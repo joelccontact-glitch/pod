@@ -26,7 +26,7 @@ export async function GET() {
       .limit(50)
       .get();
       
-    const designs = designsSnapshot.docs.map(doc => ({
+    const designs = designsSnapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));
