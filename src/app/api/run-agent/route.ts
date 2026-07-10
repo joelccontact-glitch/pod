@@ -90,8 +90,10 @@ export async function GET(req: Request) {
           prompt: designPrompt,
           config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' }
         });
-        const base64Image = imgResponse.generatedImages[0].image.imageBytes;
-        imageUrl = `data:image/jpeg;base64,${base64Image}`;
+        const base64Image = imgResponse.generatedImages?.[0]?.image?.imageBytes;
+        if (base64Image) {
+          imageUrl = `data:image/jpeg;base64,${base64Image}`;
+        }
       } catch (imgError) {
         console.error("Imagen generation failed:", imgError);
       }

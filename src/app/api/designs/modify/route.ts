@@ -43,8 +43,10 @@ export async function POST(req: Request) {
           prompt: newPrompt,
           config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' }
         });
-        const base64Image = imgResponse.generatedImages[0].image.imageBytes;
-        newImageUrl = `data:image/jpeg;base64,${base64Image}`;
+        const base64Image = imgResponse.generatedImages?.[0]?.image?.imageBytes;
+        if (base64Image) {
+          newImageUrl = `data:image/jpeg;base64,${base64Image}`;
+        }
       } catch (imgError) {
         console.error("Imagen generation failed:", imgError);
       }
