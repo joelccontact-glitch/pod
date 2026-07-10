@@ -21,7 +21,7 @@ export async function GET(req: Request) {
         
       if (!oldDesignsSnapshot.empty) {
         const batch = db.batch();
-        oldDesignsSnapshot.forEach((doc) => {
+        oldDesignsSnapshot.forEach((doc: any) => {
           batch.delete(doc.ref);
         });
         await batch.commit();
