@@ -4,25 +4,33 @@ import { useState, useEffect } from 'react';
 export default function Home() {
   const [designs, setDesigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingInitial, setLoadingInitial] = useState(true);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
   const [previewDesign, setPreviewDesign] = useState<any>(null);
   const [feedback, setFeedback] = useState('');
   const [modifying, setModifying] = useState(false);
 
   useEffect(() => {
-    fetchDesigns();
-  }, []);
+    fetchDesigns(page);
+  }, [page]);
 
-  const fetchDesigns = async () => {
+  const fetchDesigns = async (currentPage: number = 1) => {
+    setLoadingInitial(true);
     try {
-      const res = await fetch('/api/designs');
+      const res = await fetch(`/api/designs?page=${currentPage}&limit=12`);
       const data = await res.json();
       if (data.success) {
         setDesigns(data.data);
+        setTotalPages(data.totalPages || 1);
       }
     } catch (e) {
       console.error('Failed to fetch designs', e);
     }
+    setLoadingInitial(false);
   };
 
   const runAgent = async () => {
@@ -37,7 +45,8 @@ export default function Home() {
       if (!res.ok || !data.success) {
         alert('생성 실패: ' + (data.error || '알 수 없는 오류'));
       }
-      await fetchDesigns();
+      await fetchDesigns(1);
+      setPage(1);
     } catch (e: any) {
       console.error('Agent run failed', e);
       alert('네트워크 오류가 발생했습니다.');
@@ -140,42 +149,93 @@ export default function Home() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 mb-1">POD 자동화 대시보드</h1>
             <p className="text-gray-500 text-sm">트렌드 조사 및 디자인 자동 생성 결과 리뷰</p>
           </div>
-          <button 
-            onClick={runAgent}
-            disabled={loading}
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 sm:py-2 px-6 rounded-xl transition-colors disabled:opacity-50"
-          >
-            {loading ? '생성 중...' : '오늘의 디자인 생성하기'}
-          </button>
+          <div className="flex flex-row items-center gap-4 w-full sm:w-auto">
+            <div className="flex bg-gray-100 p-1 rounded-lg">
+              <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="그리드 뷰">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+              </button>
+              <button onClick={() => setViewMode('list')} className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="리스트 뷰">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
+              </button>
+            </div>
+            <button 
+              onClick={runAgent}
+              disabled={loading}
+              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 sm:py-2 px-6 rounded-xl transition-colors disabled:opacity-50"
+            >
+              {loading ? '생성 중...' : '오늘의 디자인 생성하기'}
+            </button>
+          </div>
         </header>
 
         {/* Gallery View */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {designs.map((design) => (
-            <div key={design.id} className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative" onClick={() => setSelectedDesign(design)}>
-              <div className="aspect-square bg-gray-200 relative">
-                <img src={design.image_url} alt={design.title} className="w-full h-full object-cover" />
+        {loadingInitial ? (
+          <div className="flex flex-col items-center justify-center py-24 space-y-4">
+            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p className="text-gray-500 font-medium">디자인 데이터를 불러오는 중입니다...</p>
+          </div>
+        ) : (
+          <>
+            <section className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" : "flex flex-col gap-4"}>
+              {designs.map((design) => (
+                <div key={design.id} className={`bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative ${viewMode === 'grid' ? 'rounded-2xl' : 'rounded-xl flex flex-row h-32 sm:h-40'}`} onClick={() => setSelectedDesign(design)}>
+                  <div className={`${viewMode === 'grid' ? 'aspect-square' : 'w-32 sm:w-40 flex-shrink-0'} bg-gray-200 relative`}>
+                    <img src={design.image_url} alt={design.title} className="w-full h-full object-cover" />
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); handleDelete(design.id); }}
+                      className="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-600 p-2.5 sm:p-2 rounded-full opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm shadow-sm"
+                      title="삭제"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                  <div className={`p-4 flex flex-col justify-center ${viewMode === 'list' ? 'flex-1 min-w-0' : ''}`}>
+                    <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md mb-2 inline-block w-fit">
+                      {design.topic}
+                    </span>
+                    <h3 className="font-bold text-gray-800 text-sm line-clamp-2" title={design.title}>{design.title}</h3>
+                    <p className="text-xs text-gray-500 mt-2">{new Date(design.created_at).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              ))}
+              {designs.length === 0 && !loading && (
+                <div className="col-span-full text-center py-12 text-gray-500">생성된 디자인이 없습니다.</div>
+              )}
+            </section>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 pt-8">
                 <button 
-                  onClick={(e) => { e.stopPropagation(); handleDelete(design.id); }}
-                  className="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-600 p-2.5 sm:p-2 rounded-full opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm shadow-sm"
-                  title="삭제"
+                  onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  disabled={page === 1 || loadingInitial}
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
                 >
-                  🗑️
+                  이전
+                </button>
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                    <button
+                      key={p}
+                      onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                      disabled={loadingInitial}
+                      className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${page === p ? 'bg-blue-600 text-white' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+                <button 
+                  onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  disabled={page === totalPages || loadingInitial}
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                >
+                  다음
                 </button>
               </div>
-              <div className="p-4">
-                <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md mb-2 inline-block">
-                  {design.topic}
-                </span>
-                <h3 className="font-bold text-gray-800 text-sm line-clamp-2" title={design.title}>{design.title}</h3>
-                <p className="text-xs text-gray-500 mt-2">{new Date(design.created_at).toLocaleDateString()}</p>
-              </div>
-            </div>
-          ))}
-          {designs.length === 0 && !loading && (
-            <div className="col-span-full text-center py-12 text-gray-500">생성된 디자인이 없습니다.</div>
-          )}
-        </section>
+            )}
+          </>
+        )}
 
         {/* Detail Modal */}
         {selectedDesign && (
