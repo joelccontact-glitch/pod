@@ -303,8 +303,8 @@ export default function Home() {
             <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 mb-1">POD 자동화 대시보드</h1>
             <p className="text-gray-500 text-sm">트렌드 조사 및 디자인 자동 생성 결과 리뷰</p>
           </div>
-          <div className="flex flex-row items-center gap-4 w-full sm:w-auto">
-            <div className="flex bg-gray-100 p-1 rounded-lg">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto mt-3 sm:mt-0">
+            <div className="flex bg-gray-100 p-1 rounded-lg shrink-0">
               <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="그리드 뷰">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
               </button>
@@ -315,7 +315,7 @@ export default function Home() {
             <select
               value={selectedStyleId}
               onChange={(e) => setSelectedStyleId(e.target.value)}
-              className="bg-white border border-gray-200 rounded-xl px-4 py-2 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-full sm:max-w-[140px] truncate"
+              className="bg-white border border-gray-200 rounded-xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[120px] sm:max-w-[140px] truncate shrink-0"
             >
               <option value="">화풍 선택 ▾</option>
               {styles.map(s => (
@@ -324,20 +324,20 @@ export default function Home() {
             </select>
             <button 
               onClick={() => setIsStyleModalOpen(true)}
-              className="flex-1 sm:flex-none bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 sm:py-2 px-4 rounded-xl transition-colors whitespace-nowrap text-sm sm:text-base"
+              className="flex-1 sm:flex-none bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-base"
             >
               화풍 등록
             </button>
             <button 
               onClick={() => setIsImageModalOpen(true)}
-              className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 sm:py-2 px-4 rounded-xl transition-colors whitespace-nowrap text-sm sm:text-base"
+              className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-base"
             >
               이미지 생성
             </button>
             <button 
               onClick={runAgent}
               disabled={loading}
-              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 sm:py-2 px-4 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-sm sm:text-base"
+              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-base"
             >
               {loading ? '생성 중..' : '자동 생성'}
             </button>
