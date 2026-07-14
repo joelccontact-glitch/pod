@@ -1,5 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { MOCKUP_TEMPLATES } from '@/lib/mockups';
 
 export default function Home() {
   const [designs, setDesigns] = useState<any[]>([]);
@@ -28,10 +29,72 @@ export default function Home() {
   const [styleName, setStyleName] = useState('');
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
 
+  const [activeTab, setActiveTab] = useState<'info' | 'mockup'>('info');
+  const [selectedMockupId, setSelectedMockupId] = useState(MOCKUP_TEMPLATES[0].id);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
   useEffect(() => {
     fetchDesigns(page);
     fetchStyles();
   }, [page]);
+
+  useEffect(() => {
+    if (activeTab === 'mockup' && selectedDesign) {
+      drawMockup();
+    }
+  }, [activeTab, selectedMockupId, previewDesign, selectedDesign]);
+
+  const drawMockup = () => {
+    if (activeTab !== 'mockup') return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const template = MOCKUP_TEMPLATES.find(m => m.id === selectedMockupId);
+    if (!template) return;
+
+    const designUrl = previewDesign ? previewDesign.image_url : selectedDesign?.image_url;
+    if (!designUrl) return;
+
+    const mockupImg = new Image();
+    mockupImg.crossOrigin = 'anonymous';
+    mockupImg.src = template.imageUrl;
+
+    mockupImg.onload = () => {
+      canvas.width = mockupImg.width || 800;
+      canvas.height = mockupImg.height || 800;
+
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(mockupImg, 0, 0, canvas.width, canvas.height);
+
+      const designImg = new Image();
+      designImg.crossOrigin = 'anonymous';
+      designImg.src = designUrl;
+
+      designImg.onload = () => {
+        ctx.globalCompositeOperation = template.overlay.blendMode as any;
+        ctx.drawImage(
+          designImg, 
+          template.overlay.x, 
+          template.overlay.y, 
+          template.overlay.width, 
+          template.overlay.height
+        );
+        ctx.globalCompositeOperation = 'source-over';
+      };
+    };
+  };
+
+  const downloadMockup = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const url = canvas.toDataURL('image/jpeg', 0.9);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `mockup_${Date.now()}.jpg`;
+    a.click();
+  };
 
   const fetchStyles = async () => {
     try {
@@ -424,10 +487,27 @@ export default function Home() {
               
               {/* Right: Details & Chat */}
               <div className="md:w-1/2 flex flex-col flex-1 min-h-0 bg-white relative">
-                <button onClick={() => { setSelectedDesign(null); handleCancel(); }} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">×</button>
+                <button onClick={() => { setSelectedDesign(null); handleCancel(); setActiveTab('info'); }} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">×</button>
                 
+                <div className="flex border-b border-gray-100 px-5 sm:px-8 pt-5 sm:pt-8 gap-6">
+                  <button 
+                    onClick={() => setActiveTab('info')} 
+                    className={`pb-3 font-semibold text-sm transition-colors border-b-2 ${activeTab === 'info' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-400 hover:text-gray-700'}`}
+                  >
+                    수정 및 SEO 정보
+                  </button>
+                  <button 
+                    onClick={() => setActiveTab('mockup')} 
+                    className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-1.5 ${activeTab === 'mockup' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-400 hover:text-gray-700'}`}
+                  >
+                    👕 목업으로 보기
+                  </button>
+                </div>
+
                 <div className="p-5 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{previewDesign ? previewDesign.title : selectedDesign.title}</h2>
+                  {activeTab === 'info' ? (
+                    <>
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{previewDesign ? previewDesign.title : selectedDesign.title}</h2>
                   <div className="flex gap-2 mb-6">
                     <button onClick={() => handleCopy(previewDesign ? previewDesign.title : selectedDesign.title)} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-medium transition-colors">제목 복사</button>
                     <button onClick={() => handleCopy((previewDesign ? previewDesign.tags : selectedDesign.tags)?.join(', '))} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-medium transition-colors">태그 복사</button>
@@ -447,10 +527,37 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center h-full min-h-[400px]">
+                      <div className="w-full mb-4 flex justify-between items-center">
+                        <select 
+                          value={selectedMockupId}
+                          onChange={(e) => setSelectedMockupId(e.target.value)}
+                          className="border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                        >
+                          {MOCKUP_TEMPLATES.map(t => (
+                            <option key={t.id} value={t.id}>{t.name}</option>
+                          ))}
+                        </select>
+                        <button 
+                          onClick={downloadMockup}
+                          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                          다운로드
+                        </button>
+                      </div>
+                      <div className="relative w-full flex-1 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center border border-gray-200">
+                        <canvas ref={canvasRef} className="max-w-full max-h-full object-contain" />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Chat Interface for Modification */}
-                <div className="p-4 sm:p-6 border-t border-gray-100 bg-gray-50/50">
+                {activeTab === 'info' && (
+                  <div className="p-4 sm:p-6 border-t border-gray-100 bg-gray-50/50">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                     <span>✨</span> 디자인 수정 요청
                   </h4>
@@ -494,6 +601,7 @@ export default function Home() {
                     )}
                   </div>
                 </div>
+                )}
               </div>
             </div>
           </div>
