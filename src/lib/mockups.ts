@@ -31,10 +31,10 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '캔버스 에코백',
     imageUrl: '/mockup_totebag.png',
     overlay: {
-      x: 280, // Calibrated for generated tote bag
-      y: 350,
-      width: 440,
-      height: 440,
+      x: 250, 
+      y: 300,
+      width: 300,
+      height: 300,
       blendMode: 'multiply'
     }
   },
