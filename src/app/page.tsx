@@ -315,31 +315,31 @@ export default function Home() {
             <select
               value={selectedStyleId}
               onChange={(e) => setSelectedStyleId(e.target.value)}
-              className="bg-white border border-gray-200 rounded-xl px-4 py-2 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-full sm:max-w-[160px] truncate"
+              className="bg-white border border-gray-200 rounded-xl px-4 py-2 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-full sm:max-w-[140px] truncate"
             >
-              <option value="">적용할 화풍 선택 ▾</option>
+              <option value="">화풍 선택 ▾</option>
               {styles.map(s => (
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
             <button 
               onClick={() => setIsStyleModalOpen(true)}
-              className="flex-1 sm:flex-none bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 sm:py-2 px-4 rounded-xl transition-colors whitespace-nowrap"
+              className="flex-1 sm:flex-none bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 sm:py-2 px-4 rounded-xl transition-colors whitespace-nowrap text-sm sm:text-base"
             >
-              화풍 만들기
+              화풍 등록
             </button>
             <button 
               onClick={() => setIsImageModalOpen(true)}
-              className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 sm:py-2 px-4 rounded-xl transition-colors whitespace-nowrap"
+              className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 sm:py-2 px-4 rounded-xl transition-colors whitespace-nowrap text-sm sm:text-base"
             >
-              이미지로 생성
+              이미지 생성
             </button>
             <button 
               onClick={runAgent}
               disabled={loading}
-              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 sm:py-2 px-6 rounded-xl transition-colors disabled:opacity-50"
+              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 sm:py-2 px-4 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-sm sm:text-base"
             >
-              {loading ? '생성 중...' : '오늘의 디자인 생성하기'}
+              {loading ? '생성 중..' : '자동 생성'}
             </button>
           </div>
         </header>
