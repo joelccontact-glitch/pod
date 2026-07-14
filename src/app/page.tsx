@@ -5,6 +5,7 @@ export default function Home() {
   const [designs, setDesigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
+  const [previewDesign, setPreviewDesign] = useState<any>(null);
   const [feedback, setFeedback] = useState('');
   const [modifying, setModifying] = useState(false);
 
@@ -78,19 +79,57 @@ export default function Home() {
           originalId: selectedDesign.id,
           feedback,
           topic: selectedDesign.topic,
-          originalPrompt: selectedDesign.prompt
+          originalPrompt: selectedDesign.prompt,
+          isPreview: true
         })
       });
       const data = await res.json();
       if (data.success) {
-        setDesigns([data.data, ...designs]);
-        setSelectedDesign(data.data);
-        setFeedback('');
+        setPreviewDesign(data.data);
       }
     } catch (e) {
       console.error('Modify failed', e);
     }
     setModifying(false);
+  };
+
+  const handleConfirm = async () => {
+    if (!previewDesign || !selectedDesign) return;
+    setModifying(true);
+    try {
+      const res = await fetch('/api/designs/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedDesign.id,
+          updates: {
+            prompt_hash: previewDesign.prompt_hash,
+            prompt: previewDesign.prompt,
+            title: previewDesign.title,
+            tags: previewDesign.tags,
+            image_url: previewDesign.image_url,
+            modified_from: previewDesign.modified_from,
+            feedback_applied: previewDesign.feedback_applied
+          }
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        const updatedDesign = { ...selectedDesign, ...previewDesign, id: selectedDesign.id };
+        setDesigns(designs.map(d => d.id === selectedDesign.id ? updatedDesign : d));
+        setSelectedDesign(updatedDesign);
+        setPreviewDesign(null);
+        setFeedback('');
+      }
+    } catch (e) {
+      console.error('Confirm failed', e);
+    }
+    setModifying(false);
+  };
+
+  const handleCancel = () => {
+    setPreviewDesign(null);
+    setFeedback('');
   };
 
   return (
@@ -144,29 +183,29 @@ export default function Home() {
             <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl">
               {/* Left: Image */}
               <div className="w-full md:w-1/2 bg-gray-100 flex items-center justify-center relative p-4 sm:p-6 min-h-[30vh] sm:min-h-0">
-                <img src={selectedDesign.image_url} alt={selectedDesign.title} className="max-w-full max-h-full object-contain rounded-xl shadow-md" />
+                <img src={previewDesign ? previewDesign.image_url : selectedDesign.image_url} alt={previewDesign ? previewDesign.title : selectedDesign.title} className="max-w-full max-h-full object-contain rounded-xl shadow-md" />
               </div>
               
               {/* Right: Details & Chat */}
-              <div className="md:w-1/2 flex flex-col h-full bg-white relative">
-                <button onClick={() => setSelectedDesign(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">×</button>
+              <div className="md:w-1/2 flex flex-col flex-1 min-h-0 bg-white relative">
+                <button onClick={() => { setSelectedDesign(null); handleCancel(); }} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">×</button>
                 
                 <div className="p-5 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{selectedDesign.title}</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{previewDesign ? previewDesign.title : selectedDesign.title}</h2>
                   <div className="flex gap-2 mb-6">
-                    <button onClick={() => handleCopy(selectedDesign.title)} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-medium transition-colors">제목 복사</button>
-                    <button onClick={() => handleCopy(selectedDesign.tags?.join(', '))} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-medium transition-colors">태그 복사</button>
+                    <button onClick={() => handleCopy(previewDesign ? previewDesign.title : selectedDesign.title)} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-medium transition-colors">제목 복사</button>
+                    <button onClick={() => handleCopy((previewDesign ? previewDesign.tags : selectedDesign.tags)?.join(', '))} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-medium transition-colors">태그 복사</button>
                   </div>
 
                   <div className="space-y-6">
                     <div>
                       <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Topic</h4>
-                      <p className="text-gray-700 bg-gray-50 px-4 py-3 rounded-xl text-sm border border-gray-100">{selectedDesign.topic}</p>
+                      <p className="text-gray-700 bg-gray-50 px-4 py-3 rounded-xl text-sm border border-gray-100">{previewDesign ? previewDesign.topic : selectedDesign.topic}</p>
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">SEO Tags</h4>
                       <div className="flex flex-wrap gap-2">
-                        {selectedDesign.tags?.map((tag: string, i: number) => (
+                        {(previewDesign ? previewDesign.tags : selectedDesign.tags)?.map((tag: string, i: number) => (
                           <span key={i} className="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-100">{tag}</span>
                         ))}
                       </div>
@@ -180,22 +219,43 @@ export default function Home() {
                     <span>✨</span> 디자인 수정 요청
                   </h4>
                   <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      value={feedback}
-                      onChange={e => setFeedback(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleModify()}
-                      placeholder="예: 배경색을 빨간색으로 변경해줘..." 
-                      className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
-                      disabled={modifying}
-                    />
-                    <button 
-                      onClick={handleModify}
-                      disabled={modifying || !feedback.trim()}
-                      className="bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 text-sm flex-shrink-0 shadow-sm"
-                    >
-                      {modifying ? '생성 중...' : '수정'}
-                    </button>
+                    {previewDesign ? (
+                      <div className="flex gap-2 justify-end w-full">
+                        <button 
+                          onClick={handleCancel}
+                          disabled={modifying}
+                          className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 text-sm flex-1 sm:flex-none shadow-sm"
+                        >
+                          취소
+                        </button>
+                        <button 
+                          onClick={handleConfirm}
+                          disabled={modifying}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 text-sm flex-1 sm:flex-none shadow-sm"
+                        >
+                          {modifying ? '저장 중...' : '확인'}
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <input 
+                          type="text" 
+                          value={feedback}
+                          onChange={e => setFeedback(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && handleModify()}
+                          placeholder="예: 배경색을 빨간색으로 변경해줘..." 
+                          className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                          disabled={modifying}
+                        />
+                        <button 
+                          onClick={handleModify}
+                          disabled={modifying || !feedback.trim()}
+                          className="bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 text-sm flex-shrink-0 shadow-sm"
+                        >
+                          {modifying ? '생성 중...' : '수정'}
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

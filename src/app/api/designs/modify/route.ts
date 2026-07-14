@@ -7,7 +7,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { originalId, feedback, topic, originalPrompt } = await req.json();
+    const { originalId, feedback, topic, originalPrompt, isPreview } = await req.json();
 
     if (!feedback || !topic) {
       return NextResponse.json({ success: false, error: 'Feedback and topic are required' }, { status: 400 });
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
       feedback_applied: feedback
     };
 
-    if (process.env.FIREBASE_PROJECT_ID) {
+    if (!isPreview && process.env.FIREBASE_PROJECT_ID) {
       const designRef = db.collection('designs').doc(newHash);
       await designRef.set(newDesignData);
     }
