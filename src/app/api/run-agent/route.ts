@@ -44,9 +44,38 @@ export async function GET(req: Request) {
         console.error("Trend research failed, using fallback topic.");
       }
     }
+    // [STEP 1.5] Fetch Style Presets
+    const url = new URL(req.url);
+    const styleId = url.searchParams.get('styleId');
+    let styleData = null;
+
+    if (styleId && process.env.FIREBASE_PROJECT_ID) {
+      const styleDoc = await db.collection('styles').doc(styleId).get();
+      if (styleDoc.exists) {
+        styleData = styleDoc.data();
+      }
+    }
+
+    let designPrompt = `${baseTopic}, vector art, t-shirt design, clean white background`;
     
-    const designPrompt = `${baseTopic}, vector art, t-shirt design, clean white background`;
-    
+    if (styleData && process.env.GEMINI_API_KEY) {
+      console.log(`🎨 Applying style: ${styleData.name}`);
+      try {
+        const promptResponse = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: [
+            `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator (clean background, t-shirt design).`,
+            { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
+          ]
+        });
+        if (promptResponse.text) {
+          designPrompt = promptResponse.text.trim();
+        }
+      } catch (err) {
+        console.error("Style prompt generation failed, using fallback.");
+        designPrompt = `${baseTopic}. MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`;
+      }
+    }
     // [STEP 2] Check for duplicates in Firebase via hash
     const promptHash = crypto.createHash('md5').update(designPrompt).digest('hex');
     let docExists = false;

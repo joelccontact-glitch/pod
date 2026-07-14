@@ -7,7 +7,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { imageBase64, prompt, isPreview } = await req.json();
+    const { imageBase64, prompt, isPreview, styleId } = await req.json();
 
     if (!imageBase64 || !prompt) {
       return NextResponse.json({ success: false, error: 'Image and prompt are required' }, { status: 400 });
@@ -20,18 +20,33 @@ export async function POST(req: Request) {
     let productInfo = { title: `[MOCK] Image derived T-Shirt`, tags: ["mock", "derived"] };
 
     if (process.env.GEMINI_API_KEY) {
-      // 1. Generate new prompt based on image + user prompt
+      let styleData = null;
+      if (styleId && process.env.FIREBASE_PROJECT_ID) {
+        const styleDoc = await db.collection('styles').doc(styleId).get();
+        if (styleDoc.exists) {
+          styleData = styleDoc.data();
+        }
+      }
+
+      let contentsArray: any[] = [];
+      if (styleData) {
+        console.log(`🎨 Applying style: ${styleData.name} to Image-to-Image`);
+        contentsArray = [
+          `You are an expert prompt engineer. The user wants to create a new t-shirt design based on the FIRST image (concept), with the instruction: "${prompt}". IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the SECOND image (style reference), as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like vector art, clean background, t-shirt design style) that captures the essence of the first image but completely applies the style of the second image. Return ONLY the new prompt string.`,
+          { inlineData: { data: base64Data, mimeType: 'image/jpeg' } },
+          { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
+        ];
+      } else {
+        contentsArray = [
+          `Analyze this reference image. The user wants to create a new t-shirt design based on this, with the following instruction: "${prompt}". Generate a highly detailed prompt for an image generator (like vector art, clean background, t-shirt design style) that captures the essence of the reference image but applies the user's instruction. Return ONLY the new prompt string.`,
+          { inlineData: { data: base64Data, mimeType: 'image/jpeg' } }
+        ];
+      }
+
+      // 1. Generate new prompt based on image(s) + user prompt
       const promptResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: [
-          `Analyze this reference image. The user wants to create a new t-shirt design based on this, with the following instruction: "${prompt}". Generate a highly detailed prompt for an image generator (like vector art, clean background, t-shirt design style) that captures the essence of the reference image but applies the user's instruction. Return ONLY the new prompt string.`,
-          {
-            inlineData: {
-              data: base64Data,
-              mimeType: 'image/jpeg'
-            }
-          }
-        ]
+        contents: contentsArray
       });
       newPrompt = promptResponse.text?.trim() || prompt;
 

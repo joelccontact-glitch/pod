@@ -20,9 +20,30 @@ export default function Home() {
   const [isGeneratingFromImage, setIsGeneratingFromImage] = useState(false);
   const [uploadPreviewDesign, setUploadPreviewDesign] = useState<any>(null);
 
+  const [styles, setStyles] = useState<any[]>([]);
+  const [selectedStyleId, setSelectedStyleId] = useState<string>('');
+  
+  const [isStyleModalOpen, setIsStyleModalOpen] = useState(false);
+  const [styleImageBase64, setStyleImageBase64] = useState('');
+  const [styleName, setStyleName] = useState('');
+  const [isCreatingStyle, setIsCreatingStyle] = useState(false);
+
   useEffect(() => {
     fetchDesigns(page);
+    fetchStyles();
   }, [page]);
+
+  const fetchStyles = async () => {
+    try {
+      const res = await fetch('/api/styles/list');
+      const data = await res.json();
+      if (data.success) {
+        setStyles(data.data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch styles', e);
+    }
+  };
 
   const fetchDesigns = async (currentPage: number = 1) => {
     setLoadingInitial(true);
@@ -42,7 +63,8 @@ export default function Home() {
   const runAgent = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/run-agent', {
+      const url = selectedStyleId ? `/api/run-agent?styleId=${selectedStyleId}` : '/api/run-agent';
+      const res = await fetch(url, {
         headers: {
           'Authorization': 'Bearer ' + (process.env.NEXT_PUBLIC_CRON_SECRET || 'demo-secret')
         }
@@ -82,6 +104,54 @@ export default function Home() {
     reader.readAsDataURL(file);
   };
 
+  const handleStylePaste = (e: any) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        const reader = new FileReader();
+        reader.onload = (event) => setStyleImageBase64(event.target?.result as string);
+        reader.readAsDataURL(file);
+        break;
+      }
+    }
+  };
+
+  const handleStyleFileChange = (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => setStyleImageBase64(event.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleCreateStyle = async () => {
+    if (!styleImageBase64 || !styleName.trim()) return;
+    setIsCreatingStyle(true);
+    try {
+      const res = await fetch('/api/styles/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: styleImageBase64, styleName })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsStyleModalOpen(false);
+        setStyleImageBase64('');
+        setStyleName('');
+        await fetchStyles();
+        setSelectedStyleId(data.data.id);
+      } else {
+        alert('스타일 생성 실패: ' + data.error);
+      }
+    } catch (e) {
+      console.error(e);
+      alert('오류가 발생했습니다.');
+    }
+    setIsCreatingStyle(false);
+  };
+
   const handleGenerateFromImage = async () => {
     if (!uploadImageBase64 || !uploadPrompt.trim()) return;
     setIsGeneratingFromImage(true);
@@ -89,7 +159,7 @@ export default function Home() {
       const res = await fetch('/api/designs/from-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: uploadImageBase64, prompt: uploadPrompt, isPreview: true })
+        body: JSON.stringify({ imageBase64: uploadImageBase64, prompt: uploadPrompt, isPreview: true, styleId: selectedStyleId })
       });
       const data = await res.json();
       if (data.success) {
@@ -242,11 +312,27 @@ export default function Home() {
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
               </button>
             </div>
+            <select
+              value={selectedStyleId}
+              onChange={(e) => setSelectedStyleId(e.target.value)}
+              className="bg-white border border-gray-200 rounded-xl px-4 py-2 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-full sm:max-w-[160px] truncate"
+            >
+              <option value="">적용할 화풍 선택 ▾</option>
+              {styles.map(s => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </select>
+            <button 
+              onClick={() => setIsStyleModalOpen(true)}
+              className="flex-1 sm:flex-none bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 sm:py-2 px-4 rounded-xl transition-colors whitespace-nowrap"
+            >
+              화풍 만들기
+            </button>
             <button 
               onClick={() => setIsImageModalOpen(true)}
-              className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 sm:py-2 px-6 rounded-xl transition-colors"
+              className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 sm:py-2 px-4 rounded-xl transition-colors whitespace-nowrap"
             >
-              이미지로 생성하기
+              이미지로 생성
             </button>
             <button 
               onClick={runAgent}
@@ -505,6 +591,64 @@ export default function Home() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Style Creation Modal */}
+        {isStyleModalOpen && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onPaste={handleStylePaste}>
+            <div className="bg-white rounded-3xl max-w-lg w-full flex flex-col shadow-2xl overflow-hidden relative">
+              <button onClick={() => { setIsStyleModalOpen(false); setStyleImageBase64(''); setStyleName(''); }} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">×</button>
+              
+              <div className="p-6 sm:p-8 flex flex-col h-full w-full">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">나만의 화풍(Style) 만들기</h2>
+                <p className="text-sm text-gray-500 mb-6">레퍼런스 이미지를 올리면 AI가 화풍만 정밀하게 추출하여 템플릿으로 저장합니다.</p>
+                
+                <div className="flex-1 space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">화풍 이름</label>
+                    <input 
+                      type="text"
+                      value={styleName}
+                      onChange={e => setStyleName(e.target.value)}
+                      placeholder="예: 귀여운 수채화풍" 
+                      className="w-full border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white shadow-sm"
+                    />
+                  </div>
+                  
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 sm:p-6 text-center hover:bg-gray-50 transition-colors relative flex flex-col items-center justify-center min-h-[200px]">
+                    {styleImageBase64 ? (
+                      <>
+                        <img src={styleImageBase64} alt="Style Preview" className="max-h-64 object-contain rounded-lg" />
+                        <button onClick={() => setStyleImageBase64('')} className="mt-2 text-sm text-red-500 hover:underline">이미지 지우기</button>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <p className="text-sm text-gray-600 mb-1">레퍼런스 이미지 파일 선택 또는 <br/>붙여넣기(Ctrl+V) 하세요.</p>
+                        <input type="file" accept="image/*" onChange={handleStyleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-8 flex gap-3 justify-end">
+                  <button 
+                    onClick={() => { setIsStyleModalOpen(false); setStyleImageBase64(''); setStyleName(''); }}
+                    className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition-colors"
+                  >
+                    취소
+                  </button>
+                  <button 
+                    onClick={handleCreateStyle}
+                    disabled={!styleImageBase64 || !styleName.trim() || isCreatingStyle}
+                    className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 min-w-[120px]"
+                  >
+                    {isCreatingStyle ? '분석 및 저장 중...' : '화풍 저장하기'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
