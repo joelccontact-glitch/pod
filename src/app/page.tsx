@@ -13,6 +13,11 @@ export default function Home() {
   const [previewDesign, setPreviewDesign] = useState<any>(null);
   const [feedback, setFeedback] = useState('');
   const [modifying, setModifying] = useState(false);
+  
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [uploadImageBase64, setUploadImageBase64] = useState('');
+  const [uploadPrompt, setUploadPrompt] = useState('');
+  const [isGeneratingFromImage, setIsGeneratingFromImage] = useState(false);
 
   useEffect(() => {
     fetchDesigns(page);
@@ -52,6 +57,54 @@ export default function Home() {
       alert('네트워크 오류가 발생했습니다.');
     }
     setLoading(false);
+  };
+
+  const handlePaste = (e: any) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        const reader = new FileReader();
+        reader.onload = (event) => setUploadImageBase64(event.target?.result as string);
+        reader.readAsDataURL(file);
+        break;
+      }
+    }
+  };
+
+  const handleFileChange = (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => setUploadImageBase64(event.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleGenerateFromImage = async () => {
+    if (!uploadImageBase64 || !uploadPrompt.trim()) return;
+    setIsGeneratingFromImage(true);
+    try {
+      const res = await fetch('/api/designs/from-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageBase64: uploadImageBase64, prompt: uploadPrompt })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setIsImageModalOpen(false);
+        setUploadImageBase64('');
+        setUploadPrompt('');
+        await fetchDesigns(1);
+        setPage(1);
+      } else {
+        alert('생성 실패: ' + data.error);
+      }
+    } catch (e) {
+      console.error(e);
+      alert('오류가 발생했습니다.');
+    }
+    setIsGeneratingFromImage(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -158,6 +211,12 @@ export default function Home() {
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
               </button>
             </div>
+            <button 
+              onClick={() => setIsImageModalOpen(true)}
+              className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 sm:py-2 px-6 rounded-xl transition-colors"
+            >
+              이미지로 생성하기
+            </button>
             <button 
               onClick={runAgent}
               disabled={loading}
@@ -317,6 +376,61 @@ export default function Home() {
                       </>
                     )}
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Image to Image Modal */}
+        {isImageModalOpen && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onPaste={handlePaste}>
+            <div className="bg-white rounded-3xl max-w-2xl w-full flex flex-col shadow-2xl overflow-hidden relative">
+              <button onClick={() => { setIsImageModalOpen(false); setUploadImageBase64(''); setUploadPrompt(''); }} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">×</button>
+              
+              <div className="p-6 sm:p-8 flex flex-col h-full">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">이미지로 디자인 생성</h2>
+                
+                <div className="flex-1 space-y-4">
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 sm:p-6 text-center hover:bg-gray-50 transition-colors relative flex flex-col items-center justify-center min-h-[200px]">
+                    {uploadImageBase64 ? (
+                      <>
+                        <img src={uploadImageBase64} alt="Preview" className="max-h-64 object-contain rounded-lg" />
+                        <button onClick={() => setUploadImageBase64('')} className="mt-2 text-sm text-red-500 hover:underline">이미지 지우기</button>
+                      </>
+                    ) : (
+                      <>
+                        <svg className="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                        <p className="text-sm text-gray-600 mb-1">여기를 클릭하여 파일 선택 또는 <br/>복사한 이미지를 붙여넣기(Ctrl+V) 하세요.</p>
+                        <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      </>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">어떻게 응용할까요?</label>
+                    <textarea 
+                      value={uploadPrompt}
+                      onChange={e => setUploadPrompt(e.target.value)}
+                      placeholder="예: 이 스타일을 유지하면서 고양이 대신 귀여운 강아지로 바꿔줘" 
+                      className="w-full border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white shadow-sm resize-none h-24"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-6 flex gap-3 justify-end">
+                  <button 
+                    onClick={() => { setIsImageModalOpen(false); setUploadImageBase64(''); setUploadPrompt(''); }}
+                    className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-xl font-medium transition-colors"
+                  >
+                    취소
+                  </button>
+                  <button 
+                    onClick={handleGenerateFromImage}
+                    disabled={!uploadImageBase64 || !uploadPrompt.trim() || isGeneratingFromImage}
+                    className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 min-w-[120px]"
+                  >
+                    {isGeneratingFromImage ? '생성 중...' : '생성하기'}
+                  </button>
                 </div>
               </div>
             </div>
