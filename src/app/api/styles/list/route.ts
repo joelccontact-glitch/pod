@@ -9,7 +9,7 @@ export async function GET(req: Request) {
 
     const snapshot = await db.collection('styles').orderBy('created_at', 'desc').get();
     
-    const styles = snapshot.docs.map(doc => ({
+    const styles = snapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }));
