@@ -602,8 +602,22 @@ export default function Home() {
               <button onClick={() => { setIsStyleModalOpen(false); setStyleImageBase64(''); setStyleName(''); }} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">×</button>
               
               <div className="p-6 sm:p-8 flex flex-col h-full w-full">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">나만의 화풍(Style) 만들기</h2>
-                <p className="text-sm text-gray-500 mb-6">레퍼런스 이미지를 올리면 AI가 화풍만 정밀하게 추출하여 템플릿으로 저장합니다.</p>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">🎨 나만의 화풍 만들기</h2>
+                </div>
+                
+                <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 mb-6">
+                  <h4 className="text-sm font-bold text-orange-800 mb-2 flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+                    사용 방법 안내
+                  </h4>
+                  <ol className="text-xs text-orange-700 space-y-1.5 pl-5 list-decimal marker:text-orange-400">
+                    <li>그림체나 색감이 마음에 드는 <strong>레퍼런스 이미지</strong>를 업로드하세요.</li>
+                    <li>이름을 지정하고 저장하면, AI가 <strong>'화풍(스타일)'만 정밀 분석하여 공식으로 저장</strong>합니다.</li>
+                    <li>저장 완료 후 메인 화면 상단의 <strong>[화풍 선택 ▾] 드롭다운에서 방금 만든 화풍을 선택</strong>하세요.</li>
+                    <li>이후 그림을 생성하면, 어떤 주제를 요청하든 <strong>선택한 화풍이 강제로 적용되어 생성</strong>됩니다!</li>
+                  </ol>
+                </div>
                 
                 <div className="flex-1 space-y-6">
                   <div>
