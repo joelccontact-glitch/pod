@@ -29,6 +29,10 @@ export default function Home() {
   const [styleName, setStyleName] = useState('');
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
 
+  const [isManageStylesModalOpen, setIsManageStylesModalOpen] = useState(false);
+  const [editingStyleId, setEditingStyleId] = useState<string | null>(null);
+  const [editingStyleName, setEditingStyleName] = useState('');
+
   const [activeTab, setActiveTab] = useState<'info' | 'mockup'>('info');
   const [selectedMockupId, setSelectedMockupId] = useState(MOCKUP_TEMPLATES[0].id);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -103,8 +107,42 @@ export default function Home() {
       if (data.success) {
         setStyles(data.data);
       }
+    } catch (error) {
+      console.error('Error fetching styles:', error);
+    }
+  };
+
+  const handleUpdateStyle = async (id: string) => {
+    if (!editingStyleName.trim()) return;
+    try {
+      const res = await fetch('/api/styles/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name: editingStyleName })
+      });
+      if (res.ok) {
+        setStyles(styles.map(s => s.id === id ? { ...s, name: editingStyleName } : s));
+        setEditingStyleId(null);
+      }
     } catch (e) {
-      console.error('Failed to fetch styles', e);
+      console.error(e);
+    }
+  };
+
+  const handleDeleteStyle = async (id: string) => {
+    if (!confirm('정말 이 화풍을 삭제하시겠습니까?')) return;
+    try {
+      const res = await fetch('/api/styles/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
+      if (res.ok) {
+        setStyles(styles.filter(s => s.id !== id));
+        if (selectedStyleId === id) setSelectedStyleId('');
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -385,6 +423,12 @@ export default function Home() {
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
+            <button 
+              onClick={() => setIsManageStylesModalOpen(true)}
+              className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-base border border-gray-200"
+            >
+              화풍 관리
+            </button>
             <button 
               onClick={() => setIsStyleModalOpen(true)}
               className="flex-1 sm:flex-none bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-base"
@@ -699,6 +743,75 @@ export default function Home() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Manage Styles Modal */}
+        {isManageStylesModalOpen && (
+          <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative">
+              <button onClick={() => { setIsManageStylesModalOpen(false); setEditingStyleId(null); }} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">×</button>
+              
+              <div className="p-6 sm:p-8 flex flex-col h-full">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">⚙️ 화풍 관리</h2>
+                
+                <div className="overflow-y-auto flex-1 custom-scrollbar space-y-4">
+                  {styles.length === 0 ? (
+                    <div className="text-center py-10 text-gray-500">저장된 화풍이 없습니다.</div>
+                  ) : (
+                    styles.map((style) => (
+                      <div key={style.id} className="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden shrink-0 border border-gray-200">
+                          {style.image_url ? (
+                            <img src={style.image_url} alt={style.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Img</div>
+                          )}
+                        </div>
+                        
+                        <div className="flex-1 min-w-0">
+                          {editingStyleId === style.id ? (
+                            <div className="flex gap-2">
+                              <input 
+                                type="text"
+                                value={editingStyleName}
+                                onChange={(e) => setEditingStyleName(e.target.value)}
+                                className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                autoFocus
+                                onKeyDown={(e) => e.key === 'Enter' && handleUpdateStyle(style.id)}
+                              />
+                              <button onClick={() => handleUpdateStyle(style.id)} className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700">저장</button>
+                              <button onClick={() => setEditingStyleId(null)} className="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-300">취소</button>
+                            </div>
+                          ) : (
+                            <h3 className="font-bold text-gray-800 truncate">{style.name}</h3>
+                          )}
+                        </div>
+
+                        {editingStyleId !== style.id && (
+                          <div className="flex gap-2 shrink-0">
+                            <button 
+                              onClick={() => { setEditingStyleId(style.id); setEditingStyleName(style.name); }}
+                              className="text-gray-400 hover:text-blue-600 p-2 transition-colors"
+                              title="이름 수정"
+                            >
+                              ✏️
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteStyle(style.id)}
+                              className="text-gray-400 hover:text-red-600 p-2 transition-colors"
+                              title="삭제"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         )}
