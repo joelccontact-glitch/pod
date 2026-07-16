@@ -256,6 +256,25 @@ export default function Home() {
     setIsCreatingStyle(false);
   };
 
+  const handleTogglePriority = async (id: string, is_priority: boolean) => {
+    try {
+      const res = await fetch('/api/styles/priority', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, is_priority })
+      });
+      if (res.ok) {
+        await fetchStyles(); // Refresh to show new priorities
+      } else {
+        const data = await res.json();
+        alert('우선순위 설정 실패: ' + data.error);
+      }
+    } catch (e) {
+      console.error('Priority toggle failed', e);
+      alert('오류가 발생했습니다.');
+    }
+  };
+
   const handleManualTrendSearch = async () => {
     setIsGeneratingTrend(true);
     try {
@@ -762,6 +781,21 @@ export default function Home() {
                         className="w-full border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white shadow-sm resize-none h-24"
                       />
                     </div>
+                    <div className="mt-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">적용할 화풍 (선택)</label>
+                      <select 
+                        value={selectedStyleId || ''}
+                        onChange={(e) => setSelectedStyleId(e.target.value || null)}
+                        className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white shadow-sm"
+                      >
+                        <option value="">-- 원본 이미지 스타일 유지 --</option>
+                        {styles.map(s => (
+                          <option key={s.id} value={s.id}>
+                            {s.is_priority ? '⭐️ ' : ''}{s.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   <div className="mt-6 flex gap-3 justify-end">
@@ -829,6 +863,13 @@ export default function Home() {
 
                         {editingStyleId !== style.id && (
                           <div className="flex gap-2 shrink-0">
+                            <button 
+                              onClick={() => handleTogglePriority(style.id, !style.is_priority)}
+                              className={`p-2 transition-colors ${style.is_priority ? 'text-yellow-500 hover:text-yellow-600' : 'text-gray-300 hover:text-yellow-400'}`}
+                              title={style.is_priority ? "우선순위 해제" : "우선순위 설정"}
+                            >
+                              ★
+                            </button>
                             <button 
                               onClick={() => { setEditingStyleId(style.id); setEditingStyleName(style.name); }}
                               className="text-gray-400 hover:text-blue-600 p-2 transition-colors"

@@ -54,6 +54,12 @@ export async function GET(req: Request) {
       if (styleDoc.exists) {
         styleData = styleDoc.data();
       }
+    } else if (!styleId && process.env.FIREBASE_PROJECT_ID) {
+      // Find priority style if no styleId is specified
+      const priorityQuery = await db.collection('styles').where('is_priority', '==', true).limit(1).get();
+      if (!priorityQuery.empty) {
+        styleData = priorityQuery.docs[0].data();
+      }
     }
 
     let designPrompt = `${baseTopic}, vector art, t-shirt design, clean white background`;
