@@ -102,7 +102,7 @@ Return a JSON object with:
         
         // The first 'deleteCount' documents are the oldest because of orderBy('created_at', 'asc')
         let count = 0;
-        stylesSnapshot.forEach((doc) => {
+        stylesSnapshot.forEach((doc: any) => {
           if (count < deleteCount) {
             batch.delete(doc.ref);
             count++;
