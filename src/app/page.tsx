@@ -471,7 +471,7 @@ export default function Home() {
               disabled={isGeneratingTrend}
               className="flex-1 sm:flex-none bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-base"
             >
-              {isGeneratingTrend ? '트렌드 분석중..' : '트렌드 화풍 자동생성'}
+              {isGeneratingTrend ? '트렌드 분석중..' : '트렌드화풍 생성'}
             </button>
             <button 
               onClick={() => setIsImageModalOpen(true)}
