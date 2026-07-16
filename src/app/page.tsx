@@ -1,8 +1,10 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
+import { useSession, signOut } from "next-auth/react";
 import { MOCKUP_TEMPLATES } from '@/lib/mockups';
 
 export default function Home() {
+  const { data: session } = useSession();
   const [designs, setDesigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingInitial, setLoadingInitial] = useState(true);
@@ -405,6 +407,13 @@ export default function Home() {
             <p className="text-gray-500 text-sm">트렌드 조사 및 디자인 자동 생성 결과 리뷰</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto mt-3 sm:mt-0">
+            {session?.user && (
+              <div className="flex items-center gap-2 mr-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+                {session.user.image && <img src={session.user.image} alt="Profile" className="w-6 h-6 rounded-full" />}
+                <span className="text-xs font-medium text-gray-700">{session.user.email}</span>
+                <button onClick={() => signOut()} className="text-xs text-red-500 hover:underline font-bold ml-1">로그아웃</button>
+              </div>
+            )}
             <div className="flex bg-gray-100 p-1 rounded-lg shrink-0">
               <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="그리드 뷰">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
@@ -477,7 +486,7 @@ export default function Home() {
                       {design.topic}
                     </span>
                     <h3 className="font-bold text-gray-800 text-sm line-clamp-2" title={design.title}>{design.title}</h3>
-                    <p className="text-xs text-gray-500 mt-2">{new Date(design.created_at).toLocaleDateString()}</p>
+                    <p className="text-xs text-gray-500 mt-2">{new Date(design.created_at).toLocaleString('ko-KR')}</p>
                   </div>
                 </div>
               ))}
