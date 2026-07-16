@@ -401,14 +401,16 @@ export default function Home() {
   return (
     <main className="min-h-screen p-6 md:p-12 bg-gray-50 text-gray-900 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100 gap-4 sm:gap-0">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 mb-1">POD 자동화 대시보드</h1>
-            <p className="text-gray-500 text-sm">트렌드 조사 및 디자인 자동 생성 결과 리뷰</p>
+        <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100 gap-4 xl:gap-0">
+          <div className="shrink-0 w-full xl:w-auto flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 mb-1 whitespace-nowrap">POD 자동화 대시보드</h1>
+              <p className="text-gray-500 text-sm">트렌드 조사 및 디자인 자동 생성 결과 리뷰</p>
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto mt-3 sm:mt-0">
+          <div className="flex flex-wrap items-center justify-start xl:justify-end gap-2 sm:gap-3 w-full xl:w-auto mt-3 xl:mt-0">
             {session?.user && (
-              <div className="flex items-center gap-2 mr-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+              <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 shrink-0">
                 {session.user.image && <img src={session.user.image} alt="Profile" className="w-6 h-6 rounded-full" />}
                 <span className="text-xs font-medium text-gray-700">{session.user.email}</span>
                 <button onClick={() => signOut()} className="text-xs text-red-500 hover:underline font-bold ml-1">로그아웃</button>
