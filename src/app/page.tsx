@@ -30,6 +30,7 @@ export default function Home() {
   const [styleImageBase64, setStyleImageBase64] = useState('');
   const [styleName, setStyleName] = useState('');
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
+  const [isGeneratingTrend, setIsGeneratingTrend] = useState(false);
 
   const [isManageStylesModalOpen, setIsManageStylesModalOpen] = useState(false);
   const [editingStyleId, setEditingStyleId] = useState<string | null>(null);
@@ -255,6 +256,25 @@ export default function Home() {
     setIsCreatingStyle(false);
   };
 
+  const handleManualTrendSearch = async () => {
+    setIsGeneratingTrend(true);
+    try {
+      const res = await fetch('/api/run-agent/styles');
+      const data = await res.json();
+      if (data.success) {
+        alert('✨ 트렌드 화풍 등록 성공: ' + data.data.name);
+        await fetchStyles(); // Update dropdown
+        setSelectedStyleId(data.data.id);
+      } else {
+        alert('트렌드 검색 실패: ' + data.error);
+      }
+    } catch (e) {
+      console.error('Trend search failed', e);
+      alert('오류가 발생했습니다.');
+    }
+    setIsGeneratingTrend(false);
+  };
+
   const handleGenerateFromImage = async () => {
     if (!uploadImageBase64 || !uploadPrompt.trim()) return;
     setIsGeneratingFromImage(true);
@@ -445,6 +465,13 @@ export default function Home() {
               className="flex-1 sm:flex-none bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-base"
             >
               화풍 등록
+            </button>
+            <button 
+              onClick={handleManualTrendSearch}
+              disabled={isGeneratingTrend}
+              className="flex-1 sm:flex-none bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-base"
+            >
+              {isGeneratingTrend ? '트렌드 분석중..' : '트렌드 화풍 자동생성'}
             </button>
             <button 
               onClick={() => setIsImageModalOpen(true)}
