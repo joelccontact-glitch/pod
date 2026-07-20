@@ -785,7 +785,7 @@ export default function Home() {
                       <label className="block text-sm font-semibold text-gray-700 mb-2">적용할 화풍 (선택)</label>
                       <select 
                         value={selectedStyleId || ''}
-                        onChange={(e) => setSelectedStyleId(e.target.value || null)}
+                        onChange={(e) => setSelectedStyleId(e.target.value)}
                         className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white shadow-sm"
                       >
                         <option value="">-- 원본 이미지 스타일 유지 --</option>
