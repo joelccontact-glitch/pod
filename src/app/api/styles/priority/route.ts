@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       const existingPriorities = await db.collection('styles').where('is_priority', '==', true).get();
       
       const batch = db.batch();
-      existingPriorities.forEach((doc) => {
+      existingPriorities.forEach((doc: any) => {
         if (doc.id !== id) {
           batch.update(doc.ref, { is_priority: false });
         }
