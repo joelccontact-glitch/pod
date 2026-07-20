@@ -7,6 +7,8 @@ export const config = {
     // - _next/static (정적 파일)
     // - _next/image (이미지 최적화)
     // - favicon.ico (파비콘)
-    "/((?!api/auth|_next/static|_next/image|favicon.ico).*)"
+    // - api/run-agent (Vercel Cron)
+    // - api/etsy-webhook (Webhook)
+    "/((?!api/auth|api/run-agent|api/etsy-webhook|_next/static|_next/image|favicon.ico).*)"
   ]
 };
