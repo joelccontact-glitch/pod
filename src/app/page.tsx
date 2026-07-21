@@ -668,7 +668,7 @@ export default function Home() {
                           <div className="flex flex-col gap-1">
                             <label className="text-xs font-semibold text-gray-500 text-center">크기 조절 (Zoom)</label>
                             <input 
-                              type="range" min="0.5" max="2.0" step="0.05" 
+                              type="range" min="0.5" max="2.0" step="0.01" 
                               value={mockupScale} onChange={(e) => setMockupScale(parseFloat(e.target.value))}
                               className="w-full accent-orange-500"
                             />
@@ -676,7 +676,7 @@ export default function Home() {
                           <div className="flex flex-col gap-1">
                             <label className="text-xs font-semibold text-gray-500 text-center">좌우 이동 (X)</label>
                             <input 
-                              type="range" min="-300" max="300" step="10" 
+                              type="range" min="-300" max="300" step="1" 
                               value={mockupOffsetX} onChange={(e) => setMockupOffsetX(parseInt(e.target.value))}
                               className="w-full accent-orange-500"
                             />
@@ -684,7 +684,7 @@ export default function Home() {
                           <div className="flex flex-col gap-1">
                             <label className="text-xs font-semibold text-gray-500 text-center">상하 이동 (Y)</label>
                             <input 
-                              type="range" min="-300" max="300" step="10" 
+                              type="range" min="-300" max="300" step="1" 
                               value={mockupOffsetY} onChange={(e) => setMockupOffsetY(parseInt(e.target.value))}
                               className="w-full accent-orange-500"
                             />
