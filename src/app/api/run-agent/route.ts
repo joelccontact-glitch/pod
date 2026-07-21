@@ -31,14 +31,18 @@ export async function GET(req: Request) {
 
     // [STEP 1] Trend Research using Gemini
     let baseTopic = "Cute minimalist animal illustration";
+    let catchphrase = "";
     if (process.env.GEMINI_API_KEY) {
       try {
         const trendResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents: 'Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (small animals like hamsters, guinea pigs, kittens, etc.) store concept. Return exactly 1 t-shirt design theme/topic. Return ONLY a concise short string describing the theme (e.g., "Vintage cottagecore hamster eating strawberry" or "Funny guinea pig with sunglasses"). Do not include any other text, markdown, or quotes.',
+          contents: 'Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (small animals like hamsters, guinea pigs, kittens, etc.) store concept. Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic (e.g. "Vintage cottagecore hamster eating strawberry"). 2. "catchphrase": a very short (1-3 words) aesthetic, catchy typography phrase to include in the design (e.g. "Sleepy Club", "Cozy Vibes", "Nap Time").',
+          config: { responseMimeType: 'application/json' }
         });
         if (trendResponse.text) {
-          baseTopic = trendResponse.text.trim().replace(/^["']|["']$/g, '');
+          const data = JSON.parse(trendResponse.text.trim());
+          baseTopic = data.theme;
+          catchphrase = data.catchphrase;
         }
       } catch (err) {
         console.error("Trend research failed, using fallback topic.");
@@ -62,7 +66,7 @@ export async function GET(req: Request) {
       }
     }
 
-    let designPrompt = `${baseTopic}, vector art, t-shirt design, clean white background`;
+    let designPrompt = `${baseTopic}, vector art, t-shirt design, clean white background. ${catchphrase ? `Include the typography text "${catchphrase}".` : ''}`;
     
     if (styleData && process.env.GEMINI_API_KEY) {
       console.log(`🎨 Applying style: ${styleData.name}`);
@@ -70,7 +74,7 @@ export async function GET(req: Request) {
         const promptResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
           contents: [
-            `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator (clean background, t-shirt design).`,
+            `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `Crucial: Incorporate the typography text "${catchphrase}" beautifully integrated into the design. ` : ''}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator (clean background, t-shirt design).`,
             { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
           ]
         });
@@ -79,7 +83,7 @@ export async function GET(req: Request) {
         }
       } catch (err) {
         console.error("Style prompt generation failed, using fallback.");
-        designPrompt = `${baseTopic}. MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`;
+        designPrompt = `${baseTopic}. ${catchphrase ? `Include the typography text "${catchphrase}". ` : ''}MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`;
       }
     }
     // [STEP 2] Check for duplicates in Firebase via hash

@@ -27,6 +27,30 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     }
   },
   {
+    id: 'folded-tee',
+    name: '접힌 티셔츠 (베이지 배경)',
+    imageUrl: '/mockup_folded.png',
+    overlay: {
+      x: 350,
+      y: 400,
+      width: 300,
+      height: 300,
+      blendMode: 'multiply'
+    }
+  },
+  {
+    id: 'model-tee',
+    name: '모델 착용 티셔츠',
+    imageUrl: '/mockup_model.png',
+    overlay: {
+      x: 350,
+      y: 450,
+      width: 300,
+      height: 300,
+      blendMode: 'multiply'
+    }
+  },
+  {
     id: 'totebag',
     name: '캔버스 에코백',
     imageUrl: '/mockup_totebag.png',

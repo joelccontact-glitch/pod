@@ -38,6 +38,7 @@ export default function Home() {
 
   const [activeTab, setActiveTab] = useState<'info' | 'mockup'>('info');
   const [selectedMockupId, setSelectedMockupId] = useState(MOCKUP_TEMPLATES[0].id);
+  const [mockupScale, setMockupScale] = useState(1.0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export default function Home() {
     if (activeTab === 'mockup' && selectedDesign) {
       drawMockup();
     }
-  }, [activeTab, selectedMockupId, previewDesign, selectedDesign]);
+  }, [activeTab, selectedMockupId, mockupScale, previewDesign, selectedDesign]);
 
   const drawMockup = () => {
     if (activeTab !== 'mockup') return;
@@ -80,14 +81,16 @@ export default function Home() {
       designImg.src = designUrl;
 
       designImg.onload = () => {
-        ctx.globalCompositeOperation = template.overlay.blendMode as any;
-        ctx.drawImage(
-          designImg, 
-          template.overlay.x, 
-          template.overlay.y, 
-          template.overlay.width, 
-          template.overlay.height
-        );
+        ctx.globalCompositeOperation = template.overlay.blendMode as GlobalCompositeOperation;
+        
+        const scaledWidth = template.overlay.width * mockupScale;
+        const scaledHeight = template.overlay.height * mockupScale;
+        const centerX = template.overlay.x + template.overlay.width / 2;
+        const centerY = template.overlay.y + template.overlay.height / 2;
+        const newX = centerX - scaledWidth / 2;
+        const newY = centerY - scaledHeight / 2;
+        
+        ctx.drawImage(designImg, newX, newY, scaledWidth, scaledHeight);
         ctx.globalCompositeOperation = 'source-over';
       };
     };
@@ -641,6 +644,20 @@ export default function Home() {
                             <option key={t.id} value={t.id}>{t.name}</option>
                           ))}
                         </select>
+                        
+                        <div className="flex items-center gap-2 mx-4 flex-1">
+                          <label className="text-xs font-semibold text-gray-500 whitespace-nowrap">Zoom</label>
+                          <input 
+                            type="range" 
+                            min="0.5" 
+                            max="2.0" 
+                            step="0.05" 
+                            value={mockupScale}
+                            onChange={(e) => setMockupScale(parseFloat(e.target.value))}
+                            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
+                          />
+                        </div>
+
                         <button 
                           onClick={downloadMockup}
                           className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
