@@ -39,6 +39,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'info' | 'mockup'>('info');
   const [selectedMockupId, setSelectedMockupId] = useState(MOCKUP_TEMPLATES[0].id);
   const [mockupScale, setMockupScale] = useState(1.0);
+  const [mockupOffsetX, setMockupOffsetX] = useState(0);
+  const [mockupOffsetY, setMockupOffsetY] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -50,7 +52,14 @@ export default function Home() {
     if (activeTab === 'mockup' && selectedDesign) {
       drawMockup();
     }
-  }, [activeTab, selectedMockupId, mockupScale, previewDesign, selectedDesign]);
+  }, [activeTab, selectedMockupId, mockupScale, mockupOffsetX, mockupOffsetY, previewDesign, selectedDesign]);
+
+  // Reset offsets when mockup changes
+  useEffect(() => {
+    setMockupScale(1.0);
+    setMockupOffsetX(0);
+    setMockupOffsetY(0);
+  }, [selectedMockupId]);
 
   const drawMockup = () => {
     if (activeTab !== 'mockup') return;
@@ -87,8 +96,8 @@ export default function Home() {
         const scaledHeight = template.overlay.height * mockupScale;
         const centerX = template.overlay.x + template.overlay.width / 2;
         const centerY = template.overlay.y + template.overlay.height / 2;
-        const newX = centerX - scaledWidth / 2;
-        const newY = centerY - scaledHeight / 2;
+        const newX = centerX - scaledWidth / 2 + mockupOffsetX;
+        const newY = centerY - scaledHeight / 2 + mockupOffsetY;
         
         ctx.drawImage(designImg, newX, newY, scaledWidth, scaledHeight);
         ctx.globalCompositeOperation = 'source-over';
@@ -634,37 +643,53 @@ export default function Home() {
                   </>
                 ) : (
                   <div className="flex flex-col items-center h-full min-h-[400px]">
-                      <div className="w-full mb-4 flex justify-between items-center">
-                        <select 
-                          value={selectedMockupId}
-                          onChange={(e) => setSelectedMockupId(e.target.value)}
-                          className="border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
-                        >
-                          {MOCKUP_TEMPLATES.map(t => (
-                            <option key={t.id} value={t.id}>{t.name}</option>
-                          ))}
-                        </select>
-                        
-                        <div className="flex items-center gap-2 mx-4 flex-1">
-                          <label className="text-xs font-semibold text-gray-500 whitespace-nowrap">Zoom</label>
-                          <input 
-                            type="range" 
-                            min="0.5" 
-                            max="2.0" 
-                            step="0.05" 
-                            value={mockupScale}
-                            onChange={(e) => setMockupScale(parseFloat(e.target.value))}
-                            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-orange-500"
-                          />
+                      <div className="w-full mb-4 flex flex-col gap-3">
+                        <div className="flex justify-between items-center w-full">
+                          <select 
+                            value={selectedMockupId}
+                            onChange={(e) => setSelectedMockupId(e.target.value)}
+                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                          >
+                            {MOCKUP_TEMPLATES.map(t => (
+                              <option key={t.id} value={t.id}>{t.name}</option>
+                            ))}
+                          </select>
+                          
+                          <button 
+                            onClick={downloadMockup}
+                            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            다운로드
+                          </button>
                         </div>
-
-                        <button 
-                          onClick={downloadMockup}
-                          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                          다운로드
-                        </button>
+                        
+                        <div className="grid grid-cols-3 gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                          <div className="flex flex-col gap-1">
+                            <label className="text-xs font-semibold text-gray-500 text-center">크기 조절 (Zoom)</label>
+                            <input 
+                              type="range" min="0.5" max="2.0" step="0.05" 
+                              value={mockupScale} onChange={(e) => setMockupScale(parseFloat(e.target.value))}
+                              className="w-full accent-orange-500"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <label className="text-xs font-semibold text-gray-500 text-center">좌우 이동 (X)</label>
+                            <input 
+                              type="range" min="-300" max="300" step="10" 
+                              value={mockupOffsetX} onChange={(e) => setMockupOffsetX(parseInt(e.target.value))}
+                              className="w-full accent-orange-500"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <label className="text-xs font-semibold text-gray-500 text-center">상하 이동 (Y)</label>
+                            <input 
+                              type="range" min="-300" max="300" step="10" 
+                              value={mockupOffsetY} onChange={(e) => setMockupOffsetY(parseInt(e.target.value))}
+                              className="w-full accent-orange-500"
+                            />
+                          </div>
+                        </div>
                       </div>
                       <div className="relative w-full flex-1 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center border border-gray-200">
                         <canvas ref={canvasRef} className="max-w-full max-h-full object-contain" />
