@@ -555,7 +555,7 @@ export default function Home() {
                 <div key={design.id} className={`bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative ${viewMode === 'grid' ? 'rounded-2xl' : 'rounded-xl flex flex-row h-32 sm:h-40'}`} onClick={() => setSelectedDesign(design)}>
                   <div className={`${viewMode === 'grid' ? 'aspect-square' : 'w-32 sm:w-40 flex-shrink-0'} bg-gray-200 relative`}>
                     <img src={design.image_url} alt={design.title} className="w-full h-full object-cover" />
-                    <div className="absolute top-2 right-2 flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                    <div className="absolute top-2 right-2 flex gap-2 opacity-100 transition-opacity backdrop-blur-sm">
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleToggleLikeDesign(design.id, !design.is_liked); }}
                         className={`bg-white hover:bg-gray-50 p-2 sm:p-1.5 rounded-full shadow-sm border border-gray-200 transition-colors flex items-center justify-center w-8 h-8 ${design.is_liked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
