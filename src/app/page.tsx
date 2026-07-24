@@ -10,6 +10,7 @@ export default function Home() {
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
@@ -191,6 +192,7 @@ export default function Home() {
       if (data.success) {
         setDesigns(data.data);
         setTotalPages(data.totalPages || 1);
+        setTotalCount(data.total || 0);
       }
     } catch (e) {
       console.error('Failed to fetch designs', e);
@@ -478,7 +480,10 @@ export default function Home() {
           <div className="shrink-0 w-full xl:w-auto flex justify-between items-start">
             <div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 mb-1 whitespace-nowrap">POD 자동화 대시보드</h1>
-              <p className="text-gray-500 text-sm">트렌드 조사 및 디자인 자동 생성 결과 리뷰</p>
+              <p className="text-gray-500 text-sm flex items-center gap-2">
+                트렌드 조사 및 디자인 자동 생성 결과 리뷰
+                {totalCount > 0 && <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md text-xs font-semibold border border-blue-100">총 {totalCount}개</span>}
+              </p>
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-start xl:justify-end gap-2 sm:gap-3 w-full xl:w-auto mt-3 xl:mt-0">
