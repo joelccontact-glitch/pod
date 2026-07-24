@@ -144,6 +144,28 @@ export default function Home() {
     }
   };
 
+  const handleToggleLikeDesign = async (id: string, is_liked: boolean) => {
+    try {
+      const res = await fetch('/api/designs/like', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, is_liked })
+      });
+      if (res.ok) {
+        setDesigns(designs.map(d => d.id === id ? { ...d, is_liked } : d));
+        if (selectedDesign?.id === id) {
+          setSelectedDesign({ ...selectedDesign, is_liked });
+        }
+      } else {
+        const data = await res.json();
+        alert('좋아요 설정 실패: ' + data.error);
+      }
+    } catch (e) {
+      console.error('Like toggle failed', e);
+      alert('오류가 발생했습니다.');
+    }
+  };
+
   const handleDeleteStyle = async (id: string) => {
     if (!confirm('정말 이 화풍을 삭제하시겠습니까?')) return;
     try {
@@ -533,13 +555,22 @@ export default function Home() {
                 <div key={design.id} className={`bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative ${viewMode === 'grid' ? 'rounded-2xl' : 'rounded-xl flex flex-row h-32 sm:h-40'}`} onClick={() => setSelectedDesign(design)}>
                   <div className={`${viewMode === 'grid' ? 'aspect-square' : 'w-32 sm:w-40 flex-shrink-0'} bg-gray-200 relative`}>
                     <img src={design.image_url} alt={design.title} className="w-full h-full object-cover" />
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); handleDelete(design.id); }}
-                      className="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-600 p-2.5 sm:p-2 rounded-full opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm shadow-sm"
-                      title="삭제"
-                    >
-                      🗑️
-                    </button>
+                    <div className="absolute top-2 right-2 flex gap-2 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleToggleLikeDesign(design.id, !design.is_liked); }}
+                        className={`bg-white hover:bg-gray-50 p-2 sm:p-1.5 rounded-full shadow-sm border border-gray-200 transition-colors flex items-center justify-center w-8 h-8 ${design.is_liked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
+                        title={design.is_liked ? "좋아요 취소" : "좋아요"}
+                      >
+                        <svg className="w-5 h-5" fill={design.is_liked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDelete(design.id); }}
+                        className="bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 p-2 sm:p-1.5 rounded-full shadow-sm border border-gray-200 transition-colors flex items-center justify-center w-8 h-8"
+                        title="삭제"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                      </button>
+                    </div>
                   </div>
                   <div className={`p-4 flex flex-col justify-center ${viewMode === 'list' ? 'flex-1 min-w-0' : ''}`}>
                     <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md mb-2 inline-block w-fit">

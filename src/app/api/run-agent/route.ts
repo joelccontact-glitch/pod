@@ -66,17 +66,36 @@ export async function GET(req: Request) {
       }
     }
 
+    // Fetch liked designs to use as additional inspiration
+    let likedDesigns: any[] = [];
+    if (process.env.FIREBASE_PROJECT_ID) {
+      const likedQuery = await db.collection('designs').where('is_liked', '==', true).limit(3).get();
+      likedDesigns = likedQuery.docs.map((d: any) => d.data());
+    }
+
     let designPrompt = `${baseTopic}, vector art, t-shirt design, clean white background. ${catchphrase ? `Include the typography text "${catchphrase}".` : ''}`;
     
     if (styleData && process.env.GEMINI_API_KEY) {
       console.log(`🎨 Applying style: ${styleData.name}`);
       try {
+        const contents: any[] = [
+          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `Crucial: Incorporate the typography text "${catchphrase}" beautifully integrated into the design. ` : ''}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator (clean background, t-shirt design).`,
+          { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
+        ];
+
+        if (likedDesigns.length > 0) {
+          contents[0] += ` Additionally, I am providing ${likedDesigns.length} previously generated image(s) that the user liked. Use them as additional inspiration for the overall vibe and quality.`;
+          likedDesigns.forEach(d => {
+            if (d.image_url && d.image_url.startsWith('data:image')) {
+              const mimeType = d.image_url.match(/^data:(image\/\w+);base64,/)?.[1] || 'image/jpeg';
+              contents.push({ inlineData: { data: d.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType } });
+            }
+          });
+        }
+
         const promptResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents: [
-            `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `Crucial: Incorporate the typography text "${catchphrase}" beautifully integrated into the design. ` : ''}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator (clean background, t-shirt design).`,
-            { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
-          ]
+          contents: contents
         });
         if (promptResponse.text) {
           designPrompt = promptResponse.text.trim();
