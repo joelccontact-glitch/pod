@@ -39,12 +39,48 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     }
   },
   {
-    id: 'model-tee',
-    name: '모델 착용 티셔츠',
-    imageUrl: '/mockup_model.png',
+    id: 'model-adult-male',
+    name: '성인 남성 티셔츠',
+    imageUrl: '/mockup_adult_male_1784883404035.jpg',
     overlay: {
       x: 350,
-      y: 450,
+      y: 400,
+      width: 300,
+      height: 300,
+      blendMode: 'multiply'
+    }
+  },
+  {
+    id: 'model-adult-female',
+    name: '성인 여성 티셔츠',
+    imageUrl: '/mockup_adult_female_1784883500734.jpg',
+    overlay: {
+      x: 350,
+      y: 400,
+      width: 300,
+      height: 300,
+      blendMode: 'multiply'
+    }
+  },
+  {
+    id: 'model-boy',
+    name: '남자 아이 티셔츠',
+    imageUrl: '/mockup_boy_1784883510419.jpg',
+    overlay: {
+      x: 350,
+      y: 400,
+      width: 300,
+      height: 300,
+      blendMode: 'multiply'
+    }
+  },
+  {
+    id: 'model-girl',
+    name: '여자 아이 티셔츠',
+    imageUrl: '/mockup_girl_1784883520813.jpg',
+    overlay: {
+      x: 350,
+      y: 400,
       width: 300,
       height: 300,
       blendMode: 'multiply'
@@ -75,3 +111,5 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     }
   }
 ];
+
+// force rebuild
