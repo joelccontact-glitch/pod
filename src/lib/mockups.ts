@@ -67,10 +67,10 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '남자 아이 티셔츠',
     imageUrl: '/mockup_boy_1784883510419.jpg',
     overlay: {
-      x: 350,
-      y: 400,
-      width: 300,
-      height: 300,
+      x: 412,
+      y: 320,
+      width: 200,
+      height: 200,
       blendMode: 'multiply'
     }
   },
@@ -79,10 +79,10 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '여자 아이 티셔츠',
     imageUrl: '/mockup_girl_1784883520813.jpg',
     overlay: {
-      x: 350,
-      y: 400,
-      width: 300,
-      height: 300,
+      x: 412,
+      y: 320,
+      width: 200,
+      height: 200,
       blendMode: 'multiply'
     }
   },
