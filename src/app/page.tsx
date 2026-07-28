@@ -477,8 +477,8 @@ export default function Home() {
     <main className="min-h-screen p-6 md:p-12 bg-gray-50 text-gray-900 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Store Banner */}
-        <div className="w-full overflow-hidden rounded-2xl shadow-sm border border-gray-100 mb-6">
-          <img src="/etsy-banner.jpg" alt="Etsy Store Banner" className="w-full h-auto object-cover max-h-[250px]" />
+        <div className="w-full overflow-hidden rounded-2xl shadow-sm border border-gray-100 mb-6 flex">
+          <img src="/etsy-banner.jpg" alt="Etsy Store Banner" className="w-full h-[200px] sm:h-[300px] object-cover object-bottom" />
         </div>
         
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100 gap-4 xl:gap-0">
