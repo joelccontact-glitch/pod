@@ -31,7 +31,9 @@ export async function GET(req: Request) {
 
     // [STEP 1] Trend Research using Gemini
     let baseTopic = "Cute minimalist animal illustration";
-    let catchphrase = "";
+    const urlParams = new URL(req.url);
+    const userCatchphrase = urlParams.searchParams.get('catchphrase') || '';
+    let catchphrase = userCatchphrase;
     if (process.env.GEMINI_API_KEY) {
       try {
         const trendResponse = await ai.models.generateContent({
@@ -42,7 +44,7 @@ export async function GET(req: Request) {
         if (trendResponse.text) {
           const data = JSON.parse(trendResponse.text.trim());
           baseTopic = data.theme;
-          catchphrase = data.catchphrase;
+          catchphrase = userCatchphrase || data.catchphrase;
         }
       } catch (err) {
         console.error("Trend research failed, using fallback topic.");

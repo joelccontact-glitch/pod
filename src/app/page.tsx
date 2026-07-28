@@ -758,6 +758,17 @@ export default function Home() {
                   <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
                     <span>✨</span> 디자인 수정 요청
                   </h4>
+                  {!previewDesign && (
+                    <input 
+                      type="text" 
+                      value={globalCatchphrase}
+                      onChange={e => setGlobalCatchphrase(e.target.value)}
+                      placeholder="브랜드 문구 추가 (선택)" 
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm mb-2"
+                      disabled={modifying}
+                      title="이 텍스트가 수정된 디자인에 자연스럽게 합성됩니다."
+                    />
+                  )}
                   <div className="flex gap-2">
                     {previewDesign ? (
                       <div className="flex gap-2 justify-end w-full">
