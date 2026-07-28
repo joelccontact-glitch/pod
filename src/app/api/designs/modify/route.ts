@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       // 1. Generate new prompt based on feedback
       const promptResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `I have a t-shirt design with the original prompt: "${originalPrompt}". The user provided the following feedback to modify it: "${feedback}". Generate a new, modified prompt for an image generator (like vector art, t-shirt design, clean white background). Return ONLY the new prompt string.`,
+        contents: `I have a t-shirt design with the original prompt: "${originalPrompt}". The user provided the following feedback to modify it: "${feedback}". Generate a new, modified prompt for an image generator (like vector art, t-shirt design, pure solid white background with NO scenery). Return ONLY the new prompt string.`,
       });
       newPrompt = promptResponse.text?.trim() || originalPrompt;
 

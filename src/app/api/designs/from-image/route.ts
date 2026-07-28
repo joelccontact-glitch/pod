@@ -33,25 +33,25 @@ export async function POST(req: Request) {
         console.log(`🎨 Applying style: ${styleData.name}`);
         if (base64Data) {
           contentsArray = [
-            `You are an expert prompt engineer. The user wants to create a new t-shirt design based on the FIRST image (concept), with the instruction: "${prompt}". IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the SECOND image (style reference), as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like vector art, clean background, t-shirt design style) that captures the essence of the first image but completely applies the style of the second image. Return ONLY the new prompt string.`,
+            `You are an expert prompt engineer. The user wants to create a new t-shirt design based on the FIRST image (concept), with the instruction: "${prompt}". IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the SECOND image (style reference), as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like vector art, pure solid white background with NO scenery, t-shirt design style) that captures the essence of the first image but completely applies the style of the second image. Return ONLY the new prompt string.`,
             { inlineData: { data: base64Data, mimeType: 'image/jpeg' } },
             { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
           ];
         } else {
           contentsArray = [
-            `You are an expert prompt engineer. The user wants to create a new t-shirt design based on the instruction: "${prompt}". IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference image, as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like vector art, clean background, t-shirt design style) that applies the instruction while strictly following the style reference. Return ONLY the new prompt string.`,
+            `You are an expert prompt engineer. The user wants to create a new t-shirt design based on the instruction: "${prompt}". IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference image, as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like vector art, pure solid white background with NO scenery, t-shirt design style) that applies the instruction while strictly following the style reference. Return ONLY the new prompt string.`,
             { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
           ];
         }
       } else {
         if (base64Data) {
           contentsArray = [
-            `Analyze this reference image. The user wants to create a new t-shirt design based on this, with the following instruction: "${prompt}". Generate a highly detailed prompt for an image generator (like vector art, clean background, t-shirt design style) that captures the essence of the reference image but applies the user's instruction. Return ONLY the new prompt string.`,
+            `Analyze this reference image. The user wants to create a new t-shirt design based on this, with the following instruction: "${prompt}". Generate a highly detailed prompt for an image generator (like vector art, pure solid white background with NO scenery, t-shirt design style) that captures the essence of the reference image but applies the user's instruction. Return ONLY the new prompt string.`,
             { inlineData: { data: base64Data, mimeType: 'image/jpeg' } }
           ];
         } else {
           contentsArray = [
-            `You are an expert prompt engineer. Generate a highly detailed prompt for an image generator (like vector art, clean background, t-shirt design style) based on this instruction: "${prompt}". Return ONLY the new prompt string.`
+            `You are an expert prompt engineer. Generate a highly detailed prompt for an image generator (like vector art, pure solid white background with NO scenery, t-shirt design style) based on this instruction: "${prompt}". Return ONLY the new prompt string.`
           ];
         }
       }

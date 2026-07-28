@@ -39,7 +39,7 @@ Return a JSON object with:
       console.log(`🖼️ Generating sample image...`);
       const imgResponse = await ai.models.generateImages({
         model: 'imagen-4.0-fast-generate-001',
-        prompt: `A beautiful icon or simple illustration. strictly following this style: ${promptDescription}. Clean white background.`,
+        prompt: `A beautiful icon or simple illustration. strictly following this style: ${promptDescription}. Pure solid white background with NO scenery.`,
         config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' }
       });
       

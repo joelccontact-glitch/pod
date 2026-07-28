@@ -73,13 +73,13 @@ export async function GET(req: Request) {
       likedDesigns = likedQuery.docs.map((d: any) => d.data());
     }
 
-    let designPrompt = `${baseTopic}, vector art, t-shirt design, clean white background. ${catchphrase ? `Include the typography text "${catchphrase}".` : ''}`;
+    let designPrompt = `${baseTopic}, vector art, t-shirt design, pure solid white background with NO scenery. ${catchphrase ? `Include the typography text "${catchphrase}".` : ''}`;
     
     if (styleData && process.env.GEMINI_API_KEY) {
       console.log(`🎨 Applying style: ${styleData.name}`);
       try {
         const contents: any[] = [
-          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `Crucial: Incorporate the typography text "${catchphrase}" beautifully integrated into the design. ` : ''}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator (clean background, t-shirt design).`,
+          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `Crucial: Incorporate the typography text "${catchphrase}" beautifully integrated into the design. ` : ''}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator (pure solid white background with NO scenery, t-shirt design).`,
           { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
         ];
 
