@@ -37,6 +37,7 @@ export default function Home() {
   const [isManageStylesModalOpen, setIsManageStylesModalOpen] = useState(false);
   const [editingStyleId, setEditingStyleId] = useState<string | null>(null);
   const [editingStyleName, setEditingStyleName] = useState('');
+  const [enlargedStyleImage, setEnlargedStyleImage] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<'info' | 'mockup'>('info');
   const [selectedMockupId, setSelectedMockupId] = useState(MOCKUP_TEMPLATES[0].id);
@@ -943,7 +944,13 @@ export default function Home() {
                       <div key={style.id} className="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
                         <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden shrink-0 border border-gray-200">
                           {style.image_url ? (
-                            <img src={style.image_url} alt={style.name} className="w-full h-full object-cover" />
+                            <img 
+                              src={style.image_url} 
+                              alt={style.name} 
+                              className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" 
+                              onClick={() => setEnlargedStyleImage(style.image_url)}
+                              title="크게 보기"
+                            />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Img</div>
                           )}
@@ -1070,6 +1077,29 @@ export default function Home() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+        {/* Enlarged Style Image Modal */}
+        {enlargedStyleImage && (
+          <div 
+            className="fixed inset-0 bg-black/80 z-[70] flex items-center justify-center p-4 backdrop-blur-sm"
+            onClick={() => setEnlargedStyleImage(null)}
+          >
+            <div className="relative max-w-4xl max-h-[90vh] flex items-center justify-center">
+              <button 
+                onClick={() => setEnlargedStyleImage(null)} 
+                className="absolute -top-12 right-0 text-white hover:text-gray-300 text-4xl font-bold z-10 w-12 h-12 flex items-center justify-center"
+                title="닫기"
+              >
+                ×
+              </button>
+              <img 
+                src={enlargedStyleImage} 
+                alt="Enlarged style" 
+                className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-gray-700" 
+                onClick={(e) => e.stopPropagation()} 
+              />
             </div>
           </div>
         )}
