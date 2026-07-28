@@ -486,7 +486,7 @@ export default function Home() {
             <div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 mb-1 whitespace-nowrap">POD 자동화 대시보드</h1>
               <p className="text-gray-500 text-sm flex items-center gap-2">
-                트렌드 조사 및 디자인 자동 생성 결과 리뷰
+                디자인 생성 결과
                 {totalCount > 0 && <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md text-xs font-semibold border border-blue-100">총 {totalCount}개</span>}
               </p>
             </div>
