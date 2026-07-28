@@ -414,7 +414,7 @@ export default function Home() {
   };
 
   const handleModify = async () => {
-    if (!feedback.trim() || !selectedDesign) return;
+    if ((!feedback.trim() && !globalCatchphrase.trim()) || !selectedDesign) return;
     setModifying(true);
     try {
       const res = await fetch('/api/designs/modify', {
@@ -794,13 +794,13 @@ export default function Home() {
                           value={feedback}
                           onChange={e => setFeedback(e.target.value)}
                           onKeyDown={e => e.key === 'Enter' && handleModify()}
-                          placeholder="예: 배경색을 빨간색으로 변경해줘..." 
+                          placeholder={globalCatchphrase.trim() ? "예: 텍스트를 상단에 배치해줘 (또는 비워두셔도 됩니다)" : "예: 배경색을 빨간색으로 변경해줘..."}
                           className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
                           disabled={modifying}
                         />
                         <button 
                           onClick={handleModify}
-                          disabled={modifying || !feedback.trim()}
+                          disabled={modifying || (!feedback.trim() && !globalCatchphrase.trim())}
                           className="bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 text-sm flex-shrink-0 shadow-sm"
                         >
                           {modifying ? '생성 중...' : '수정'}
