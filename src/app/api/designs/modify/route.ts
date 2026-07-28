@@ -7,7 +7,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { originalId, feedback, topic, originalPrompt, isPreview } = await req.json();
+    const { originalId, feedback, topic, originalPrompt, isPreview, catchphrase } = await req.json();
 
     if (!feedback || !topic) {
       return NextResponse.json({ success: false, error: 'Feedback and topic are required' }, { status: 400 });
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       // 1. Generate new prompt based on feedback
       const promptResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `I have a t-shirt design with the original prompt: "${originalPrompt}". The user provided the following feedback to modify it: "${feedback}". Generate a new, modified prompt for an image generator (like vector art, t-shirt design, pure solid white background with NO scenery). Return ONLY the new prompt string.`,
+        contents: `I have a t-shirt design with the original prompt: "${originalPrompt}". The user provided the following feedback to modify it: "${feedback}". ${catchphrase ? `CRUCIAL: Modify the design to incorporate the typography text "${catchphrase}" beautifully integrated. ` : ''}Generate a new, modified prompt for an image generator (like vector art, t-shirt design, pure solid white background with NO scenery). Return ONLY the new prompt string.`,
       });
       newPrompt = promptResponse.text?.trim() || originalPrompt;
 

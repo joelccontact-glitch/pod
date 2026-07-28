@@ -32,6 +32,7 @@ export default function Home() {
   const [styleName, setStyleName] = useState('');
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
   const [isGeneratingTrend, setIsGeneratingTrend] = useState(false);
+  const [globalCatchphrase, setGlobalCatchphrase] = useState('Little Paws');
 
   const [isManageStylesModalOpen, setIsManageStylesModalOpen] = useState(false);
   const [editingStyleId, setEditingStyleId] = useState<string | null>(null);
@@ -203,7 +204,10 @@ export default function Home() {
   const runAgent = async () => {
     setLoading(true);
     try {
-      const url = selectedStyleId ? `/api/run-agent?styleId=${selectedStyleId}` : '/api/run-agent';
+      let url = selectedStyleId ? `/api/run-agent?styleId=${selectedStyleId}` : '/api/run-agent';
+      if (globalCatchphrase.trim()) {
+        url += (url.includes('?') ? '&' : '?') + `catchphrase=${encodeURIComponent(globalCatchphrase.trim())}`;
+      }
       const res = await fetch(url, {
         headers: {
           'Authorization': 'Bearer ' + (process.env.NEXT_PUBLIC_CRON_SECRET || 'demo-secret')
@@ -337,7 +341,7 @@ export default function Home() {
       const res = await fetch('/api/designs/from-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: uploadImageBase64, prompt: uploadPrompt, isPreview: true, styleId: selectedStyleId })
+        body: JSON.stringify({ imageBase64: uploadImageBase64, prompt: uploadPrompt, isPreview: true, styleId: selectedStyleId, catchphrase: globalCatchphrase.trim() })
       });
       const data = await res.json();
       if (data.success) {
@@ -421,7 +425,8 @@ export default function Home() {
           feedback,
           topic: selectedDesign.topic,
           originalPrompt: selectedDesign.prompt,
-          isPreview: true
+          isPreview: true,
+          catchphrase: globalCatchphrase.trim()
         })
       });
       const data = await res.json();
@@ -517,6 +522,14 @@ export default function Home() {
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
+            <input 
+              type="text" 
+              value={globalCatchphrase}
+              onChange={(e) => setGlobalCatchphrase(e.target.value)}
+              placeholder="브랜드 문구 (선택)"
+              className="bg-white border border-gray-200 rounded-xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[100px] sm:max-w-[140px] shrink-0"
+              title="디자인에 포함할 텍스트 (예: Little Paws)"
+            />
             <button 
               onClick={() => setIsManageStylesModalOpen(true)}
               className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-base border border-gray-200"
