@@ -75,13 +75,13 @@ export async function GET(req: Request) {
       likedDesigns = likedQuery.docs.map((d: any) => d.data());
     }
 
-    let designPrompt = `${baseTopic}, vector art, t-shirt design, pure solid white background with NO scenery. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using pastel pink and warm beige colors.` : ''}`;
+    let designPrompt = `${baseTopic}, vector art, t-shirt design, pure solid white background with NO scenery. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.` : ''}`;
     
     if (styleData && process.env.GEMINI_API_KEY) {
       console.log(`🎨 Applying style: ${styleData.name}`);
       try {
         const contents: any[] = [
-          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using pastel pink and warm beige colors. ` : ''}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator (pure solid white background with NO scenery, t-shirt design).`,
+          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : ''}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator (pure solid white background with NO scenery, t-shirt design).`,
           { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
         ];
 
@@ -104,7 +104,7 @@ export async function GET(req: Request) {
         }
       } catch (err) {
         console.error("Style prompt generation failed, using fallback.");
-        designPrompt = `${baseTopic}. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using pastel pink and warm beige colors. ` : ''}MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`;
+        designPrompt = `${baseTopic}. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : ''}MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`;
       }
     }
     // [STEP 2] Check for duplicates in Firebase via hash

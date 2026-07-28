@@ -11,4 +11,4 @@ This version has breaking changes — APIs, conventions, and file structure may 
 이미지를 생성하는 코드를 작성하거나 프롬프트를 수정할 때, 또는 에이전트가 직접 이미지를 생성할 때는 **반드시 배경 풍경이나 색상이 없는 깔끔한 흰색 단색 배경(또는 투명 배경)**이 되도록 지시사항을 강제해야 합니다. (예: `pure solid white background with NO scenery`). POD 상품에 프린팅 시 배경색이 남아 있으면 사각형 테두리가 인쇄되어 매우 부자연스럽기 때문입니다.
 
 # 브랜드 텍스트 스타일 유지 원칙
-생성되는 이미지에 브랜드 텍스트(예: Little Paws)를 추가할 때는 반드시 특정 스타일("파스텔 핑크와 따뜻한 베이지 컬러를 사용한, 귀엽고 우아한 손글씨(스크립트) 폰트")을 유지하도록 프롬프트에 강제해야 합니다. (예: `MUST be drawn in an elegant, cute, hand-drawn script font using pastel pink and warm beige colors.`)
+생성되는 이미지에 브랜드 텍스트(예: Little Paws)를 추가할 때는 반드시 특정 스타일("귀엽고 우아한 손글씨(스크립트) 폰트")을 유지하도록 프롬프트에 강제해야 합니다. 단, 텍스트의 색상은 생성되는 이미지 분위기에 맞게 자연스럽게 변경되도록 지시해야 합니다. (예: `MUST be drawn in an elegant, cute, hand-drawn script font, using colors that perfectly match the mood and palette of the image.`)
