@@ -331,7 +331,7 @@ export default function Home() {
   };
 
   const handleGenerateFromImage = async () => {
-    if (!uploadImageBase64 || !uploadPrompt.trim()) return;
+    if (!uploadPrompt.trim()) return;
     setIsGeneratingFromImage(true);
     try {
       const res = await fetch('/api/designs/from-image', {
@@ -837,7 +837,7 @@ export default function Home() {
                 </>
               ) : (
                 <div className="p-6 sm:p-8 flex flex-col h-full w-full">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">이미지로 디자인 생성</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">새 디자인 생성</h2>
                   
                   <div className="flex-1 space-y-4">
                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 sm:p-6 text-center hover:bg-gray-50 transition-colors relative flex flex-col items-center justify-center min-h-[200px]">
@@ -849,18 +849,18 @@ export default function Home() {
                       ) : (
                         <>
                           <svg className="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                          <p className="text-sm text-gray-600 mb-1">여기를 클릭하여 파일 선택 또는 <br/>복사한 이미지를 붙여넣기(Ctrl+V) 하세요.</p>
+                          <p className="text-sm text-gray-600 mb-1">참고할 이미지가 있다면 클릭하여 첨부하세요 (선택 사항)</p>
                           <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                         </>
                       )}
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">어떻게 응용할까요?</label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">어떤 디자인을 만들까요? (필수)</label>
                       <textarea 
                         value={uploadPrompt}
                         onChange={e => setUploadPrompt(e.target.value)}
-                        placeholder="예: 이 스타일을 유지하면서 고양이 대신 귀여운 강아지로 바꿔줘" 
+                        placeholder="예: 수채화 톤의 코티지코어 감성, 들꽃과 토끼 일러스트" 
                         className="w-full border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white shadow-sm resize-none h-24"
                       />
                     </div>
@@ -890,7 +890,7 @@ export default function Home() {
                     </button>
                     <button 
                       onClick={handleGenerateFromImage}
-                      disabled={!uploadImageBase64 || !uploadPrompt.trim() || isGeneratingFromImage}
+                      disabled={!uploadPrompt.trim() || isGeneratingFromImage}
                       className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 min-w-[120px]"
                     >
                       {isGeneratingFromImage ? '생성 중...' : '생성하기'}
