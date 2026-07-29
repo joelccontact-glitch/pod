@@ -32,19 +32,19 @@ export async function GET(req: Request) {
     // [STEP 1] Trend Research using Gemini
     let baseTopic = "Cute minimalist animal illustration";
     const urlParams = new URL(req.url);
-    const userCatchphrase = urlParams.searchParams.get('catchphrase') || '';
+    const userCatchphrase = urlParams.searchParams.get('catchphrase') || 'Little Paws';
     let catchphrase = userCatchphrase;
     if (process.env.GEMINI_API_KEY) {
       try {
         const trendResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents: 'Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (small animals like hamsters, guinea pigs, kittens, etc.) store concept. Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic (e.g. "Vintage cottagecore hamster eating strawberry"). 2. "catchphrase": a very short (1-3 words) aesthetic, catchy typography phrase to include in the design (e.g. "Sleepy Club", "Cozy Vibes", "Nap Time").',
+          contents: 'Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (small animals like hamsters, guinea pigs, kittens, puppies, bunnies, etc.) store concept. Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic (e.g. "Vintage cottagecore hamster eating strawberry").',
           config: { responseMimeType: 'application/json' }
         });
         if (trendResponse.text) {
           const data = JSON.parse(trendResponse.text.trim());
           baseTopic = data.theme;
-          catchphrase = userCatchphrase || data.catchphrase;
+          catchphrase = userCatchphrase || data.catchphrase || 'Little Paws';
         }
       } catch (err) {
         console.error("Trend research failed, using fallback topic.");
@@ -75,13 +75,13 @@ export async function GET(req: Request) {
       likedDesigns = likedQuery.docs.map((d: any) => d.data());
     }
 
-    let designPrompt = `${baseTopic}, vector art, t-shirt design, pure solid white background with NO scenery. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.` : ''}`;
+    let designPrompt = `${baseTopic}, vector art, t-shirt design. CRITICAL: The image MUST have a pure solid white background with NO scenery, NO background colors, and NO landscapes. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.` : ''}`;
     
     if (styleData && process.env.GEMINI_API_KEY) {
       console.log(`🎨 Applying style: ${styleData.name}`);
       try {
         const contents: any[] = [
-          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : ''}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator (pure solid white background with NO scenery, t-shirt design).`,
+          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : ''}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this rule to the prompt: The image MUST have a pure solid white background with NO scenery, NO background colors, and NO landscapes.`,
           { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
         ];
 
@@ -104,7 +104,7 @@ export async function GET(req: Request) {
         }
       } catch (err) {
         console.error("Style prompt generation failed, using fallback.");
-        designPrompt = `${baseTopic}. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : ''}MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`;
+        designPrompt = `${baseTopic}. CRITICAL: The image MUST have a pure solid white background with NO scenery, NO background colors, and NO landscapes. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : ''}MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`;
       }
     }
     // [STEP 2] Check for duplicates in Firebase via hash
