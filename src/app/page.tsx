@@ -44,12 +44,18 @@ export default function Home() {
   const [isAutoAgentModalOpen, setIsAutoAgentModalOpen] = useState(false);
   const [autoAgentAnimal, setAutoAgentAnimal] = useState('random');
 
-  const [activeTab, setActiveTab] = useState<'info' | 'mockup'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'mockup' | 'edit'>('info');
   const [selectedMockupId, setSelectedMockupId] = useState(MOCKUP_TEMPLATES[0].id);
   const [mockupScale, setMockupScale] = useState(1.0);
   const [mockupOffsetX, setMockupOffsetX] = useState(0);
   const [mockupOffsetY, setMockupOffsetY] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const editCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [brushSize, setBrushSize] = useState(20);
+  const [isSavingManual, setIsSavingManual] = useState(false);
+  const [originalEditImage, setOriginalEditImage] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDesigns(page);
@@ -120,6 +126,137 @@ export default function Home() {
     const a = document.createElement('a');
     a.href = url;
     a.download = `mockup_${Date.now()}.jpg`;
+    a.click();
+  };
+
+  useEffect(() => {
+    if (activeTab === 'edit' && selectedDesign) {
+      initEditCanvas();
+    }
+  }, [activeTab, selectedDesign]);
+
+  const initEditCanvas = () => {
+    const canvas = editCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = selectedDesign.image_url;
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      setOriginalEditImage(canvas.toDataURL('image/jpeg', 1.0));
+    };
+  };
+
+  const getCoordinates = (e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    let clientX, clientY;
+    
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = (e as React.MouseEvent).clientX;
+      clientY = (e as React.MouseEvent).clientY;
+    }
+    
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  };
+
+  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    setIsDrawing(true);
+    draw(e);
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+    const canvas = editCanvasRef.current;
+    if (canvas) {
+      canvas.getContext('2d')?.beginPath();
+    }
+  };
+
+  const draw = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDrawing) return;
+    const canvas = editCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const { x, y } = getCoordinates(e, canvas);
+    
+    ctx.lineWidth = brushSize;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#FFFFFF';
+    
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+
+  const resetEditCanvas = () => {
+    const canvas = editCanvasRef.current;
+    if (!canvas || !originalEditImage) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    const img = new Image();
+    img.src = originalEditImage;
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    };
+  };
+
+  const saveManualEdit = async () => {
+    const canvas = editCanvasRef.current;
+    if (!canvas || !selectedDesign) return;
+    
+    setIsSavingManual(true);
+    try {
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+      const res = await fetch('/api/designs/save-manual', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          originalId: selectedDesign.id,
+          imageBase64: dataUrl,
+          topic: selectedDesign.topic,
+          originalPrompt: selectedDesign.prompt,
+          tags: selectedDesign.tags
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('성공적으로 저장되었습니다!');
+        fetchDesigns(1);
+      } else {
+        alert('저장에 실패했습니다.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('오류가 발생했습니다.');
+    }
+    setIsSavingManual(false);
+  };
+
+  const downloadEditCanvas = () => {
+    const canvas = editCanvasRef.current;
+    if (!canvas) return;
+    const url = canvas.toDataURL('image/jpeg', 1.0);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `edited_${Date.now()}.jpg`;
     a.click();
   };
 
@@ -713,6 +850,12 @@ export default function Home() {
                   >
                     👕 목업으로 보기
                   </button>
+                  <button 
+                    onClick={() => setActiveTab('edit')} 
+                    className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-1.5 ${activeTab === 'edit' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-400 hover:text-gray-700'}`}
+                  >
+                    🖌️ 직접 편집
+                  </button>
                 </div>
 
                 <div className="p-5 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
@@ -792,6 +935,48 @@ export default function Home() {
                       <div className="relative w-full flex-1 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center border border-gray-200">
                         <canvas ref={canvasRef} className="max-w-full max-h-full object-contain" />
                       </div>
+                    </div>
+                  )}
+                  
+                  {activeTab === 'edit' && (
+                    <div className="flex flex-col h-full gap-4">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                            지우개 굵기:
+                            <input 
+                              type="range" min="5" max="100" step="1" 
+                              value={brushSize} onChange={(e) => setBrushSize(parseInt(e.target.value))}
+                              className="w-24 accent-purple-500"
+                            />
+                          </label>
+                          <button onClick={resetEditCanvas} className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
+                            초기화
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={downloadEditCanvas} className="text-xs px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1">
+                            ⬇️ 다운로드
+                          </button>
+                          <button onClick={saveManualEdit} disabled={isSavingManual} className="text-xs px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1 disabled:opacity-50">
+                            💾 {isSavingManual ? '저장 중...' : '새 디자인 저장'}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="relative w-full flex-1 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center border border-gray-200 cursor-crosshair touch-none shadow-inner">
+                        <canvas 
+                          ref={editCanvasRef} 
+                          className="max-w-full max-h-full object-contain"
+                          onMouseDown={startDrawing}
+                          onMouseMove={draw}
+                          onMouseUp={stopDrawing}
+                          onMouseOut={stopDrawing}
+                          onTouchStart={startDrawing}
+                          onTouchMove={draw}
+                          onTouchEnd={stopDrawing}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 text-center font-medium">💡 마우스로 드래그하여 원하지 않는 글자나 부분을 하얗게 지워보세요.</p>
                     </div>
                   )}
                 </div>
