@@ -38,10 +38,14 @@ export async function GET(request: Request) {
       .limit(limitNum)
       .get();
       
-    const designs = designsSnapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const designs = designsSnapshot.docs.map((doc: any) => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        image_url: data.image_url?.startsWith('data:image/') ? `/api/designs/image?id=${doc.id}` : data.image_url
+      };
+    });
 
     return NextResponse.json({ 
       success: true, 
