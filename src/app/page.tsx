@@ -56,6 +56,21 @@ export default function Home() {
   const [brushSize, setBrushSize] = useState(20);
   const [isSavingManual, setIsSavingManual] = useState(false);
   const [originalEditImage, setOriginalEditImage] = useState<string | null>(null);
+  
+  type TextElement = {
+    id: string;
+    text: string;
+    x: number;
+    y: number;
+    font: string;
+    size: number;
+    color: string;
+  };
+  const [editMode, setEditMode] = useState<'eraser' | 'text'>('eraser');
+  const [textElements, setTextElements] = useState<TextElement[]>([]);
+  const [activeTextId, setActiveTextId] = useState<string | null>(null);
+  const [isDraggingText, setIsDraggingText] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     fetchDesigns(page);
@@ -173,11 +188,13 @@ export default function Home() {
   };
 
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    if (editMode !== 'eraser') return;
     setIsDrawing(true);
     draw(e);
   };
 
   const stopDrawing = () => {
+    if (editMode !== 'eraser') return;
     setIsDrawing(false);
     const canvas = editCanvasRef.current;
     if (canvas) {
@@ -186,7 +203,7 @@ export default function Home() {
   };
 
   const draw = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDrawing) return;
+    if (!isDrawing || editMode !== 'eraser') return;
     const canvas = editCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -216,15 +233,37 @@ export default function Home() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
     };
+    setTextElements([]);
+  };
+
+  const getFinalCanvasDataUrl = () => {
+    const canvas = editCanvasRef.current;
+    if (!canvas) return null;
+    
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
+    const ctx = tempCanvas.getContext('2d');
+    if (!ctx) return null;
+    
+    ctx.drawImage(canvas, 0, 0);
+    
+    textElements.forEach(t => {
+      ctx.font = `${t.size}px '${t.font}'`;
+      ctx.fillStyle = t.color;
+      ctx.textBaseline = 'top';
+      ctx.fillText(t.text, t.x, t.y);
+    });
+    
+    return tempCanvas.toDataURL('image/jpeg', 0.95);
   };
 
   const saveManualEdit = async () => {
-    const canvas = editCanvasRef.current;
-    if (!canvas || !selectedDesign) return;
+    const dataUrl = getFinalCanvasDataUrl();
+    if (!dataUrl || !selectedDesign) return;
     
     setIsSavingManual(true);
     try {
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
       const res = await fetch('/api/designs/save-manual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -251,13 +290,63 @@ export default function Home() {
   };
 
   const downloadEditCanvas = () => {
-    const canvas = editCanvasRef.current;
-    if (!canvas) return;
-    const url = canvas.toDataURL('image/jpeg', 1.0);
+    const url = getFinalCanvasDataUrl();
+    if (!url) return;
     const a = document.createElement('a');
     a.href = url;
     a.download = `edited_${Date.now()}.jpg`;
     a.click();
+  };
+
+  const handleAddText = () => {
+    setTextElements([...textElements, {
+      id: Date.now().toString(),
+      text: 'Double click to edit',
+      x: 50,
+      y: 50,
+      font: 'Pacifico',
+      size: 60,
+      color: '#333333'
+    }]);
+    setEditMode('text');
+  };
+
+  const updateTextElement = (id: string, updates: Partial<TextElement>) => {
+    setTextElements(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+  };
+
+  const handleTextMouseDown = (e: React.MouseEvent | React.TouchEvent, id: string) => {
+    if (editMode !== 'text') return;
+    e.stopPropagation();
+    setActiveTextId(id);
+    setIsDraggingText(true);
+    
+    const canvas = editCanvasRef.current;
+    if (!canvas) return;
+    const { x, y } = getCoordinates(e, canvas);
+    const textEl = textElements.find(t => t.id === id);
+    if (textEl) {
+      setDragOffset({ x: x - textEl.x, y: y - textEl.y });
+    }
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
+    if (editMode === 'eraser' && isDrawing) {
+      draw(e);
+    } else if (editMode === 'text' && isDraggingText && activeTextId) {
+      const canvas = editCanvasRef.current;
+      if (!canvas) return;
+      const { x, y } = getCoordinates(e, canvas);
+      updateTextElement(activeTextId, { x: x - dragOffset.x, y: y - dragOffset.y });
+    }
+  };
+
+  const handleCanvasMouseUp = () => {
+    if (editMode === 'eraser') {
+      stopDrawing();
+    } else if (editMode === 'text') {
+      setIsDraggingText(false);
+    }
   };
 
   const fetchStyles = async () => {
@@ -941,43 +1030,146 @@ export default function Home() {
                   
                   {activeTab === 'edit' && (
                     <div className="flex flex-col h-full gap-4">
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                            지우개 굵기:
-                            <input 
-                              type="range" min="5" max="100" step="1" 
-                              value={brushSize} onChange={(e) => setBrushSize(parseInt(e.target.value))}
-                              className="w-24 accent-purple-500"
-                            />
-                          </label>
-                          <button onClick={resetEditCanvas} className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
-                            초기화
-                          </button>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
+                            <button 
+                              onClick={() => setEditMode('eraser')} 
+                              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${editMode === 'eraser' ? 'bg-white shadow-sm text-purple-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                              지우개
+                            </button>
+                            <button 
+                              onClick={() => setEditMode('text')} 
+                              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${editMode === 'text' ? 'bg-white shadow-sm text-purple-600' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                              텍스트
+                            </button>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <button onClick={downloadEditCanvas} className="text-xs px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1">
+                              ⬇️ 다운로드
+                            </button>
+                            <button onClick={saveManualEdit} disabled={isSavingManual} className="text-xs px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1 disabled:opacity-50">
+                              💾 {isSavingManual ? '저장 중...' : '새 디자인 저장'}
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <button onClick={downloadEditCanvas} className="text-xs px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1">
-                            ⬇️ 다운로드
-                          </button>
-                          <button onClick={saveManualEdit} disabled={isSavingManual} className="text-xs px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1 disabled:opacity-50">
-                            💾 {isSavingManual ? '저장 중...' : '새 디자인 저장'}
-                          </button>
+
+                        {editMode === 'eraser' && (
+                          <div className="flex items-center gap-3">
+                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                              지우개 굵기:
+                              <input 
+                                type="range" min="5" max="100" step="1" 
+                                value={brushSize} onChange={(e) => setBrushSize(parseInt(e.target.value))}
+                                className="w-24 accent-purple-500"
+                              />
+                            </label>
+                            <button onClick={resetEditCanvas} className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
+                              초기화
+                            </button>
+                          </div>
+                        )}
+                        
+                        {editMode === 'text' && (
+                          <div className="flex flex-wrap items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200">
+                            <button onClick={handleAddText} className="text-xs px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-md font-bold transition-colors">
+                              + 텍스트 추가
+                            </button>
+                            {activeTextId && (
+                              <>
+                                <div className="h-4 w-px bg-gray-300 mx-1"></div>
+                                <select 
+                                  className="text-xs border border-gray-200 rounded p-1"
+                                  value={textElements.find(t => t.id === activeTextId)?.font}
+                                  onChange={(e) => updateTextElement(activeTextId, { font: e.target.value })}
+                                >
+                                  <option value="Pacifico">Pacifico (손글씨)</option>
+                                  <option value="Comic Neue">Comic Neue (위트)</option>
+                                  <option value="Jua">Jua (둥근고딕)</option>
+                                  <option value="Roboto">Roboto (기본)</option>
+                                </select>
+                                <input 
+                                  type="number" 
+                                  className="text-xs border border-gray-200 rounded p-1 w-16"
+                                  value={textElements.find(t => t.id === activeTextId)?.size}
+                                  onChange={(e) => updateTextElement(activeTextId, { size: parseInt(e.target.value) || 20 })}
+                                />
+                                <input 
+                                  type="color" 
+                                  className="w-6 h-6 p-0 border-0 rounded cursor-pointer"
+                                  value={textElements.find(t => t.id === activeTextId)?.color}
+                                  onChange={(e) => updateTextElement(activeTextId, { color: e.target.value })}
+                                />
+                                <button 
+                                  onClick={() => setTextElements(prev => prev.filter(t => t.id !== activeTextId))}
+                                  className="text-xs text-red-500 hover:text-red-700 ml-auto"
+                                >
+                                  삭제
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <div className="relative w-full flex-1 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center border border-gray-200 touch-none shadow-inner">
+                        <div 
+                          className="relative inline-block leading-none"
+                          onMouseMove={handleCanvasMouseMove}
+                          onMouseUp={handleCanvasMouseUp}
+                          onMouseOut={handleCanvasMouseUp}
+                          onTouchMove={handleCanvasMouseMove}
+                          onTouchEnd={handleCanvasMouseUp}
+                        >
+                          <canvas 
+                            ref={editCanvasRef} 
+                            className={`max-w-full max-h-full object-contain ${editMode === 'eraser' ? 'cursor-crosshair' : 'cursor-default'}`}
+                            onMouseDown={editMode === 'eraser' ? startDrawing : undefined}
+                            onTouchStart={editMode === 'eraser' ? startDrawing : undefined}
+                          />
+                          {textElements.map(t => (
+                            <div
+                              key={t.id}
+                              onMouseDown={(e) => handleTextMouseDown(e, t.id)}
+                              onTouchStart={(e) => handleTextMouseDown(e, t.id)}
+                              style={{
+                                position: 'absolute',
+                                left: t.x,
+                                top: t.y,
+                                fontFamily: `'${t.font}', sans-serif`,
+                                fontSize: `${t.size}px`,
+                                color: t.color,
+                                cursor: editMode === 'text' ? 'move' : 'default',
+                                userSelect: 'none',
+                                whiteSpace: 'nowrap',
+                                outline: activeTextId === t.id && editMode === 'text' ? '2px dashed #a855f7' : 'none',
+                                padding: '2px',
+                                pointerEvents: editMode === 'text' ? 'auto' : 'none'
+                              }}
+                            >
+                              <input
+                                type="text"
+                                value={t.text}
+                                onChange={(e) => updateTextElement(t.id, { text: e.target.value })}
+                                onFocus={() => setActiveTextId(t.id)}
+                                style={{
+                                  background: 'transparent',
+                                  border: 'none',
+                                  outline: 'none',
+                                  color: 'inherit',
+                                  font: 'inherit',
+                                  width: `${Math.max(t.text.length, 1) + 0.5}ch`
+                                }}
+                              />
+                            </div>
+                          ))}
                         </div>
                       </div>
-                      <div className="relative w-full flex-1 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center border border-gray-200 cursor-crosshair touch-none shadow-inner">
-                        <canvas 
-                          ref={editCanvasRef} 
-                          className="max-w-full max-h-full object-contain"
-                          onMouseDown={startDrawing}
-                          onMouseMove={draw}
-                          onMouseUp={stopDrawing}
-                          onMouseOut={stopDrawing}
-                          onTouchStart={startDrawing}
-                          onTouchMove={draw}
-                          onTouchEnd={stopDrawing}
-                        />
-                      </div>
-                      <p className="text-xs text-gray-500 text-center font-medium">💡 마우스로 드래그하여 원하지 않는 글자나 부분을 하얗게 지워보세요.</p>
+                      <p className="text-xs text-gray-500 text-center font-medium">
+                        {editMode === 'eraser' ? '💡 마우스로 드래그하여 원하지 않는 부분을 하얗게 지워보세요.' : '💡 텍스트를 추가하고 드래그하여 원하는 위치에 배치하세요.'}
+                      </p>
                     </div>
                   )}
                 </div>
