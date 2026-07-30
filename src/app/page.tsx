@@ -859,7 +859,7 @@ export default function Home() {
                 </div>
 
                 <div className="p-5 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
-                  {activeTab === 'info' ? (
+                  {activeTab === 'info' && (
                     <>
                       <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{previewDesign ? previewDesign.title : selectedDesign.title}</h2>
                   <div className="flex gap-2 mb-6">
@@ -882,8 +882,9 @@ export default function Home() {
                     </div>
                   </div>
                   </>
-                ) : (
-                  <div className="flex flex-col items-center h-full min-h-[400px]">
+                  )}
+                  {activeTab === 'mockup' && (
+                    <div className="flex flex-col items-center h-full min-h-[400px]">
                       <div className="w-full mb-4 flex flex-col gap-3">
                         <div className="flex justify-between items-center w-full">
                           <select 
