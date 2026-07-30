@@ -496,8 +496,8 @@ export default function Home() {
           
           {/* Left Text */}
           <div className="w-full sm:w-1/3 flex flex-col justify-center sm:justify-start sm:pl-10 mb-2 sm:mb-0 z-10 text-center sm:text-left">
-            <h2 className="text-4xl sm:text-5xl font-pacifico text-[#8c5a53] drop-shadow-sm font-normal py-1">
-              Little Paws
+            <h2 className="text-4xl sm:text-5xl font-fredoka drop-shadow-sm font-bold py-1 tracking-wide">
+              <span className="text-[#c27c77]">Little</span> <span className="text-[#849a7f]">Paws</span>
             </h2>
             <p className="text-lg sm:text-xl font-bold text-orange-600/80 tracking-widest uppercase mt-0 sm:mt-1">
               Studio Shop
