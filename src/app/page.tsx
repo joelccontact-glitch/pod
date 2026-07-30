@@ -301,11 +301,11 @@ export default function Home() {
   const handleAddText = () => {
     setTextElements([...textElements, {
       id: Date.now().toString(),
-      text: 'Double click to edit',
+      text: 'Hello',
       x: 50,
       y: 50,
       font: 'Pacifico',
-      size: 60,
+      size: 40,
       color: '#333333'
     }]);
     setEditMode('text');
