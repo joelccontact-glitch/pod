@@ -40,6 +40,9 @@ export default function Home() {
   const [editingStyleName, setEditingStyleName] = useState('');
   const [enlargedStyleImage, setEnlargedStyleImage] = useState<string | null>(null);
 
+  const [isAutoAgentModalOpen, setIsAutoAgentModalOpen] = useState(false);
+  const [autoAgentAnimal, setAutoAgentAnimal] = useState('random');
+
   const [activeTab, setActiveTab] = useState<'info' | 'mockup'>('info');
   const [selectedMockupId, setSelectedMockupId] = useState(MOCKUP_TEMPLATES[0].id);
   const [mockupScale, setMockupScale] = useState(1.0);
@@ -205,8 +208,12 @@ export default function Home() {
 
   const runAgent = async () => {
     setLoading(true);
+    setIsAutoAgentModalOpen(false);
     try {
       let url = selectedStyleId ? `/api/run-agent?styleId=${selectedStyleId}` : '/api/run-agent';
+      if (autoAgentAnimal && autoAgentAnimal !== 'random') {
+        url += (url.includes('?') ? '&' : '?') + `animal=${encodeURIComponent(autoAgentAnimal)}`;
+      }
       if (globalCatchphrase.trim()) {
         url += (url.includes('?') ? '&' : '?') + `catchphrase=${encodeURIComponent(globalCatchphrase.trim())}`;
       }
@@ -486,7 +493,7 @@ export default function Home() {
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Store Banner */}
         <div className="w-full overflow-hidden rounded-2xl shadow-sm border border-gray-100 mb-4 flex bg-orange-50">
-          <img src="/etsy-banner.jpg" alt="Etsy Store Banner" className="w-full h-[120px] sm:h-[180px] object-cover object-center" />
+          <img src="/etsy-banner.jpg" alt="Etsy Store Banner" className="w-full h-[120px] sm:h-[180px] object-contain object-center" />
         </div>
         
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 gap-3 xl:gap-0">
@@ -559,7 +566,7 @@ export default function Home() {
               이미지 생성
             </button>
             <button 
-              onClick={runAgent}
+              onClick={() => setIsAutoAgentModalOpen(true)}
               disabled={loading}
               className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-base"
             >
@@ -817,6 +824,55 @@ export default function Home() {
             </div>
           </div>
         )}
+        {/* Auto Agent Modal */}
+        {isAutoAgentModalOpen && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl relative">
+              <button onClick={() => setIsAutoAgentModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">×</button>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">자동 생성 설정</h2>
+              
+              <label className="block text-sm font-semibold text-gray-700 mb-2">어떤 동물로 만들까요?</label>
+              <select 
+                value={autoAgentAnimal}
+                onChange={(e) => setAutoAgentAnimal(e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm mb-6"
+              >
+                <option value="random">랜덤 (Random)</option>
+                <option value="hamster">햄스터 (Hamster)</option>
+                <option value="guinea pig">기니피그 (Guinea Pig)</option>
+                <option value="kitten">새끼 고양이 (Kitten)</option>
+                <option value="puppy">강아지 (Puppy)</option>
+                <option value="bunny">토끼 (Bunny)</option>
+                <option value="duckling">새끼 오리 (Duckling)</option>
+                <option value="piglet">아기 돼지 (Piglet)</option>
+                <option value="pygmy hippo">피그미 하마 (Pygmy Hippo)</option>
+                <option value="sea otter pup">새끼 해달 (Sea Otter Pup)</option>
+                <option value="black bear cub">새끼 흑곰 (Black Bear Cub)</option>
+                <option value="fawn">새끼 사슴 (Fawn)</option>
+                <option value="baby sloth">나무늘보 (Baby Sloth)</option>
+                <option value="baby hedgehog">새끼 고슴도치 (Baby Hedgehog)</option>
+                <option value="baby red panda">레서판다 (Baby Red Panda)</option>
+              </select>
+
+              <div className="flex gap-3 justify-end">
+                <button 
+                  onClick={() => setIsAutoAgentModalOpen(false)}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-5 rounded-xl transition-colors flex-1"
+                >
+                  취소
+                </button>
+                <button 
+                  onClick={runAgent}
+                  disabled={loading}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-5 rounded-xl transition-colors disabled:opacity-50 flex-1"
+                >
+                  생성 시작
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Image to Image Modal */}
         {isImageModalOpen && (
           <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onPaste={handlePaste}>

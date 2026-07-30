@@ -31,14 +31,18 @@ export async function GET(req: Request) {
 
     // [STEP 1] Trend Research using Gemini
     let baseTopic = "Cute minimalist animal illustration";
+    const animalList = ['hamsters', 'guinea pigs', 'kittens', 'puppies', 'bunnies', 'ducklings', 'piglets', 'Pygmy Hippos', 'sea otter pups', 'Black Bear Cubs', 'fawns', 'Baby Sloths', 'Baby Hedgehogs', 'baby red pandas'];
     const urlParams = new URL(req.url);
+    const requestedAnimal = urlParams.searchParams.get('animal');
+    const targetAnimal = (requestedAnimal && requestedAnimal !== 'random') ? requestedAnimal : animalList[Math.floor(Math.random() * animalList.length)];
+    
     const userCatchphrase = urlParams.searchParams.get('catchphrase') || 'Little Paws';
     let catchphrase = userCatchphrase;
     if (process.env.GEMINI_API_KEY) {
       try {
         const trendResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents: 'Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (small animals like hamsters, guinea pigs, kittens, puppies, bunnies, ducklings, piglets, Pygmy Hippos, sea otter pups, Black Bear Cubs, fawns, Baby Sloths, Baby Hedgehogs or baby red pandas) store concept. Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic (e.g. "Vintage cottagecore hamster eating strawberry").',
+          contents: `Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (${targetAnimal}) store concept. Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic featuring the ${targetAnimal} (e.g. "Vintage cottagecore ${targetAnimal} eating strawberry").`,
           config: { responseMimeType: 'application/json' }
         });
         if (trendResponse.text) {
