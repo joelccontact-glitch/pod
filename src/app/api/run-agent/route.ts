@@ -158,9 +158,19 @@ export async function GET(req: Request) {
         const base64Image = imgResponse.generatedImages?.[0]?.image?.imageBytes;
         if (base64Image) {
           imageUrl = `data:image/jpeg;base64,${base64Image}`;
+        } else {
+          return NextResponse.json({ success: false, error: 'AI 이미지 생성에 실패했습니다.' }, { status: 500 });
         }
-      } catch (imgError) {
+      } catch (imgError: any) {
         console.error("Imagen generation failed:", imgError);
+        const errMsg = imgError?.message || String(imgError);
+        if (errMsg.includes('429') || errMsg.includes('quota') || errMsg.includes('RESOURCE_EXHAUSTED')) {
+          return NextResponse.json({ 
+            success: false, 
+            error: '오늘 사용할 수 있는 구글 AI 이미지 생성 하루 한도(70회)를 모두 소진했습니다. 내일 다시 시도해 주세요!' 
+          }, { status: 429 });
+        }
+        return NextResponse.json({ success: false, error: `AI 이미지 생성 중 오류 발생: ${errMsg}` }, { status: 500 });
       }
     }
 
