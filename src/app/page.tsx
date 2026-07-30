@@ -496,10 +496,10 @@ export default function Home() {
           
           {/* Left Text */}
           <div className="w-full sm:w-1/3 flex flex-col justify-center sm:justify-start sm:pl-10 mb-2 sm:mb-0 z-10 text-center sm:text-left">
-            <h2 className="text-3xl sm:text-4xl font-black text-orange-900 tracking-tighter drop-shadow-sm">
-              LittlePaws
+            <h2 className="text-4xl sm:text-5xl font-pacifico text-[#8c5a53] drop-shadow-sm font-normal py-1">
+              Little Paws
             </h2>
-            <p className="text-lg sm:text-xl font-bold text-orange-600/80 tracking-widest uppercase mt-[-2px]">
+            <p className="text-lg sm:text-xl font-bold text-orange-600/80 tracking-widest uppercase mt-0 sm:mt-1">
               Studio Shop
             </p>
           </div>
