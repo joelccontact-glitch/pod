@@ -803,15 +803,29 @@ export default function Home() {
                     <span>✨</span> 디자인 수정 요청
                   </h4>
                   {!previewDesign && (
-                    <input 
-                      type="text" 
-                      value={globalCatchphrase}
-                      onChange={e => setGlobalCatchphrase(e.target.value)}
-                      placeholder="브랜드 문구 추가 (선택)" 
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm mb-2"
-                      disabled={modifying}
-                      title="이 텍스트가 수정된 디자인에 자연스럽게 합성됩니다."
-                    />
+                    <>
+                      <input 
+                        type="text" 
+                        value={globalCatchphrase}
+                        onChange={e => setGlobalCatchphrase(e.target.value)}
+                        placeholder="브랜드 문구 추가 (선택)" 
+                        className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm mb-2 disabled:opacity-50"
+                        disabled={modifying || autoGeneratePhrase}
+                        title="이 텍스트가 수정된 디자인에 자연스럽게 합성됩니다."
+                      />
+                      <div className="flex items-center gap-2 mb-3 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                        <input
+                          type="checkbox"
+                          id="auto-phrase-modify"
+                          checked={autoGeneratePhrase}
+                          onChange={(e) => setAutoGeneratePhrase(e.target.checked)}
+                          className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                        />
+                        <label htmlFor="auto-phrase-modify" className="text-xs font-semibold text-gray-700 cursor-pointer select-none">
+                          위트 문구 자동 생성 (추천)
+                        </label>
+                      </div>
+                    </>
                   )}
                   <div className="flex gap-2">
                     {previewDesign ? (
@@ -838,13 +852,13 @@ export default function Home() {
                           value={feedback}
                           onChange={e => setFeedback(e.target.value)}
                           onKeyDown={e => e.key === 'Enter' && handleModify()}
-                          placeholder={globalCatchphrase.trim() ? "예: 텍스트를 상단에 배치해줘 (또는 비워두셔도 됩니다)" : "예: 배경색을 빨간색으로 변경해줘..."}
+                          placeholder={(globalCatchphrase.trim() || autoGeneratePhrase) ? "예: 텍스트를 상단에 배치해줘 (또는 비워두셔도 됩니다)" : "예: 배경색을 빨간색으로 변경해줘..."}
                           className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
                           disabled={modifying}
                         />
                         <button 
                           onClick={handleModify}
-                          disabled={modifying || (!feedback.trim() && !globalCatchphrase.trim())}
+                          disabled={modifying || (!feedback.trim() && !globalCatchphrase.trim() && !autoGeneratePhrase)}
                           className="bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 text-sm flex-shrink-0 shadow-sm"
                         >
                           {modifying ? '생성 중...' : '수정'}
