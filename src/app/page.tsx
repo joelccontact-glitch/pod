@@ -106,6 +106,11 @@ export default function Home() {
     setMockupOffsetY(0);
   }, [selectedMockupId]);
 
+  // Reset text elements when a different design is opened
+  useEffect(() => {
+    setTextElements([]);
+  }, [selectedDesign?.id]);
+
   const drawMockup = () => {
     if (activeTab !== 'mockup') return;
     const canvas = canvasRef.current;
