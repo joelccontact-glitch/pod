@@ -72,6 +72,9 @@ export default function Home() {
   const [isDraggingText, setIsDraggingText] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [canvasDisplayScale, setCanvasDisplayScale] = useState(1);
+  const [history, setHistory] = useState<string[]>([]);
+  const [cursorPos, setCursorPos] = useState({ x: -1000, y: -1000 });
+  const [isHoveringCanvas, setIsHoveringCanvas] = useState(false);
 
   useEffect(() => {
     const updateScale = () => {
@@ -185,6 +188,7 @@ export default function Home() {
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
       setOriginalEditImage(canvas.toDataURL('image/jpeg', 1.0));
+      setHistory([]);
     };
   };
 
@@ -210,6 +214,10 @@ export default function Home() {
 
   const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
     if (editMode !== 'eraser') return;
+    const canvas = editCanvasRef.current;
+    if (canvas) {
+      setHistory(prev => [...prev, canvas.toDataURL('image/jpeg', 1.0)]);
+    }
     setIsDrawing(true);
     draw(e);
   };
@@ -255,6 +263,25 @@ export default function Home() {
       ctx.drawImage(img, 0, 0);
     };
     setTextElements([]);
+    setHistory([]);
+  };
+
+  const handleUndo = () => {
+    if (history.length === 0) return;
+    const canvas = editCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    const previousState = history[history.length - 1];
+    setHistory(prev => prev.slice(0, -1));
+    
+    const img = new Image();
+    img.src = previousState;
+    img.onload = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    };
   };
 
   const getFinalCanvasDataUrl = () => {
@@ -352,9 +379,21 @@ export default function Home() {
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (editMode === 'eraser' && isDrawing) {
-      draw(e);
+    if (editMode === 'eraser') {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+      const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+      setCursorPos({ x: clientX - rect.left, y: clientY - rect.top });
+      
+      if (isDrawing) {
+        draw(e);
+      }
     }
+  };
+
+  const handleCanvasMouseLeave = () => {
+    setIsHoveringCanvas(false);
+    handleCanvasMouseUp();
   };
 
   const handleCanvasMouseUp = () => {
@@ -1099,7 +1138,7 @@ export default function Home() {
                         </div>
 
                         {editMode === 'eraser' && (
-                          <div className="flex items-center gap-3">
+                          <div className="flex flex-wrap items-center gap-3">
                             <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
                               지우개 굵기:
                               <input 
@@ -1108,9 +1147,14 @@ export default function Home() {
                                 className="w-24 accent-purple-500"
                               />
                             </label>
-                            <button onClick={resetEditCanvas} className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
-                              초기화
-                            </button>
+                            <div className="flex gap-2 ml-auto sm:ml-0">
+                              <button onClick={handleUndo} disabled={history.length === 0} className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors disabled:opacity-50">
+                                ↩️ 되돌리기
+                              </button>
+                              <button onClick={resetEditCanvas} className="text-xs px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
+                                초기화
+                              </button>
+                            </div>
                           </div>
                         )}
                         
@@ -1157,19 +1201,41 @@ export default function Home() {
                       </div>
                       <div className="relative w-full flex-1 bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center border border-gray-200 touch-none shadow-inner">
                         <div 
-                          className="relative inline-block leading-none"
+                          className="relative inline-block leading-none cursor-none"
+                          onMouseEnter={() => setIsHoveringCanvas(true)}
                           onMouseMove={handleCanvasMouseMove}
                           onMouseUp={handleCanvasMouseUp}
-                          onMouseOut={handleCanvasMouseUp}
+                          onMouseOut={handleCanvasMouseLeave}
+                          onMouseLeave={handleCanvasMouseLeave}
                           onTouchMove={handleCanvasMouseMove}
                           onTouchEnd={handleCanvasMouseUp}
                         >
                           <canvas 
                             ref={editCanvasRef} 
-                            className={`max-w-full max-h-full object-contain ${editMode === 'eraser' ? 'cursor-crosshair' : 'cursor-default'}`}
+                            className={`max-w-full max-h-full object-contain ${editMode === 'eraser' ? 'cursor-none' : 'cursor-default'}`}
                             onMouseDown={editMode === 'eraser' ? startDrawing : undefined}
                             onTouchStart={editMode === 'eraser' ? startDrawing : undefined}
                           />
+                          
+                          {/* Custom Eraser Cursor */}
+                          {editMode === 'eraser' && isHoveringCanvas && (
+                            <div 
+                              style={{
+                                position: 'absolute',
+                                left: cursorPos.x,
+                                top: cursorPos.y,
+                                width: brushSize * canvasDisplayScale,
+                                height: brushSize * canvasDisplayScale,
+                                borderRadius: '50%',
+                                border: '1.5px solid rgba(0,0,0,0.5)',
+                                backgroundColor: 'rgba(255,255,255,0.4)',
+                                pointerEvents: 'none',
+                                transform: 'translate(-50%, -50%)',
+                                zIndex: 10,
+                                boxShadow: '0 0 0 1px rgba(255,255,255,0.3)'
+                              }}
+                            />
+                          )}
                           {textElements.map(t => (
                             <div
                               key={t.id}
