@@ -34,7 +34,7 @@ export async function POST(req: Request) {
       productInfo = productInfoText ? JSON.parse(productInfoText) : productInfo;
     }
 
-    let newImageUrl = `https://placehold.co/800x800/eff6ff/1d4ed8?text=${encodeURIComponent(topic.split(' ').slice(0, 3).join(' ')+ '\\n(Modified Preview)')}`;
+    let newImageUrl = '';
     if (process.env.GEMINI_API_KEY) {
       try {
         console.log(`🎨 Drawing modified image with Imagen 4.0...`);
@@ -46,10 +46,15 @@ export async function POST(req: Request) {
         const base64Image = imgResponse.generatedImages?.[0]?.image?.imageBytes;
         if (base64Image) {
           newImageUrl = `data:image/jpeg;base64,${base64Image}`;
+        } else {
+          return NextResponse.json({ success: false, error: 'AI 이미지 생성에 실패했습니다. 다시 시도해 주세요.' }, { status: 500 });
         }
-      } catch (imgError) {
+      } catch (imgError: any) {
         console.error("Imagen generation failed:", imgError);
+        return NextResponse.json({ success: false, error: `AI 이미지 생성 중 오류 발생: ${imgError?.message || '알 수 없는 오류'}` }, { status: 500 });
       }
+    } else {
+      newImageUrl = `https://placehold.co/800x800/eff6ff/1d4ed8?text=${encodeURIComponent(topic.split(' ').slice(0, 3).join(' ')+ '\\n(Modified Preview)')}`;
     }
     const newHash = crypto.createHash('md5').update(newPrompt + Date.now().toString()).digest('hex');
 

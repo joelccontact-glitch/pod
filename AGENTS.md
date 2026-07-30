@@ -12,3 +12,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 
 # 브랜드 텍스트 스타일 유지 원칙
 생성되는 이미지에 브랜드 텍스트(예: Little Paws)를 추가할 때는 반드시 특정 스타일("귀엽고 우아한 손글씨(스크립트) 폰트")을 유지하도록 프롬프트에 강제해야 합니다. 단, 텍스트의 색상은 생성되는 이미지 분위기에 맞게 자연스럽게 변경되도록 지시해야 합니다. (예: `MUST be drawn in an elegant, cute, hand-drawn script font, using colors that perfectly match the mood and palette of the image.`)
+
+# 반응형 UI/UX 우선 원칙 (반응형 웹 디자인)
+모든 새로운 기능 구현 및 기존 기능 수정 시에는 **반드시 '모바일(Mobile)'과 'PC(Desktop)' 버전 두 가지 환경 모두에서 완벽하게 작동하고 예쁘게 보이도록 UI/UX 측면을 최우선으로 고려하여 개발**해야 합니다. 화면 너비가 좁은 모바일 기기에서의 레이아웃 깨짐, 버튼 텍스트 잘림, 터치 이벤트(Touch Event) 지원 여부 등을 항상 점검하세요.

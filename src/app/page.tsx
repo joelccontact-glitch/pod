@@ -759,9 +759,12 @@ export default function Home() {
       const data = await res.json();
       if (data.success) {
         setPreviewDesign(data.data);
+      } else {
+        alert(data.error || '이미지 수정 생성에 실패했습니다.');
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Modify failed', e);
+      alert('오류가 발생했습니다: ' + (e?.message || '알 수 없는 오류'));
     }
     setModifying(false);
   };
