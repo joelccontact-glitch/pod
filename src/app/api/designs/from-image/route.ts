@@ -7,7 +7,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { imageBase64, prompt, isPreview, styleId, catchphrase } = await req.json();
+    const { imageBase64, prompt, isPreview, styleId, catchphrase, autoPhrase } = await req.json();
 
     if (!prompt) {
       return NextResponse.json({ success: false, error: 'Prompt is required' }, { status: 400 });
