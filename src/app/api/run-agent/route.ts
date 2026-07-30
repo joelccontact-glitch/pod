@@ -38,7 +38,7 @@ export async function GET(req: Request) {
       try {
         const trendResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents: 'Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (small animals like hamsters, guinea pigs, kittens, puppies, bunnies, ducklings, piglets, sea otter pups, fawns, or baby red pandas) store concept. Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic (e.g. "Vintage cottagecore hamster eating strawberry").',
+          contents: 'Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (small animals like hamsters, guinea pigs, kittens, puppies, bunnies, ducklings, piglets, Pygmy Hippos, sea otter pups, Black Bear Cubs, fawns, Baby Sloths, Baby Hedgehogs or baby red pandas) store concept. Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic (e.g. "Vintage cottagecore hamster eating strawberry").',
           config: { responseMimeType: 'application/json' }
         });
         if (trendResponse.text) {
