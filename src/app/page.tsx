@@ -167,18 +167,18 @@ export default function Home() {
     };
   };
 
-  const getCoordinates = (e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
+  const getCoordinates = (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent, canvas: HTMLCanvasElement) => {
     const rect = canvas.getBoundingClientRect();
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
     let clientX, clientY;
     
     if ('touches' in e) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
+      clientX = (e as TouchEvent | React.TouchEvent).touches[0].clientX;
+      clientY = (e as TouchEvent | React.TouchEvent).touches[0].clientY;
     } else {
-      clientX = (e as React.MouseEvent).clientX;
-      clientY = (e as React.MouseEvent).clientY;
+      clientX = (e as MouseEvent | React.MouseEvent).clientX;
+      clientY = (e as MouseEvent | React.MouseEvent).clientY;
     }
     
     return {
@@ -333,21 +333,41 @@ export default function Home() {
   const handleCanvasMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
     if (editMode === 'eraser' && isDrawing) {
       draw(e);
-    } else if (editMode === 'text' && isDraggingText && activeTextId) {
-      const canvas = editCanvasRef.current;
-      if (!canvas) return;
-      const { x, y } = getCoordinates(e, canvas);
-      updateTextElement(activeTextId, { x: x - dragOffset.x, y: y - dragOffset.y });
     }
   };
 
   const handleCanvasMouseUp = () => {
     if (editMode === 'eraser') {
       stopDrawing();
-    } else if (editMode === 'text') {
-      setIsDraggingText(false);
     }
   };
+
+  useEffect(() => {
+    if (editMode === 'text' && isDraggingText && activeTextId) {
+      const handleGlobalMouseMove = (e: MouseEvent | TouchEvent) => {
+        const canvas = editCanvasRef.current;
+        if (!canvas) return;
+        const { x, y } = getCoordinates(e, canvas);
+        updateTextElement(activeTextId, { x: x - dragOffset.x, y: y - dragOffset.y });
+      };
+      
+      const handleGlobalMouseUp = () => {
+        setIsDraggingText(false);
+      };
+      
+      window.addEventListener('mousemove', handleGlobalMouseMove);
+      window.addEventListener('mouseup', handleGlobalMouseUp);
+      window.addEventListener('touchmove', handleGlobalMouseMove, { passive: false });
+      window.addEventListener('touchend', handleGlobalMouseUp);
+
+      return () => {
+        window.removeEventListener('mousemove', handleGlobalMouseMove);
+        window.removeEventListener('mouseup', handleGlobalMouseUp);
+        window.removeEventListener('touchmove', handleGlobalMouseMove);
+        window.removeEventListener('touchend', handleGlobalMouseUp);
+      };
+    }
+  }, [editMode, isDraggingText, activeTextId, dragOffset]);
 
   const fetchStyles = async () => {
     try {
