@@ -23,6 +23,7 @@ export default function Home() {
   const [uploadPrompt, setUploadPrompt] = useState('');
   const [isGeneratingFromImage, setIsGeneratingFromImage] = useState(false);
   const [uploadPreviewDesign, setUploadPreviewDesign] = useState<any>(null);
+  const [selectedAnimal, setSelectedAnimal] = useState('hamster');
 
   const [styles, setStyles] = useState<any[]>([]);
   const [selectedStyleId, setSelectedStyleId] = useState<string>('');
@@ -339,10 +340,11 @@ export default function Home() {
     if (!uploadPrompt.trim()) return;
     setIsGeneratingFromImage(true);
     try {
+      const finalPrompt = selectedAnimal ? `${selectedAnimal} subject, ${uploadPrompt}` : uploadPrompt;
       const res = await fetch('/api/designs/from-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: uploadImageBase64, prompt: uploadPrompt, isPreview: true, styleId: selectedStyleId, catchphrase: globalCatchphrase.trim() })
+        body: JSON.stringify({ imageBase64: uploadImageBase64, prompt: finalPrompt, isPreview: true, styleId: selectedStyleId, catchphrase: globalCatchphrase.trim() })
       });
       const data = await res.json();
       if (data.success) {
@@ -483,8 +485,8 @@ export default function Home() {
     <main className="min-h-screen p-6 md:p-12 bg-gray-50 text-gray-900 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* Store Banner */}
-        <div className="w-full overflow-hidden rounded-2xl shadow-sm border border-gray-100 mb-4 flex">
-          <img src="/etsy-banner.jpg" alt="Etsy Store Banner" className="w-full h-[100px] sm:h-[160px] object-cover object-bottom" />
+        <div className="w-full overflow-hidden rounded-2xl shadow-sm border border-gray-100 mb-4 flex bg-orange-50">
+          <img src="/etsy-banner.jpg" alt="Etsy Store Banner" className="w-full h-[120px] sm:h-[180px] object-cover object-center" />
         </div>
         
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 gap-3 xl:gap-0">
@@ -881,11 +883,33 @@ export default function Home() {
                     </div>
                     
                     <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">동물 선택</label>
+                      <select 
+                        value={selectedAnimal}
+                        onChange={(e) => setSelectedAnimal(e.target.value)}
+                        className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white shadow-sm mb-4"
+                      >
+                        <option value="hamster">햄스터 (Hamster)</option>
+                        <option value="guinea pig">기니피그 (Guinea Pig)</option>
+                        <option value="kitten">새끼 고양이 (Kitten)</option>
+                        <option value="puppy">강아지 (Puppy)</option>
+                        <option value="bunny">토끼 (Bunny)</option>
+                        <option value="duckling">새끼 오리 (Duckling)</option>
+                        <option value="piglet">아기 돼지 (Piglet)</option>
+                        <option value="pygmy hippo">피그미 하마 (Pygmy Hippo)</option>
+                        <option value="sea otter pup">새끼 해달 (Sea Otter Pup)</option>
+                        <option value="black bear cub">새끼 흑곰 (Black Bear Cub)</option>
+                        <option value="fawn">새끼 사슴 (Fawn)</option>
+                        <option value="baby sloth">나무늘보 (Baby Sloth)</option>
+                        <option value="baby hedgehog">새끼 고슴도치 (Baby Hedgehog)</option>
+                        <option value="baby red panda">레서판다 (Baby Red Panda)</option>
+                      </select>
+
                       <label className="block text-sm font-semibold text-gray-700 mb-2">어떤 디자인을 만들까요? (필수)</label>
                       <textarea 
                         value={uploadPrompt}
                         onChange={e => setUploadPrompt(e.target.value)}
-                        placeholder="예: 수채화 톤의 코티지코어 감성, 들꽃과 토끼 일러스트" 
+                        placeholder="예: 수채화 톤의 코티지코어 감성, 들꽃 일러스트" 
                         className="w-full border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white shadow-sm resize-none h-24"
                       />
                     </div>
