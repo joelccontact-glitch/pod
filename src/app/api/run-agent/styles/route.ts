@@ -19,7 +19,7 @@ export async function GET(req: Request) {
       contents: `Identify a highly popular, trending art or design style currently popular on platforms like Etsy or Pinterest (e.g., Cottagecore Watercolor, Y2K Retro Pixel Art, Minimalist Line Art). 
 Return a JSON object with:
 - "styleName": A very short, catchy name for this style (max 4 words).
-- "promptDescription": A detailed prompt description for an image generator to create an icon or simple illustration perfectly demonstrating this style.`,
+- "promptDescription": A detailed prompt description for an image generator to create an icon or simple illustration perfectly demonstrating this style. CRITICAL: Do NOT include any background colors in this description. The style must assume a pure solid white background.`,
       config: { responseMimeType: 'application/json' }
     });
 
@@ -39,7 +39,7 @@ Return a JSON object with:
       console.log(`🖼️ Generating sample image...`);
       const imgResponse = await ai.models.generateImages({
         model: 'imagen-4.0-fast-generate-001',
-        prompt: `A beautiful icon or simple illustration. strictly following this style: ${promptDescription}. Pure solid white background with NO scenery.`,
+        prompt: `A beautiful icon or simple illustration. strictly following this style: ${promptDescription}. CRITICAL RULE: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery.`,
         config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' }
       });
       
@@ -62,7 +62,7 @@ Return a JSON object with:
       const promptResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: [
-          `Analyze this reference image. Extract ONLY the artistic style, coloring technique, linework, mood, texture, and medium. Do NOT include the specific subject matter. Output ONLY the comma-separated style tags and a concise sentence describing the art style, designed to be used as a style suffix for an image generator prompt.`,
+          `Analyze this reference image. Extract ONLY the artistic style, coloring technique, linework, mood, texture, and medium. Do NOT include the specific subject matter. CRITICAL RULE: Ignore the background color of this reference image completely. The style prompt MUST NOT contain any instructions about the background color or background scenery. Output ONLY the comma-separated style tags and a concise sentence describing the art style, designed to be used as a style suffix for an image generator prompt.`,
           {
             inlineData: {
               data: base64Data,

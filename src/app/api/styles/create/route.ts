@@ -21,7 +21,7 @@ export async function POST(req: Request) {
       const promptResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: [
-          `Analyze this reference image. Extract ONLY the artistic style, coloring technique, linework, mood, texture, and medium (e.g., watercolor, minimalist vector, vintage poster, 3d render, etc.). Do NOT include the specific subject matter (e.g., if it's a dog, do not mention a dog). Output ONLY the comma-separated style tags and a concise sentence describing the art style, designed to be used as a style suffix for an image generator prompt.`,
+          `Analyze this reference image. Extract ONLY the artistic style, coloring technique, linework, mood, texture, and medium (e.g., watercolor, minimalist vector, vintage poster, 3d render, etc.). Do NOT include the specific subject matter (e.g., if it's a dog, do not mention a dog). CRITICAL RULE: Ignore the background color of this reference image completely. The style prompt MUST NOT contain any instructions about the background color or background scenery. Output ONLY the comma-separated style tags and a concise sentence describing the art style, designed to be used as a style suffix for an image generator prompt.`,
           {
             inlineData: {
               data: base64Data,
