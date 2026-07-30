@@ -434,7 +434,7 @@ export default function Home() {
   };
 
   const handleModify = async () => {
-    if ((!feedback.trim() && !globalCatchphrase.trim()) || !selectedDesign) return;
+    if ((!feedback.trim() && !globalCatchphrase.trim() && !autoGeneratePhrase) || !selectedDesign) return;
     setModifying(true);
     try {
       const res = await fetch('/api/designs/modify', {
