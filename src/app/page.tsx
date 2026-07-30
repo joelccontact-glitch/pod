@@ -811,38 +811,10 @@ export default function Home() {
   return (
     <main className="min-h-screen p-6 md:p-12 bg-gray-50 text-gray-900 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* Store Banner */}
-        <div className="w-full overflow-hidden rounded-2xl shadow-sm border border-orange-100 mb-6 bg-gradient-to-r from-orange-50 via-[#fff8f0] to-orange-50 relative flex flex-col sm:flex-row items-center justify-between h-auto sm:h-[160px] p-4 sm:p-0">
-          
-          {/* Left Text */}
-          <div className="w-full sm:w-1/3 flex flex-col justify-center sm:justify-start sm:pl-10 mb-2 sm:mb-0 z-10 text-center sm:text-left">
-            <h2 className="text-5xl sm:text-6xl font-grand-hotel drop-shadow-sm font-normal py-1 tracking-wide">
-              <span className="text-[#c27c77]">Little</span> <span className="text-[#849a7f]">Paws</span>
-            </h2>
-            <p className="text-lg sm:text-xl font-bold text-orange-600/80 tracking-widest uppercase mt-0 sm:mt-1">
-              Studio Shop
-            </p>
-          </div>
-
-          {/* Center Image */}
-          <div className="w-full sm:w-1/3 h-[120px] sm:h-[160px] flex justify-center items-center z-10 py-1 sm:py-0">
-            <img src="/etsy-banner.jpg" alt="Little Paws Studio" className="h-full w-auto object-contain drop-shadow-md rounded-xl sm:rounded-none" />
-          </div>
-
-          {/* Right Decoration */}
-          <div className="hidden sm:flex w-1/3 flex-col justify-center items-end pr-10 z-10 text-right opacity-80">
-             <span className="text-xs font-bold text-orange-800/40 uppercase tracking-[0.2em] mb-1">Premium</span>
-             <span className="text-xs font-bold text-orange-800/40 uppercase tracking-[0.2em]">Pet Designs</span>
-             <div className="mt-2 text-orange-300">
-               <svg className="w-8 h-8 opacity-50" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-             </div>
-          </div>
-        </div>
-        
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 gap-3 xl:gap-0">
           <div className="shrink-0 w-full xl:w-auto flex justify-between items-start">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 mb-1 whitespace-nowrap">POD 자동화 대시보드</h1>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 mb-1 whitespace-nowrap">Little Paws Studio Shop</h1>
               <p className="text-gray-500 text-sm flex items-center gap-2">
                 디자인 생성 결과
                 {totalCount > 0 && <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md text-xs font-semibold border border-blue-100">총 {totalCount}개</span>}
