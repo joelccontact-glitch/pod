@@ -36,7 +36,7 @@ export async function GET(req: Request) {
     const requestedAnimal = urlParams.searchParams.get('animal');
     const targetAnimal = (requestedAnimal && requestedAnimal !== 'random') ? requestedAnimal : animalList[Math.floor(Math.random() * animalList.length)];
     
-    const userCatchphrase = urlParams.searchParams.get('catchphrase') || 'Little Paws';
+    const userCatchphrase = urlParams.searchParams.get('catchphrase') || '';
     let catchphrase = userCatchphrase;
     if (process.env.GEMINI_API_KEY) {
       try {
@@ -48,7 +48,7 @@ export async function GET(req: Request) {
         if (trendResponse.text) {
           const data = JSON.parse(trendResponse.text.trim());
           baseTopic = data.theme;
-          catchphrase = userCatchphrase || data.catchphrase || 'Little Paws';
+          catchphrase = userCatchphrase || data.catchphrase || '';
         }
       } catch (err) {
         console.error("Trend research failed, using fallback topic.");

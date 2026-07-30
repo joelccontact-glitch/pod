@@ -33,7 +33,7 @@ export default function Home() {
   const [styleName, setStyleName] = useState('');
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
   const [isGeneratingTrend, setIsGeneratingTrend] = useState(false);
-  const [globalCatchphrase, setGlobalCatchphrase] = useState('Little Paws');
+  const [globalCatchphrase, setGlobalCatchphrase] = useState('');
 
   const [isManageStylesModalOpen, setIsManageStylesModalOpen] = useState(false);
   const [editingStyleId, setEditingStyleId] = useState<string | null>(null);
