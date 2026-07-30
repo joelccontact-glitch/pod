@@ -931,19 +931,19 @@ export default function Home() {
                     onClick={() => setActiveTab('info')} 
                     className={`pb-3 font-semibold text-sm transition-colors border-b-2 ${activeTab === 'info' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-400 hover:text-gray-700'}`}
                   >
-                    수정 및 SEO 정보
+                    수정·SEO
                   </button>
                   <button 
                     onClick={() => setActiveTab('mockup')} 
                     className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-1.5 ${activeTab === 'mockup' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-400 hover:text-gray-700'}`}
                   >
-                    👕 목업으로 보기
+                    👕 목업
                   </button>
                   <button 
                     onClick={() => setActiveTab('edit')} 
                     className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-1.5 ${activeTab === 'edit' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-400 hover:text-gray-700'}`}
                   >
-                    🖌️ 직접 편집
+                    🖌️ 편집
                   </button>
                 </div>
 
@@ -1048,11 +1048,11 @@ export default function Home() {
                           </div>
                           
                           <div className="flex items-center gap-2">
-                            <button onClick={downloadEditCanvas} className="text-xs px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1">
-                              ⬇️ 다운로드
+                            <button onClick={downloadEditCanvas} className="text-xs px-2 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1">
+                              ⬇️ 저장
                             </button>
-                            <button onClick={saveManualEdit} disabled={isSavingManual} className="text-xs px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1 disabled:opacity-50">
-                              💾 {isSavingManual ? '저장 중...' : '새 디자인 저장'}
+                            <button onClick={saveManualEdit} disabled={isSavingManual} className="text-xs px-2 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1 disabled:opacity-50">
+                              💾 {isSavingManual ? '저장 중...' : 'DB 저장'}
                             </button>
                           </div>
                         </div>
@@ -1076,7 +1076,7 @@ export default function Home() {
                         {editMode === 'text' && (
                           <div className="flex flex-wrap items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-200">
                             <button onClick={handleAddText} className="text-xs px-3 py-1.5 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-md font-bold transition-colors">
-                              + 텍스트 추가
+                              + 텍스트
                             </button>
                             {activeTextId && (
                               <>
