@@ -7,9 +7,9 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { originalId, feedback, topic, originalPrompt, isPreview, catchphrase } = await req.json();
+    const { originalId, feedback, topic, originalPrompt, isPreview, catchphrase, autoPhrase } = await req.json();
 
-    if ((!feedback && !catchphrase) || !topic) {
+    if ((!feedback && !catchphrase && !autoPhrase) || !topic) {
       return NextResponse.json({ success: false, error: 'Feedback or catchphrase is required' }, { status: 400 });
     }
 
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       // 1. Generate new prompt based on feedback
       const promptResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `I have a t-shirt design with the original prompt: "${originalPrompt}". ${feedback ? `The user provided the following feedback to modify it: "${feedback}". ` : ''}${catchphrase ? `CRUCIAL: Modify the design to incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : ''}Generate a new, modified prompt for an image generator (like vector art, t-shirt design, pure solid white background with NO scenery). Return ONLY the new prompt string.`,
+        contents: `I have a t-shirt design with the original prompt: "${originalPrompt}". ${feedback ? `The user provided the following feedback to modify it: "${feedback}". ` : ''}${catchphrase ? `CRUCIAL: Modify the design to incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : (autoPhrase ? `CRUCIAL: Invent a short, witty, trademark-free phrase (2-4 words, e.g., "Tiny Oink") related to the design, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : '')}Generate a new, modified prompt for an image generator (like vector art, t-shirt design, pure solid white background with NO scenery). Return ONLY the new prompt string.`,
       });
       newPrompt = promptResponse.text?.trim() || originalPrompt;
 

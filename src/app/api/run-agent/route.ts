@@ -37,18 +37,19 @@ export async function GET(req: Request) {
     const targetAnimal = (requestedAnimal && requestedAnimal !== 'random') ? requestedAnimal : animalList[Math.floor(Math.random() * animalList.length)];
     
     const userCatchphrase = urlParams.searchParams.get('catchphrase') || '';
+    const autoPhrase = urlParams.searchParams.get('autoPhrase') === 'true';
     let catchphrase = userCatchphrase;
     if (process.env.GEMINI_API_KEY) {
       try {
         const trendResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents: `Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (${targetAnimal}) store concept. Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic featuring the ${targetAnimal} (e.g. "Vintage cottagecore ${targetAnimal} eating strawberry").`,
+          contents: `Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (${targetAnimal}) store concept. Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic featuring the ${targetAnimal} (e.g. "Vintage cottagecore ${targetAnimal} eating strawberry").${autoPhrase ? ` 2. "catchphrase": A short, witty, trademark-free phrase (2-4 words) related to the animal or theme, such as "Piggy Love".` : ''}`,
           config: { responseMimeType: 'application/json' }
         });
         if (trendResponse.text) {
           const data = JSON.parse(trendResponse.text.trim());
           baseTopic = data.theme;
-          catchphrase = userCatchphrase || data.catchphrase || '';
+          catchphrase = userCatchphrase || (autoPhrase && data.catchphrase ? data.catchphrase : '');
         }
       } catch (err) {
         console.error("Trend research failed, using fallback topic.");
@@ -79,13 +80,13 @@ export async function GET(req: Request) {
       likedDesigns = likedQuery.docs.map((d: any) => d.data());
     }
 
-    let designPrompt = `${baseTopic}, vector art, t-shirt design. CRITICAL: The image MUST have a pure solid white background with NO scenery, NO background colors, and NO landscapes. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.` : ''}`;
+    let designPrompt = `${baseTopic}, vector art, t-shirt design. CRITICAL: The image MUST have a pure solid white background with NO scenery, NO background colors, and NO landscapes. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.` : (autoPhrase ? `CRUCIAL: Invent a short, witty, trademark-free phrase (2-4 words) related to the animal or theme, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.` : '')}`;
     
     if (styleData && process.env.GEMINI_API_KEY) {
       console.log(`🎨 Applying style: ${styleData.name}`);
       try {
         const contents: any[] = [
-          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : ''}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this rule to the prompt: The image MUST have a pure solid white background with NO scenery, NO background colors, and NO landscapes.`,
+          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : (autoPhrase ? `CRUCIAL: Invent a short, witty, trademark-free phrase (2-4 words) related to the animal or theme, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : '')}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this rule to the prompt: The image MUST have a pure solid white background with NO scenery, NO background colors, and NO landscapes.`,
           { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
         ];
 
@@ -108,7 +109,7 @@ export async function GET(req: Request) {
         }
       } catch (err) {
         console.error("Style prompt generation failed, using fallback.");
-        designPrompt = `${baseTopic}. CRITICAL: The image MUST have a pure solid white background with NO scenery, NO background colors, and NO landscapes. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : ''}MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`;
+        designPrompt = `${baseTopic}. CRITICAL: The image MUST have a pure solid white background with NO scenery, NO background colors, and NO landscapes. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : (autoPhrase ? `CRUCIAL: Invent a short, witty, trademark-free phrase (2-4 words) related to the animal or theme, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : '')}MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`;
       }
     }
     // [STEP 2] Check for duplicates in Firebase via hash

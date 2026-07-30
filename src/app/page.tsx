@@ -34,6 +34,7 @@ export default function Home() {
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
   const [isGeneratingTrend, setIsGeneratingTrend] = useState(false);
   const [globalCatchphrase, setGlobalCatchphrase] = useState('');
+  const [autoGeneratePhrase, setAutoGeneratePhrase] = useState(false);
 
   const [isManageStylesModalOpen, setIsManageStylesModalOpen] = useState(false);
   const [editingStyleId, setEditingStyleId] = useState<string | null>(null);
@@ -214,7 +215,9 @@ export default function Home() {
       if (autoAgentAnimal && autoAgentAnimal !== 'random') {
         url += (url.includes('?') ? '&' : '?') + `animal=${encodeURIComponent(autoAgentAnimal)}`;
       }
-      if (globalCatchphrase.trim()) {
+      if (autoGeneratePhrase) {
+        url += (url.includes('?') ? '&' : '?') + `autoPhrase=true`;
+      } else if (globalCatchphrase.trim()) {
         url += (url.includes('?') ? '&' : '?') + `catchphrase=${encodeURIComponent(globalCatchphrase.trim())}`;
       }
       const res = await fetch(url, {
@@ -351,7 +354,14 @@ export default function Home() {
       const res = await fetch('/api/designs/from-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ imageBase64: uploadImageBase64, prompt: finalPrompt, isPreview: true, styleId: selectedStyleId, catchphrase: globalCatchphrase.trim() })
+        body: JSON.stringify({ 
+          imageBase64: uploadImageBase64, 
+          prompt: finalPrompt, 
+          isPreview: true, 
+          styleId: selectedStyleId, 
+          catchphrase: autoGeneratePhrase ? '' : globalCatchphrase.trim(),
+          autoPhrase: autoGeneratePhrase
+        })
       });
       const data = await res.json();
       if (data.success) {
@@ -436,7 +446,8 @@ export default function Home() {
           topic: selectedDesign.topic,
           originalPrompt: selectedDesign.prompt,
           isPreview: true,
-          catchphrase: globalCatchphrase.trim()
+          catchphrase: autoGeneratePhrase ? '' : globalCatchphrase.trim(),
+          autoPhrase: autoGeneratePhrase
         })
       });
       const data = await res.json();
@@ -555,14 +566,27 @@ export default function Home() {
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
-            <input 
-              type="text" 
-              value={globalCatchphrase}
-              onChange={(e) => setGlobalCatchphrase(e.target.value)}
-              placeholder="브랜드 문구 (선택)"
-              className="bg-white border border-gray-200 rounded-xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[100px] sm:max-w-[140px] shrink-0"
-              title="디자인에 포함할 텍스트 (예: Little Paws)"
-            />
+            <div className="flex flex-col gap-1 shrink-0">
+              <input 
+                type="text" 
+                value={globalCatchphrase}
+                onChange={(e) => setGlobalCatchphrase(e.target.value)}
+                placeholder="브랜드 문구 (선택)"
+                className="bg-white border border-gray-200 rounded-xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[100px] sm:max-w-[140px] disabled:opacity-50 disabled:bg-gray-50"
+                title="디자인에 포함할 텍스트 (예: Little Paws)"
+                disabled={autoGeneratePhrase}
+              />
+              <div className="flex items-center gap-1 px-1">
+                <input
+                  type="checkbox"
+                  id="auto-phrase"
+                  checked={autoGeneratePhrase}
+                  onChange={(e) => setAutoGeneratePhrase(e.target.checked)}
+                  className="w-3 h-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                />
+                <label htmlFor="auto-phrase" className="text-[10px] text-gray-500 cursor-pointer">위트문구 자동</label>
+              </div>
+            </div>
             <button 
               onClick={() => setIsManageStylesModalOpen(true)}
               className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-base border border-gray-200"
