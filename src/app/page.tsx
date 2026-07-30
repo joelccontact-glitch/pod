@@ -566,27 +566,14 @@ export default function Home() {
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
-            <div className="flex flex-col gap-1 shrink-0">
-              <input 
-                type="text" 
-                value={globalCatchphrase}
-                onChange={(e) => setGlobalCatchphrase(e.target.value)}
-                placeholder="브랜드 문구 (선택)"
-                className="bg-white border border-gray-200 rounded-xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[100px] sm:max-w-[140px] disabled:opacity-50 disabled:bg-gray-50"
-                title="디자인에 포함할 텍스트 (예: Little Paws)"
-                disabled={autoGeneratePhrase}
-              />
-              <div className="flex items-center gap-1 px-1">
-                <input
-                  type="checkbox"
-                  id="auto-phrase"
-                  checked={autoGeneratePhrase}
-                  onChange={(e) => setAutoGeneratePhrase(e.target.checked)}
-                  className="w-3 h-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                />
-                <label htmlFor="auto-phrase" className="text-[10px] text-gray-500 cursor-pointer">위트문구 자동</label>
-              </div>
-            </div>
+            <input 
+              type="text" 
+              value={globalCatchphrase}
+              onChange={(e) => setGlobalCatchphrase(e.target.value)}
+              placeholder="브랜드 문구 (선택)"
+              className="bg-white border border-gray-200 rounded-xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[100px] sm:max-w-[140px] shrink-0"
+              title="디자인에 포함할 텍스트 (예: Little Paws)"
+            />
             <button 
               onClick={() => setIsManageStylesModalOpen(true)}
               className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-base border border-gray-200"
@@ -901,6 +888,19 @@ export default function Home() {
                 <option value="baby red panda">레서판다 (Baby Red Panda)</option>
               </select>
 
+              <div className="flex items-center gap-2 mb-6 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                <input
+                  type="checkbox"
+                  id="auto-phrase-modal"
+                  checked={autoGeneratePhrase}
+                  onChange={(e) => setAutoGeneratePhrase(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer"
+                />
+                <label htmlFor="auto-phrase-modal" className="text-sm font-semibold text-blue-800 cursor-pointer select-none">
+                  위트 문구 자동 생성 (추천)
+                </label>
+              </div>
+
               <div className="flex gap-3 justify-end">
                 <button 
                   onClick={() => setIsAutoAgentModalOpen(false)}
@@ -1016,7 +1016,20 @@ export default function Home() {
                         className="w-full border border-gray-200 rounded-xl p-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white shadow-sm resize-none h-24"
                       />
                     </div>
+                    
                     <div className="mt-4">
+                      <div className="flex items-center gap-2 mb-4 bg-purple-50 p-3 rounded-lg border border-purple-100">
+                        <input
+                          type="checkbox"
+                          id="auto-phrase-image-modal"
+                          checked={autoGeneratePhrase}
+                          onChange={(e) => setAutoGeneratePhrase(e.target.checked)}
+                          className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500 cursor-pointer"
+                        />
+                        <label htmlFor="auto-phrase-image-modal" className="text-sm font-semibold text-purple-800 cursor-pointer select-none">
+                          위트 문구 자동 생성 (추천)
+                        </label>
+                      </div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">적용할 화풍 (선택)</label>
                       <select 
                         value={selectedStyleId || ''}
