@@ -1069,10 +1069,10 @@ export default function Home() {
                           
                           <div className="flex items-center gap-2">
                             <button onClick={downloadEditCanvas} className="text-xs px-2 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1">
-                              ⬇️ 저장
+                              ⬇️ 다운
                             </button>
                             <button onClick={saveManualEdit} disabled={isSavingManual} className="text-xs px-2 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium shadow-sm transition-colors flex items-center gap-1 disabled:opacity-50">
-                              💾 {isSavingManual ? '저장 중...' : 'DB 저장'}
+                              💾 {isSavingManual ? '저장 중...' : '저장'}
                             </button>
                           </div>
                         </div>
