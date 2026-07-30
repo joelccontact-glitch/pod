@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Pacifico, Fredoka } from "next/font/google";
+import { Geist, Geist_Mono, Grand_Hotel } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -7,14 +7,9 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const pacifico = Pacifico({
+const grandHotel = Grand_Hotel({
   weight: "400",
-  variable: "--font-pacifico",
-  subsets: ["latin"],
-});
-
-const fredoka = Fredoka({
-  variable: "--font-fredoka",
+  variable: "--font-grand-hotel",
   subsets: ["latin"],
 });
 
@@ -38,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${pacifico.variable} ${fredoka.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${grandHotel.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>

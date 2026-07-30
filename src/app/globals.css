@@ -10,8 +10,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-pacifico: var(--font-pacifico);
-  --font-fredoka: var(--font-fredoka);
+  --font-grand-hotel: var(--font-grand-hotel);
 }
 
 @media (prefers-color-scheme: dark) {
