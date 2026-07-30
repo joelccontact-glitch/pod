@@ -71,6 +71,22 @@ export default function Home() {
   const [activeTextId, setActiveTextId] = useState<string | null>(null);
   const [isDraggingText, setIsDraggingText] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [canvasDisplayScale, setCanvasDisplayScale] = useState(1);
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (editCanvasRef.current && editCanvasRef.current.width > 0) {
+        const rect = editCanvasRef.current.getBoundingClientRect();
+        setCanvasDisplayScale(rect.width / editCanvasRef.current.width);
+      }
+    };
+    window.addEventListener('resize', updateScale);
+    const timeoutId = setTimeout(updateScale, 100);
+    return () => {
+      window.removeEventListener('resize', updateScale);
+      clearTimeout(timeoutId);
+    };
+  }, [activeTab, selectedDesign, originalEditImage]);
 
   useEffect(() => {
     fetchDesigns(page);
@@ -1156,10 +1172,10 @@ export default function Home() {
                               onTouchStart={(e) => handleTextMouseDown(e, t.id)}
                               style={{
                                 position: 'absolute',
-                                left: t.x,
-                                top: t.y,
+                                left: t.x * canvasDisplayScale,
+                                top: t.y * canvasDisplayScale,
                                 fontFamily: `'${t.font}', sans-serif`,
-                                fontSize: `${t.size}px`,
+                                fontSize: `${t.size * canvasDisplayScale}px`,
                                 color: t.color,
                                 cursor: editMode === 'text' ? 'move' : 'default',
                                 userSelect: 'none',
