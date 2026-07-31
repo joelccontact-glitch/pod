@@ -40,10 +40,11 @@ export async function GET(request: Request) {
       
     const designs = designsSnapshot.docs.map((doc: any) => {
       const data = doc.data();
+      const versionTs = data.updated_at ? new Date(data.updated_at).getTime() : (data.created_at ? new Date(data.created_at).getTime() : Date.now());
       return {
         id: doc.id,
         ...data,
-        image_url: data.image_url?.startsWith('data:image/') ? `/api/designs/image?id=${doc.id}` : data.image_url
+        image_url: data.image_url?.startsWith('data:image/') ? `/api/designs/image?id=${doc.id}&v=${versionTs}` : data.image_url
       };
     });
 
