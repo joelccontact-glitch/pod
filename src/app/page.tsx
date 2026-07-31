@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSession, signOut } from "next-auth/react";
 import { MOCKUP_TEMPLATES } from '@/lib/mockups';
+import { processTransparentPNG } from '@/lib/image-processor';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -47,6 +48,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'info' | 'mockup' | 'edit'>('info');
   const [selectedMockupId, setSelectedMockupId] = useState(MOCKUP_TEMPLATES[0].id);
   const [mockupScale, setMockupScale] = useState(1.0);
+  const [isProcessingPNG, setIsProcessingPNG] = useState(false);
   const [mockupOffsetX, setMockupOffsetX] = useState(0);
   const [mockupOffsetY, setMockupOffsetY] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -159,13 +161,80 @@ export default function Home() {
   };
 
   const downloadMockup = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const url = canvas.toDataURL('image/jpeg', 0.9);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `mockup_${Date.now()}.jpg`;
-    a.click();
+    const template = MOCKUP_TEMPLATES.find(t => t.id === selectedMockupId);
+    const designUrl = previewDesign ? previewDesign.image_url : selectedDesign?.image_url;
+    if (!template || !designUrl) return;
+
+    const targetDimension = 2500; // Etsy High-Res 2500px square
+    const mockupImg = new Image();
+    mockupImg.crossOrigin = 'anonymous';
+    mockupImg.src = template.imageUrl;
+
+    mockupImg.onload = () => {
+      const origW = mockupImg.width || 800;
+      const origH = mockupImg.height || 800;
+      const scaleFactor = targetDimension / Math.max(origW, origH);
+
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = Math.round(origW * scaleFactor);
+      offCanvas.height = Math.round(origH * scaleFactor);
+      const offCtx = offCanvas.getContext('2d');
+      if (!offCtx) return;
+
+      offCtx.imageSmoothingEnabled = true;
+      offCtx.imageSmoothingQuality = 'high';
+
+      offCtx.globalCompositeOperation = 'source-over';
+      offCtx.drawImage(mockupImg, 0, 0, offCanvas.width, offCanvas.height);
+
+      const designImg = new Image();
+      designImg.crossOrigin = 'anonymous';
+      designImg.src = designUrl;
+
+      designImg.onload = () => {
+        offCtx.globalCompositeOperation = template.overlay.blendMode as GlobalCompositeOperation;
+
+        const scaledWidth = template.overlay.width * mockupScale * scaleFactor;
+        const scaledHeight = template.overlay.height * mockupScale * scaleFactor;
+        const centerX = (template.overlay.x + template.overlay.width / 2) * scaleFactor;
+        const centerY = (template.overlay.y + template.overlay.height / 2) * scaleFactor;
+        const newX = centerX - scaledWidth / 2 + (mockupOffsetX * scaleFactor);
+        const newY = centerY - scaledHeight / 2 + (mockupOffsetY * scaleFactor);
+
+        offCtx.drawImage(designImg, newX, newY, scaledWidth, scaledHeight);
+        offCtx.globalCompositeOperation = 'source-over';
+
+        const url = offCanvas.toDataURL('image/jpeg', 0.95);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `etsy_mockup_2.5K_${Date.now()}.jpg`;
+        a.click();
+      };
+    };
+  };
+
+  const downloadPODPrintPNG = async () => {
+    const designUrl = previewDesign ? previewDesign.image_url : selectedDesign?.image_url;
+    if (!designUrl) return;
+
+    try {
+      setIsProcessingPNG(true);
+      const transparentDataUrl = await processTransparentPNG(designUrl, {
+        targetWidth: 4000,
+        targetHeight: 4000,
+        tolerance: 238
+      });
+
+      const a = document.createElement('a');
+      a.href = transparentDataUrl;
+      a.download = `pod_print_4K_300dpi_${Date.now()}.png`;
+      a.click();
+    } catch (err) {
+      console.error('PNG processing failed', err);
+      alert('PNG 생성 중 오류가 발생했습니다.');
+    } finally {
+      setIsProcessingPNG(false);
+    }
   };
 
   useEffect(() => {
@@ -1012,25 +1081,59 @@ export default function Home() {
                   </div>
 
                   <div className="space-y-6">
-                    <div>
-                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Topic</h4>
-                      <p className="text-gray-700 bg-gray-50 px-4 py-3 rounded-xl text-sm border border-gray-100">{previewDesign ? previewDesign.topic : selectedDesign.topic}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">SEO Tags</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {(previewDesign ? previewDesign.tags : selectedDesign.tags)?.map((tag: string, i: number) => (
-                          <span key={i} className="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-100">{tag}</span>
-                        ))}
+                      <div>
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Topic</h4>
+                        <p className="text-gray-700 bg-gray-50 px-4 py-3 rounded-xl text-sm border border-gray-100">{previewDesign ? previewDesign.topic : selectedDesign.topic}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">SEO Tags</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {(previewDesign ? previewDesign.tags : selectedDesign.tags)?.map((tag: string, i: number) => (
+                            <span key={i} className="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-100">{tag}</span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-100 space-y-3">
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">고해상도 다운로드 옵션</h4>
+                        <div className="flex flex-col sm:flex-row gap-2.5">
+                          <button 
+                            onClick={downloadPODPrintPNG}
+                            disabled={isProcessingPNG}
+                            className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2"
+                          >
+                            {isProcessingPNG ? (
+                              <>
+                                <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>4K PNG 변환 중...</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                <span>🖨️ POD 인쇄용 4K 투명 PNG</span>
+                              </>
+                            )}
+                          </button>
+
+                          <button 
+                            onClick={downloadMockup}
+                            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0"
+                          >
+                            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                            <span>👕 Etsy 2.5K 목업 다운로드</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
                   </>
                   )}
                   {activeTab === 'mockup' && (
                     <div className="flex flex-col items-center h-full min-h-[400px]">
                       <div className="w-full mb-4 flex flex-col gap-3">
-                        <div className="flex justify-between items-center w-full">
+                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center w-full gap-2">
                           <select 
                             value={selectedMockupId}
                             onChange={(e) => setSelectedMockupId(e.target.value)}
@@ -1041,13 +1144,23 @@ export default function Home() {
                             ))}
                           </select>
                           
-                          <button 
-                            onClick={downloadMockup}
-                            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            다운로드
-                          </button>
+                          <div className="flex flex-wrap gap-2">
+                            <button 
+                              onClick={downloadMockup}
+                              className="flex-1 sm:flex-initial bg-orange-500 hover:bg-orange-600 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                              👕 Etsy 2.5K 목업
+                            </button>
+                            
+                            <button 
+                              onClick={downloadPODPrintPNG}
+                              disabled={isProcessingPNG}
+                              className="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5"
+                            >
+                              {isProcessingPNG ? '4K 변환중...' : '🖨️ POD 4K 투명 PNG'}
+                            </button>
+                          </div>
                         </div>
                         
                         <div className="grid grid-cols-3 gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
