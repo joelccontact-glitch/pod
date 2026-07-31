@@ -1100,7 +1100,7 @@ export default function Home() {
                           <button 
                             onClick={downloadPODPrintPNG}
                             disabled={isProcessingPNG}
-                            className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2"
+                            className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
                           >
                             {isProcessingPNG ? (
                               <>
@@ -1108,22 +1108,22 @@ export default function Home() {
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
-                                <span>4K PNG 변환 중...</span>
+                                <span>4K 변환 중...</span>
                               </>
                             ) : (
                               <>
                                 <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                <span>🖨️ POD 인쇄용 4K 투명 PNG</span>
+                                <span>🖨️ 4K 투명 PNG</span>
                               </>
                             )}
                           </button>
 
                           <button 
                             onClick={downloadMockup}
-                            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 shrink-0"
+                            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
                           >
                             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            <span>👕 Etsy 2.5K 목업 다운로드</span>
+                            <span>👕 Etsy 2.5K 목업</span>
                           </button>
                         </div>
                       </div>
@@ -1147,7 +1147,7 @@ export default function Home() {
                           <div className="flex flex-wrap gap-2">
                             <button 
                               onClick={downloadMockup}
-                              className="flex-1 sm:flex-initial bg-orange-500 hover:bg-orange-600 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5"
+                              className="flex-1 sm:flex-initial bg-orange-500 hover:bg-orange-600 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap"
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                               👕 Etsy 2.5K 목업
@@ -1156,9 +1156,9 @@ export default function Home() {
                             <button 
                               onClick={downloadPODPrintPNG}
                               disabled={isProcessingPNG}
-                              className="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5"
+                              className="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap"
                             >
-                              {isProcessingPNG ? '4K 변환중...' : '🖨️ POD 4K 투명 PNG'}
+                              {isProcessingPNG ? '4K 변환중...' : '🖨️ 4K 투명 PNG'}
                             </button>
                           </div>
                         </div>
