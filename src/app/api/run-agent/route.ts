@@ -37,7 +37,8 @@ export async function GET(req: Request) {
     const targetAnimal = (requestedAnimal && requestedAnimal !== 'random') ? requestedAnimal : animalList[Math.floor(Math.random() * animalList.length)];
     
     const userCatchphrase = urlParams.searchParams.get('catchphrase') || '';
-    const autoPhrase = urlParams.searchParams.get('autoPhrase') === 'true';
+    const autoPhraseParam = urlParams.searchParams.get('autoPhrase');
+    const autoPhrase = autoPhraseParam === null ? true : autoPhraseParam === 'true';
     let catchphrase = userCatchphrase;
     if (process.env.GEMINI_API_KEY) {
       try {

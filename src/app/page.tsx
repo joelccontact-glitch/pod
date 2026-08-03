@@ -35,7 +35,7 @@ export default function Home() {
   const [isCreatingStyle, setIsCreatingStyle] = useState(false);
   const [isGeneratingTrend, setIsGeneratingTrend] = useState(false);
   const [globalCatchphrase, setGlobalCatchphrase] = useState('');
-  const [autoGeneratePhrase, setAutoGeneratePhrase] = useState(false);
+  const [autoGeneratePhrase, setAutoGeneratePhrase] = useState(true);
 
   const [isManageStylesModalOpen, setIsManageStylesModalOpen] = useState(false);
   const [editingStyleId, setEditingStyleId] = useState<string | null>(null);
@@ -52,6 +52,9 @@ export default function Home() {
   const [mockupOffsetX, setMockupOffsetX] = useState(0);
   const [mockupOffsetY, setMockupOffsetY] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const loadedMockupImgRef = useRef<{ id: string; img: HTMLImageElement } | null>(null);
+  const loadedDesignImgRef = useRef<{ url: string; img: HTMLImageElement } | null>(null);
+  const drawSequenceRef = useRef<number>(0);
 
   const editCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -129,35 +132,72 @@ export default function Home() {
     const designUrl = previewDesign ? previewDesign.image_url : selectedDesign?.image_url;
     if (!designUrl) return;
 
-    const mockupImg = new Image();
-    mockupImg.crossOrigin = 'anonymous';
-    mockupImg.src = template.imageUrl;
+    const currentDrawSeq = ++drawSequenceRef.current;
 
-    mockupImg.onload = () => {
-      canvas.width = mockupImg.width || 800;
-      canvas.height = mockupImg.height || 800;
+    const render = (mockupImg: HTMLImageElement, designImg: HTMLImageElement) => {
+      const targetW = mockupImg.width || 800;
+      const targetH = mockupImg.height || 800;
+      if (canvas.width !== targetW || canvas.height !== targetH) {
+        canvas.width = targetW;
+        canvas.height = targetH;
+      }
 
       ctx.globalCompositeOperation = 'source-over';
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(mockupImg, 0, 0, canvas.width, canvas.height);
 
-      const designImg = new Image();
-      designImg.crossOrigin = 'anonymous';
-      designImg.src = designUrl;
-
-      designImg.onload = () => {
-        ctx.globalCompositeOperation = template.overlay.blendMode as GlobalCompositeOperation;
-        
-        const scaledWidth = template.overlay.width * mockupScale;
-        const scaledHeight = template.overlay.height * mockupScale;
-        const centerX = template.overlay.x + template.overlay.width / 2;
-        const centerY = template.overlay.y + template.overlay.height / 2;
-        const newX = centerX - scaledWidth / 2 + mockupOffsetX;
-        const newY = centerY - scaledHeight / 2 + mockupOffsetY;
-        
-        ctx.drawImage(designImg, newX, newY, scaledWidth, scaledHeight);
-        ctx.globalCompositeOperation = 'source-over';
-      };
+      ctx.globalCompositeOperation = template.overlay.blendMode as GlobalCompositeOperation;
+      
+      const scaledWidth = template.overlay.width * mockupScale;
+      const scaledHeight = template.overlay.height * mockupScale;
+      const centerX = template.overlay.x + template.overlay.width / 2;
+      const centerY = template.overlay.y + template.overlay.height / 2;
+      const newX = centerX - scaledWidth / 2 + mockupOffsetX;
+      const newY = centerY - scaledHeight / 2 + mockupOffsetY;
+      
+      ctx.drawImage(designImg, newX, newY, scaledWidth, scaledHeight);
+      ctx.globalCompositeOperation = 'source-over';
     };
+
+    const isMockupCached = loadedMockupImgRef.current?.id === selectedMockupId;
+    const isDesignCached = loadedDesignImgRef.current?.url === designUrl;
+
+    if (isMockupCached && isDesignCached) {
+      render(loadedMockupImgRef.current!.img, loadedDesignImgRef.current!.img);
+      return;
+    }
+
+    let loadedMockup: HTMLImageElement | null = isMockupCached ? loadedMockupImgRef.current!.img : null;
+    let loadedDesign: HTMLImageElement | null = isDesignCached ? loadedDesignImgRef.current!.img : null;
+
+    const checkAndRender = () => {
+      if (currentDrawSeq !== drawSequenceRef.current) return;
+      if (loadedMockup && loadedDesign) {
+        render(loadedMockup, loadedDesign);
+      }
+    };
+
+    if (!loadedMockup) {
+      const mImg = new Image();
+      mImg.crossOrigin = 'anonymous';
+      mImg.src = template.imageUrl;
+      mImg.onload = () => {
+        loadedMockupImgRef.current = { id: selectedMockupId, img: mImg };
+        loadedMockup = mImg;
+        checkAndRender();
+      };
+    }
+
+    if (!loadedDesign) {
+      const dImg = new Image();
+      dImg.crossOrigin = 'anonymous';
+      dImg.src = designUrl;
+      dImg.onload = () => {
+        loadedDesignImgRef.current = { url: designUrl, img: dImg };
+        loadedDesign = dImg;
+        checkAndRender();
+      };
+    }
   };
 
   const downloadMockup = () => {
@@ -1169,7 +1209,7 @@ export default function Home() {
                             <input 
                               type="range" min="0.5" max="2.0" step="0.01" 
                               value={mockupScale} onChange={(e) => setMockupScale(parseFloat(e.target.value))}
-                              className="w-full accent-orange-500"
+                              className="w-full accent-orange-500 touch-none"
                             />
                           </div>
                           <div className="flex flex-col gap-1">
@@ -1177,7 +1217,7 @@ export default function Home() {
                             <input 
                               type="range" min="-300" max="300" step="1" 
                               value={mockupOffsetX} onChange={(e) => setMockupOffsetX(parseInt(e.target.value))}
-                              className="w-full accent-orange-500"
+                              className="w-full accent-orange-500 touch-none"
                             />
                           </div>
                           <div className="flex flex-col gap-1">
@@ -1185,7 +1225,7 @@ export default function Home() {
                             <input 
                               type="range" min="-300" max="300" step="1" 
                               value={mockupOffsetY} onChange={(e) => setMockupOffsetY(parseInt(e.target.value))}
-                              className="w-full accent-orange-500"
+                              className="w-full accent-orange-500 touch-none"
                             />
                           </div>
                         </div>
