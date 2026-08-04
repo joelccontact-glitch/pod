@@ -80,11 +80,17 @@ export function StockDashboard({ onNavigate }: { onNavigate: (tab: string) => vo
           <div className="absolute -right-4 -bottom-4 h-24 w-24 rounded-full bg-white/10 blur-xl pointer-events-none" />
         </div>
 
-        {/* KPI 2 */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        {/* KPI 2: 누적 이미지 등록 (클릭 시 이미지 갤러리로 바로 이동!) */}
+        <div
+          onClick={() => onNavigate("generator")}
+          className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:border-indigo-500 hover:shadow-md transition-all duration-200 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-indigo-500"
+          title="클릭하면 생성된 전체 이미지 라이브러리를 바로 확인합니다"
+        >
           <div className="flex items-center justify-between text-slate-500 dark:text-slate-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">누적 이미지 등록</span>
-            <ImageIcon className="h-5 w-5 text-indigo-500" />
+            <span className="text-xs font-semibold uppercase tracking-wider group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+              누적 이미지 등록 (갤러리 보기 🔍)
+            </span>
+            <ImageIcon className="h-5 w-5 text-indigo-500 group-hover:scale-110 transition-transform" />
           </div>
           <div className="mt-3 flex items-baseline space-x-2">
             <span className="text-3xl font-extrabold text-slate-900 dark:text-white">
@@ -98,6 +104,9 @@ export function StockDashboard({ onNavigate }: { onNavigate: (tab: string) => vo
               style={{ width: `${progressPercent}%` }}
             />
           </div>
+          <p className="mt-2 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 group-hover:underline flex items-center gap-1">
+            ⚡ 클릭하여 생성 이미지 전체 확인하기 <ChevronRight className="h-3 w-3" />
+          </p>
         </div>
 
         {/* KPI 3 */}

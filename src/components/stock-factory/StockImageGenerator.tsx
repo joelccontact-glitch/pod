@@ -219,15 +219,27 @@ export function StockImageGenerator({
     }, 100);
   };
 
-  // 4. 이미지 변형 / 구도 수정 기능
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 4;
+  const totalPages = Math.ceil(generatedImages.length / itemsPerPage) || 1;
+
+  const paginatedImages = generatedImages.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // 4. 이미지 변형 / 구도 수정 기능 (강력한 주체 치환)
   const handleModifyImage = (id: string, currentP: string, modifierType: string) => {
     let modifiedP = currentP;
     if (modifierType === "lighting") {
-      modifiedP += " | bright studio lighting, soft shadows";
+      modifiedP += " | bright studio lighting, soft shadows, 8k resolution";
     } else if (modifierType === "angle") {
-      modifiedP += " | wide angle shot, cinematic camera perspective";
+      modifiedP += " | wide angle shot, cinematic camera perspective, full body framing";
     } else if (modifierType === "senior") {
-      modifiedP += " | 50s middle-aged Korean active senior couple";
+      // 인물 모델을 5060 중년 은퇴 부부로 완벽 강제 치환!
+      modifiedP =
+        "CRITICAL SUBJECT: A happy 50s-60s Korean middle-aged active senior husband and wife with gentle grey hair discussing retirement pension fund with financial advisor, authentic mature faces, warm daylight, 8k resolution | " +
+        currentP;
     }
 
     setPrompt(modifiedP);
@@ -406,107 +418,142 @@ export function StockImageGenerator({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            {generatedImages.map((img, idx) => (
-              <div
-                key={img.id}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between"
-              >
-                <div>
-                  {/* Image View */}
-                  <div className="relative aspect-video w-full overflow-hidden bg-slate-900 group">
-                    <img src={img.url} alt="Generated Stock" className="h-full w-full object-cover" />
-                    <span className="absolute top-2 left-2 rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-mono text-white backdrop-blur">
-                      {img.createdAt} | 2560x1440 4K
-                    </span>
+          <>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              {paginatedImages.map((img, idx) => (
+                <div
+                  key={img.id}
+                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between"
+                >
+                  <div>
+                    {/* Image View */}
+                    <div className="relative aspect-video w-full overflow-hidden bg-slate-900 group">
+                      <img src={img.url} alt="Generated Stock" className="h-full w-full object-cover" />
+                      <span className="absolute top-2 left-2 rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-mono text-white backdrop-blur">
+                        {img.createdAt} | 2560x1440 4K
+                      </span>
 
-                    {/* 3. 이미지 삭제 버튼 (오른쪽 상단) */}
-                    <button
-                      onClick={() => handleDeleteImage(img.id)}
-                      className="absolute top-2 right-2 rounded-lg bg-rose-600/90 p-1.5 text-white hover:bg-rose-700 transition-all shadow-md"
-                      title="이미지 삭제하기"
-                    >
-                      🗑️ 삭제
-                    </button>
+                      {/* 3. 이미지 삭제 버튼 (오른쪽 상단) */}
+                      <button
+                        onClick={() => handleDeleteImage(img.id)}
+                        className="absolute top-2 right-2 rounded-lg bg-rose-600/90 p-1.5 text-white hover:bg-rose-700 transition-all shadow-md text-xs font-bold"
+                        title="이미지 삭제하기"
+                      >
+                        🗑️ 삭제
+                      </button>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-4 space-y-3">
+                      <p className="text-xs text-slate-600 dark:text-slate-300 font-mono line-clamp-2">
+                        {img.prompt}
+                      </p>
+
+                      {/* 4. 이미지 구도/조명/인물 수정 & 튜닝 툴바 */}
+                      <div className="rounded-xl bg-slate-50 p-2.5 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
+                        <span className="block text-[10px] font-bold text-slate-500 mb-1.5">
+                          🎨 마음에 안 들 때 1초 구도/조명 수정 튜닝:
+                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          <button
+                            onClick={() => handleModifyImage(img.id, img.prompt, "lighting")}
+                            className="rounded bg-white px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm border border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:border-indigo-500"
+                          >
+                            ✨ 화사한 조명 튜닝
+                          </button>
+                          <button
+                            onClick={() => handleModifyImage(img.id, img.prompt, "angle")}
+                            className="rounded bg-white px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm border border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:border-indigo-500"
+                          >
+                            📐 와이드 카메라 구도
+                          </button>
+                          <button
+                            onClick={() => handleModifyImage(img.id, img.prompt, "senior")}
+                            className="rounded bg-white px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm border border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:border-indigo-500"
+                          >
+                            👥 5060 중년 은퇴부부로 수정 (강력)
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Card Content */}
-                  <div className="p-4 space-y-3">
-                    <p className="text-xs text-slate-600 dark:text-slate-300 font-mono line-clamp-2">
-                      {img.prompt}
-                    </p>
+                  {/* Bottom Action Footer */}
+                  <div className="p-4 pt-0">
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+                      <button
+                        onClick={() => handleCopyPrompt(idx, img.prompt)}
+                        className="inline-flex items-center text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                      >
+                        {copiedIndex === idx ? (
+                          <>
+                            <Check className="mr-1 h-3.5 w-3.5 text-emerald-500" /> 복사 완료
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="mr-1 h-3.5 w-3.5" /> 프롬프트 복사
+                          </>
+                        )}
+                      </button>
 
-                    {/* 4. 이미지 구도/조명/인물 수정 & 튜닝 툴바 */}
-                    <div className="rounded-xl bg-slate-50 p-2.5 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-                      <span className="block text-[10px] font-bold text-slate-500 mb-1.5">
-                        🎨 마음에 안 들 때 1초 구도/조명 수정 튜닝:
-                      </span>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => handleModifyImage(img.id, img.prompt, "lighting")}
-                          className="rounded bg-white px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm border border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:border-indigo-500"
+                          onClick={async () => {
+                            await downloadHighResPNG(img.url, `stock_factory_${img.id}_4k.png`);
+                            window.open("https://drive.google.com/drive/my-drive", "_blank");
+                          }}
+                          className="inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-950 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-800 transition-colors"
+                          title="4K 이미지 파일 다운로드 및 내 구글 드라이브 열기"
                         >
-                          ✨ 화사한 조명 튜닝
+                          ☁️ 드라이브 저장
                         </button>
+
                         <button
-                          onClick={() => handleModifyImage(img.id, img.prompt, "angle")}
-                          className="rounded bg-white px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm border border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:border-indigo-500"
+                          onClick={() => downloadHighResPNG(img.url, `stock_factory_${img.id}_4k.png`)}
+                          className="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                         >
-                          📐 와이드 카메라 구도
-                        </button>
-                        <button
-                          onClick={() => handleModifyImage(img.id, img.prompt, "senior")}
-                          className="rounded bg-white px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm border border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:border-indigo-500"
-                        >
-                          👥 중년 은퇴부부로 수정
+                          <Download className="mr-1.5 h-3.5 w-3.5 text-indigo-500" /> 4K PNG 다운로드 (2~4MB)
                         </button>
                       </div>
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
 
-                {/* Bottom Action Footer */}
-                <div className="p-4 pt-0">
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
-                    <button
-                      onClick={() => handleCopyPrompt(idx, img.prompt)}
-                      className="inline-flex items-center text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
-                    >
-                      {copiedIndex === idx ? (
-                        <>
-                          <Check className="mr-1 h-3.5 w-3.5 text-emerald-500" /> 복사 완료
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="mr-1 h-3.5 w-3.5" /> 프롬프트 복사
-                        </>
-                      )}
-                    </button>
-
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={async () => {
-                          await downloadHighResPNG(img.url, `stock_factory_${img.id}_4k.png`);
-                          window.open("https://drive.google.com/drive/my-drive", "_blank");
-                        }}
-                        className="inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-950 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-800 transition-colors"
-                        title="4K 이미지 파일 다운로드 및 내 구글 드라이브 열기"
-                      >
-                        ☁️ 드라이브 저장
-                      </button>
-
-                      <button
-                        onClick={() => downloadHighResPNG(img.url, `stock_factory_${img.id}_4k.png`)}
-                        className="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                      >
-                        <Download className="mr-1.5 h-3.5 w-3.5 text-indigo-500" /> 4K PNG 다운로드 (2~4MB)
-                      </button>
-                    </div>
-                  </div>
-                </div>
+            {/* 페이징 내비게이션 바 */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center space-x-2 pt-6 border-t border-slate-200 dark:border-slate-800">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                >
+                  ◀ 이전
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                      currentPage === pageNum
+                        ? "bg-indigo-600 text-white shadow-sm"
+                        : "border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="rounded-lg border border-slate-200 dark:border-slate-800 px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                >
+                  다음 ▶
+                </button>
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </div>
