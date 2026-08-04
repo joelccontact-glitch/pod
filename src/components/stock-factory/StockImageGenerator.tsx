@@ -308,21 +308,31 @@ export function StockImageGenerator({
         {/* Form Inputs */}
         <div className="space-y-4">
           {/* Optional Google AI Ultra / Gemini API Key */}
-          <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/50 p-3 dark:border-emerald-900/50 dark:bg-emerald-950/20">
-            <div className="flex items-center justify-between mb-1">
+          <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/50 p-3.5 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
               <label className="text-xs font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-emerald-500" />
                 Google AI Ultra / Gemini API 키 연동 (선택 - 100% 쨍한 Imagen 3 8K 직접 생성)
               </label>
-              <span className="text-[10px] text-emerald-600 font-medium">구독자 전용 연동</span>
+              <a
+                href="https://aistudio.google.com/app/apikey"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center text-[11px] font-extrabold text-emerald-700 dark:text-emerald-300 hover:underline bg-emerald-100 dark:bg-emerald-900/60 px-2.5 py-1 rounded-md border border-emerald-300 dark:border-emerald-700 transition-colors shrink-0"
+              >
+                🔑 무료 API 키 1초 발급 바로가기 (Google AI Studio ↗)
+              </a>
             </div>
             <input
               type="password"
               value={googleApiKey}
               onChange={(e) => setGoogleApiKey(e.target.value)}
-              placeholder="구글 Gemini API Key가 있다면 여기에 입력하세요 (미입력시 4K 렌더러 자동 동작)"
-              className="w-full rounded-lg border border-emerald-200 bg-white p-2 text-xs font-mono text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:outline-none dark:border-emerald-900 dark:bg-slate-900 dark:text-slate-100"
+              placeholder="Google AI Studio에서 발급받은 API Key (AIzaSy...)를 입력하세요 (100% 쨍한 Imagen 3 직접 연동)"
+              className="w-full rounded-lg border border-emerald-200 bg-white p-2.5 text-xs font-mono text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:outline-none dark:border-emerald-900 dark:bg-slate-900 dark:text-slate-100 shadow-sm"
             />
+            <p className="mt-1.5 text-[10px] text-emerald-700 dark:text-emerald-400 font-medium">
+              💡 발급 방법: 위 [🔑 무료 API 키 1초 발급 바로가기] 클릭 ➔ [Create API Key] 버튼 클릭 ➔ 복사 후 여기에 붙여넣기하시면 구글 최상위 Imagen 3 포토가 앱 내부에서 직접 쨍하게 생성됩니다!
+            </p>
           </div>
           {/* Prompt TextArea */}
           <div>
