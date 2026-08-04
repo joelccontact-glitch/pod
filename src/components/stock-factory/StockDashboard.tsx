@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   TrendingUp,
   Target,
@@ -29,8 +29,24 @@ export function StockDashboard({ onNavigate }: { onNavigate: (tab: string) => vo
     setCompletedTasks((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const [savedCount, setSavedCount] = useState<number>(0);
+
+  useEffect(() => {
+    const updateCount = () => {
+      const cnt = parseInt(localStorage.getItem("stock_generated_count") || "0", 10);
+      setSavedCount(cnt);
+    };
+    updateCount();
+    window.addEventListener("storage", updateCount);
+    const interval = setInterval(updateCount, 1000);
+    return () => {
+      window.removeEventListener("storage", updateCount);
+      clearInterval(interval);
+    };
+  }, []);
+
   const categories = [
-    { name: "금융 / 퇴직연금 / ETF", target: 300, current: 0, color: "bg-blue-500", label: "추천 ★★★★★" },
+    { name: "금융 / 퇴직연금 / ETF", target: 300, current: savedCount, color: "bg-blue-500", label: "추천 ★★★★★" },
     { name: "AI & 스마트 오피스", target: 300, current: 0, color: "bg-indigo-500", label: "인기 ★★★★☆" },
     { name: "한국 직장인 & 회의", target: 300, current: 0, color: "bg-purple-500", label: "수요 ★★★★☆" },
     { name: "디지털 뱅킹 / 핀테크", target: 200, current: 0, color: "bg-emerald-500", label: "전문 ★★★★★" },
@@ -38,7 +54,7 @@ export function StockDashboard({ onNavigate }: { onNavigate: (tab: string) => vo
     { name: "비즈니스 배경 & 패턴", target: 300, current: 0, color: "bg-cyan-500", label: "스테디 ★★★☆☆" },
   ];
 
-  const totalCurrent = categories.reduce((sum, c) => sum + c.current, 0);
+  const totalCurrent = savedCount;
   const totalTarget = 2000;
   const progressPercent = Math.round((totalCurrent / totalTarget) * 100);
 

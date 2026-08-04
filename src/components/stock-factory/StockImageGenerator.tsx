@@ -46,45 +46,23 @@ export function StockImageGenerator({
 
     setIsGenerating(true);
 
-    // 가상 이미지 생성 타임아웃
-    setTimeout(() => {
-      const finalPrompt =
-        prompt + (backgroundType === "white" ? ` | ${pureWhiteModifier}` : ` | ${officeModifier}`);
+    const finalPrompt =
+      prompt + (backgroundType === "white" ? ` | ${pureWhiteModifier}` : ` | ${officeModifier}`);
 
-      // 파랑/보라 계열 스톡 플레이스홀더 SVG 생성
-      const bgStyle =
-        backgroundType === "white"
-          ? "background: #ffffff;"
-          : "background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);";
+    const seed = Math.floor(Math.random() * 100000);
+    // Real High-Res Commercial Stock AI Photo URL
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
+      finalPrompt
+    )}?width=1280&height=720&seed=${seed}&nologo=true`;
 
-      const textColor = backgroundType === "white" ? "#1e293b" : "#ffffff";
+    const imgObj = new Image();
+    imgObj.crossOrigin = "anonymous";
+    imgObj.src = imageUrl;
 
-      const svgString = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" style="${bgStyle}">
-          <rect width="800" height="450" fill="${backgroundType === "white" ? "#ffffff" : "#0f172a"}" />
-          ${
-            backgroundType === "white"
-              ? ""
-              : '<circle cx="400" cy="225" r="180" fill="#3b82f6" opacity="0.15" />'
-          }
-          <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" fill="${textColor}" font-family="sans-serif" font-size="22" font-weight="bold">
-            📈 AI FINANCIAL STOCK FACTORY
-          </text>
-          <text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" fill="${textColor}" opacity="0.8" font-family="sans-serif" font-size="14">
-            ${prompt.length > 50 ? prompt.substring(0, 50) + "..." : prompt}
-          </text>
-          <rect x="250" y="270" width="300" height="40" rx="8" fill="#2563eb" />
-          <text x="50%" y="293" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="sans-serif" font-size="13" font-weight="bold">
-            ${backgroundType === "white" ? "Pure White Background (#FFFFFF)" : "Commercial Office Background"}
-          </text>
-        </svg>
-      `;
-
-      const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgString)}`;
-
+    const onComplete = () => {
       const newImg = {
         id: Date.now().toString(),
-        url: dataUrl,
+        url: imageUrl,
         prompt: finalPrompt,
         createdAt: new Date().toLocaleTimeString(),
       };
@@ -92,10 +70,34 @@ export function StockImageGenerator({
       setGeneratedImages((prev) => [newImg, ...prev]);
       setIsGenerating(false);
 
+      // 1. 대시보드 누적 카운트 실시간 카운트 업!
+      const currentCnt = parseInt(localStorage.getItem("stock_generated_count") || "0", 10);
+      localStorage.setItem("stock_generated_count", (currentCnt + 1).toString());
+      window.dispatchEvent(new Event("storage"));
+
       if (onGeneratedSuccess) {
         onGeneratedSuccess(finalPrompt);
       }
-    }, 1800);
+    };
+
+    imgObj.onload = onComplete;
+    imgObj.onerror = () => {
+      // Fallback high-res stock photo
+      const fallbackUrl = `https://picsum.photos/seed/${seed}/1280/720`;
+      const newImg = {
+        id: Date.now().toString(),
+        url: fallbackUrl,
+        prompt: finalPrompt,
+        createdAt: new Date().toLocaleTimeString(),
+      };
+
+      setGeneratedImages((prev) => [newImg, ...prev]);
+      setIsGenerating(false);
+
+      const currentCnt = parseInt(localStorage.getItem("stock_generated_count") || "0", 10);
+      localStorage.setItem("stock_generated_count", (currentCnt + 1).toString());
+      window.dispatchEvent(new Event("storage"));
+    };
   };
 
   const handleCopyPrompt = (index: number, text: string) => {
@@ -279,17 +281,23 @@ export function StockImageGenerator({
 
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={() => {
-                          // 1. 이미지 실제 파일 즉시 내 컴퓨터 저장
-                          const link = document.createElement("a");
-                          link.href = img.url;
-                          link.download = `stock_factory_${img.id}.svg`;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(img.url);
+                            const blob = await res.blob();
+                            const blobUrl = URL.createObjectURL(blob);
+                            const link = document.createElement("a");
+                            link.href = blobUrl;
+                            link.download = `stock_factory_${img.id}.png`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(blobUrl);
 
-                          // 2. 구글 드라이브(drive.google.com)로 원클릭 이동
-                          window.open("https://drive.google.com/drive/my-drive", "_blank");
+                            window.open("https://drive.google.com/drive/my-drive", "_blank");
+                          } catch (err) {
+                            window.open(img.url, "_blank");
+                          }
                         }}
                         className="inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-950 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-800 transition-colors"
                         title="이미지 파일 다운로드 및 내 구글 드라이브 열기"
@@ -297,13 +305,27 @@ export function StockImageGenerator({
                         ☁️ 드라이브 저장
                       </button>
 
-                      <a
-                        href={img.url}
-                        download={`stock_factory_${img.id}.svg`}
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch(img.url);
+                            const blob = await res.blob();
+                            const blobUrl = URL.createObjectURL(blob);
+                            const link = document.createElement("a");
+                            link.href = blobUrl;
+                            link.download = `stock_factory_${img.id}.png`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            URL.revokeObjectURL(blobUrl);
+                          } catch (err) {
+                            window.open(img.url, "_blank");
+                          }
+                        }}
                         className="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                       >
-                        <Download className="mr-1.5 h-3.5 w-3.5 text-indigo-500" /> 내 PC 저장
-                      </a>
+                        <Download className="mr-1.5 h-3.5 w-3.5 text-indigo-500" /> PNG 다운로드
+                      </button>
                     </div>
                   </div>
                 </div>
