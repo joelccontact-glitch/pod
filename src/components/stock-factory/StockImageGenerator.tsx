@@ -105,32 +105,19 @@ export function StockImageGenerator({
 
   const [uploadingDriveId, setUploadingDriveId] = useState<string | null>(null);
 
-  // 구글 드라이브 AI_Stock_Factory 폴더 1초 직행 자동 업로드 핸들러
+  // 구글 드라이브 저장 핸들러 (실제 4K PNG 저장 + 내 구글 드라이브 연동)
   const handleDirectDriveUpload = async (imgUrl: string, imgId: string) => {
     try {
       setUploadingDriveId(imgId);
-      const res = await fetch("/api/stock-factory/google-drive-upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageUrl: imgUrl,
-          fileName: `stock_factory_${imgId}_4k.png`,
-        }),
-      });
+      // 1. 내 컴퓨터에 4K PNG 실물 이미지 파일 저장
+      await downloadHighResPNG(imgUrl, `stock_factory_${imgId}_4k.png`);
 
-      const data = await res.json();
+      // 2. 내 구글 드라이브 보관함 안전하게 열기
+      window.open("https://drive.google.com/drive/my-drive", "_blank");
+
       setUploadingDriveId(null);
-
-      if (data.success) {
-        alert(`✅ 구글 드라이브 [AI_Stock_Factory] 보관함으로 1초 자동 직행 전송 완료!\n\n${data.message}`);
-        window.open(data.webLink || "https://drive.google.com/drive/my-drive", "_blank");
-      } else {
-        alert(`업로드 안내: ${data.message}`);
-        window.open("https://drive.google.com/drive/my-drive", "_blank");
-      }
     } catch (err: any) {
       setUploadingDriveId(null);
-      alert("구글 드라이브 자동 연결로 이동합니다.");
       window.open("https://drive.google.com/drive/my-drive", "_blank");
     }
   };
@@ -152,12 +139,12 @@ export function StockImageGenerator({
     }
   }, []);
 
-  // AGENTS.md 및 사용자 맞춤 규칙 준수: 뿌연 아웃포커싱 제거 및 100% 초고선명도(Sharp Focus) 강제 지시어
+  // AGENTS.md 및 사용자 맞춤 규칙 준수: 뿌연 필터/유화 효과 100% 제거 & 8K 칼같은 실사 포토 지시어
   const pureWhiteModifier =
-    "CRITICAL: Ultra sharp focus, 8k crisp details, studio photography, no blur, no depth of field distortion, extremely clear facial features, five realistic fingers. Pure solid white (#FFFFFF) background, zero scenery, no watermark, no text.";
+    "CRITICAL: NO OIL PAINTING EFFECT, NO SMOOTH SKIN FILTER, NO ARTIFICIAL BLUR. Extremely crisp sharp focus, authentic 8k photorealistic commercial photography, natural skin texture, razor sharp focus on facial features. Pure solid white (#FFFFFF) background, zero scenery, no watermark, no text.";
 
   const officeModifier =
-    "Ultra sharp focus, 8k crisp detail commercial photography, professional clean office background, bright studio lighting, no blur, crystal clear facial expression, correct five fingers, high contrast, no text, no logo.";
+    "CRITICAL: NO OIL PAINTING EFFECT, NO SMOOTH FILTER, NO BLUR. Extremely crisp sharp focus 8k DSLR photography, natural bright corporate office background, high contrast, razor sharp facial details, correct five fingers, no text, no logo.";
 
   const saveToStorage = (newList: { id: string; url: string; prompt: string; createdAt: string }[]) => {
     setGeneratedImages(newList);
@@ -178,16 +165,16 @@ export function StockImageGenerator({
     const styleObj = topStockStyles.find((s) => s.id === selectedStockStyle);
     const styleModifier = styleObj ? styleObj.promptModifier : "";
 
-    const sharpEnhancer = ", ultra sharp, crisp focus, hyper realistic, high clarity 8k stock photo, no blur";
+    const sharpEnhancer = ", extremely sharp focus, crisp details, 8k realistic photo, no blur, no oil painting, high clarity";
 
     const finalPrompt =
       prompt + styleModifier + sharpEnhancer + (backgroundType === "white" ? ` | ${pureWhiteModifier}` : ` | ${officeModifier}`);
 
     const seed = Math.floor(Math.random() * 1000000);
-    // Sharp Crisp 1080p/4K High Precision Commercial Stock Photo Model URL
+    // Real Sharp Commercial Stock Photo Model URL
     const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
       finalPrompt
-    )}?width=1920&height=1080&seed=${seed}&model=flux&nologo=true&enhance=true`;
+    )}?width=1920&height=1080&seed=${seed}&model=flux&nologo=true`;
 
     const imgObj = new Image();
     imgObj.crossOrigin = "anonymous";

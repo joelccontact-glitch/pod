@@ -90,16 +90,15 @@ export async function POST(req: Request) {
       }
     }
 
-    // fallback 시뮬레이션 성공
+    // AccessToken이 없는 경우 거짓 성공 메시지를 띄우지 않고 정확한 안내 반환!
     return NextResponse.json({
-      success: true,
-      message: "구글 드라이브 동기화 폴더로 자동 전송이 완료되었습니다.",
-      fileName: fileName || `stock_factory_${Date.now()}.png`,
+      success: false,
+      message: "구글 계정 연동(OAuth)이 필요합니다. 이미지 파일(4K PNG)을 다운로드한 후 구글 드라이브로 안전하게 이동합니다.",
     });
   } catch (error: any) {
     console.error("Google Drive Upload Error:", error);
     return NextResponse.json(
-      { success: false, message: error.message || "구글 드라이브 업로드에 실패했습니다." },
+      { success: false, message: error.message || "구글 드라이브 업로드 권한 확인이 필요합니다." },
       { status: 500 }
     );
   }
