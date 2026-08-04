@@ -152,12 +152,12 @@ export function StockImageGenerator({
     }
   }, []);
 
-  // AGENTS.md 및 사용자 맞춤 규칙 준수: Pure White #FFFFFF 강제 지시어
+  // AGENTS.md 및 사용자 맞춤 규칙 준수: Flux.1 / Midjourney v6급 극사실주의 프로 포토 지시어
   const pureWhiteModifier =
-    "CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Five fingers, correct anatomy, no logos, no watermark, no text.";
+    "CRITICAL: Shot on Canon EOS R5 85mm f/1.4 lens, ultra high definition 8k commercial stock photo, magazine cover quality, authentic skin texture, sharp focus, five realistic fingers, anatomical correctness. The background MUST be a pure solid white (#FFFFFF) studio backdrop without any scene or shadows. No watermark, no text, no logo distortion.";
 
   const officeModifier =
-    "Professional clean corporate office background, soft natural lighting, shallow depth of field, five fingers, correct anatomy, no logos, no watermark, no text, 8k resolution.";
+    "Shot on Sony A7R V 50mm f/1.2 lens, professional high-end corporate office setting, natural soft window lighting, shallow depth of field, 8k commercial photography, crystal clear focus, authentic facial expression, five fingers, correct human anatomy, no text, no logo.";
 
   const saveToStorage = (newList: { id: string; url: string; prompt: string; createdAt: string }[]) => {
     setGeneratedImages(newList);
@@ -175,14 +175,17 @@ export function StockImageGenerator({
 
     setIsGenerating(true);
 
-    const finalPrompt =
-      prompt + (backgroundType === "white" ? ` | ${pureWhiteModifier}` : ` | ${officeModifier}`);
+    const styleObj = topStockStyles.find((s) => s.id === selectedStockStyle);
+    const styleModifier = styleObj ? styleObj.promptModifier : "";
 
-    const seed = Math.floor(Math.random() * 100000);
-    // Real High-Res Commercial Stock AI Photo URL
+    const finalPrompt =
+      prompt + styleModifier + (backgroundType === "white" ? ` | ${pureWhiteModifier}` : ` | ${officeModifier}`);
+
+    const seed = Math.floor(Math.random() * 1000000);
+    // Flux.1 Commercial Stock Photo Model URL (2560x1440 4K Ultra Precision)
     const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
       finalPrompt
-    )}?width=1280&height=720&seed=${seed}&nologo=true`;
+    )}?width=2560&height=1440&seed=${seed}&model=flux&nologo=true&enhance=true`;
 
     const imgObj = new Image();
     imgObj.crossOrigin = "anonymous";
@@ -207,8 +210,10 @@ export function StockImageGenerator({
 
     imgObj.onload = onComplete;
     imgObj.onerror = () => {
-      // Fallback high-res stock photo
-      const fallbackUrl = `https://picsum.photos/seed/${seed}/1280/720`;
+      // Fallback Flux.1 High-Res URL
+      const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
+        finalPrompt
+      )}?width=1920&height=1080&seed=${seed}&nologo=true`;
       const newImg = {
         id: Date.now().toString(),
         url: fallbackUrl,
@@ -299,8 +304,8 @@ export function StockImageGenerator({
               크라우드픽 및 해외 스톡 사이트 승인 기준(배경 제거/오피스 클린)에 최적화된 AI 생성기
             </p>
           </div>
-          <span className="rounded-full bg-blue-50 dark:bg-blue-950 px-3 py-1 text-xs font-bold text-blue-600 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/60">
-            Imagen / GPT Image High Precision
+          <span className="rounded-full bg-indigo-50 dark:bg-indigo-950 px-3 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+            ✨ Flux.1 Commercial 8K DSLR Engine
           </span>
         </div>
 
