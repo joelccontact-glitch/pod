@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Wand2,
   Sparkles,
@@ -34,12 +34,35 @@ export function StockImageGenerator({
   >([]);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
+  // 최초 로드 시 localStorage에서 이전 생성 이미지 갤러리 복원
+  useEffect(() => {
+    try {
+      const savedList = localStorage.getItem("stock_generated_list");
+      if (savedList) {
+        setGeneratedImages(JSON.parse(savedList));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
   // AGENTS.md 및 사용자 맞춤 규칙 준수: Pure White #FFFFFF 강제 지시어
   const pureWhiteModifier =
     "CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Five fingers, correct anatomy, no logos, no watermark, no text.";
 
   const officeModifier =
     "Professional clean corporate office background, soft natural lighting, shallow depth of field, five fingers, correct anatomy, no logos, no watermark, no text, 8k resolution.";
+
+  const saveToStorage = (newList: { id: string; url: string; prompt: string; createdAt: string }[]) => {
+    setGeneratedImages(newList);
+    try {
+      localStorage.setItem("stock_generated_list", JSON.stringify(newList));
+      localStorage.setItem("stock_generated_count", newList.length.toString());
+      window.dispatchEvent(new Event("storage"));
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleGenerate = () => {
     if (!prompt.trim()) return;
@@ -67,13 +90,9 @@ export function StockImageGenerator({
         createdAt: new Date().toLocaleTimeString(),
       };
 
-      setGeneratedImages((prev) => [newImg, ...prev]);
+      const updated = [newImg, ...generatedImages];
+      saveToStorage(updated);
       setIsGenerating(false);
-
-      // 1. 대시보드 누적 카운트 실시간 카운트 업!
-      const currentCnt = parseInt(localStorage.getItem("stock_generated_count") || "0", 10);
-      localStorage.setItem("stock_generated_count", (currentCnt + 1).toString());
-      window.dispatchEvent(new Event("storage"));
 
       if (onGeneratedSuccess) {
         onGeneratedSuccess(finalPrompt);
@@ -91,12 +110,9 @@ export function StockImageGenerator({
         createdAt: new Date().toLocaleTimeString(),
       };
 
-      setGeneratedImages((prev) => [newImg, ...prev]);
+      const updated = [newImg, ...generatedImages];
+      saveToStorage(updated);
       setIsGenerating(false);
-
-      const currentCnt = parseInt(localStorage.getItem("stock_generated_count") || "0", 10);
-      localStorage.setItem("stock_generated_count", (currentCnt + 1).toString());
-      window.dispatchEvent(new Event("storage"));
     };
   };
 
@@ -106,9 +122,10 @@ export function StockImageGenerator({
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  // 3. 이미지 삭제 기능
+  // 3. 이미지 삭제 기능 (localStorage 영구 반영)
   const handleDeleteImage = (id: string) => {
-    setGeneratedImages((prev) => prev.filter((img) => img.id !== id));
+    const updated = generatedImages.filter((img) => img.id !== id);
+    saveToStorage(updated);
   };
 
   // 1 & 2. 프롬프트 추천 및 1초 재생성 기능
