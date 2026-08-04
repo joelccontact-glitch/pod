@@ -95,6 +95,38 @@ export function StockImageGenerator({
       window.open(imgUrl, "_blank");
     }
   };
+
+  const [uploadingDriveId, setUploadingDriveId] = useState<string | null>(null);
+
+  // 구글 드라이브 AI_Stock_Factory 폴더 1초 직행 자동 업로드 핸들러
+  const handleDirectDriveUpload = async (imgUrl: string, imgId: string) => {
+    try {
+      setUploadingDriveId(imgId);
+      const res = await fetch("/api/stock-factory/google-drive-upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          imageUrl: imgUrl,
+          fileName: `stock_factory_${imgId}_4k.png`,
+        }),
+      });
+
+      const data = await res.json();
+      setUploadingDriveId(null);
+
+      if (data.success) {
+        alert(`✅ 구글 드라이브 [AI_Stock_Factory] 보관함으로 1초 자동 직행 전송 완료!\n\n${data.message}`);
+        window.open(data.webLink || "https://drive.google.com/drive/my-drive", "_blank");
+      } else {
+        alert(`업로드 안내: ${data.message}`);
+        window.open("https://drive.google.com/drive/my-drive", "_blank");
+      }
+    } catch (err: any) {
+      setUploadingDriveId(null);
+      alert("구글 드라이브 자동 연결로 이동합니다.");
+      window.open("https://drive.google.com/drive/my-drive", "_blank");
+    }
+  };
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generatedImages, setGeneratedImages] = useState<
     { id: string; url: string; prompt: string; createdAt: string }[]
@@ -498,14 +530,19 @@ export function StockImageGenerator({
 
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={async () => {
-                            await downloadHighResPNG(img.url, `stock_factory_${img.id}_4k.png`);
-                            window.open("https://drive.google.com/drive/my-drive", "_blank");
-                          }}
-                          className="inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-950 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-800 transition-colors"
-                          title="4K 이미지 파일 다운로드 및 내 구글 드라이브 열기"
+                          onClick={() => handleDirectDriveUpload(img.url, img.id)}
+                          disabled={uploadingDriveId === img.id}
+                          className="inline-flex items-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 transition-all"
+                          title="구글 드라이브 AI_Stock_Factory 폴더에 1초 자동 직행 업로드"
                         >
-                          ☁️ 드라이브 저장
+                          {uploadingDriveId === img.id ? (
+                            <>
+                              <div className="mr-1.5 h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                              자동 전송 중...
+                            </>
+                          ) : (
+                            <>☁️ 드라이브 자동 전송</>
+                          )}
                         </button>
 
                         <button
