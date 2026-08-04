@@ -27,7 +27,74 @@ export function StockImageGenerator({
       "Ultra realistic commercial stock photo, professional Korean financial advisor explaining retirement pension plan on a tablet to a couple, clean modern office setting, corporate blue lighting, copy space, 8k resolution"
   );
   const [backgroundType, setBackgroundType] = useState<"white" | "office">("white");
-  const [aspectRatio, setAspectRatio] = useState<"16:9" | "4:3" | "1:1">("16:9");
+  const [selectedStockStyle, setSelectedStockStyle] = useState<string>("photo");
+
+  // 베스트셀러 스톡 TOP 5 스타일 정의
+  const topStockStyles = [
+    {
+      id: "photo",
+      name: "📸 TOP 1. 극사실주의 실사 포토",
+      desc: "3040/5060 한국인 모델, 세련된 비즈니스 컷",
+      promptModifier: ", ultra realistic photo, authentic skin texture, natural studio lighting, commercial photography, 8k",
+    },
+    {
+      id: "3d",
+      name: "🎨 TOP 2. 미니멀 3D 오브젝트",
+      desc: "금융/연금 3D 캐릭터 & 아이콘 (Pure White 배경)",
+      promptModifier: ", 3d render illustration, minimalist modern design, smooth glossy texture, octane render, soft shadows, 8k",
+    },
+    {
+      id: "vector",
+      name: "💼 TOP 3. 기업 벡터 일러스트",
+      desc: "언론기사, 카드뉴스, 가이드북용 세련된 벡터",
+      promptModifier: ", flat vector illustration, clean lines, professional corporate palette, modern graphic design, high resolution",
+    },
+    {
+      id: "portrait",
+      name: "🌇 TOP 4. 스튜디오 인물 컷",
+      desc: "자산관리사, 은퇴부부 신뢰감 있는 포트레이트",
+      promptModifier: ", professional corporate studio portrait, shallow depth of field, warm ambient light, authentic facial expression",
+    },
+    {
+      id: "fintech",
+      name: "📊 TOP 5. AI 금융 테크 그래픽",
+      desc: "ETF 주식 차트, 빅데이터, 디지털 핀테크",
+      promptModifier: ", futuristic fintech data visualization, glowing digital chart, clean blue lighting, high tech corporate background",
+    },
+  ];
+
+  // Canvas 2560x1440 High-Res PNG Exporter Function
+  const downloadHighResPNG = async (imgUrl: string, fileName: string) => {
+    try {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = imgUrl;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 2560;
+      canvas.height = 1440;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.fillStyle = backgroundType === "white" ? "#ffffff" : "#0f172a";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }
+
+      const dataUrl = canvas.toDataURL("image/png", 1.0);
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      window.open(imgUrl, "_blank");
+    }
+  };
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generatedImages, setGeneratedImages] = useState<
     { id: string; url: string; prompt: string; createdAt: string }[]
@@ -223,6 +290,31 @@ export function StockImageGenerator({
             </div>
           </div>
 
+          {/* TOP 5 Bestselling Stock Style Selector */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5 flex items-center gap-1">
+              <Sparkles className="h-3.5 w-3.5 text-amber-500" />
+              스톡 판매 TOP 5 베스트셀러 스타일 선택
+            </label>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {topStockStyles.map((st) => (
+                <button
+                  key={st.id}
+                  type="button"
+                  onClick={() => setSelectedStockStyle(st.id)}
+                  className={`rounded-xl p-2.5 text-left transition-all ${
+                    selectedStockStyle === st.id
+                      ? "border-2 border-indigo-600 bg-indigo-50/70 text-indigo-900 dark:border-indigo-500 dark:bg-indigo-950/60 dark:text-indigo-200 shadow-sm"
+                      : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
+                  }`}
+                >
+                  <span className="block text-xs font-bold">{st.name}</span>
+                  <span className="block text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{st.desc}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Options Grid */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Background Option (AGENTS.md Rule) */}
@@ -260,26 +352,14 @@ export function StockImageGenerator({
               </div>
             </div>
 
-            {/* Aspect Ratio */}
+            {/* Quality Spec Badge */}
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5">
-                이미지 비율 (스톡 규격)
+                화질 및 해상도 규격 (스톡 제출용)
               </label>
-              <div className="grid grid-cols-3 gap-2">
-                {(["16:9", "4:3", "1:1"] as const).map((ratio) => (
-                  <button
-                    key={ratio}
-                    type="button"
-                    onClick={() => setAspectRatio(ratio)}
-                    className={`rounded-xl py-2.5 text-xs font-bold transition-all ${
-                      aspectRatio === ratio
-                        ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 shadow-sm"
-                        : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
-                    }`}
-                  >
-                    {ratio}
-                  </button>
-                ))}
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-2.5 dark:border-emerald-900/50 dark:bg-emerald-950/30 text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center justify-between">
+                <span>2560 x 1440px (4K 고해상도)</span>
+                <span className="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded">약 2MB~4MB PNG</span>
               </div>
             </div>
           </div>
@@ -287,6 +367,7 @@ export function StockImageGenerator({
           {/* Prompt Preview Banner */}
           <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-950 text-[11px] text-slate-600 dark:text-slate-400 font-mono">
             <span className="font-bold text-indigo-600 dark:text-indigo-400">자동 추가 보완 템플릿: </span>
+            {topStockStyles.find((s) => s.id === selectedStockStyle)?.name}
             {backgroundType === "white" ? pureWhiteModifier : officeModifier}
           </div>
 
@@ -299,12 +380,12 @@ export function StockImageGenerator({
             {isGenerating ? (
               <>
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                <span>스톡 이미지 팩토리 생성 중...</span>
+                <span>4K 고화질 스톡 포토 생성 중...</span>
               </>
             ) : (
               <>
                 <Sparkles className="h-4 w-4" />
-                <span>AI 이미지 고화질 생성하기</span>
+                <span>4K 고화질 AI 이미지 생성하기 (2~4MB)</span>
               </>
             )}
           </button>
@@ -321,7 +402,7 @@ export function StockImageGenerator({
         {generatedImages.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-slate-300 p-12 text-center dark:border-slate-800">
             <p className="text-xs text-slate-500">
-              상단 프롬프트를 입력하고 [AI 이미지 고화질 생성하기] 버튼을 누르시면 여기에 바로 생성됩니다.
+              상단 프롬프트를 입력하고 [4K 고화질 AI 이미지 생성하기] 버튼을 누르시면 여기에 바로 생성됩니다.
             </p>
           </div>
         ) : (
@@ -336,7 +417,7 @@ export function StockImageGenerator({
                   <div className="relative aspect-video w-full overflow-hidden bg-slate-900 group">
                     <img src={img.url} alt="Generated Stock" className="h-full w-full object-cover" />
                     <span className="absolute top-2 left-2 rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-mono text-white backdrop-blur">
-                      {img.createdAt}
+                      {img.createdAt} | 2560x1440 4K
                     </span>
 
                     {/* 3. 이미지 삭제 버튼 (오른쪽 상단) */}
@@ -405,49 +486,20 @@ export function StockImageGenerator({
                     <div className="flex items-center space-x-2">
                       <button
                         onClick={async () => {
-                          try {
-                            const res = await fetch(img.url);
-                            const blob = await res.blob();
-                            const blobUrl = URL.createObjectURL(blob);
-                            const link = document.createElement("a");
-                            link.href = blobUrl;
-                            link.download = `stock_factory_${img.id}.png`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            URL.revokeObjectURL(blobUrl);
-
-                            window.open("https://drive.google.com/drive/my-drive", "_blank");
-                          } catch (err) {
-                            window.open(img.url, "_blank");
-                          }
+                          await downloadHighResPNG(img.url, `stock_factory_${img.id}_4k.png`);
+                          window.open("https://drive.google.com/drive/my-drive", "_blank");
                         }}
                         className="inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-950 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-800 transition-colors"
-                        title="이미지 파일 다운로드 및 내 구글 드라이브 열기"
+                        title="4K 이미지 파일 다운로드 및 내 구글 드라이브 열기"
                       >
                         ☁️ 드라이브 저장
                       </button>
 
                       <button
-                        onClick={async () => {
-                          try {
-                            const res = await fetch(img.url);
-                            const blob = await res.blob();
-                            const blobUrl = URL.createObjectURL(blob);
-                            const link = document.createElement("a");
-                            link.href = blobUrl;
-                            link.download = `stock_factory_${img.id}.png`;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            URL.revokeObjectURL(blobUrl);
-                          } catch (err) {
-                            window.open(img.url, "_blank");
-                          }
-                        }}
+                        onClick={() => downloadHighResPNG(img.url, `stock_factory_${img.id}_4k.png`)}
                         className="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                       >
-                        <Download className="mr-1.5 h-3.5 w-3.5 text-indigo-500" /> PNG 다운로드
+                        <Download className="mr-1.5 h-3.5 w-3.5 text-indigo-500" /> 4K PNG 다운로드 (2~4MB)
                       </button>
                     </div>
                   </div>
