@@ -106,6 +106,50 @@ export function StockImageGenerator({
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
+  // 3. 이미지 삭제 기능
+  const handleDeleteImage = (id: string) => {
+    setGeneratedImages((prev) => prev.filter((img) => img.id !== id));
+  };
+
+  // 1 & 2. 프롬프트 추천 및 1초 재생성 기능
+  const recommendedPromptOptions = [
+    {
+      title: "태블릿 자산설계 연출",
+      prompt: "Korean financial advisor demonstrating retirement pension portfolio on tablet to 30s couple, modern bright office, copy space, 8k",
+    },
+    {
+      title: "은퇴 설계 컨설팅 구도",
+      prompt: "Middle-aged Korean couple discussing IRP investment strategy with financial planner, warm daylight, realistic photo, 8k",
+    },
+    {
+      title: "스마트 오피스 데이터 회의",
+      prompt: "Korean fintech developer analyzing ETF stock chart on high tech workstation, clean minimalist office, realistic corporate photo, 8k",
+    },
+  ];
+
+  const handleApplyRecommendedPrompt = (newP: string) => {
+    setPrompt(newP);
+    // 즉시 추천 프롬프트로 재생성!
+    setTimeout(() => {
+      handleGenerate();
+    }, 100);
+  };
+
+  // 4. 이미지 변형 / 구도 수정 기능
+  const handleModifyImage = (id: string, currentP: string, modifierType: string) => {
+    let modifiedP = currentP;
+    if (modifierType === "lighting") {
+      modifiedP += " | bright studio lighting, soft shadows";
+    } else if (modifierType === "angle") {
+      modifiedP += " | wide angle shot, cinematic camera perspective";
+    } else if (modifierType === "senior") {
+      modifiedP += " | 50s middle-aged Korean active senior couple";
+    }
+
+    setPrompt(modifiedP);
+    handleGenerate();
+  };
+
   return (
     <div className="space-y-6">
       {/* Control Panel Card */}
@@ -129,9 +173,14 @@ export function StockImageGenerator({
         <div className="space-y-4">
           {/* Prompt TextArea */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5">
-              생성 프롬프트 (영문 입력 권장)
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+                생성 프롬프트 (영문 입력 권장)
+              </label>
+              <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400">
+                💡 프롬프트 추천 기능 지원
+              </span>
+            </div>
             <textarea
               rows={3}
               value={prompt}
@@ -139,6 +188,22 @@ export function StockImageGenerator({
               placeholder="생성하고 싶은 이미지 장면을 구체적으로 적으세요..."
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 p-3 text-xs font-mono text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
             />
+
+            {/* 1 & 2. 추천 프롬프트 세트 & 1초 재생성 칩 */}
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <span className="text-[10px] font-bold text-slate-400">AI 승인율 추천 프롬프트:</span>
+              {recommendedPromptOptions.map((opt, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleApplyRecommendedPrompt(opt.prompt)}
+                  className="rounded-lg bg-indigo-50 px-2 py-1 text-[11px] font-semibold text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-950 dark:text-indigo-300 dark:hover:bg-indigo-900 border border-indigo-200/60 transition-all flex items-center gap-1"
+                >
+                  <Sparkles className="h-3 w-3 text-indigo-500" />
+                  {opt.title} (재생성 ⚡)
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Options Grid */}
@@ -247,23 +312,64 @@ export function StockImageGenerator({
             {generatedImages.map((img, idx) => (
               <div
                 key={img.id}
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between"
               >
-                {/* SVG Rendered Image */}
-                <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
-                  <img src={img.url} alt="Generated Stock" className="h-full w-full object-cover" />
-                  <span className="absolute top-2 left-2 rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-mono text-white backdrop-blur">
-                    {img.createdAt}
-                  </span>
+                <div>
+                  {/* Image View */}
+                  <div className="relative aspect-video w-full overflow-hidden bg-slate-900 group">
+                    <img src={img.url} alt="Generated Stock" className="h-full w-full object-cover" />
+                    <span className="absolute top-2 left-2 rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-mono text-white backdrop-blur">
+                      {img.createdAt}
+                    </span>
+
+                    {/* 3. 이미지 삭제 버튼 (오른쪽 상단) */}
+                    <button
+                      onClick={() => handleDeleteImage(img.id)}
+                      className="absolute top-2 right-2 rounded-lg bg-rose-600/90 p-1.5 text-white hover:bg-rose-700 transition-all shadow-md"
+                      title="이미지 삭제하기"
+                    >
+                      🗑️ 삭제
+                    </button>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="p-4 space-y-3">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 font-mono line-clamp-2">
+                      {img.prompt}
+                    </p>
+
+                    {/* 4. 이미지 구도/조명/인물 수정 & 튜닝 툴바 */}
+                    <div className="rounded-xl bg-slate-50 p-2.5 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
+                      <span className="block text-[10px] font-bold text-slate-500 mb-1.5">
+                        🎨 마음에 안 들 때 1초 구도/조명 수정 튜닝:
+                      </span>
+                      <div className="flex flex-wrap gap-1">
+                        <button
+                          onClick={() => handleModifyImage(img.id, img.prompt, "lighting")}
+                          className="rounded bg-white px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm border border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:border-indigo-500"
+                        >
+                          ✨ 화사한 조명 튜닝
+                        </button>
+                        <button
+                          onClick={() => handleModifyImage(img.id, img.prompt, "angle")}
+                          className="rounded bg-white px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm border border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:border-indigo-500"
+                        >
+                          📐 와이드 카메라 구도
+                        </button>
+                        <button
+                          onClick={() => handleModifyImage(img.id, img.prompt, "senior")}
+                          className="rounded bg-white px-2 py-1 text-[10px] font-bold text-slate-700 shadow-sm border border-slate-200 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 hover:border-indigo-500"
+                        >
+                          👥 중년 은퇴부부로 수정
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Card Content */}
-                <div className="p-4 space-y-3">
-                  <p className="text-xs text-slate-600 dark:text-slate-300 font-mono line-clamp-2">
-                    {img.prompt}
-                  </p>
-
-                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                {/* Bottom Action Footer */}
+                <div className="p-4 pt-0">
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
                     <button
                       onClick={() => handleCopyPrompt(idx, img.prompt)}
                       className="inline-flex items-center text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
