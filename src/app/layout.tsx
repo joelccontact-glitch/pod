@@ -24,6 +24,7 @@ export const metadata: Metadata = {
 };
 
 import { Providers } from "./providers";
+import { TopMasterTab } from "@/components/TopMasterTab";
 
 export default function RootLayout({
   children,
@@ -41,7 +42,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Comic+Neue:wght@400;700&family=Jua&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers>
+          <TopMasterTab />
+          <div className="flex-1">{children}</div>
+        </Providers>
         <script
           dangerouslySetInnerHTML={{
             __html: `
