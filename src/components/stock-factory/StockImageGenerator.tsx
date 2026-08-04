@@ -157,63 +157,70 @@ export function StockImageGenerator({
     }
   };
 
-  const handleGenerate = () => {
+  const [googleApiKey, setGoogleApiKey] = useState<string>("");
+
+  const handleGenerate = async () => {
     if (!prompt.trim()) return;
 
     setIsGenerating(true);
 
     const styleObj = topStockStyles.find((s) => s.id === selectedStockStyle);
     const styleModifier = styleObj ? styleObj.promptModifier : "";
-
     const sharpEnhancer = ", extremely sharp focus, crisp details, 8k realistic photo, no blur, no oil painting, high clarity";
 
     const finalPrompt =
       prompt + styleModifier + sharpEnhancer + (backgroundType === "white" ? ` | ${pureWhiteModifier}` : ` | ${officeModifier}`);
 
-    const seed = Math.floor(Math.random() * 1000000);
-    // Real Sharp Commercial Stock Photo Model URL
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
-      finalPrompt
-    )}?width=1920&height=1080&seed=${seed}&model=flux&nologo=true`;
+    try {
+      // 1. 앱 내부 프로그램에서 Google Imagen 3 API 직접 호출!
+      const res = await fetch("/api/stock-factory/imagen3-generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: finalPrompt,
+          apiKey: googleApiKey,
+        }),
+      });
 
-    const imgObj = new Image();
-    imgObj.crossOrigin = "anonymous";
-    imgObj.src = imageUrl;
+      const data = await res.json();
 
-    const onComplete = () => {
-      const newImg = {
-        id: Date.now().toString(),
-        url: imageUrl,
-        prompt: finalPrompt,
-        createdAt: new Date().toLocaleTimeString(),
-      };
+      if (data.success && data.url) {
+        const newImg = {
+          id: Date.now().toString(),
+          url: data.url,
+          prompt: finalPrompt,
+          createdAt: new Date().toLocaleTimeString(),
+        };
 
-      const updated = [newImg, ...generatedImages];
-      saveToStorage(updated);
-      setIsGenerating(false);
+        const updated = [newImg, ...generatedImages];
+        saveToStorage(updated);
+        setIsGenerating(false);
 
-      if (onGeneratedSuccess) {
-        onGeneratedSuccess(finalPrompt);
+        if (onGeneratedSuccess) {
+          onGeneratedSuccess(finalPrompt);
+        }
+        return;
       }
+    } catch (e) {
+      console.error(e);
+    }
+
+    // Fallback
+    const seed = Math.floor(Math.random() * 1000000);
+    const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
+      finalPrompt
+    )}?width=1920&height=1080&seed=${seed}&model=flux-realism&nologo=true`;
+
+    const newImg = {
+      id: Date.now().toString(),
+      url: fallbackUrl,
+      prompt: finalPrompt,
+      createdAt: new Date().toLocaleTimeString(),
     };
 
-    imgObj.onload = onComplete;
-    imgObj.onerror = () => {
-      // Fallback Flux.1 High-Res URL
-      const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
-        finalPrompt
-      )}?width=1920&height=1080&seed=${seed}&nologo=true`;
-      const newImg = {
-        id: Date.now().toString(),
-        url: fallbackUrl,
-        prompt: finalPrompt,
-        createdAt: new Date().toLocaleTimeString(),
-      };
-
-      const updated = [newImg, ...generatedImages];
-      saveToStorage(updated);
-      setIsGenerating(false);
-    };
+    const updated = [newImg, ...generatedImages];
+    saveToStorage(updated);
+    setIsGenerating(false);
   };
 
   const handleCopyPrompt = (index: number, text: string) => {
@@ -293,13 +300,30 @@ export function StockImageGenerator({
               크라우드픽 및 해외 스톡 사이트 승인 기준(배경 제거/오피스 클린)에 최적화된 AI 생성기
             </p>
           </div>
-          <span className="rounded-full bg-indigo-50 dark:bg-indigo-950 px-3 py-1 text-xs font-bold text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
-            ✨ Flux.1 Commercial 8K DSLR Engine
+          <span className="rounded-full bg-emerald-50 dark:bg-emerald-950 px-3 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 flex items-center gap-1">
+            ✨ Google Imagen 3 Direct 8K Engine
           </span>
         </div>
 
         {/* Form Inputs */}
         <div className="space-y-4">
+          {/* Optional Google AI Ultra / Gemini API Key */}
+          <div className="rounded-xl border border-emerald-200/80 bg-emerald-50/50 p-3 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-bold text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5">
+                <Sparkles className="h-4 w-4 text-emerald-500" />
+                Google AI Ultra / Gemini API 키 연동 (선택 - 100% 쨍한 Imagen 3 8K 직접 생성)
+              </label>
+              <span className="text-[10px] text-emerald-600 font-medium">구독자 전용 연동</span>
+            </div>
+            <input
+              type="password"
+              value={googleApiKey}
+              onChange={(e) => setGoogleApiKey(e.target.value)}
+              placeholder="구글 Gemini API Key가 있다면 여기에 입력하세요 (미입력시 4K 렌더러 자동 동작)"
+              className="w-full rounded-lg border border-emerald-200 bg-white p-2 text-xs font-mono text-slate-800 placeholder-slate-400 focus:border-emerald-500 focus:outline-none dark:border-emerald-900 dark:bg-slate-900 dark:text-slate-100"
+            />
+          </div>
           {/* Prompt TextArea */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
