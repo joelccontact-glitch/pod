@@ -138,21 +138,31 @@ export default function StockFactoryPage() {
         </div>
       </div>
 
-      {/* Main View Area */}
+      {/* Main View Area (Preserves DOM state so ongoing generation is not lost on tab switch) */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {activeTab === "dashboard" && <StockDashboard onNavigate={(tab) => setActiveTab(tab)} />}
-        {activeTab === "prompts" && (
+        <div className={activeTab === "dashboard" ? "" : "hidden"}>
+          <StockDashboard onNavigate={(tab) => setActiveTab(tab)} />
+        </div>
+        <div className={activeTab === "prompts" ? "" : "hidden"}>
           <PromptLibrary onUsePrompt={(p) => handleUsePromptFromLibrary(p)} />
-        )}
-        {activeTab === "generator" && (
+        </div>
+        <div className={activeTab === "generator" ? "" : "hidden"}>
           <StockImageGenerator
             initialPrompt={generatorPrompt}
-            onGeneratedSuccess={() => setActiveTab("metadata")}
+            onGeneratedSuccess={() => {
+              // 이미지 생성이 완료되어도 메타데이터 탭으로 바로 이동하지 않고 소비자가 확인할 수 있도록 유지
+            }}
           />
-        )}
-        {activeTab === "metadata" && <MetadataGenerator />}
-        {activeTab === "series" && <SeriesManager />}
-        {activeTab === "gdrive" && <GoogleDriveSync />}
+        </div>
+        <div className={activeTab === "metadata" ? "" : "hidden"}>
+          <MetadataGenerator />
+        </div>
+        <div className={activeTab === "series" ? "" : "hidden"}>
+          <SeriesManager />
+        </div>
+        <div className={activeTab === "gdrive" ? "" : "hidden"}>
+          <GoogleDriveSync />
+        </div>
       </div>
     </main>
   );
