@@ -10,12 +10,14 @@ import {
   TrendingUp,
   ShieldCheck,
   Zap,
+  Cloud,
 } from "lucide-react";
 import { StockDashboard } from "@/components/stock-factory/StockDashboard";
 import { PromptLibrary } from "@/components/stock-factory/PromptLibrary";
 import { StockImageGenerator } from "@/components/stock-factory/StockImageGenerator";
 import { MetadataGenerator } from "@/components/stock-factory/MetadataGenerator";
 import { SeriesManager } from "@/components/stock-factory/SeriesManager";
+import { GoogleDriveSync } from "@/components/stock-factory/GoogleDriveSync";
 
 export default function StockFactoryPage() {
   const [activeTab, setActiveTab] = useState<string>("dashboard");
@@ -120,6 +122,18 @@ export default function StockFactoryPage() {
               <Layers className="h-4 w-4" />
               <span>시리즈 팩토리 (20~50장 묶음)</span>
             </button>
+
+            <button
+              onClick={() => setActiveTab("gdrive")}
+              className={`flex items-center space-x-2 shrink-0 rounded-xl px-4 py-2 text-xs font-bold transition-all ${
+                activeTab === "gdrive"
+                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/20"
+                  : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+              }`}
+            >
+              <Cloud className="h-4 w-4 text-sky-400" />
+              <span>Google Drive (15GB 연동)</span>
+            </button>
           </div>
         </div>
       </div>
@@ -138,6 +152,7 @@ export default function StockFactoryPage() {
         )}
         {activeTab === "metadata" && <MetadataGenerator />}
         {activeTab === "series" && <SeriesManager />}
+        {activeTab === "gdrive" && <GoogleDriveSync />}
       </div>
     </main>
   );

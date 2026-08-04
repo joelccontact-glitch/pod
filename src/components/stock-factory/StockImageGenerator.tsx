@@ -277,13 +277,41 @@ export function StockImageGenerator({
                       )}
                     </button>
 
-                    <a
-                      href={img.url}
-                      download={`stock_factory_${img.id}.svg`}
-                      className="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      <Download className="mr-1.5 h-3.5 w-3.5 text-indigo-500" /> 이미지 저장
-                    </a>
+                    <div className="flex items-center space-x-2">
+                      <button
+                        onClick={async () => {
+                          try {
+                            const res = await fetch("/api/stock-factory/google-drive", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                fileName: `stock_img_${img.id}.png`,
+                                fileData: img.url,
+                                category: "퇴직연금",
+                              }),
+                            });
+                            const json = await res.json();
+                            if (json.success) {
+                              alert("☁️ Google Drive 15GB 무료 폴더에 성공적으로 자동 백업되었습니다!");
+                            }
+                          } catch (e) {
+                            console.error(e);
+                          }
+                        }}
+                        className="inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-950 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-800 transition-colors"
+                        title="Google Drive로 원클릭 백업"
+                      >
+                        ☁️ 드라이브 저장
+                      </button>
+
+                      <a
+                        href={img.url}
+                        download={`stock_factory_${img.id}.svg`}
+                        className="inline-flex items-center rounded-lg bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                      >
+                        <Download className="mr-1.5 h-3.5 w-3.5 text-indigo-500" /> 내 PC 저장
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
