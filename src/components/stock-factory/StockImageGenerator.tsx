@@ -279,27 +279,20 @@ export function StockImageGenerator({
 
                     <div className="flex items-center space-x-2">
                       <button
-                        onClick={async () => {
-                          try {
-                            const res = await fetch("/api/stock-factory/google-drive", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({
-                                fileName: `stock_img_${img.id}.png`,
-                                fileData: img.url,
-                                category: "퇴직연금",
-                              }),
-                            });
-                            const json = await res.json();
-                            if (json.success) {
-                              alert("☁️ Google Drive 15GB 무료 폴더에 성공적으로 자동 백업되었습니다!");
-                            }
-                          } catch (e) {
-                            console.error(e);
-                          }
+                        onClick={() => {
+                          // 1. 이미지 실제 파일 즉시 내 컴퓨터 저장
+                          const link = document.createElement("a");
+                          link.href = img.url;
+                          link.download = `stock_factory_${img.id}.svg`;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+
+                          // 2. 구글 드라이브(drive.google.com)로 원클릭 이동
+                          window.open("https://drive.google.com/drive/my-drive", "_blank");
                         }}
                         className="inline-flex items-center rounded-lg bg-blue-50 dark:bg-blue-950 px-2.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900 border border-blue-200 dark:border-blue-800 transition-colors"
-                        title="Google Drive로 원클릭 백업"
+                        title="이미지 파일 다운로드 및 내 구글 드라이브 열기"
                       >
                         ☁️ 드라이브 저장
                       </button>

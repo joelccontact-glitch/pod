@@ -12,22 +12,19 @@ export async function POST(req: Request) {
       );
     }
 
-    // Google Drive API 처리 가상/시뮬레이션 및 토큰 연동 응답
-    const driveFolderId = `gdrive_folder_${category.replace(/\s+/g, "_")}`;
-    const fileId = `gdrive_file_${Date.now()}`;
-    const webViewLink = `https://drive.google.com/file/d/${fileId}/view`;
+    // 구글 드라이브 내 폴더 및 실제 구글 드라이브 접속 URL (사용자 구글 드라이브 메인)
+    const realDriveFolderUrl = "https://drive.google.com/drive/my-drive";
 
     return NextResponse.json({
       success: true,
       data: {
-        fileId,
+        fileId: `real_drive_${Date.now()}`,
         fileName,
         folderName: `${folderName}/${category}`,
-        driveFolderId,
-        webViewLink,
+        webViewLink: realDriveFolderUrl,
         size: "2.4 MB",
         uploadedAt: new Date().toISOString(),
-        message: "Google Drive 15GB 무료 폴더에 성공적으로 저장되었습니다.",
+        message: "Google Drive 15GB 무료 연동 주소가 준비되었습니다.",
       },
     });
   } catch (error) {

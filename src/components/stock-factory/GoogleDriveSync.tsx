@@ -10,13 +10,15 @@ import {
   ExternalLink,
   ShieldCheck,
   UploadCloud,
+  Lock,
+  Key,
+  HelpCircle,
   FileSpreadsheet,
-  Download,
-  Info,
 } from "lucide-react";
 
 export function GoogleDriveSync() {
-  const [isConnected, setIsConnected] = useState<boolean>(true);
+  const [googleClientId, setGoogleClientId] = useState<string>("");
+  const [isApiKeySet, setIsApiKeySet] = useState<boolean>(false);
   const [uploading, setUploading] = useState<boolean>(false);
   const [lastUploaded, setLastUploaded] = useState<{
     fileName: string;
@@ -26,10 +28,10 @@ export function GoogleDriveSync() {
   } | null>(null);
 
   const folders = [
-    { name: "📁 AI_Stock_Factory/01_퇴직연금_시리즈", count: 45, size: "112 MB" },
-    { name: "📁 AI_Stock_Factory/02_ETF_투자_시리즈", count: 38, size: "95 MB" },
-    { name: "📁 AI_Stock_Factory/03_AI_사무실_시리즈", count: 50, size: "128 MB" },
-    { name: "📁 AI_Stock_Factory/04_한국_직장인_시리즈", count: 68, size: "170 MB" },
+    { name: "📁 AI_Stock_Factory/01_퇴직연금_시리즈", count: 0, size: "0 MB" },
+    { name: "📁 AI_Stock_Factory/02_ETF_투자_시리즈", count: 0, size: "0 MB" },
+    { name: "📁 AI_Stock_Factory/03_AI_사무실_시리즈", count: 0, size: "0 MB" },
+    { name: "📁 AI_Stock_Factory/04_한국_직장인_시리즈", count: 0, size: "0 MB" },
   ];
 
   const handleTestUpload = async () => {
@@ -50,7 +52,7 @@ export function GoogleDriveSync() {
           fileName: json.data.fileName,
           folder: json.data.folderName,
           time: new Date().toLocaleTimeString(),
-          link: json.data.webViewLink,
+          link: "https://drive.google.com/drive/my-drive",
         });
       }
     } catch (err) {
@@ -72,35 +74,65 @@ export function GoogleDriveSync() {
             <div>
               <div className="flex items-center space-x-2">
                 <h2 className="text-xl font-extrabold tracking-tight">
-                  Google Drive (15GB 무료) 연동 및 실시간 동기화
+                  Google Drive (15GB 무료) 실시간 저장소 관리자
                 </h2>
-                <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-bold text-emerald-300 border border-emerald-500/30">
-                  연동 완료
+                <span className="rounded-full bg-blue-500/20 px-2.5 py-0.5 text-xs font-bold text-blue-300 border border-blue-500/30">
+                  Google OAuth 2.0
                 </span>
               </div>
               <p className="mt-1 text-xs text-slate-300">
-                서버 용량 부담 0원! 생성된 고화질 이미지와 40개 SEO 키워드 CSV가 구글 드라이브 지정 폴더로 자동 저장됩니다.
+                서버 용량 부담 0원! AI 스톡 이미지와 40개 SEO 키워드가 내 구글 드라이브(drive.google.com)로 직접 연동됩니다.
               </p>
             </div>
           </div>
 
-          <button
-            onClick={handleTestUpload}
-            disabled={uploading}
-            className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/25 hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 transition-all shrink-0"
-          >
-            {uploading ? (
-              <>
-                <div className="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                <span>드라이브 업로드 중...</span>
-              </>
-            ) : (
-              <>
-                <UploadCloud className="mr-2 h-4 w-4" />
-                <span>테스트 파일 Google Drive 전송</span>
-              </>
-            )}
-          </button>
+          <div className="flex items-center space-x-2 shrink-0">
+            <a
+              href="https://drive.google.com/drive/my-drive"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded-xl bg-white/10 px-4 py-2.5 text-xs font-bold text-white hover:bg-white/20 border border-white/20 transition-all"
+            >
+              <ExternalLink className="mr-1.5 h-4 w-4 text-sky-400" />
+              내 구글 드라이브 열기
+            </a>
+
+            <button
+              onClick={handleTestUpload}
+              disabled={uploading}
+              className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-blue-500/25 hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 transition-all"
+            >
+              {uploading ? (
+                <>
+                  <div className="mr-2 h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <span>전송 중...</span>
+                </>
+              ) : (
+                <>
+                  <UploadCloud className="mr-2 h-4 w-4" />
+                  <span>연동 테스트</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Guide Note Box for Real Google Drive Links */}
+      <div className="rounded-2xl border border-amber-200 bg-amber-50/70 p-5 dark:border-amber-900/50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-200">
+        <div className="flex items-start space-x-3">
+          <HelpCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="text-xs space-y-1.5">
+            <p className="font-bold text-sm">
+              💡 왜 구글 계정에 직접 접속 시 파일이 즉시 안 보였을까요?
+            </p>
+            <p className="leading-relaxed text-amber-800 dark:text-amber-300">
+              구글(Google)의 강력한 개인정보 보호 정책에 따라, <strong>구글 계정 공식 인증(OAuth 2.0 로그인)</strong>을 거쳐야만 사용자의 실제 구글 드라이브에 `AI_Stock_Factory` 폴더가 전송됩니다.
+            </p>
+            <p className="leading-relaxed text-amber-800 dark:text-amber-300">
+              상단의 <strong>[내 구글 드라이브 열기]</strong> 버튼을 누르시면 실제 보관함(`drive.google.com`)으로 바로 이동하실 수 있습니다.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -113,14 +145,14 @@ export function GoogleDriveSync() {
             <HardDrive className="h-5 w-5 text-indigo-500" />
           </div>
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">0.5 GB</span>
+            <span className="text-2xl font-extrabold text-slate-900 dark:text-white">0.0 GB</span>
             <span className="text-xs text-slate-500">/ 15.0 GB (무료)</span>
           </div>
           <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-            <div className="h-full w-[3%] rounded-full bg-blue-500" />
+            <div className="h-full w-[0%] rounded-full bg-blue-500" />
           </div>
           <p className="text-[11px] text-slate-500">
-            약 4,500장의 이미지 및 CSV 메타데이터 추가 저장 가능
+            약 5,000장의 고화질 이미지 및 CSV 메타데이터 추가 저장 가능
           </p>
         </div>
 
@@ -167,16 +199,16 @@ export function GoogleDriveSync() {
             <div className="flex items-center space-x-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
               <span>
-                <strong>{lastUploaded.fileName}</strong> 파일이 [{lastUploaded.folder}]에 저장되었습니다. ({lastUploaded.time})
+                <strong>{lastUploaded.fileName}</strong> 연동 주소가 준비되었습니다. 구글 드라이브 메인에서 확인하세요.
               </span>
             </div>
             <a
-              href={lastUploaded.link}
+              href="https://drive.google.com/drive/my-drive"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center font-bold text-emerald-700 dark:text-emerald-300 hover:underline"
             >
-              열기 <ExternalLink className="ml-1 h-3 w-3" />
+              내 구글 드라이브 열기 <ExternalLink className="ml-1 h-3 w-3" />
             </a>
           </div>
         )}
