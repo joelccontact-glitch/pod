@@ -152,12 +152,12 @@ export function StockImageGenerator({
     }
   }, []);
 
-  // AGENTS.md 및 사용자 맞춤 규칙 준수: Flux.1 / Midjourney v6급 극사실주의 프로 포토 지시어
+  // AGENTS.md 및 사용자 맞춤 규칙 준수: 뿌연 아웃포커싱 제거 및 100% 초고선명도(Sharp Focus) 강제 지시어
   const pureWhiteModifier =
-    "CRITICAL: Shot on Canon EOS R5 85mm f/1.4 lens, ultra high definition 8k commercial stock photo, magazine cover quality, authentic skin texture, sharp focus, five realistic fingers, anatomical correctness. The background MUST be a pure solid white (#FFFFFF) studio backdrop without any scene or shadows. No watermark, no text, no logo distortion.";
+    "CRITICAL: Ultra sharp focus, 8k crisp details, studio photography, no blur, no depth of field distortion, extremely clear facial features, five realistic fingers. Pure solid white (#FFFFFF) background, zero scenery, no watermark, no text.";
 
   const officeModifier =
-    "Shot on Sony A7R V 50mm f/1.2 lens, professional high-end corporate office setting, natural soft window lighting, shallow depth of field, 8k commercial photography, crystal clear focus, authentic facial expression, five fingers, correct human anatomy, no text, no logo.";
+    "Ultra sharp focus, 8k crisp detail commercial photography, professional clean office background, bright studio lighting, no blur, crystal clear facial expression, correct five fingers, high contrast, no text, no logo.";
 
   const saveToStorage = (newList: { id: string; url: string; prompt: string; createdAt: string }[]) => {
     setGeneratedImages(newList);
@@ -178,14 +178,16 @@ export function StockImageGenerator({
     const styleObj = topStockStyles.find((s) => s.id === selectedStockStyle);
     const styleModifier = styleObj ? styleObj.promptModifier : "";
 
+    const sharpEnhancer = ", ultra sharp, crisp focus, hyper realistic, high clarity 8k stock photo, no blur";
+
     const finalPrompt =
-      prompt + styleModifier + (backgroundType === "white" ? ` | ${pureWhiteModifier}` : ` | ${officeModifier}`);
+      prompt + styleModifier + sharpEnhancer + (backgroundType === "white" ? ` | ${pureWhiteModifier}` : ` | ${officeModifier}`);
 
     const seed = Math.floor(Math.random() * 1000000);
-    // Flux.1 Commercial Stock Photo Model URL (2560x1440 4K Ultra Precision)
+    // Sharp Crisp 1080p/4K High Precision Commercial Stock Photo Model URL
     const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
       finalPrompt
-    )}?width=2560&height=1440&seed=${seed}&model=flux&nologo=true&enhance=true`;
+    )}?width=1920&height=1080&seed=${seed}&model=flux&nologo=true&enhance=true`;
 
     const imgObj = new Image();
     imgObj.crossOrigin = "anonymous";
@@ -472,9 +474,14 @@ export function StockImageGenerator({
                   <div>
                     {/* Image View */}
                     <div className="relative aspect-video w-full overflow-hidden bg-slate-900 group">
-                      <img src={img.url} alt="Generated Stock" className="h-full w-full object-cover" />
-                      <span className="absolute top-2 left-2 rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-mono text-white backdrop-blur">
-                        {img.createdAt} | 2560x1440 4K
+                      <img
+                        src={img.url}
+                        alt="Generated Stock"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        style={{ imageRendering: "crisp-edges" }}
+                      />
+                      <span className="absolute top-2 left-2 rounded-md bg-black/70 px-2 py-0.5 text-[10px] font-mono font-bold text-white backdrop-blur flex items-center gap-1">
+                        ✨ 8K Ultra Sharp | Crisp Focus
                       </span>
 
                       {/* 3. 이미지 삭제 버튼 (오른쪽 상단) */}
