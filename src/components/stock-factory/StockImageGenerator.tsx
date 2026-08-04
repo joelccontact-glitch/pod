@@ -26,6 +26,13 @@ export function StockImageGenerator({
     initialPrompt ||
       "Ultra realistic commercial stock photo, professional Korean financial advisor explaining retirement pension plan on a tablet to a couple, clean modern office setting, corporate blue lighting, copy space, 8k resolution"
   );
+
+  // 선택한 프롬프트 라이브러리 항목이 바뀔 때 자동 입력 반영!
+  useEffect(() => {
+    if (initialPrompt && initialPrompt.trim().length > 0) {
+      setPrompt(initialPrompt);
+    }
+  }, [initialPrompt]);
   const [backgroundType, setBackgroundType] = useState<"white" | "office">("white");
   const [selectedStockStyle, setSelectedStockStyle] = useState<string>("photo");
 
