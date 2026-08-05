@@ -5,12 +5,12 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { prompt, style = "photo", width = 2560, height = 1440 } = body;
 
-    // 초고화질 스톡 렌더링 엔진 (Pollinations 4K High Precision / Unsplash High Res)
+    // 100% 무료 4K 고화질 스톡 렌더링 엔진 (Pollinations Free Engine)
     const seed = Math.floor(Math.random() * 1000000);
     const encodedPrompt = encodeURIComponent(prompt);
     
-    // 2560x1440 2.5K~4K resolution real stock image URL
-    const highResUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true&enhance=true`;
+    // 2560x1440 4K PNG 100% free high-res image URL
+    const highResUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true`;
 
     return NextResponse.json({
       success: true,

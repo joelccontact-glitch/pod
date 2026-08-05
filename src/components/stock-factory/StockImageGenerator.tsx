@@ -463,15 +463,14 @@ export function StockImageGenerator({
                   className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between"
                 >
                   <div>
-                    {/* Image View */}
-                    <div className="relative aspect-video w-full overflow-hidden bg-slate-900 group">
+                    {/* Image View - object-top & object-contain으로 인물 머리/얼굴잘림 100% 방지! */}
+                    <div className="relative aspect-video w-full overflow-hidden bg-slate-900 group flex items-center justify-center">
                       <img
                         src={img.url}
                         alt="Generated Stock"
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        className="h-full w-full object-contain object-top transition-transform duration-300 group-hover:scale-105"
                         style={{ imageRendering: "crisp-edges" }}
                         onError={(e) => {
-                          // 이미지 로딩 실패 시 100% 고화질 비즈니스 오피스 포토로 안전 복구 (밤하늘 산 풍경 사진 완전 차단!)
                           e.currentTarget.src = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1280";
                         }}
                       />
