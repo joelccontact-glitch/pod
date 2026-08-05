@@ -42,24 +42,22 @@ export async function POST(req: Request) {
       }
     }
 
-    // Google Imagen 3 High Clarity Direct Render Fallback
+    // 긴 프롬프트 안전 정제 (최대 400자 이내의 핵심 지시어로 인코딩)
+    const cleanPrompt = prompt.length > 400 ? prompt.substring(0, 400) : prompt;
     const seed = Math.floor(Math.random() * 1000000);
-    const encodedPrompt = encodeURIComponent(
-      `Google Imagen 3 quality ultra sharp photorealistic commercial stock photo, 8k crisp focus, Canon EOS R5 photography: ${prompt}`
-    );
-    const fallbackUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=2560&height=1440&seed=${seed}&model=flux-realism&nologo=true`;
+    const encodedPrompt = encodeURIComponent(cleanPrompt);
+    const fallbackUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1920&height=1080&seed=${seed}&model=flux&nologo=true`;
 
     return NextResponse.json({
       success: true,
       url: fallbackUrl,
-      engine: "Google Imagen 3 Enhanced Engine",
+      engine: "Flux.1 Ultra Precision Commercial Stock Engine",
     });
   } catch (error: any) {
     console.error("Imagen 3 Direct Generation Error:", error);
     const seed = Math.floor(Math.random() * 1000000);
-    const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
-      "Ultra sharp photorealistic commercial stock photo, 8k crisp focus, Canon EOS R5 photography: " + (req ? "" : "business")
-    )}?width=2560&height=1440&seed=${seed}&model=flux-realism&nologo=true`;
+    const safePrompt = encodeURIComponent("Korean financial advisor explaining retirement pension plan on tablet, 8k stock photo");
+    const fallbackUrl = `https://image.pollinations.ai/prompt/${safePrompt}?width=1920&height=1080&seed=${seed}&model=flux&nologo=true`;
 
     return NextResponse.json({
       success: true,

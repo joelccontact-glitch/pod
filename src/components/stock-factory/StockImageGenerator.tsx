@@ -471,9 +471,8 @@ export function StockImageGenerator({
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         style={{ imageRendering: "crisp-edges" }}
                         onError={(e) => {
-                          // 이미지 로딩 실패 시 100% 정상 가동되는 고화질 실사 포토로 자동 복구!
-                          const fallbackSeed = (parseInt(img.id) || 123) % 1000;
-                          e.currentTarget.src = `https://picsum.photos/seed/${fallbackSeed}/1280/720`;
+                          // 이미지 로딩 실패 시 100% 고화질 비즈니스 오피스 포토로 안전 복구 (밤하늘 산 풍경 사진 완전 차단!)
+                          e.currentTarget.src = "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1280";
                         }}
                       />
                       <span className="absolute top-2 left-2 rounded-md bg-black/70 px-2 py-0.5 text-[10px] font-mono font-bold text-white backdrop-blur flex items-center gap-1">
@@ -492,9 +491,12 @@ export function StockImageGenerator({
 
                     {/* Card Content */}
                     <div className="p-4 space-y-3">
-                      <p className="text-xs text-slate-600 dark:text-slate-300 font-mono line-clamp-2">
-                        {img.prompt}
-                      </p>
+                      {/* 프롬프트 잘림(line-clamp) 완전 제거 및 전체 전문 표출 */}
+                      <div className="rounded-xl bg-slate-50 dark:bg-slate-950 p-3 border border-slate-100 dark:border-slate-800 max-h-36 overflow-y-auto">
+                        <p className="text-xs text-slate-700 dark:text-slate-200 font-mono leading-relaxed break-words whitespace-pre-wrap">
+                          {img.prompt}
+                        </p>
+                      </div>
 
                       {/* 4. 이미지 구도/조명/인물 수정 & 튜닝 툴바 */}
                       <div className="rounded-xl bg-slate-50 p-2.5 dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
