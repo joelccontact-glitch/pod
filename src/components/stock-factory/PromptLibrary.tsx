@@ -62,13 +62,13 @@ export function PromptLibrary({ onUsePrompt }: { onUsePrompt?: (prompt: string) 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <span className="inline-flex items-center rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-bold text-emerald-300 border border-emerald-500/30">
-              <ShieldCheck className="mr-1.5 h-3.5 w-3.5" /> 스톡 승인율 99% 템플릿 검증 완료
+              <ShieldCheck className="mr-1.5 h-3.5 w-3.5" /> 어도비스톡 TOP 1% 베스트셀러 극세사 8K 프롬프트
             </span>
             <h2 className="mt-2 text-2xl font-extrabold tracking-tight">
-              B2B 금융 · 퇴직연금 · ETF 프롬프트 라이브러리
+              B2B 금융 · 퇴직연금 · ETF 프로급 프롬프트 라이브러리
             </h2>
             <p className="mt-1 text-sm text-slate-300">
-              기업 구매자가 선호하는 한국형 비즈니스 및 금융 이미지 전용 템플릿입니다. 프롬프트를 1초 만에 복사하여 바로 생성하세요.
+              실제 어도비스톡과 크라우드픽에서 매월 수백만 원씩 판매되는 최고 레벨 작가들의 20가지 극세사 디테일 프롬프트입니다.
             </p>
           </div>
         </div>
