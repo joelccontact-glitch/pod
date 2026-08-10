@@ -16,7 +16,7 @@ export interface MockupTemplate {
 export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   {
     id: 'white-tshirt',
-    name: '흰색 반팔 티셔츠',
+    name: '흰색 반팔 티셔츠 (글로벌 베스트셀러)',
     imageUrl: '/mockup_1.png',
     overlay: {
       x: 320, 
@@ -24,6 +24,42 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
       width: 360,
       height: 360,
       blendMode: 'multiply'
+    }
+  },
+  {
+    id: 'cream-tshirt',
+    name: '크림 / 베이지 티셔츠 (파스텔 최적화)',
+    imageUrl: '/mockup_cream.jpg',
+    overlay: {
+      x: 250,
+      y: 240,
+      width: 300,
+      height: 300,
+      blendMode: 'multiply'
+    }
+  },
+  {
+    id: 'black-tshirt',
+    name: '검정 반팔 티셔츠 (글로벌 베스트셀러)',
+    imageUrl: '/mockup_black.jpg',
+    overlay: {
+      x: 250,
+      y: 240,
+      width: 300,
+      height: 300,
+      blendMode: 'source-over'
+    }
+  },
+  {
+    id: 'navy-tshirt',
+    name: '네이비 반팔 티셔츠 (글로벌 Top 3)',
+    imageUrl: '/mockup_navy.jpg',
+    overlay: {
+      x: 250,
+      y: 240,
+      width: 300,
+      height: 300,
+      blendMode: 'source-over'
     }
   },
   {
@@ -91,7 +127,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '흰색 머그컵',
     imageUrl: '/mockup_mug.png',
     overlay: {
-      x: 380, // Calibrated for generated mug
+      x: 380,
       y: 380,
       width: 240,
       height: 240,
@@ -100,4 +136,3 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   }
 ];
 
-// force rebuild
