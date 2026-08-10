@@ -78,13 +78,24 @@ export async function processTransparentPNG(
         const g = data[idx + 1];
         const b = data[idx + 2];
 
-        // Strict background check: pixel color must be within 14 units of sampled corner background
+        // 1. Color distance from sampled corner background
         const dr = Math.abs(r - bgR);
         const dg = Math.abs(g - bgG);
         const db = Math.abs(b - bgB);
+        if (dr <= 28 && dg <= 28 && db <= 28) return true;
 
-        return dr <= 14 && dg <= 14 && db <= 14;
+        // 2. Off-white / cream / light beige ground shadow under feet (high brightness & low saturation)
+        if (r >= 195 && g >= 195 && b >= 185) {
+          const maxC = Math.max(r, g, b);
+          const minC = Math.min(r, g, b);
+          if (maxC - minC <= 24) { // Low saturation off-white ground shadow
+            return true;
+          }
+        }
+
+        return false;
       };
+
 
       // 1. Seed 4 outer border edges for BFS Flood Fill
       for (let x = 0; x < width; x++) {
