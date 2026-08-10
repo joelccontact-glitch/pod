@@ -53,7 +53,7 @@ export default function Home() {
   const [mockupOffsetY, setMockupOffsetY] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const loadedMockupImgRef = useRef<{ id: string; img: HTMLImageElement } | null>(null);
-  const loadedDesignImgRef = useRef<{ url: string; img: HTMLImageElement } | null>(null);
+  const loadedDesignImgRef = useRef<{ url: string; img: HTMLImageElement | HTMLCanvasElement } | null>(null);
   const drawSequenceRef = useRef<number>(0);
 
   const editCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -119,6 +119,37 @@ export default function Home() {
     setTextElements([]);
   }, [selectedDesign?.id]);
 
+  const createTransparentDesignCanvas = (img: HTMLImageElement, tolerance = 238): HTMLCanvasElement => {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth || img.width || 800;
+    canvas.height = img.naturalHeight || img.height || 800;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return canvas;
+
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+
+      if (r >= tolerance && g >= tolerance && b >= tolerance) {
+        const minVal = Math.min(r, g, b);
+        if (minVal >= 250) {
+          data[i + 3] = 0;
+        } else {
+          const alphaRatio = (255 - minVal) / (255 - tolerance);
+          data[i + 3] = Math.min(data[i + 3], Math.floor(alphaRatio * 255));
+        }
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    return canvas;
+  };
+
   const drawMockup = () => {
     if (activeTab !== 'mockup') return;
     const canvas = canvasRef.current;
@@ -134,7 +165,7 @@ export default function Home() {
 
     const currentDrawSeq = ++drawSequenceRef.current;
 
-    const render = (mockupImg: HTMLImageElement, designImg: HTMLImageElement) => {
+    const render = (mockupImg: HTMLImageElement, designImg: HTMLImageElement | HTMLCanvasElement) => {
       const targetW = mockupImg.width || 800;
       const targetH = mockupImg.height || 800;
       if (canvas.width !== targetW || canvas.height !== targetH) {
@@ -168,7 +199,7 @@ export default function Home() {
     }
 
     let loadedMockup: HTMLImageElement | null = isMockupCached ? loadedMockupImgRef.current!.img : null;
-    let loadedDesign: HTMLImageElement | null = isDesignCached ? loadedDesignImgRef.current!.img : null;
+    let loadedDesign: HTMLImageElement | HTMLCanvasElement | null = isDesignCached ? loadedDesignImgRef.current!.img : null;
 
     const checkAndRender = () => {
       if (currentDrawSeq !== drawSequenceRef.current) return;
@@ -193,8 +224,9 @@ export default function Home() {
       dImg.crossOrigin = 'anonymous';
       dImg.src = designUrl;
       dImg.onload = () => {
-        loadedDesignImgRef.current = { url: designUrl, img: dImg };
-        loadedDesign = dImg;
+        const transparentCanvas = createTransparentDesignCanvas(dImg);
+        loadedDesignImgRef.current = { url: designUrl, img: transparentCanvas };
+        loadedDesign = transparentCanvas;
         checkAndRender();
       };
     }
@@ -232,6 +264,7 @@ export default function Home() {
       designImg.src = designUrl;
 
       designImg.onload = () => {
+        const transparentDesignCanvas = createTransparentDesignCanvas(designImg);
         offCtx.globalCompositeOperation = template.overlay.blendMode as GlobalCompositeOperation;
 
         const scaledWidth = template.overlay.width * mockupScale * scaleFactor;
@@ -241,7 +274,7 @@ export default function Home() {
         const newX = centerX - scaledWidth / 2 + (mockupOffsetX * scaleFactor);
         const newY = centerY - scaledHeight / 2 + (mockupOffsetY * scaleFactor);
 
-        offCtx.drawImage(designImg, newX, newY, scaledWidth, scaledHeight);
+        offCtx.drawImage(transparentDesignCanvas, newX, newY, scaledWidth, scaledHeight);
         offCtx.globalCompositeOperation = 'source-over';
 
         const url = offCanvas.toDataURL('image/jpeg', 0.95);

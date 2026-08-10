@@ -31,10 +31,10 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '크림 / 베이지 티셔츠 (파스텔 최적화)',
     imageUrl: '/mockup_cream.jpg',
     overlay: {
-      x: 250,
-      y: 240,
-      width: 300,
-      height: 300,
+      x: 322,
+      y: 300,
+      width: 380,
+      height: 380,
       blendMode: 'multiply'
     }
   },
@@ -43,10 +43,10 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '검정 반팔 티셔츠 (글로벌 베스트셀러)',
     imageUrl: '/mockup_black.jpg',
     overlay: {
-      x: 250,
-      y: 240,
-      width: 300,
-      height: 300,
+      x: 322,
+      y: 300,
+      width: 380,
+      height: 380,
       blendMode: 'source-over'
     }
   },
@@ -55,10 +55,10 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '네이비 반팔 티셔츠 (글로벌 Top 3)',
     imageUrl: '/mockup_navy.jpg',
     overlay: {
-      x: 250,
-      y: 240,
-      width: 300,
-      height: 300,
+      x: 322,
+      y: 300,
+      width: 380,
+      height: 380,
       blendMode: 'source-over'
     }
   },
