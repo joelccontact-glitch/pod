@@ -80,9 +80,9 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     imageUrl: '/mockup_adult_female_smiling_1786343996457.jpg',
     overlay: {
       x: 360,
-      y: 430,
-      width: 280,
-      height: 280,
+      y: 375,
+      width: 300,
+      height: 300,
       blendMode: 'multiply'
     }
   },
@@ -91,10 +91,10 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '남자 아이 티셔츠',
     imageUrl: '/mockup_boy_smiling_1786343963751.jpg',
     overlay: {
-      x: 360,
-      y: 480,
-      width: 260,
-      height: 260,
+      x: 370,
+      y: 515,
+      width: 280,
+      height: 280,
       blendMode: 'multiply'
     }
   },
@@ -103,13 +103,14 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '여자 아이 티셔츠',
     imageUrl: '/mockup_girl_smiling_v2_1786347441131.jpg',
     overlay: {
-      x: 410,
-      y: 440,
-      width: 260,
-      height: 260,
+      x: 370,
+      y: 425,
+      width: 270,
+      height: 270,
       blendMode: 'multiply'
     }
   },
+
 
 
 
