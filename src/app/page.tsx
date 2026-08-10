@@ -227,9 +227,9 @@ export default function Home() {
       }
     }
 
-    // 2. Safe Micro-Island Cleanup for Tiny Enclosed Letter Holes ONLY (e.g. inside 'e', 'o', 'a', 'b')
-    // Strictly tiny holes (< 150px on 4K) that are surrounded by dark text strokes
-    const maxHoleArea = Math.min(250, Math.max(30, Math.round(totalPixels * 0.000015)));
+    // 2. Enclosed Letter Hole Cleanup for ALL text stroke colors (mint, pink, coral, black, etc.)
+    // Strictly small enclosed background holes (< 400px on 4K) surrounded by non-background strokes
+    const maxHoleArea = Math.min(500, Math.max(40, Math.round(totalPixels * 0.00003)));
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -245,7 +245,7 @@ export default function Home() {
           islandQueue[iTail++] = y;
           islandPixels[0] = startIdx;
           let count = 1;
-          let darkStrokeBorderCount = 0;
+          let strokeBoundaryCount = 0;
 
           while (iHead < iTail) {
             const ix = islandQueue[iHead++];
@@ -264,19 +264,16 @@ export default function Home() {
                     islandQueue[iTail++] = ny;
                     islandPixels[count++] = nidx;
                   } else {
-                    // Check if neighbor is a dark text stroke pixel (r<120, g<120, b<120)
-                    const pIdx = nidx * 4;
-                    if (data[pIdx] < 140 && data[pIdx + 1] < 140 && data[pIdx + 2] < 140) {
-                      darkStrokeBorderCount++;
-                    }
+                    // Neighbor is a non-background stroke pixel (mint green, pink, black, coral, etc.)
+                    strokeBoundaryCount++;
                   }
                 }
               }
             }
           }
 
-          // ONLY clear if island is tiny AND bounded by dark text strokes (not fur or body highlights!)
-          if (count <= maxHoleArea && darkStrokeBorderCount > 4) {
+          // Clear if small background hole is bounded by text stroke (mint, pink, coral, black)
+          if (count <= maxHoleArea && strokeBoundaryCount > 4) {
             for (let k = 0; k < count; k++) {
               visited[islandPixels[k]] = 1;
             }
@@ -284,6 +281,7 @@ export default function Home() {
         }
       }
     }
+
 
     // 3. Clear background & letter holes with smooth anti-aliased defringing
     for (let i = 0; i < totalPixels; i++) {
