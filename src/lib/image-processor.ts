@@ -1,12 +1,14 @@
 /**
  * Image Processor for POD (Print-on-Demand) High-Res Export & Background Removal
- * Uses BFS Flood Fill from outer edges to preserve inner white artwork (bunny fur, flowers, text)
+ * 1. BFS Outer Background Flood-Fill
+ * 2. Micro-Island Enclosed Letter Hole Cleanup (clears white holes inside 'e', 'B', 'o', 'a', etc.)
+ * 3. Anti-Aliased Edge Defringing (removes white halos around text strokes)
  */
 
 export interface TransparentPNGOptions {
   targetWidth?: number; // default 4000px
   targetHeight?: number; // default 4000px
-  tolerance?: number; // white threshold tolerance (e.g. 235-255)
+  tolerance?: number; // white threshold tolerance (e.g. 200-255)
 }
 
 export async function processTransparentPNG(
@@ -16,7 +18,7 @@ export async function processTransparentPNG(
   const {
     targetWidth = 4000,
     targetHeight = 4000,
-    tolerance = 235,
+    tolerance = 200,
   } = options;
 
   return new Promise((resolve, reject) => {
@@ -38,17 +40,16 @@ export async function processTransparentPNG(
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
-      // Draw high-resolution image centered
       ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
-      // Extract pixel data for background removal
       const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
       const data = imageData.data;
       const width = targetWidth;
       const height = targetHeight;
+      const totalPixels = width * height;
 
-      const visited = new Uint8Array(width * height);
-      const queue = new Int32Array(width * height * 2);
+      const visited = new Uint8Array(totalPixels);
+      const queue = new Int32Array(totalPixels * 2);
       let head = 0;
       let tail = 0;
 
@@ -60,7 +61,7 @@ export async function processTransparentPNG(
         return r >= tolerance && g >= tolerance && b >= tolerance;
       };
 
-      // Seed 4 outer border edges for BFS Flood Fill
+      // 1. Seed 4 outer border edges for BFS Flood Fill
       for (let x = 0; x < width; x++) {
         if (isWhite(x, 0)) {
           const idx = 0 * width + x;
@@ -83,7 +84,7 @@ export async function processTransparentPNG(
         }
       }
 
-      // BFS Flood Fill 4-directional
+      // BFS Flood Fill 4-directional for main background
       const dx = [1, -1, 0, 0];
       const dy = [0, 0, 1, -1];
 
@@ -106,17 +107,69 @@ export async function processTransparentPNG(
         }
       }
 
-      // Clear ONLY visited outer background pixels (leave inner white artwork untouched)
-      for (let i = 0; i < width * height; i++) {
-        if (visited[i]) {
+      // 2. Micro-Island Cleanup for Enclosed Letter Holes (e.g. inside 'e', 'B', 'o', 'a')
+      // Max hole size threshold: 0.3% of total image pixels
+      const maxHoleArea = Math.round(totalPixels * 0.003);
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const startIdx = y * width + x;
+          if (!visited[startIdx] && isWhite(x, y)) {
+            // Found an unvisited white component; measure its pixel count
+            let iHead = 0;
+            let iTail = 0;
+            const islandQueue = new Int32Array(totalPixels * 2);
+            const islandPixels = new Int32Array(totalPixels);
+            
+            visited[startIdx] = 2; // Mark temporary
+            islandQueue[iTail++] = x;
+            islandQueue[iTail++] = y;
+            islandPixels[0] = startIdx;
+            let count = 1;
+
+            while (iHead < iTail) {
+              const ix = islandQueue[iHead++];
+              const iy = islandQueue[iHead++];
+
+              for (let d = 0; d < 4; d++) {
+                const nx = ix + dx[d];
+                const ny = iy + dy[d];
+
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                  const nidx = ny * width + nx;
+                  if (!visited[nidx] && isWhite(nx, ny)) {
+                    visited[nidx] = 2;
+                    islandQueue[iTail++] = nx;
+                    islandQueue[iTail++] = ny;
+                    islandPixels[count++] = nidx;
+                  }
+                }
+              }
+            }
+
+            // If component is small (letter hole), mark as background to clear it!
+            if (count < maxHoleArea) {
+              for (let k = 0; k < count; k++) {
+                visited[islandPixels[k]] = 1; // Mark as background
+              }
+            }
+          }
+        }
+      }
+
+      // 3. Clear outer background + letter holes with anti-aliased defringing
+      for (let i = 0; i < totalPixels; i++) {
+        if (visited[i] === 1) {
           const pIdx = i * 4;
           const r = data[pIdx];
           const g = data[pIdx + 1];
           const b = data[pIdx + 2];
           const minVal = Math.min(r, g, b);
-          if (minVal >= 250) {
-            data[pIdx + 3] = 0; // 100% transparent for outer white background
+
+          if (minVal >= 245) {
+            data[pIdx + 3] = 0; // 100% transparent for background and letter holes
           } else {
+            // Defringe anti-aliased edges around text strokes
             const alphaRatio = (255 - minVal) / (255 - tolerance);
             data[pIdx + 3] = Math.min(data[pIdx + 3], Math.floor(alphaRatio * 255));
           }
@@ -132,4 +185,5 @@ export async function processTransparentPNG(
     };
   });
 }
+
 
