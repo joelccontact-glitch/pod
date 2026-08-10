@@ -77,39 +77,40 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   {
     id: 'model-adult-female',
     name: '성인 여성 티셔츠',
-    imageUrl: '/mockup_adult_female_1784883500734.jpg',
+    imageUrl: '/mockup_adult_female_smiling_1786343996457.jpg',
     overlay: {
       x: 350,
       y: 400,
-      width: 300,
-      height: 300,
+      width: 320,
+      height: 320,
       blendMode: 'multiply'
     }
   },
   {
     id: 'model-boy',
     name: '남자 아이 티셔츠',
-    imageUrl: '/mockup_boy_1784883510419.jpg',
+    imageUrl: '/mockup_boy_smiling_1786343963751.jpg',
     overlay: {
-      x: 412,
-      y: 320,
-      width: 200,
-      height: 200,
+      x: 360,
+      y: 380,
+      width: 300,
+      height: 300,
       blendMode: 'multiply'
     }
   },
   {
     id: 'model-girl',
     name: '여자 아이 티셔츠',
-    imageUrl: '/mockup_girl_1784883520813.jpg',
+    imageUrl: '/mockup_girl_smiling_1786343981630.jpg',
     overlay: {
-      x: 412,
-      y: 320,
-      width: 200,
-      height: 200,
+      x: 360,
+      y: 380,
+      width: 300,
+      height: 300,
       blendMode: 'multiply'
     }
   },
+
   {
     id: 'totebag',
     name: '캔버스 에코백',
