@@ -337,6 +337,56 @@ export default function Home() {
 
 
 
+  const getTrimmedDesignBounds = (canvas: HTMLCanvasElement | HTMLImageElement) => {
+    let w = canvas.width;
+    let h = canvas.height;
+    let ctx: CanvasRenderingContext2D | null = null;
+
+    if (canvas instanceof HTMLCanvasElement) {
+      ctx = canvas.getContext('2d');
+    } else {
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = w;
+      tempCanvas.height = h;
+      ctx = tempCanvas.getContext('2d');
+      if (ctx) ctx.drawImage(canvas, 0, 0);
+    }
+
+    if (!ctx || w === 0 || h === 0) {
+      return { x: 0, y: 0, width: w, height: h };
+    }
+
+    const imgData = ctx.getImageData(0, 0, w, h);
+    const data = imgData.data;
+
+    let minX = w, minY = h, maxX = 0, maxY = 0;
+    let hasPixel = false;
+
+    for (let y = 0; y < h; y += 4) {
+      for (let x = 0; x < w; x += 4) {
+        const alpha = data[(y * w + x) * 4 + 3];
+        if (alpha > 15) {
+          hasPixel = true;
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    if (!hasPixel) {
+      return { x: 0, y: 0, width: w, height: h };
+    }
+
+    return {
+      x: minX,
+      y: minY,
+      width: Math.max(10, maxX - minX + 1),
+      height: Math.max(10, maxY - minY + 1)
+    };
+  };
+
   const drawMockup = () => {
     if (activeTab !== 'mockup') return;
     const canvas = canvasRef.current;
@@ -366,14 +416,31 @@ export default function Home() {
 
       ctx.globalCompositeOperation = template.overlay.blendMode as GlobalCompositeOperation;
       
-      const scaledWidth = template.overlay.width * mockupScale;
-      const scaledHeight = template.overlay.height * mockupScale;
-      const centerX = template.overlay.x + template.overlay.width / 2;
-      const centerY = template.overlay.y + template.overlay.height / 2;
-      const newX = centerX - scaledWidth / 2 + mockupOffsetX;
-      const newY = centerY - scaledHeight / 2 + mockupOffsetY;
-      
-      ctx.drawImage(designImg, newX, newY, scaledWidth, scaledHeight);
+      const bounds = getTrimmedDesignBounds(designImg);
+      const aspect = bounds.width / bounds.height;
+
+      const baseBoxW = template.overlay.width * mockupScale;
+      const baseBoxH = template.overlay.height * mockupScale;
+
+      let drawW = baseBoxW;
+      let drawH = baseBoxW / aspect;
+
+      if (drawH > baseBoxH) {
+        drawH = baseBoxH;
+        drawW = baseBoxH * aspect;
+      }
+
+      const chestCenterX = template.overlay.x + template.overlay.width / 2;
+      const chestCenterY = template.overlay.y + template.overlay.height / 2;
+
+      const finalX = chestCenterX - drawW / 2 + mockupOffsetX;
+      const finalY = chestCenterY - drawH / 2 + mockupOffsetY;
+
+      ctx.drawImage(
+        designImg,
+        bounds.x, bounds.y, bounds.width, bounds.height,
+        finalX, finalY, drawW, drawH
+      );
       ctx.globalCompositeOperation = 'source-over';
     };
 
@@ -454,14 +521,31 @@ export default function Home() {
         const transparentDesignCanvas = createTransparentDesignCanvas(designImg);
         offCtx.globalCompositeOperation = template.overlay.blendMode as GlobalCompositeOperation;
 
-        const scaledWidth = template.overlay.width * mockupScale * scaleFactor;
-        const scaledHeight = template.overlay.height * mockupScale * scaleFactor;
-        const centerX = (template.overlay.x + template.overlay.width / 2) * scaleFactor;
-        const centerY = (template.overlay.y + template.overlay.height / 2) * scaleFactor;
-        const newX = centerX - scaledWidth / 2 + (mockupOffsetX * scaleFactor);
-        const newY = centerY - scaledHeight / 2 + (mockupOffsetY * scaleFactor);
+        const bounds = getTrimmedDesignBounds(transparentDesignCanvas);
+        const aspect = bounds.width / bounds.height;
 
-        offCtx.drawImage(transparentDesignCanvas, newX, newY, scaledWidth, scaledHeight);
+        const baseBoxW = template.overlay.width * mockupScale * scaleFactor;
+        const baseBoxH = template.overlay.height * mockupScale * scaleFactor;
+
+        let drawW = baseBoxW;
+        let drawH = baseBoxW / aspect;
+
+        if (drawH > baseBoxH) {
+          drawH = baseBoxH;
+          drawW = baseBoxH * aspect;
+        }
+
+        const chestCenterX = (template.overlay.x + template.overlay.width / 2) * scaleFactor;
+        const chestCenterY = (template.overlay.y + template.overlay.height / 2) * scaleFactor;
+
+        const finalX = chestCenterX - drawW / 2 + (mockupOffsetX * scaleFactor);
+        const finalY = chestCenterY - drawH / 2 + (mockupOffsetY * scaleFactor);
+
+        offCtx.drawImage(
+          transparentDesignCanvas,
+          bounds.x, bounds.y, bounds.width, bounds.height,
+          finalX, finalY, drawW, drawH
+        );
         offCtx.globalCompositeOperation = 'source-over';
 
         const url = offCanvas.toDataURL('image/jpeg', 0.95);
@@ -472,6 +556,7 @@ export default function Home() {
       };
     };
   };
+
 
   const downloadPODPrintPNG = async () => {
     const designUrl = previewDesign ? previewDesign.image_url : selectedDesign?.image_url;

@@ -79,10 +79,10 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '성인 여성 티셔츠',
     imageUrl: '/mockup_adult_female_smiling_1786343996457.jpg',
     overlay: {
-      x: 380,
-      y: 375,
-      width: 300,
-      height: 300,
+      x: 340,
+      y: 350,
+      width: 320,
+      height: 320,
       blendMode: 'multiply'
     }
   },
@@ -91,10 +91,10 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '남자 아이 티셔츠',
     imageUrl: '/mockup_boy_smiling_1786343963751.jpg',
     overlay: {
-      x: 395,
-      y: 515,
-      width: 275,
-      height: 275,
+      x: 350,
+      y: 470,
+      width: 300,
+      height: 300,
       blendMode: 'multiply'
     }
   },
@@ -103,13 +103,14 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '여자 아이 티셔츠',
     imageUrl: '/mockup_girl_smiling_v2_1786347441131.jpg',
     overlay: {
-      x: 345,
-      y: 425,
-      width: 270,
-      height: 270,
+      x: 350,
+      y: 390,
+      width: 300,
+      height: 300,
       blendMode: 'multiply'
     }
   },
+
 
 
 
