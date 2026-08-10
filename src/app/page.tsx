@@ -107,12 +107,36 @@ export default function Home() {
     }
   }, [activeTab, selectedMockupId, mockupScale, mockupOffsetX, mockupOffsetY, previewDesign, selectedDesign]);
 
-  // Reset offsets when mockup changes
+  // Reset all modals and page state to initial home screen on header logo / upload image home click
+  useEffect(() => {
+    const handleGoHome = () => {
+      setSelectedDesign(null);
+      setPreviewDesign(null);
+      setIsImageModalOpen(false);
+      setUploadImageBase64('');
+      setUploadPrompt('');
+      setUploadPreviewDesign(null);
+      setIsStyleModalOpen(false);
+      setIsManageStylesModalOpen(false);
+      setIsAutoAgentModalOpen(false);
+      setSelectedStyleId('');
+      setPage(1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.addEventListener('go-home-reset', handleGoHome);
+    return () => {
+      window.removeEventListener('go-home-reset', handleGoHome);
+    };
+  }, []);
+
+  // Reset scale and offsets when mockup changes
   useEffect(() => {
     setMockupScale(1.0);
     setMockupOffsetX(0);
     setMockupOffsetY(0);
   }, [selectedMockupId]);
+
 
   // Reset text elements when a different design is opened
   useEffect(() => {
@@ -1756,12 +1780,26 @@ export default function Home() {
         {isImageModalOpen && (
           <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onPaste={handlePaste}>
             <div className={`bg-white rounded-3xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative ${uploadPreviewDesign ? 'max-w-4xl md:flex-row' : 'max-w-2xl'}`}>
+              <div className="absolute top-4 left-4 z-10 flex items-center space-x-2">
+                <button 
+                  onClick={() => {
+                    if (typeof window !== 'undefined') {
+                      window.dispatchEvent(new Event('go-home-reset'));
+                    }
+                  }} 
+                  className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-xs font-semibold flex items-center space-x-1.5 shadow-sm transition-colors cursor-pointer"
+                  title="첫화면으로 이동"
+                >
+                  <span>🏠 첫화면으로</span>
+                </button>
+              </div>
               <button onClick={() => { setIsImageModalOpen(false); setUploadImageBase64(''); setUploadPrompt(''); setUploadPreviewDesign(null); }} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">×</button>
               
               {uploadPreviewDesign ? (
                 <>
-                  <div className="w-full md:w-1/2 bg-gray-100 flex items-center justify-center relative p-4 sm:p-6 min-h-[30vh] sm:min-h-0">
-                    <img src={uploadPreviewDesign.image_url} alt={uploadPreviewDesign.title} className="max-w-full max-h-full object-contain rounded-xl shadow-md" />
+                  <div className="w-full md:w-1/2 bg-gray-100 flex items-center justify-center relative p-4 sm:p-6 min-h-[30vh] sm:min-h-0 cursor-pointer group" title="클릭 시 첫화면으로 이동" onClick={() => { if (typeof window !== 'undefined') window.dispatchEvent(new Event('go-home-reset')); }}>
+                    <img src={uploadPreviewDesign.image_url} alt={uploadPreviewDesign.title} className="max-w-full max-h-full object-contain rounded-xl shadow-md group-hover:scale-105 transition-transform" />
+                    <span className="absolute bottom-3 bg-black/70 text-white text-xs px-3 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">🏠 클릭 시 첫화면으로 이동</span>
                   </div>
                   <div className="md:w-1/2 flex flex-col flex-1 min-h-0 bg-white relative">
                     <div className="p-5 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
@@ -1799,16 +1837,39 @@ export default function Home() {
                 </>
               ) : (
                 <div className="p-6 sm:p-8 flex flex-col h-full w-full">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">새 디자인 생성</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 mt-4 sm:mt-0">새 디자인 생성</h2>
                   
                   <div className="flex-1 space-y-4">
                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 sm:p-6 text-center hover:bg-gray-50 transition-colors relative flex flex-col items-center justify-center min-h-[200px]">
                       {uploadImageBase64 ? (
                         <>
-                          <img src={uploadImageBase64} alt="Preview" className="max-h-64 object-contain rounded-lg" />
-                          <button onClick={() => setUploadImageBase64('')} className="mt-2 text-sm text-red-500 hover:underline">이미지 지우기</button>
+                          <img 
+                            src={uploadImageBase64} 
+                            alt="Preview" 
+                            className="max-h-64 object-contain rounded-lg cursor-pointer hover:opacity-90 transition-opacity" 
+                            onClick={() => {
+                              if (typeof window !== 'undefined') {
+                                window.dispatchEvent(new Event('go-home-reset'));
+                              }
+                            }}
+                            title="업로드 이미지 클릭 시 첫화면으로 이동"
+                          />
+                          <div className="flex items-center space-x-3 mt-2">
+                            <button onClick={() => setUploadImageBase64('')} className="text-xs text-red-500 hover:underline">이미지 지우기</button>
+                            <button 
+                              onClick={() => {
+                                if (typeof window !== 'undefined') {
+                                  window.dispatchEvent(new Event('go-home-reset'));
+                                }
+                              }} 
+                              className="text-xs text-indigo-600 font-semibold hover:underline"
+                            >
+                              🏠 클릭하여 첫화면 이동
+                            </button>
+                          </div>
                         </>
                       ) : (
+
                         <>
                           <svg className="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                           <p className="text-sm text-gray-600 mb-1">참고할 이미지가 있다면 클릭하여 첨부하세요 (선택 사항)</p>

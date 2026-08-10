@@ -7,8 +7,17 @@ export function TopMasterTab() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-950/90 transition-colors duration-200">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-3.5 py-2.5 sm:px-6 lg:px-8">
-        {/* Brand Logo / Link to Shop */}
-        <Link href="/" className="flex items-center space-x-2.5 group">
+        {/* Brand Logo / Link to Shop - Click to Go Home / Reset Initial Screen */}
+        <Link 
+          href="/" 
+          onClick={() => {
+            if (typeof window !== 'undefined') {
+              window.dispatchEvent(new Event('go-home-reset'));
+            }
+          }}
+          className="flex items-center space-x-2.5 group cursor-pointer"
+          title="첫화면으로 이동 (Reset to Initial Screen)"
+        >
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white shadow-sm group-hover:scale-105 transition-transform duration-200">
             <ShoppingBag className="h-5 w-5" />
           </div>
@@ -21,6 +30,7 @@ export function TopMasterTab() {
             </span>
           </div>
         </Link>
+
 
         {/* Status Badge */}
         <div className="flex items-center space-x-3 text-xs">
