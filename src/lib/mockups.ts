@@ -103,13 +103,14 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     name: '여자 아이 티셔츠',
     imageUrl: '/mockup_girl_smiling_v2_1786347441131.jpg',
     overlay: {
-      x: 360,
-      y: 450,
+      x: 410,
+      y: 440,
       width: 260,
       height: 260,
       blendMode: 'multiply'
     }
   },
+
 
 
 
