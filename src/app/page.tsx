@@ -362,10 +362,11 @@ export default function Home() {
     let minX = w, minY = h, maxX = 0, maxY = 0;
     let hasPixel = false;
 
-    for (let y = 0; y < h; y += 4) {
-      for (let x = 0; x < w; x += 4) {
+    // Scan with alpha > 40 threshold to ignore noise
+    for (let y = 0; y < h; y += 2) {
+      for (let x = 0; x < w; x += 2) {
         const alpha = data[(y * w + x) * 4 + 3];
-        if (alpha > 15) {
+        if (alpha > 40) {
           hasPixel = true;
           if (x < minX) minX = x;
           if (x > maxX) maxX = x;
@@ -375,17 +376,26 @@ export default function Home() {
       }
     }
 
-    if (!hasPixel) {
+    if (!hasPixel || minX >= maxX || minY >= maxY) {
       return { x: 0, y: 0, width: w, height: h };
     }
 
+    const padX = Math.round(w * 0.005);
+    const padY = Math.round(h * 0.005);
+
+    const safeMinX = Math.max(0, minX - padX);
+    const safeMinY = Math.max(0, minY - padY);
+    const safeMaxX = Math.min(w - 1, maxX + padX);
+    const safeMaxY = Math.min(h - 1, maxY + padY);
+
     return {
-      x: minX,
-      y: minY,
-      width: Math.max(10, maxX - minX + 1),
-      height: Math.max(10, maxY - minY + 1)
+      x: safeMinX,
+      y: safeMinY,
+      width: Math.max(10, safeMaxX - safeMinX + 1),
+      height: Math.max(10, safeMaxY - safeMinY + 1)
     };
   };
+
 
   const drawMockup = () => {
     if (activeTab !== 'mockup') return;
