@@ -162,18 +162,12 @@ export default function Home() {
       const g = data[idx + 1];
       const b = data[idx + 2];
 
-      // 1. Strict color distance from sampled corner background (Distance <= 40)
-      const dr = r - bgR;
-      const dg = g - bgG;
-      const db = b - bgB;
-      if (dr * dr + dg * dg + db * db <= 1600) return true;
+      // Strict background check: pixel color must be within 14 units of sampled corner background
+      const dr = Math.abs(r - bgR);
+      const dg = Math.abs(g - bgG);
+      const db = Math.abs(b - bgB);
 
-      // 2. High brightness off-white background ONLY
-      if (r >= 220 && g >= 220 && b >= 220) {
-        return true;
-      }
-
-      return false;
+      return dr <= 14 && dg <= 14 && db <= 14;
     };
 
     // 1. Seed 4 outer border edges for BFS Flood Fill
@@ -222,9 +216,9 @@ export default function Home() {
       }
     }
 
-    // 2. Safe Micro-Island Cleanup for Tiny Enclosed Letter Holes (e.g. inside 'e', 'o', 'a', 'b')
-    // Max hole area: strictly small tiny holes (< 600px on 4K) to NEVER erase text or artwork
-    const maxHoleArea = Math.min(800, Math.max(100, Math.round(totalPixels * 0.00005)));
+    // 2. Safe Micro-Island Cleanup for Tiny Enclosed Letter Holes ONLY (e.g. inside 'e', 'o', 'a', 'b')
+    // Strictly tiny holes (< 150px on 4K) that are surrounded by dark text strokes
+    const maxHoleArea = Math.min(250, Math.max(30, Math.round(totalPixels * 0.000015)));
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -240,6 +234,7 @@ export default function Home() {
           islandQueue[iTail++] = y;
           islandPixels[0] = startIdx;
           let count = 1;
+          let darkStrokeBorderCount = 0;
 
           while (iHead < iTail) {
             const ix = islandQueue[iHead++];
@@ -251,18 +246,26 @@ export default function Home() {
 
               if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
                 const nidx = ny * width + nx;
-                if (!visited[nidx] && isBackgroundPixel(nx, ny)) {
-                  visited[nidx] = 2;
-                  islandQueue[iTail++] = nx;
-                  islandQueue[iTail++] = ny;
-                  islandPixels[count++] = nidx;
+                if (!visited[nidx]) {
+                  if (isBackgroundPixel(nx, ny)) {
+                    visited[nidx] = 2;
+                    islandQueue[iTail++] = nx;
+                    islandQueue[iTail++] = ny;
+                    islandPixels[count++] = nidx;
+                  } else {
+                    // Check if neighbor is a dark text stroke pixel (r<120, g<120, b<120)
+                    const pIdx = nidx * 4;
+                    if (data[pIdx] < 140 && data[pIdx + 1] < 140 && data[pIdx + 2] < 140) {
+                      darkStrokeBorderCount++;
+                    }
+                  }
                 }
               }
             }
           }
 
-          // Tiny isolated letter holes get marked to clear
-          if (count < maxHoleArea) {
+          // ONLY clear if island is tiny AND bounded by dark text strokes (not fur or body highlights!)
+          if (count <= maxHoleArea && darkStrokeBorderCount > 4) {
             for (let k = 0; k < count; k++) {
               visited[islandPixels[k]] = 1;
             }
@@ -280,16 +283,17 @@ export default function Home() {
         const b = data[pIdx + 2];
         const minVal = Math.min(r, g, b);
 
-        if (minVal >= 240) {
-          data[pIdx + 3] = 0; // 100% transparent for background & holes
-        } else if (minVal >= 210) {
-          const alphaRatio = (255 - minVal) / 45;
+        if (minVal >= 242) {
+          data[pIdx + 3] = 0; // 100% transparent for background & letter holes
+        } else if (minVal >= 215) {
+          const alphaRatio = (255 - minVal) / 40;
           data[pIdx + 3] = Math.min(data[pIdx + 3], Math.floor((1 - alphaRatio) * 255));
         } else {
           data[pIdx + 3] = 0;
         }
       }
     }
+
 
 
 
