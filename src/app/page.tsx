@@ -1227,7 +1227,40 @@ export default function Home() {
           </div>
         ) : (
           <>
+            {/* Top Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mb-6">
+                <button 
+                  onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  disabled={page === 1 || loadingInitial}
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm bg-white"
+                >
+                  이전
+                </button>
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                    <button
+                      key={p}
+                      onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                      disabled={loadingInitial}
+                      className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${page === p ? 'bg-blue-600 text-white shadow-sm' : 'border border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'}`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+                <button 
+                  onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                  disabled={page === totalPages || loadingInitial}
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm bg-white"
+                >
+                  다음
+                </button>
+              </div>
+            )}
+
             <section className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" : "flex flex-col gap-4"}>
+
               {designs.map((design) => (
                 <div key={design.id} className={`bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative ${viewMode === 'grid' ? 'rounded-2xl' : 'rounded-xl flex flex-row h-32 sm:h-40'}`} onClick={() => setSelectedDesign(design)}>
                   <div className={`${viewMode === 'grid' ? 'aspect-square' : 'w-32 sm:w-40 flex-shrink-0'} bg-gray-200 relative`}>
