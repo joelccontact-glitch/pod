@@ -119,7 +119,7 @@ export default function Home() {
     setTextElements([]);
   }, [selectedDesign?.id]);
 
-  const createTransparentDesignCanvas = (img: HTMLImageElement, tolerance = 200): HTMLCanvasElement => {
+  const createTransparentDesignCanvas = (img: HTMLImageElement): HTMLCanvasElement => {
     const canvas = document.createElement('canvas');
     const width = img.naturalWidth || img.width || 800;
     const height = img.naturalHeight || img.height || 800;
@@ -133,43 +133,77 @@ export default function Home() {
     const data = imageData.data;
     const totalPixels = width * height;
 
+    // Sample background color from 4 corners
+    const samplePoints = [
+      (0 * width + 0) * 4,
+      (0 * width + (width - 1)) * 4,
+      ((height - 1) * width + 0) * 4,
+      ((height - 1) * width + (width - 1)) * 4,
+    ];
+
+    let bgR = 0, bgG = 0, bgB = 0;
+    samplePoints.forEach(idx => {
+      bgR += data[idx];
+      bgG += data[idx + 1];
+      bgB += data[idx + 2];
+    });
+    bgR = Math.round(bgR / 4);
+    bgG = Math.round(bgG / 4);
+    bgB = Math.round(bgB / 4);
+
     const visited = new Uint8Array(totalPixels);
     const queue = new Int32Array(totalPixels * 2);
     let head = 0;
     let tail = 0;
 
-    const isWhite = (x: number, y: number) => {
+    const isBackgroundPixel = (x: number, y: number) => {
       const idx = (y * width + x) * 4;
       const r = data[idx];
       const g = data[idx + 1];
       const b = data[idx + 2];
-      return r >= tolerance && g >= tolerance && b >= tolerance;
+
+      // 1. Color distance from sampled corner background
+      const dr = r - bgR;
+      const dg = g - bgG;
+      const db = b - bgB;
+      if (dr * dr + dg * dg + db * db <= 6400) return true; // Distance <= 80
+
+      // 2. Light neutral background pixel (cloud/shadow/glow around text & graphics)
+      if (r >= 150 && g >= 150 && b >= 150) {
+        const maxC = Math.max(r, g, b);
+        const minC = Math.min(r, g, b);
+        if (maxC - minC <= 35) { // Low saturation off-white/gray shadow
+          return true;
+        }
+      }
+
+      return false;
     };
 
     // 1. Seed 4 outer border edges for BFS Flood Fill
     for (let x = 0; x < width; x++) {
-      if (isWhite(x, 0)) {
+      if (isBackgroundPixel(x, 0)) {
         const idx = 0 * width + x;
         if (!visited[idx]) { visited[idx] = 1; queue[tail++] = x; queue[tail++] = 0; }
       }
-      if (isWhite(x, height - 1)) {
+      if (isBackgroundPixel(x, height - 1)) {
         const idx = (height - 1) * width + x;
         if (!visited[idx]) { visited[idx] = 1; queue[tail++] = x; queue[tail++] = height - 1; }
       }
     }
 
     for (let y = 0; y < height; y++) {
-      if (isWhite(0, y)) {
+      if (isBackgroundPixel(0, y)) {
         const idx = y * width + 0;
         if (!visited[idx]) { visited[idx] = 1; queue[tail++] = 0; queue[tail++] = y; }
       }
-      if (isWhite(width - 1, y)) {
+      if (isBackgroundPixel(width - 1, y)) {
         const idx = y * width + (width - 1);
         if (!visited[idx]) { visited[idx] = 1; queue[tail++] = width - 1; queue[tail++] = y; }
       }
     }
 
-    // BFS Flood Fill 4-directional for main background
+    // BFS Flood Fill 4-directional
     const dx = [1, -1, 0, 0];
     const dy = [0, 0, 1, -1];
 
@@ -183,7 +217,7 @@ export default function Home() {
 
         if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
           const nidx = ny * width + nx;
-          if (!visited[nidx] && isWhite(nx, ny)) {
+          if (!visited[nidx] && isBackgroundPixel(nx, ny)) {
             visited[nidx] = 1;
             queue[tail++] = nx;
             queue[tail++] = ny;
@@ -193,18 +227,17 @@ export default function Home() {
     }
 
     // 2. Micro-Island Cleanup for Enclosed Letter Holes (e.g. inside 'e', 'B', 'o', 'a')
-    // Max hole size threshold: 0.3% of total image pixels
     const maxHoleArea = Math.round(totalPixels * 0.003);
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const startIdx = y * width + x;
-        if (!visited[startIdx] && isWhite(x, y)) {
+        if (!visited[startIdx] && isBackgroundPixel(x, y)) {
           let iHead = 0;
           let iTail = 0;
           const islandQueue = new Int32Array(totalPixels * 2);
           const islandPixels = new Int32Array(totalPixels);
-          
+
           visited[startIdx] = 2; // Mark temporary
           islandQueue[iTail++] = x;
           islandQueue[iTail++] = y;
@@ -221,7 +254,7 @@ export default function Home() {
 
               if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
                 const nidx = ny * width + nx;
-                if (!visited[nidx] && isWhite(nx, ny)) {
+                if (!visited[nidx] && isBackgroundPixel(nx, ny)) {
                   visited[nidx] = 2;
                   islandQueue[iTail++] = nx;
                   islandQueue[iTail++] = ny;
@@ -231,7 +264,7 @@ export default function Home() {
             }
           }
 
-          // If component is small (letter hole), mark as background to clear it!
+          // Small isolated background islands (letter holes) get marked to clear!
           if (count < maxHoleArea) {
             for (let k = 0; k < count; k++) {
               visited[islandPixels[k]] = 1;
@@ -241,7 +274,7 @@ export default function Home() {
       }
     }
 
-    // 3. Clear outer background + letter holes with anti-aliased defringing
+    // 3. Clear background & letter holes with anti-aliased defringing
     for (let i = 0; i < totalPixels; i++) {
       if (visited[i] === 1) {
         const pIdx = i * 4;
@@ -250,12 +283,14 @@ export default function Home() {
         const b = data[pIdx + 2];
         const minVal = Math.min(r, g, b);
 
-        if (minVal >= 245) {
-          data[pIdx + 3] = 0; // 100% transparent for background and letter holes
+        if (minVal >= 235) {
+          data[pIdx + 3] = 0; // 100% transparent
+        } else if (minVal >= 150) {
+          // Defringe anti-aliased edges
+          const alphaRatio = (245 - minVal) / 95;
+          data[pIdx + 3] = Math.min(data[pIdx + 3], Math.floor((1 - alphaRatio) * 255));
         } else {
-          // Defringe anti-aliased edges around text strokes
-          const alphaRatio = (255 - minVal) / (255 - tolerance);
-          data[pIdx + 3] = Math.min(data[pIdx + 3], Math.floor(alphaRatio * 255));
+          data[pIdx + 3] = 0;
         }
       }
     }
@@ -263,6 +298,7 @@ export default function Home() {
     ctx.putImageData(imageData, 0, 0);
     return canvas;
   };
+
 
 
 
