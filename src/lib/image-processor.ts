@@ -82,13 +82,13 @@ export async function processTransparentPNG(
         const dr = r - bgR;
         const dg = g - bgG;
         const db = b - bgB;
-        if (dr * dr + dg * dg + db * db <= 6400) return true; // Distance <= 80
+        if (dr * dr + dg * dg + db * db <= 12100) return true; // Distance <= 110
 
-        // 2. Light neutral background pixel (cloud/shadow/glow around text & graphics)
-        if (r >= 150 && g >= 150 && b >= 150) {
+        // 2. Light neutral background pixel (ground shadows, drop shadows, clouds, glows)
+        if (r >= 130 && g >= 130 && b >= 130) {
           const maxC = Math.max(r, g, b);
           const minC = Math.min(r, g, b);
-          if (maxC - minC <= 35) { // Low saturation off-white/gray shadow
+          if (maxC - minC <= 42) { // Low saturation off-white/cream/gray ground shadow
             return true;
           }
         }
@@ -143,7 +143,7 @@ export async function processTransparentPNG(
       }
 
       // 2. Micro-Island Cleanup for Enclosed Letter Holes (e.g. inside 'e', 'B', 'o', 'a')
-      const maxHoleArea = Math.round(totalPixels * 0.003);
+      const maxHoleArea = Math.round(totalPixels * 0.004);
 
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
@@ -190,26 +190,14 @@ export async function processTransparentPNG(
         }
       }
 
-      // 3. Clear background & letter holes with anti-aliased defringing
+      // 3. Clear background & letter holes with 100% crystal transparency
       for (let i = 0; i < totalPixels; i++) {
         if (visited[i] === 1) {
           const pIdx = i * 4;
-          const r = data[pIdx];
-          const g = data[pIdx + 1];
-          const b = data[pIdx + 2];
-          const minVal = Math.min(r, g, b);
-
-          if (minVal >= 235) {
-            data[pIdx + 3] = 0; // 100% transparent
-          } else if (minVal >= 150) {
-            // Defringe anti-aliased edges
-            const alphaRatio = (245 - minVal) / 95;
-            data[pIdx + 3] = Math.min(data[pIdx + 3], Math.floor((1 - alphaRatio) * 255));
-          } else {
-            data[pIdx + 3] = 0;
-          }
+          data[pIdx + 3] = 0; // 100% transparent for all cleared background, ground shadows & letter holes
         }
       }
+
 
       ctx.putImageData(imageData, 0, 0);
       resolve(canvas.toDataURL('image/png'));
