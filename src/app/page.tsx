@@ -1206,24 +1206,24 @@ export default function Home() {
                   {activeTab === 'mockup' && (
                     <div className="flex flex-col items-center h-full min-h-[400px]">
                       <div className="w-full mb-4 flex flex-col gap-3">
-                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center w-full gap-2 overflow-hidden">
+                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center w-full gap-2.5">
                           <select 
                             value={selectedMockupId}
                             onChange={(e) => setSelectedMockupId(e.target.value)}
-                            className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white truncate max-w-full"
+                            className="border border-gray-200 rounded-lg px-3 py-2 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white shadow-xs w-full sm:w-auto sm:max-w-xs"
                           >
                             {MOCKUP_TEMPLATES.map(t => (
                               <option key={t.id} value={t.id}>{t.name}</option>
                             ))}
                           </select>
                           
-                          <div className="flex items-center gap-1.5 shrink-0">
+                          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
                             <button 
                               onClick={downloadMockup}
                               title="Etsy 2.5K 목업 다운로드"
-                              className="flex-1 sm:flex-initial bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-sm flex items-center justify-center gap-1 whitespace-nowrap shrink-0"
+                              className="bg-orange-500 hover:bg-orange-600 active:scale-98 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 w-full sm:w-auto whitespace-nowrap"
                             >
-                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                              <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                               <span>👕 2.5K 목업</span>
                             </button>
                             
@@ -1231,9 +1231,16 @@ export default function Home() {
                               onClick={downloadPODPrintPNG}
                               disabled={isProcessingPNG}
                               title="4K 투명 PNG 인쇄용 다운로드"
-                              className="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-sm flex items-center justify-center gap-1 whitespace-nowrap shrink-0"
+                              className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 active:scale-98 text-white px-3 py-2 rounded-lg text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 w-full sm:w-auto whitespace-nowrap"
                             >
-                              {isProcessingPNG ? '4K 변환중...' : '🖨️ 4K PNG'}
+                              {isProcessingPNG ? (
+                                '4K 변환중...'
+                              ) : (
+                                <>
+                                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                  <span>🖨️ 4K PNG</span>
+                                </>
+                              )}
                             </button>
                           </div>
                         </div>
