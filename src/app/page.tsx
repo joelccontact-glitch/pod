@@ -1196,7 +1196,7 @@ export default function Home() {
                             className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
                           >
                             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            <span>👕 Etsy 2.5K 목업</span>
+                            <span>👕 2.5K 목업</span>
                           </button>
                         </div>
                       </div>
@@ -1206,32 +1206,34 @@ export default function Home() {
                   {activeTab === 'mockup' && (
                     <div className="flex flex-col items-center h-full min-h-[400px]">
                       <div className="w-full mb-4 flex flex-col gap-3">
-                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center w-full gap-2">
+                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center w-full gap-2 overflow-hidden">
                           <select 
                             value={selectedMockupId}
                             onChange={(e) => setSelectedMockupId(e.target.value)}
-                            className="border border-gray-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
+                            className="border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white truncate max-w-full"
                           >
                             {MOCKUP_TEMPLATES.map(t => (
                               <option key={t.id} value={t.id}>{t.name}</option>
                             ))}
                           </select>
                           
-                          <div className="flex flex-wrap gap-2">
+                          <div className="flex items-center gap-1.5 shrink-0">
                             <button 
                               onClick={downloadMockup}
-                              className="flex-1 sm:flex-initial bg-orange-500 hover:bg-orange-600 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap"
+                              title="Etsy 2.5K 목업 다운로드"
+                              className="flex-1 sm:flex-initial bg-orange-500 hover:bg-orange-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-sm flex items-center justify-center gap-1 whitespace-nowrap shrink-0"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                              👕 Etsy 2.5K 목업
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                              <span>👕 2.5K 목업</span>
                             </button>
                             
                             <button 
                               onClick={downloadPODPrintPNG}
                               disabled={isProcessingPNG}
-                              className="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-3.5 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-1.5 whitespace-nowrap"
+                              title="4K 투명 PNG 인쇄용 다운로드"
+                              className="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors shadow-sm flex items-center justify-center gap-1 whitespace-nowrap shrink-0"
                             >
-                              {isProcessingPNG ? '4K 변환중...' : '🖨️ 4K 투명 PNG'}
+                              {isProcessingPNG ? '4K 변환중...' : '🖨️ 4K PNG'}
                             </button>
                           </div>
                         </div>

@@ -16,7 +16,7 @@ export interface MockupTemplate {
 export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   {
     id: 'white-tshirt',
-    name: '흰색 반팔 티셔츠 (글로벌 베스트셀러)',
+    name: '흰색 티셔츠',
     imageUrl: '/mockup_1.png',
     overlay: {
       x: 320, 
@@ -28,7 +28,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   {
     id: 'cream-tshirt',
-    name: '크림 / 베이지 티셔츠 (파스텔 최적화)',
+    name: '크림/베이지',
     imageUrl: '/mockup_cream.jpg',
     overlay: {
       x: 322,
@@ -40,7 +40,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   {
     id: 'black-tshirt',
-    name: '검정 반팔 티셔츠 (글로벌 베스트셀러)',
+    name: '검정 티셔츠',
     imageUrl: '/mockup_black.jpg',
     overlay: {
       x: 322,
@@ -52,7 +52,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   {
     id: 'navy-tshirt',
-    name: '네이비 반팔 티셔츠 (글로벌 Top 3)',
+    name: '네이비 티셔츠',
     imageUrl: '/mockup_navy.jpg',
     overlay: {
       x: 322,
