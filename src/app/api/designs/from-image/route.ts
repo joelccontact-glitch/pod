@@ -2,21 +2,26 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
+import { sanitizeSpelling, getStrictSpellingInstruction } from '@/lib/spelling-verifier';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { imageBase64, prompt, isPreview, styleId, catchphrase, autoPhrase } = await req.json();
+    const { imageBase64, prompt, isPreview, styleId, catchphrase: rawCatchphrase, autoPhrase } = await req.json();
 
     if (!prompt) {
       return NextResponse.json({ success: false, error: 'Prompt is required' }, { status: 400 });
     }
 
+    const catchphrase = rawCatchphrase ? sanitizeSpelling(rawCatchphrase) : null;
+    const spellingInstruction = getStrictSpellingInstruction(catchphrase || undefined, autoPhrase);
+
     // Strip data URL prefix if present
     const base64Data = imageBase64 ? imageBase64.replace(/^data:image\/\w+;base64,/, "") : "";
 
-    let newPrompt = prompt;
+    let newPrompt = sanitizeSpelling(prompt);
+
     let productInfo = { title: `[MOCK] Image derived T-Shirt`, tags: ["mock", "derived"] };
 
     if (process.env.GEMINI_API_KEY) {

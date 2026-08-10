@@ -2,27 +2,33 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
+import { sanitizeSpelling, getStrictSpellingInstruction } from '@/lib/spelling-verifier';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { originalId, feedback, topic, originalPrompt, isPreview, catchphrase, autoPhrase } = await req.json();
+    const { originalId, feedback: rawFeedback, topic, originalPrompt, isPreview, catchphrase: rawCatchphrase, autoPhrase } = await req.json();
 
-    if ((!feedback && !catchphrase && !autoPhrase) || !topic) {
+    if ((!rawFeedback && !rawCatchphrase && !autoPhrase) || !topic) {
       return NextResponse.json({ success: false, error: 'Feedback or catchphrase is required' }, { status: 400 });
     }
 
-    let newPrompt = originalPrompt;
+    const feedback = rawFeedback ? sanitizeSpelling(rawFeedback) : '';
+    const catchphrase = rawCatchphrase ? sanitizeSpelling(rawCatchphrase) : null;
+    const spellingInstruction = getStrictSpellingInstruction(catchphrase || undefined, autoPhrase);
+
+    let newPrompt = sanitizeSpelling(originalPrompt);
     let productInfo = { title: `[MOCK Modified] ${topic} T-Shirt`, tags: ["mock", "modified"] };
 
     if (process.env.GEMINI_API_KEY) {
       // 1. Generate new prompt based on feedback
       const promptResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `I have a t-shirt design concept with the original prompt: "${originalPrompt}". ${feedback ? `The user provided the following feedback to modify it: "${feedback}". ` : ''}${catchphrase ? `CRUCIAL: If the original prompt contains any text, typography, or phrasing instructions, REMOVE THEM COMPLETELY. Replace them with the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : (autoPhrase ? `CRUCIAL: If the original prompt contains any text, typography, or phrasing instructions, REMOVE THEM COMPLETELY. Invent a new short, witty, trademark-free phrase (2-4 words, e.g., "Tiny Oink") related to the design, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : '')}Generate a new, modified prompt for an image generator (vector art, graphic illustration, pure solid white background (#FFFFFF), NO scenery). CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
+        contents: `I have a t-shirt design concept with the original prompt: "${originalPrompt}". ${feedback ? `The user provided the following feedback to modify it: "${feedback}". ` : ''}${spellingInstruction} Generate a new, modified prompt for an image generator (vector art, graphic illustration, pure solid white background (#FFFFFF), NO scenery). CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
       });
-      newPrompt = promptResponse.text?.trim() || originalPrompt;
+      newPrompt = sanitizeSpelling(promptResponse.text?.trim() || originalPrompt);
+
 
       // 2. Generate new SEO Content
       const textResponse = await ai.models.generateContent({

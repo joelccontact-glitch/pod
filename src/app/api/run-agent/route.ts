@@ -2,6 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
+import { sanitizeSpelling, getStrictSpellingInstruction } from '@/lib/spelling-verifier';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -51,6 +52,7 @@ export async function GET(req: Request) {
           const data = JSON.parse(trendResponse.text.trim());
           baseTopic = data.theme;
           catchphrase = userCatchphrase || (autoPhrase && data.catchphrase ? data.catchphrase : '');
+          catchphrase = sanitizeSpelling(userCatchphrase || (autoPhrase && data.catchphrase ? data.catchphrase : ''));
         }
       } catch (err) {
         console.error("Trend research failed, using fallback topic.");
@@ -81,13 +83,14 @@ export async function GET(req: Request) {
       likedDesigns = likedQuery.docs.map((d: any) => d.data());
     }
 
-    let designPrompt = `${baseTopic}, vector art, standalone graphic illustration. CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.` : (autoPhrase ? `CRUCIAL: Invent a short, witty, trademark-free phrase (2-4 words) related to the animal or theme, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.` : '')}`;
+    const spellingInstruction = getStrictSpellingInstruction(catchphrase, autoPhrase);
+    let designPrompt = sanitizeSpelling(`${baseTopic}, vector art, standalone graphic illustration. CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction}`);
     
     if (styleData && process.env.GEMINI_API_KEY) {
       console.log(`🎨 Applying style: ${styleData.name}`);
       try {
         const contents: any[] = [
-          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : (autoPhrase ? `CRUCIAL: Invent a short, witty, trademark-free phrase (2-4 words) related to the animal or theme, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : '')}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery.`,
+          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${spellingInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery.`,
           { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
         ];
 
@@ -106,11 +109,11 @@ export async function GET(req: Request) {
           contents: contents
         });
         if (promptResponse.text) {
-          designPrompt = promptResponse.text.trim();
+          designPrompt = sanitizeSpelling(promptResponse.text.trim());
         }
       } catch (err) {
         console.error("Style prompt generation failed, using fallback.");
-        designPrompt = `${baseTopic}. CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : (autoPhrase ? `CRUCIAL: Invent a short, witty, trademark-free phrase (2-4 words) related to the animal or theme, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : '')}MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`;
+        designPrompt = sanitizeSpelling(`${baseTopic}. CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction} MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`);
       }
     }
     // [STEP 2] Check for duplicates in Firebase via hash
