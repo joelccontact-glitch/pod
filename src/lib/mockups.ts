@@ -80,7 +80,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     imageUrl: '/mockup_adult_female_smiling_1786343996457.jpg',
     overlay: {
       x: 402,
-      y: 350,
+      y: 410,
       width: 220,
       height: 220,
       blendMode: 'multiply'
@@ -92,7 +92,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     imageUrl: '/mockup_boy_smiling_1786343963751.jpg',
     overlay: {
       x: 412,
-      y: 470,
+      y: 525,
       width: 200,
       height: 200,
       blendMode: 'multiply'
@@ -104,12 +104,13 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     imageUrl: '/mockup_girl_smiling_v2_1786347441131.jpg',
     overlay: {
       x: 412,
-      y: 420,
+      y: 460,
       width: 200,
       height: 200,
       blendMode: 'multiply'
     }
   },
+
 
 
 
