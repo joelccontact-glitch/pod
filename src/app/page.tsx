@@ -1138,19 +1138,19 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-6 md:p-12 bg-gray-50 text-gray-900 font-sans">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-gray-100 gap-3 xl:gap-0">
+    <main className="min-h-screen p-3 sm:p-4 md:p-6 bg-gray-50 text-gray-900 font-sans">
+      <div className="max-w-6xl mx-auto space-y-3.5 sm:space-y-4">
+        <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-gray-100 gap-2.5 xl:gap-0">
           <div className="shrink-0 w-full xl:w-auto flex justify-between items-start">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-600 mb-1 whitespace-nowrap">Little Paws Studio Shop</h1>
-              <p className="text-gray-500 text-sm flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-extrabold text-blue-600 mb-0.5 whitespace-nowrap">Little Paws Studio Shop</h1>
+              <p className="text-gray-500 text-xs sm:text-sm flex items-center gap-2">
                 디자인 생성 결과
                 {totalCount > 0 && <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md text-xs font-semibold border border-blue-100">총 {totalCount}개</span>}
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-start xl:justify-end gap-2 sm:gap-3 w-full xl:w-auto mt-3 xl:mt-0">
+          <div className="flex flex-wrap items-center justify-start xl:justify-end gap-2 sm:gap-2.5 w-full xl:w-auto mt-2 xl:mt-0">
             {session?.user && (
               <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100 shrink-0">
                 {session.user.image && <img src={session.user.image} alt="Profile" className="w-6 h-6 rounded-full" />}
@@ -1159,17 +1159,17 @@ export default function Home() {
               </div>
             )}
             <div className="flex bg-gray-100 p-1 rounded-lg shrink-0">
-              <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="그리드 뷰">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+              <button onClick={() => setViewMode('grid')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="그리드 뷰">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
               </button>
-              <button onClick={() => setViewMode('list')} className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="리스트 뷰">
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
+              <button onClick={() => setViewMode('list')} className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-400 hover:text-gray-600'}`} title="리스트 뷰">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
               </button>
             </div>
             <select
               value={selectedStyleId}
               onChange={(e) => setSelectedStyleId(e.target.value)}
-              className="bg-white border border-gray-200 rounded-xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[120px] sm:max-w-[140px] truncate shrink-0"
+              className="bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[110px] sm:max-w-[130px] truncate shrink-0"
             >
               <option value="">화풍 선택 ▾</option>
               {styles.map(s => (
@@ -1181,38 +1181,38 @@ export default function Home() {
               value={globalCatchphrase}
               onChange={(e) => setGlobalCatchphrase(e.target.value)}
               placeholder="브랜드 문구 (선택)"
-              className="bg-white border border-gray-200 rounded-xl px-3 py-2 sm:px-4 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[100px] sm:max-w-[140px] shrink-0"
+              className="bg-white border border-gray-200 rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 max-w-[95px] sm:max-w-[130px] shrink-0"
               title="디자인에 포함할 텍스트 (예: Little Paws)"
             />
             <button 
               onClick={() => setIsManageStylesModalOpen(true)}
-              className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-base border border-gray-200"
+              className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm border border-gray-200"
             >
               화풍 관리
             </button>
             <button 
               onClick={() => setIsStyleModalOpen(true)}
-              className="flex-1 sm:flex-none bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-base"
+              className="flex-1 sm:flex-none bg-orange-500 hover:bg-orange-600 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm"
             >
               화풍 등록
             </button>
             <button 
               onClick={handleManualTrendSearch}
               disabled={isGeneratingTrend}
-              className="flex-1 sm:flex-none bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-base"
+              className="flex-1 sm:flex-none bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-sm"
             >
               {isGeneratingTrend ? '트렌드 분석중..' : '트렌드화풍 생성'}
             </button>
             <button 
               onClick={() => setIsImageModalOpen(true)}
-              className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-base"
+              className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm"
             >
               이미지 생성
             </button>
             <button 
               onClick={() => setIsAutoAgentModalOpen(true)}
               disabled={loading}
-              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-3 sm:py-2 sm:px-4 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-base"
+              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-sm"
             >
               {loading ? '생성 중..' : '자동 생성'}
             </button>
@@ -1221,19 +1221,19 @@ export default function Home() {
 
         {/* Gallery View */}
         {loadingInitial ? (
-          <div className="flex flex-col items-center justify-center py-24 space-y-4">
-            <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-            <p className="text-gray-500 font-medium">디자인 데이터를 불러오는 중입니다...</p>
+          <div className="flex flex-col items-center justify-center py-16 space-y-3">
+            <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+            <p className="text-gray-500 font-medium text-sm">디자인 데이터를 불러오는 중입니다...</p>
           </div>
         ) : (
           <>
             {/* Top Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 mb-6">
+              <div className="flex justify-center items-center gap-1.5 mb-3.5">
                 <button 
                   onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                   disabled={page === 1 || loadingInitial}
-                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm bg-white"
+                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm bg-white"
                 >
                   이전
                 </button>
@@ -1243,7 +1243,7 @@ export default function Home() {
                       key={p}
                       onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                       disabled={loadingInitial}
-                      className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${page === p ? 'bg-blue-600 text-white shadow-sm' : 'border border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'}`}
+                      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-xs sm:text-sm font-medium transition-colors ${page === p ? 'bg-blue-600 text-white shadow-sm' : 'border border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'}`}
                     >
                       {p}
                     </button>
@@ -1252,48 +1252,48 @@ export default function Home() {
                 <button 
                   onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
                   disabled={page === totalPages || loadingInitial}
-                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm bg-white"
+                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm bg-white"
                 >
                   다음
                 </button>
               </div>
             )}
 
-            <section className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" : "flex flex-col gap-4"}>
+            <section className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4.5" : "flex flex-col gap-3"}>
 
               {designs.map((design) => (
-                <div key={design.id} className={`bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative ${viewMode === 'grid' ? 'rounded-2xl' : 'rounded-xl flex flex-row h-32 sm:h-40'}`} onClick={() => setSelectedDesign(design)}>
-                  <div className={`${viewMode === 'grid' ? 'aspect-square' : 'w-32 sm:w-40 flex-shrink-0'} bg-gray-200 relative`}>
+                <div key={design.id} className={`bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative ${viewMode === 'grid' ? 'rounded-2xl' : 'rounded-xl flex flex-row h-28 sm:h-36'}`} onClick={() => setSelectedDesign(design)}>
+                  <div className={`${viewMode === 'grid' ? 'aspect-square' : 'w-28 sm:w-36 flex-shrink-0'} bg-gray-200 relative`}>
                     <img src={design.image_url} alt={design.title} className="w-full h-full object-cover" />
-                    <div className="absolute top-2 right-2 flex gap-2 opacity-100 transition-opacity backdrop-blur-sm">
+                    <div className="absolute top-1.5 right-1.5 flex gap-1.5 opacity-100 transition-opacity backdrop-blur-sm">
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleToggleLikeDesign(design.id, !design.is_liked); }}
-                        className={`bg-white hover:bg-gray-50 p-2 sm:p-1.5 rounded-full shadow-sm border border-gray-200 transition-colors flex items-center justify-center w-8 h-8 ${design.is_liked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
+                        className={`bg-white/90 hover:bg-white p-1.5 rounded-full shadow-sm border border-gray-200 transition-colors flex items-center justify-center w-7 h-7 ${design.is_liked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
                         title={design.is_liked ? "좋아요 취소" : "좋아요"}
                       >
-                        <svg className="w-5 h-5" fill={design.is_liked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                        <svg className="w-4 h-4" fill={design.is_liked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                       </button>
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleDelete(design.id); }}
-                        className="bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 p-2 sm:p-1.5 rounded-full shadow-sm border border-gray-200 transition-colors flex items-center justify-center w-8 h-8"
+                        className="bg-white/90 hover:bg-red-50 text-gray-400 hover:text-red-500 p-1.5 rounded-full shadow-sm border border-gray-200 transition-colors flex items-center justify-center w-7 h-7"
                         title="삭제"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                       </button>
                     </div>
                   </div>
-                  <div className={`p-4 flex flex-col justify-center ${viewMode === 'list' ? 'flex-1 min-w-0' : ''}`}>
-                    <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-md mb-2 inline-block w-fit">
+                  <div className={`p-2.5 sm:p-3 flex flex-col justify-center ${viewMode === 'list' ? 'flex-1 min-w-0' : ''}`}>
+                    <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md mb-1 inline-block w-fit">
                       {design.topic}
                     </span>
-                    <h3 className="font-bold text-gray-800 text-sm line-clamp-2" title={design.title}>{design.title}</h3>
-                    <p className="text-xs text-gray-500 mt-2">{new Date(design.created_at).toLocaleString('ko-KR')}</p>
+                    <h3 className="font-bold text-gray-800 text-xs sm:text-sm line-clamp-2 leading-snug" title={design.title}>{design.title}</h3>
                   </div>
                 </div>
               ))}
               {designs.length === 0 && !loading && (
                 <div className="col-span-full text-center py-12 text-gray-500">생성된 디자인이 없습니다.</div>
               )}
+
             </section>
 
             {/* Pagination Controls */}

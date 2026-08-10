@@ -6,7 +6,8 @@ import { Sparkles, ShoppingBag } from "lucide-react";
 export function TopMasterTab() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-slate-800/80 dark:bg-slate-950/90 transition-colors duration-200">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-3.5 py-2.5 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-3.5 py-1.5 sm:px-6 lg:px-8">
+
         {/* Brand Logo / Link to Shop - Click to Go Home / Reset Initial Screen */}
         <Link 
           href="/" 
