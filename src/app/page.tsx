@@ -162,19 +162,15 @@ export default function Home() {
       const g = data[idx + 1];
       const b = data[idx + 2];
 
-      // 1. Color distance from sampled corner background
+      // 1. Strict color distance from sampled corner background (Distance <= 40)
       const dr = r - bgR;
       const dg = g - bgG;
       const db = b - bgB;
-      if (dr * dr + dg * dg + db * db <= 12100) return true; // Distance <= 110
+      if (dr * dr + dg * dg + db * db <= 1600) return true;
 
-      // 2. Light neutral background pixel (ground shadows, drop shadows, clouds, glows)
-      if (r >= 130 && g >= 130 && b >= 130) {
-        const maxC = Math.max(r, g, b);
-        const minC = Math.min(r, g, b);
-        if (maxC - minC <= 42) { // Low saturation off-white/cream/gray ground shadow
-          return true;
-        }
+      // 2. High brightness off-white background ONLY
+      if (r >= 220 && g >= 220 && b >= 220) {
+        return true;
       }
 
       return false;
@@ -226,8 +222,9 @@ export default function Home() {
       }
     }
 
-    // 2. Micro-Island Cleanup for Enclosed Letter Holes (e.g. inside 'e', 'B', 'o', 'a')
-    const maxHoleArea = Math.round(totalPixels * 0.004);
+    // 2. Safe Micro-Island Cleanup for Tiny Enclosed Letter Holes (e.g. inside 'e', 'o', 'a', 'b')
+    // Max hole area: strictly small tiny holes (< 600px on 4K) to NEVER erase text or artwork
+    const maxHoleArea = Math.min(800, Math.max(100, Math.round(totalPixels * 0.00005)));
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -264,7 +261,7 @@ export default function Home() {
             }
           }
 
-          // Small isolated background islands (letter holes) get marked to clear!
+          // Tiny isolated letter holes get marked to clear
           if (count < maxHoleArea) {
             for (let k = 0; k < count; k++) {
               visited[islandPixels[k]] = 1;
@@ -274,13 +271,26 @@ export default function Home() {
       }
     }
 
-    // 3. Clear background & letter holes with 100% crystal transparency
+    // 3. Clear background & letter holes with smooth anti-aliased defringing
     for (let i = 0; i < totalPixels; i++) {
       if (visited[i] === 1) {
         const pIdx = i * 4;
-        data[pIdx + 3] = 0; // 100% transparent for all cleared background, ground shadows & letter holes
+        const r = data[pIdx];
+        const g = data[pIdx + 1];
+        const b = data[pIdx + 2];
+        const minVal = Math.min(r, g, b);
+
+        if (minVal >= 240) {
+          data[pIdx + 3] = 0; // 100% transparent for background & holes
+        } else if (minVal >= 210) {
+          const alphaRatio = (255 - minVal) / 45;
+          data[pIdx + 3] = Math.min(data[pIdx + 3], Math.floor((1 - alphaRatio) * 255));
+        } else {
+          data[pIdx + 3] = 0;
+        }
       }
     }
+
 
 
     ctx.putImageData(imageData, 0, 0);
