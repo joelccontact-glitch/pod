@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles, ShoppingBag } from "lucide-react";
+import { Sparkles, ShoppingBag, Database } from "lucide-react";
 
 export function TopMasterTab() {
   return (
@@ -34,17 +34,25 @@ export function TopMasterTab() {
 
 
         {/* Status Badge */}
-        <div className="flex items-center space-x-3 text-xs">
-          <div className="flex items-center space-x-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-medium">
+        <div className="flex items-center space-x-2.5 sm:space-x-3 text-xs">
+          <div className="flex items-center space-x-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-1 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-medium">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
             <span>Shop Active</span>
           </div>
-          <div className="hidden lg:flex items-center space-x-1.5 text-slate-500 dark:text-slate-400">
-            <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
-            <span>Vercel Auto Deploy Active</span>
+
+          <div className="hidden md:flex items-center space-x-2 text-slate-500 dark:text-slate-400">
+            <div className="flex items-center space-x-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-amber-500 animate-pulse" />
+              <span>Vercel Auto Deploy Active</span>
+            </div>
+            <span className="text-slate-300 dark:text-slate-700">|</span>
+            <div className="flex items-center space-x-1.5 px-2.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/80 font-medium">
+              <Database className="h-3 w-3 text-amber-500" />
+              <span>Google Firebase</span>
+            </div>
           </div>
         </div>
       </div>
