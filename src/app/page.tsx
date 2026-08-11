@@ -186,18 +186,22 @@ export default function Home() {
       const r = data[idx];
       const g = data[idx + 1];
       const b = data[idx + 2];
+      const a = data[idx + 3];
+
+      if (a === 0) return true;
 
       // 1. Color distance from sampled corner background
       const dr = Math.abs(r - bgR);
       const dg = Math.abs(g - bgG);
       const db = Math.abs(b - bgB);
-      if (dr <= 28 && dg <= 28 && db <= 28) return true;
+      if (dr <= 32 && dg <= 32 && db <= 32) return true;
 
-      // 2. Off-white / cream / light beige ground shadow under feet (high brightness & low saturation)
-      if (r >= 195 && g >= 195 && b >= 185) {
+      // 2. Off-white / light gray ground shadow / floor noise under feet/chairs
+      // (High brightness & low saturation neutral gray ground shadow)
+      if (r >= 150 && g >= 150 && b >= 145) {
         const maxC = Math.max(r, g, b);
         const minC = Math.min(r, g, b);
-        if (maxC - minC <= 24) { // Low saturation off-white ground shadow
+        if (maxC - minC <= 20) { // Low saturation neutral ground shadow
           return true;
         }
       }
@@ -612,7 +616,7 @@ export default function Home() {
       canvas.width = img.width;
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0);
-      setOriginalEditImage(canvas.toDataURL('image/jpeg', 1.0));
+      setOriginalEditImage(canvas.toDataURL('image/png'));
       setHistory([]);
     };
   };
@@ -641,7 +645,7 @@ export default function Home() {
     if (editMode !== 'eraser') return;
     const canvas = editCanvasRef.current;
     if (canvas) {
-      setHistory(prev => [...prev, canvas.toDataURL('image/jpeg', 1.0)]);
+      setHistory(prev => [...prev, canvas.toDataURL('image/png')]);
     }
     setIsDrawing(true);
     draw(e);
@@ -652,7 +656,11 @@ export default function Home() {
     setIsDrawing(false);
     const canvas = editCanvasRef.current;
     if (canvas) {
-      canvas.getContext('2d')?.beginPath();
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.beginPath();
+        ctx.globalCompositeOperation = 'source-over';
+      }
     }
   };
 
@@ -667,7 +675,8 @@ export default function Home() {
     
     ctx.lineWidth = brushSize;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#FFFFFF';
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.strokeStyle = 'rgba(0,0,0,1)';
     
     ctx.lineTo(x, y);
     ctx.stroke();
