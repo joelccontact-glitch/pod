@@ -58,6 +58,24 @@ export async function GET(req: Request) {
         console.error("Trend research failed, using fallback topic.");
       }
     }
+    // [STEP 1.2] Garment Color Preference (Light vs Dark T-Shirt)
+    const garmentParam = urlParams.searchParams.get('garmentColor');
+    let isDarkGarment = false;
+    if (garmentParam === 'dark') {
+      isDarkGarment = true;
+    } else if (garmentParam === 'light') {
+      isDarkGarment = false;
+    } else {
+      // ~30% random probability for Dark Garment (Black or Navy T-Shirt)
+      isDarkGarment = Math.random() < 0.30;
+    }
+
+    const darkMockupId = Math.random() < 0.5 ? 'black-tshirt' : 'navy-tshirt';
+    const recommendedMockup = isDarkGarment ? darkMockupId : 'white-tshirt';
+    const darkGarmentInstruction = isDarkGarment 
+      ? ` CRITICAL INSTRUCTION FOR DARK (BLACK/NAVY) T-SHIRT PRINTING: This graphic illustration will be printed on a DARK (BLACK or NAVY BLUE) t-shirt. All text, catchphrases, lettering, typography, outlines, and key subject details MUST be drawn using BRIGHT WHITE, LIGHT CREAM, GLOWING GOLD, or VIVID LIGHT PASTEL COLORS (e.g., crisp white script font, bright pastel yellow, vivid mint). ABSOLUTELY NO BLACK, DARK BROWN, OR DARK NAVY TEXT OR OUTLINES, as they will be completely invisible on dark fabric. Ensure all text and artwork pop brightly against a dark background!`
+      : '';
+
     // [STEP 1.5] Fetch Style Presets
     const url = new URL(req.url);
     const styleId = url.searchParams.get('styleId');
@@ -84,13 +102,13 @@ export async function GET(req: Request) {
     }
 
     const spellingInstruction = getStrictSpellingInstruction(catchphrase, autoPhrase);
-    let designPrompt = sanitizeSpelling(`${baseTopic}, vector art, standalone graphic illustration. CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction}`);
+    let designPrompt = sanitizeSpelling(`${baseTopic}, vector art, standalone graphic illustration.${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction}`);
     
     if (styleData && process.env.GEMINI_API_KEY) {
       console.log(`🎨 Applying style: ${styleData.name}`);
       try {
         const contents: any[] = [
-          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${spellingInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery.`,
+          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${spellingInstruction}${darkGarmentInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery.`,
           { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
         ];
 
@@ -113,7 +131,7 @@ export async function GET(req: Request) {
         }
       } catch (err) {
         console.error("Style prompt generation failed, using fallback.");
-        designPrompt = sanitizeSpelling(`${baseTopic}. CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction} MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`);
+        designPrompt = sanitizeSpelling(`${baseTopic}.${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction} MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`);
       }
     }
 
@@ -131,7 +149,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: 'Skipped: Duplicate design', topic: baseTopic });
     }
 
-    console.log(`🎨 Generating design and SEO text for: ${baseTopic}...`);
+    console.log(`🎨 Generating design and SEO text for: ${baseTopic} (Target: ${isDarkGarment ? 'Dark' : 'Light'} Garment)...`);
     
     // [STEP 3] Generate SEO Content using Gemini 3.1 Pro
     let productInfo;
@@ -188,7 +206,9 @@ export async function GET(req: Request) {
       tags: productInfo.tags,
       image_url: imageUrl,
       created_at: new Date().toISOString(),
-      status: 'success'
+      status: 'success',
+      target_garment: isDarkGarment ? 'dark' : 'light',
+      recommended_mockup: recommendedMockup
     };
 
     if (process.env.FIREBASE_PROJECT_ID) {

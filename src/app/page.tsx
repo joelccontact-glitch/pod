@@ -44,6 +44,7 @@ export default function Home() {
 
   const [isAutoAgentModalOpen, setIsAutoAgentModalOpen] = useState(false);
   const [autoAgentAnimal, setAutoAgentAnimal] = useState('random');
+  const [autoAgentGarmentColor, setAutoAgentGarmentColor] = useState('random');
 
   const [activeTab, setActiveTab] = useState<'info' | 'mockup' | 'edit'>('info');
   const [selectedMockupId, setSelectedMockupId] = useState(MOCKUP_TEMPLATES[0].id);
@@ -945,6 +946,9 @@ export default function Home() {
       if (autoAgentAnimal && autoAgentAnimal !== 'random') {
         url += (url.includes('?') ? '&' : '?') + `animal=${encodeURIComponent(autoAgentAnimal)}`;
       }
+      if (autoAgentGarmentColor && autoAgentGarmentColor !== 'random') {
+        url += (url.includes('?') ? '&' : '?') + `garmentColor=${encodeURIComponent(autoAgentGarmentColor)}`;
+      }
       if (autoGeneratePhrase) {
         url += (url.includes('?') ? '&' : '?') + `autoPhrase=true`;
       } else if (globalCatchphrase.trim()) {
@@ -958,6 +962,8 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok || !data.success) {
         alert('생성 실패: ' + (data.error || '알 수 없는 오류'));
+      } else if (data.data?.recommended_mockup) {
+        setSelectedMockupId(data.data.recommended_mockup);
       }
       await fetchDesigns(1);
       setPage(1);
@@ -1357,7 +1363,16 @@ export default function Home() {
             <section className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4.5" : "flex flex-col gap-3"}>
 
               {designs.map((design) => (
-                <div key={design.id} className={`bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative ${viewMode === 'grid' ? 'rounded-2xl' : 'rounded-xl flex flex-row h-28 sm:h-36'}`} onClick={() => setSelectedDesign(design)}>
+                <div 
+                  key={design.id} 
+                  className={`bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative ${viewMode === 'grid' ? 'rounded-2xl' : 'rounded-xl flex flex-row h-28 sm:h-36'}`} 
+                  onClick={() => {
+                    setSelectedDesign(design);
+                    if (design.recommended_mockup) {
+                      setSelectedMockupId(design.recommended_mockup);
+                    }
+                  }}
+                >
                   <div className={`${viewMode === 'grid' ? 'aspect-square' : 'w-28 sm:w-36 flex-shrink-0'} bg-gray-200 relative`}>
                     <img src={design.image_url} alt={design.title} className="w-full h-full object-cover" />
                     <div className="absolute top-1.5 right-1.5 flex gap-1.5 opacity-100 transition-opacity backdrop-blur-sm">
@@ -1378,9 +1393,16 @@ export default function Home() {
                     </div>
                   </div>
                   <div className={`p-2.5 sm:p-3 flex flex-col justify-center ${viewMode === 'list' ? 'flex-1 min-w-0' : ''}`}>
-                    <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md mb-1 inline-block w-fit">
-                      {design.topic}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                      <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md inline-block w-fit">
+                        {design.topic}
+                      </span>
+                      {design.target_garment === 'dark' && (
+                        <span className="text-[10px] font-bold text-amber-300 bg-slate-900 px-1.5 py-0.5 rounded-md inline-block">
+                          🖤 어두운 티셔츠용
+                        </span>
+                      )}
+                    </div>
                     <h3 className="font-bold text-gray-800 text-xs sm:text-sm line-clamp-2 leading-snug" title={design.title}>{design.title}</h3>
                   </div>
                 </div>
@@ -1870,6 +1892,17 @@ export default function Home() {
                 <option value="baby sloth">나무늘보 (Baby Sloth)</option>
                 <option value="baby hedgehog">새끼 고슴도치 (Baby Hedgehog)</option>
                 <option value="baby red panda">레서판다 (Baby Red Panda)</option>
+              </select>
+
+              <label className="block text-sm font-semibold text-gray-700 mb-2">티셔츠 색상 타겟</label>
+              <select 
+                value={autoAgentGarmentColor}
+                onChange={(e) => setAutoAgentGarmentColor(e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm mb-6"
+              >
+                <option value="random">랜덤 (밝은 티셔츠 70%, 검정/네이비 30%)</option>
+                <option value="light">밝은 티셔츠 전용 (흰색/크림)</option>
+                <option value="dark">어두운 티셔츠 전용 (검정/네이비 - 화이트/파스텔 글씨)</option>
               </select>
 
               <div className="flex items-center gap-2 mb-6 bg-blue-50 p-3 rounded-lg border border-blue-100">
