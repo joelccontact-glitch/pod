@@ -1182,14 +1182,15 @@ export default function Home() {
     if ((!feedback.trim() && !globalCatchphrase.trim() && !autoGeneratePhrase) || !selectedDesign) return;
     setModifying(true);
     try {
+      const baseDesign = previewDesign || selectedDesign;
       const res = await fetch('/api/designs/modify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           originalId: selectedDesign.id,
-          feedback,
-          topic: selectedDesign.topic,
-          originalPrompt: selectedDesign.prompt,
+          feedback: feedback.trim(),
+          topic: baseDesign.topic,
+          originalPrompt: baseDesign.prompt,
           isPreview: true,
           catchphrase: autoGeneratePhrase ? '' : globalCatchphrase.trim(),
           autoPhrase: autoGeneratePhrase
@@ -1198,6 +1199,7 @@ export default function Home() {
       const data = await res.json();
       if (data.success) {
         setPreviewDesign(data.data);
+        setFeedback('');
       } else {
         alert(data.error || '이미지 수정 생성에 실패했습니다.');
       }
@@ -1207,6 +1209,7 @@ export default function Home() {
     }
     setModifying(false);
   };
+
 
   const handleConfirm = async () => {
     if (!previewDesign || !selectedDesign) return;
@@ -1799,22 +1802,29 @@ export default function Home() {
 
                 {/* Chat Interface for Modification */}
                 {activeTab === 'info' && (
-                  <div className="p-4 sm:p-6 border-t border-gray-100 bg-gray-50/50">
-                  <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <span>✨</span> 디자인 수정 요청
-                  </h4>
-                  {!previewDesign && (
-                    <>
+                  <div className="p-4 sm:p-6 border-t border-gray-100 bg-gray-50/50 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                        <span>✨</span> 디자인 수정 요청
+                      </h4>
+                      {previewDesign && (
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-bold animate-pulse">
+                          ✨ 미리보기 적용 중
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
                       <input 
                         type="text" 
                         value={globalCatchphrase}
                         onChange={e => setGlobalCatchphrase(e.target.value)}
                         placeholder="브랜드 문구 추가 (선택)" 
-                        className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm mb-2 disabled:opacity-50"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm disabled:opacity-50"
                         disabled={modifying || autoGeneratePhrase}
                         title="이 텍스트가 수정된 디자인에 자연스럽게 합성됩니다."
                       />
-                      <div className="flex items-center gap-2 mb-3 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+                      <div className="flex items-center gap-2 bg-gray-50 p-2.5 rounded-lg border border-gray-200">
                         <input
                           type="checkbox"
                           id="auto-phrase-modify"
@@ -1826,48 +1836,59 @@ export default function Home() {
                           위트 문구 자동 생성 (추천)
                         </label>
                       </div>
-                    </>
-                  )}
-                  <div className="flex gap-2">
-                    {previewDesign ? (
-                      <div className="flex gap-2 justify-end w-full">
-                        <button 
-                          onClick={handleCancel}
-                          disabled={modifying}
-                          className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-5 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 text-sm flex-1 sm:flex-none shadow-sm"
-                        >
-                          취소
-                        </button>
-                        <button 
-                          onClick={handleConfirm}
-                          disabled={modifying}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 text-sm flex-1 sm:flex-none shadow-sm"
-                        >
-                          {modifying ? '저장 중...' : '확인'}
-                        </button>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={feedback}
+                        onChange={e => setFeedback(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && handleModify()}
+                        placeholder={
+                          previewDesign 
+                            ? "마음에 안 드시나요? 추가 수정 명령어를 입력하세요 (예: 폰트 크기 확대, 위치 변경 등)" 
+                            : ((globalCatchphrase.trim() || autoGeneratePhrase) ? "예: 텍스트를 상단에 배치해줘 (또는 비워두셔도 됩니다)" : "예: 배경색을 빨간색으로 변경해줘...")
+                        }
+                        className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+                        disabled={modifying}
+                      />
+                      <button 
+                        onClick={handleModify}
+                        disabled={modifying || (!feedback.trim() && !globalCatchphrase.trim() && !autoGeneratePhrase)}
+                        className="bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 text-sm flex-shrink-0 shadow-sm flex items-center gap-1.5 whitespace-nowrap"
+                      >
+                        {modifying ? (
+                          <span>생성 중...</span>
+                        ) : (
+                          <span>{previewDesign ? '다시 수정' : '수정'}</span>
+                        )}
+                      </button>
+                    </div>
+
+                    {previewDesign && (
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 p-3 bg-blue-50/80 rounded-2xl border border-blue-100">
+                        <span className="text-xs font-semibold text-blue-900 flex items-center gap-1.5">
+                          <span>💡</span> 수정본이 마음에 드시면 [확인], 원본으로 돌아가려면 [취소]를 누르세요.
+                        </span>
+                        <div className="flex gap-2 shrink-0 justify-end">
+                          <button 
+                            onClick={handleCancel}
+                            disabled={modifying}
+                            className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-50 text-xs sm:text-sm shadow-sm"
+                          >
+                            취소 (원본 복원)
+                          </button>
+                          <button 
+                            onClick={handleConfirm}
+                            disabled={modifying}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-50 text-xs sm:text-sm shadow-sm font-semibold"
+                          >
+                            {modifying ? '저장 중...' : '확인 (최종 반영)'}
+                          </button>
+                        </div>
                       </div>
-                    ) : (
-                      <>
-                        <input 
-                          type="text" 
-                          value={feedback}
-                          onChange={e => setFeedback(e.target.value)}
-                          onKeyDown={e => e.key === 'Enter' && handleModify()}
-                          placeholder={(globalCatchphrase.trim() || autoGeneratePhrase) ? "예: 텍스트를 상단에 배치해줘 (또는 비워두셔도 됩니다)" : "예: 배경색을 빨간색으로 변경해줘..."}
-                          className="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
-                          disabled={modifying}
-                        />
-                        <button 
-                          onClick={handleModify}
-                          disabled={modifying || (!feedback.trim() && !globalCatchphrase.trim() && !autoGeneratePhrase)}
-                          className="bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-xl font-medium transition-colors disabled:opacity-50 text-sm flex-shrink-0 shadow-sm"
-                        >
-                          {modifying ? '생성 중...' : '수정'}
-                        </button>
-                      </>
                     )}
                   </div>
-                </div>
                 )}
               </div>
             </div>
