@@ -931,20 +931,25 @@ export default function Home() {
     }
   };
 
-  const fetchDesigns = async (currentPage: number = 1) => {
-    setLoadingInitial(true);
+  const fetchDesigns = async (currentPage: number = 1, showSpinner: boolean = true) => {
+    if (showSpinner) setLoadingInitial(true);
     try {
       const res = await fetch(`/api/designs?page=${currentPage}&limit=12`);
       const data = await res.json();
       if (data.success) {
         setDesigns(data.data);
-        setTotalPages(data.totalPages || 1);
+        const newTotalPages = data.totalPages || 1;
+        setTotalPages(newTotalPages);
         setTotalCount(data.total || 0);
+
+        if (currentPage > newTotalPages && newTotalPages > 0) {
+          setPage(newTotalPages);
+        }
       }
     } catch (e) {
       console.error('Failed to fetch designs', e);
     }
-    setLoadingInitial(false);
+    if (showSpinner) setLoadingInitial(false);
   };
 
   const runAgent = async () => {
@@ -1165,8 +1170,12 @@ export default function Home() {
       });
       const data = await res.json();
       if (data.success) {
-        setDesigns(designs.filter(d => d.id !== id));
+        setDesigns(prev => prev.filter(d => d.id !== id));
+        setTotalCount(prev => Math.max(0, prev - 1));
         if (selectedDesign?.id === id) setSelectedDesign(null);
+        await fetchDesigns(page, false);
+      } else {
+        alert(data.error || '삭제하지 못했습니다.');
       }
     } catch (e) {
       console.error('Delete failed', e);
