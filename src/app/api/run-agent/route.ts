@@ -3,6 +3,7 @@ import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { sanitizeSpelling, getStrictSpellingInstruction } from '@/lib/spelling-verifier';
+import { getAnimalAffinityInstruction } from '@/lib/animal-affinities';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -36,7 +37,8 @@ export async function GET(req: Request) {
     const urlParams = new URL(req.url);
     const requestedAnimal = urlParams.searchParams.get('animal');
     const targetAnimal = (requestedAnimal && requestedAnimal !== 'random') ? requestedAnimal : animalList[Math.floor(Math.random() * animalList.length)];
-    
+    const affinityInstruction = getAnimalAffinityInstruction(targetAnimal);
+
     const userCatchphrase = urlParams.searchParams.get('catchphrase') || '';
     const autoPhraseParam = urlParams.searchParams.get('autoPhrase');
     const autoPhrase = autoPhraseParam === null ? true : autoPhraseParam === 'true';
@@ -45,7 +47,7 @@ export async function GET(req: Request) {
       try {
         const trendResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents: `Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (${targetAnimal}) store concept. Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic featuring the ${targetAnimal} (e.g. "Vintage cottagecore ${targetAnimal} eating strawberry").${autoPhrase ? ` 2. "catchphrase": A short, witty, trademark-free phrase (2-4 words) related to the animal or theme, such as "Piggy Love".` : ''}`,
+          contents: `Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (${targetAnimal}) store concept. ${affinityInstruction} Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic featuring the ${targetAnimal} (e.g. "Vintage cottagecore ${targetAnimal} with bamboo").${autoPhrase ? ` 2. "catchphrase": A short, witty, trademark-free phrase (2-4 words) related to the animal or theme, such as "Paws & Bamboo".` : ''}`,
           config: { responseMimeType: 'application/json' }
         });
         if (trendResponse.text) {
@@ -102,13 +104,13 @@ export async function GET(req: Request) {
     }
 
     const spellingInstruction = getStrictSpellingInstruction(catchphrase, autoPhrase);
-    let designPrompt = sanitizeSpelling(`${baseTopic}, vector art, standalone graphic illustration.${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction}`);
+    let designPrompt = sanitizeSpelling(`${baseTopic}, vector art, standalone graphic illustration. ${affinityInstruction}${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction}`);
     
     if (styleData && process.env.GEMINI_API_KEY) {
       console.log(`🎨 Applying style: ${styleData.name}`);
       try {
         const contents: any[] = [
-          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${spellingInstruction}${darkGarmentInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery.`,
+          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${affinityInstruction} ${spellingInstruction}${darkGarmentInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery.`,
           { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
         ];
 
@@ -131,7 +133,7 @@ export async function GET(req: Request) {
         }
       } catch (err) {
         console.error("Style prompt generation failed, using fallback.");
-        designPrompt = sanitizeSpelling(`${baseTopic}.${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction} MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`);
+        designPrompt = sanitizeSpelling(`${baseTopic}. ${affinityInstruction}${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction} MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`);
       }
     }
 
