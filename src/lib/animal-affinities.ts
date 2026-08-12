@@ -116,17 +116,23 @@ export function getAnimalAffinityData(targetAnimal: string): AnimalAffinity | nu
 export function getAnimalAffinityInstruction(targetAnimal: string): string {
   const affinity = getAnimalAffinityData(targetAnimal);
 
-  const baseRules = `PRIMARY MANDATE 1: ANTHROPOMORPHISM & FRIENDLINESS (#1 MANDATE). The character MUST be an ultra-cute, friendly, endearing anthropomorphic character wearing cute clothing (e.g., cozy sweater, hoodie, beanie, denim jacket, or sneakers) and engaged in a friendly human-like posture.
-PRIMARY MANDATE 2: POPULAR US CULTURE & HOBBIES. Incorporate popular American lifestyle preferences, hobbies, or trendy accessories (e.g., sipping iced coffee/boba tea, cozy book reading, skateboarding, playing acoustic guitar, outdoor camping, baking, or vinyl music).`;
+  // Randomly select between Anthropomorphic vs Authentic Natural Baby Animal (~50/50 probability)
+  const isAnthropomorphic = Math.random() < 0.5;
 
-  if (!affinity) return baseRules;
-
-  let rule = `${baseRules}
-PRIMARY MANDATE 3: HARMONIOUS BIOLOGICAL AFFINITY. Seamlessly blend ${affinity.animalName}'s biological preferences (${affinity.preferredItems.join(', ')}) with its anthropomorphic US hobby (e.g., ${affinity.usHobbyIdeas.join(' OR ')}).`;
-
-  if (affinity.strictExclusions && affinity.strictExclusions.length > 0) {
-    rule += ` STRICT NEGATIVE RULE: ABSOLUTELY DO NOT generate biologically mismatched items for ${affinity.animalName} such as: ${affinity.strictExclusions.join(', ')}. (For example, Red Pandas eat bamboo/bamboo boba, NOT mushrooms or spores!).`;
+  let styleDirective = '';
+  if (isAnthropomorphic) {
+    styleDirective = `STYLE MANDATE: ANTHROPOMORPHIC ANIMAL WITH US HOBBY. Depict ${affinity ? affinity.animalName : targetAnimal} as an ultra-cute, friendly anthropomorphic character wearing cute clothing (e.g., cozy sweater, hoodie, beanie, denim jacket, or sneakers) and enjoying a popular US lifestyle/hobby (e.g., sipping iced coffee/boba, cozy book reading, skateboarding, acoustic guitar, or camping).`;
+  } else {
+    styleDirective = `STYLE MANDATE: AUTHENTIC NATURAL BABY ANIMAL. Depict ${affinity ? affinity.animalName : targetAnimal} in its pure, fluffy, adorable natural baby animal state (no human clothes), in a charming standalone pose.`;
   }
 
-  return rule;
+  let affinityRule = '';
+  if (affinity) {
+    affinityRule = `BIOLOGICAL AFFINITY RULE: Ensure the artwork naturally incorporates elements ${affinity.animalName} actually loves in real life (preferred items: ${affinity.preferredItems.join(', ')}).`;
+    if (affinity.strictExclusions && affinity.strictExclusions.length > 0) {
+      affinityRule += ` STRICT NEGATIVE RULE: DO NOT include biologically mismatched items for ${affinity.animalName} such as: ${affinity.strictExclusions.join(', ')}. (For example, Red Pandas eat bamboo, NOT mushrooms or spores!).`;
+    }
+  }
+
+  return `${styleDirective} ${affinityRule}`.trim();
 }
