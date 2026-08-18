@@ -51,8 +51,23 @@ Return a JSON object with:
         throw new Error("No image generated.");
       }
     } catch (imgError) {
-      console.error("Imagen generation failed:", imgError);
-      throw new Error("Failed to generate sample image.");
+      console.warn("Imagen generation failed, trying Pollinations Flux fallback:", imgError);
+      try {
+        const seed = Math.floor(Math.random() * 1000000);
+        const encodedPrompt = encodeURIComponent(`A beautiful icon or simple illustration. strictly following this style: ${promptDescription}. Pure solid white background (#FFFFFF)`);
+        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=800&seed=${seed}&model=flux&nologo=true`;
+        const res = await fetch(pollinationsUrl);
+        if (res.ok) {
+          const arrayBuf = await res.arrayBuffer();
+          base64Data = Buffer.from(arrayBuf).toString('base64');
+          imageUrl = `data:image/jpeg;base64,${base64Data}`;
+        } else {
+          throw new Error("Pollinations fallback failed");
+        }
+      } catch (fallbackErr) {
+        console.error("All image generation failed:", fallbackErr);
+        throw new Error("Failed to generate sample image.");
+      }
     }
 
     // 3. Extract exact style prompt using Gemini

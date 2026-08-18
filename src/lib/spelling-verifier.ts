@@ -150,16 +150,26 @@ Return ONLY a JSON object with this exact JSON schema:
   return defaultResult;
 }
 
-const IMAGE_MODELS = [
+const GOOGLE_IMAGE_MODELS = [
   'imagen-3.0-generate-002',
+  'imagen-3.0-generate-images-002',
   'imagen-3.0-fast-generate-001',
+  'imagen-3.0-fast-generate-images-001',
 ];
 
+/**
+ * Multi-Engine Image Generation with Zero-Downtime Fallback:
+ * 1. GoogleGenAI SDK (multiple model candidate names)
+ * 2. Direct Google Imagen 3 REST API
+ * 3. High Precision Flux.1 Engine via Pollinations
+ */
 async function callGenerateImagesWithFallback(ai: any, prompt: string): Promise<string> {
-  let lastError: any = null;
-  for (const modelName of IMAGE_MODELS) {
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY;
+
+  // 1. Try GoogleGenAI SDK model methods
+  for (const modelName of GOOGLE_IMAGE_MODELS) {
     try {
-      console.log(`🎨 Drawing image with ${modelName}...`);
+      console.log(`🎨 Drawing image with Google model '${modelName}'...`);
       const response = await ai.models.generateImages({
         model: modelName,
         prompt: prompt,
@@ -170,15 +180,68 @@ async function callGenerateImagesWithFallback(ai: any, prompt: string): Promise<
         return base64Image;
       }
     } catch (err: any) {
-      console.warn(`Model ${modelName} failed:`, err?.message || String(err));
-      lastError = err;
+      console.warn(`Google GenAI SDK model '${modelName}' failed:`, err?.message || String(err));
     }
   }
-  throw lastError || new Error('AI 이미지 생성 결과가 비어있습니다.');
+
+  // 2. Try Direct Google Imagen 3 REST API
+  if (apiKey) {
+    try {
+      console.log(`🎨 Trying Direct Google Imagen 3 REST API...`);
+      const googleRes = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-images-002:generate?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: prompt,
+            config: {
+              numberOfImages: 1,
+              outputMimeType: 'image/jpeg',
+              aspectRatio: '1:1',
+            },
+          }),
+        }
+      );
+      const data = await googleRes.json();
+      if (data.generatedImages && data.generatedImages.length > 0) {
+        const base64Image = data.generatedImages[0].image.imageBytes;
+        if (base64Image) {
+          return base64Image;
+        }
+      }
+      console.warn(`Direct Google Imagen 3 REST API returned no images:`, data);
+    } catch (err: any) {
+      console.warn(`Direct Google Imagen 3 REST API failed:`, err?.message || String(err));
+    }
+  }
+
+  // 3. Fallback: Ultra-Reliable High Precision Flux.1 Engine via Pollinations
+  try {
+    console.log(`🎨 Falling back to High Precision Flux.1 AI Engine...`);
+    const cleanPrompt = prompt.length > 400 ? prompt.substring(0, 400) : prompt;
+    const seed = Math.floor(Math.random() * 1000000);
+    const encodedPrompt = encodeURIComponent(cleanPrompt);
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
+
+    const imgRes = await fetch(pollinationsUrl);
+    if (imgRes.ok) {
+      const arrayBuf = await imgRes.arrayBuffer();
+      const base64 = Buffer.from(arrayBuf).toString('base64');
+      if (base64) {
+        console.log(`✨ Successfully generated image via Pollinations Flux.1!`);
+        return base64;
+      }
+    }
+  } catch (err: any) {
+    console.error(`Pollinations Flux fallback failed:`, err);
+  }
+
+  throw new Error('모든 AI 이미지 생성 엔진 호출에 실패했습니다. 잠시 후 다시 시도해 주세요.');
 }
 
 /**
- * Generates an image with Google Imagen and automatically retries using Gemini Vision OCR verification
+ * Generates an image with multi-engine fallback and automatically retries using Gemini Vision OCR verification
  * if a text typo is detected in the generated image.
  */
 export async function generateImageWithVisionRetry(
