@@ -7,6 +7,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 # 사용자 맞춤 규칙 (Vercel 배포)
 코드나 기능 수정 사항을 적용한 후에는 무조건 `git add .`, `git commit -m "..."`, `git push`를 수행하여 Vercel에 자동 배포되도록 해야 합니다.
 
+# 화풍 생성 및 수집 원칙 (수동 실행 전용)
+화풍(Style)은 Vercel Cron 등의 자동 주기로 수집/생성하지 않으며, 사용자가 UI 대시보드의 **[트렌드 화풍 생성]** 버튼을 눌렀을 때만 수동으로 실행되도록 유지합니다. `vercel.json` 등에 화풍 자동 수집 크론(Cron)을 추가하지 마세요.
+
 # 디자인 생성 시 배경 제거 원칙 (가장 중요!!!)
 절대로 바탕 배경색을 생성하지 마세요!!! 이미지를 생성하는 코드를 작성하거나 프롬프트를 수정할 때, **반드시 배경 풍경이나 색상이 전혀 없는 완벽한 흰색 단색 배경(Pure White, #FFFFFF)**이 되도록 지시사항을 최우선으로 강제해야 합니다. (예: `CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery.`). POD 상품에 프린팅 시 배경색이 남아 있으면 사각형 테두리가 인쇄되어 상품을 망치게 됩니다.
 

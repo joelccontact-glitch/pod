@@ -3,10 +3,6 @@
     {
       "path": "/api/run-agent",
       "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/run-agent/styles",
-      "schedule": "0 0 * * 1"
     }
   ]
 }
