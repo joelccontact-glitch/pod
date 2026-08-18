@@ -38,7 +38,7 @@ Return a JSON object with:
     try {
       console.log(`🖼️ Generating sample image...`);
       const imgResponse = await ai.models.generateImages({
-        model: 'imagen-4.0-fast-generate-001',
+        model: 'imagen-3.0-generate-002',
         prompt: `A beautiful icon or simple illustration. strictly following this style: ${promptDescription}. CRITICAL RULE: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery.`,
         config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' }
       });

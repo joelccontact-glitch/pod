@@ -150,8 +150,35 @@ Return ONLY a JSON object with this exact JSON schema:
   return defaultResult;
 }
 
+const IMAGE_MODELS = [
+  'imagen-3.0-generate-002',
+  'imagen-3.0-fast-generate-001',
+];
+
+async function callGenerateImagesWithFallback(ai: any, prompt: string): Promise<string> {
+  let lastError: any = null;
+  for (const modelName of IMAGE_MODELS) {
+    try {
+      console.log(`🎨 Drawing image with ${modelName}...`);
+      const response = await ai.models.generateImages({
+        model: modelName,
+        prompt: prompt,
+        config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' },
+      });
+      const base64Image = response.generatedImages?.[0]?.image?.imageBytes;
+      if (base64Image) {
+        return base64Image;
+      }
+    } catch (err: any) {
+      console.warn(`Model ${modelName} failed:`, err?.message || String(err));
+      lastError = err;
+    }
+  }
+  throw lastError || new Error('AI 이미지 생성 결과가 비어있습니다.');
+}
+
 /**
- * Generates an image with Imagen 4.0 and automatically retries using Gemini Vision OCR verification
+ * Generates an image with Google Imagen and automatically retries using Gemini Vision OCR verification
  * if a text typo is detected in the generated image.
  */
 export async function generateImageWithVisionRetry(
@@ -180,18 +207,8 @@ export async function generateImageWithVisionRetry(
   const maxAttempts = Math.max(1, maxRetries + 1);
 
   while (attempt <= maxAttempts) {
-    console.log(`🎨 [Attempt ${attempt}/${maxAttempts}] Drawing image with Imagen 4.0...`);
-    const imgResponse = await ai.models.generateImages({
-      model: 'imagen-4.0-fast-generate-001',
-      prompt: currentPrompt,
-      config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' },
-    });
-
-    const base64Image = imgResponse.generatedImages?.[0]?.image?.imageBytes;
-    if (!base64Image) {
-      throw new Error('AI 이미지 생성 결과가 비어있습니다.');
-    }
-
+    console.log(`🎨 [Attempt ${attempt}/${maxAttempts}] Drawing image...`);
+    const base64Image = await callGenerateImagesWithFallback(ai, currentPrompt);
     lastBase64 = base64Image;
 
     // Run 2nd-stage Vision OCR verification
