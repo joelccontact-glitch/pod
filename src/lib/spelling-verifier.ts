@@ -134,8 +134,22 @@ Return ONLY a JSON object with this exact JSON schema:
 
     if (response.text) {
       const parsed = JSON.parse(response.text.trim());
+      const hasText = Boolean(parsed.hasText);
+
+      // If no text is drawn in the image (pure graphic illustration), there are zero typos!
+      if (!hasText) {
+        return {
+          hasText: false,
+          detectedText: '',
+          isSpellingCorrect: true,
+          hasTypo: false,
+          typoDetails: '이미지 내 텍스트 미포함 (순수 그래픽 일러스트)',
+          matchScore: 100,
+        };
+      }
+
       return {
-        hasText: Boolean(parsed.hasText),
+        hasText: true,
         detectedText: parsed.detectedText || '',
         isSpellingCorrect: Boolean(parsed.isSpellingCorrect),
         hasTypo: Boolean(parsed.hasTypo),

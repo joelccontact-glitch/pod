@@ -1423,12 +1423,21 @@ export default function Home() {
                           🖤 어두운 티셔츠용
                         </span>
                       )}
-                      {design.spelling_verified !== undefined && (
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 ${design.spelling_verified ? 'text-emerald-700 bg-emerald-50 border border-emerald-200' : 'text-amber-700 bg-amber-50 border border-amber-200'}`} title={design.spelling_typo_details || (design.spelling_verified ? 'Gemini Vision OCR 문구 검증 완료 (Zero-Typo)' : '문구 오타 감지됨')}>
-                          {design.spelling_verified ? '✨ Vision 문구검증 완료' : '⚠️ Vision 오타 의심'}
-                          {design.spelling_attempts > 1 && ` (${design.spelling_attempts}회)`}
-                        </span>
-                      )}
+                      {design.spelling_verified !== undefined && (() => {
+                        const isNoText = !design.spelling_detected_text && design.spelling_verified;
+                        return (
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 ${
+                            design.spelling_verified 
+                              ? (isNoText ? 'text-slate-700 bg-slate-100 border border-slate-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-200')
+                              : 'text-amber-700 bg-amber-50 border border-amber-200'
+                          }`} title={design.spelling_typo_details || (design.spelling_verified ? (isNoText ? '텍스트 미포함 (순수 일러스트)' : 'Gemini Vision OCR 문구 검증 완료') : '문구 오타 감지됨')}>
+                            {design.spelling_verified 
+                              ? (isNoText ? '🎨 텍스트 미포함' : '✨ Vision 문구검증 완료')
+                              : '⚠️ Vision 오타 의심'}
+                            {design.spelling_attempts > 1 && ` (${design.spelling_attempts}회)`}
+                          </span>
+                        );
+                      })()}
                     </div>
                     <h3 className="font-bold text-gray-800 text-xs sm:text-sm line-clamp-2 leading-snug" title={design.title}>{design.title}</h3>
                   </div>
@@ -1531,31 +1540,46 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {((previewDesign || selectedDesign)?.spelling_verified !== undefined) && (
-                        <div>
-                          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Gemini Vision 문구 검증 (2차 OCR)</h4>
-                          <div className={`p-3.5 rounded-xl border text-xs sm:text-sm flex flex-col gap-1.5 ${(previewDesign || selectedDesign).spelling_verified ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900' : 'bg-amber-50/80 border-amber-200 text-amber-900'}`}>
-                            <div className="flex items-center justify-between font-bold">
-                              <span className="flex items-center gap-1.5">
-                                {(previewDesign || selectedDesign).spelling_verified ? '✨ Gemini Vision OCR 100% 문구 검증 완료 (Zero-Typo)' : '⚠️ 문구 오타 감지/의심'}
-                              </span>
-                              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/80 border border-current">
-                                시도 횟수: {(previewDesign || selectedDesign).spelling_attempts || 1}회
-                              </span>
+                      {((previewDesign || selectedDesign)?.spelling_verified !== undefined) && (() => {
+                        const currentDesign = previewDesign || selectedDesign;
+                        const isNoText = !currentDesign.spelling_detected_text && currentDesign.spelling_verified;
+                        
+                        return (
+                          <div>
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Gemini Vision 문구 검증 (2차 OCR)</h4>
+                            <div className={`p-3.5 rounded-xl border text-xs sm:text-sm flex flex-col gap-1.5 ${
+                              currentDesign.spelling_verified
+                                ? (isNoText ? 'bg-slate-50 border-slate-200 text-slate-800' : 'bg-emerald-50/80 border-emerald-200 text-emerald-900')
+                                : 'bg-amber-50/80 border-amber-200 text-amber-900'
+                            }`}>
+                              <div className="flex items-center justify-between font-bold">
+                                <span className="flex items-center gap-1.5">
+                                  {currentDesign.spelling_verified
+                                    ? (isNoText ? '🎨 텍스트 미포함 (순수 그래픽 일러스트)' : '✨ Gemini Vision OCR 100% 문구 검증 완료 (Zero-Typo)')
+                                    : '⚠️ 문구 오타 감지/의심'}
+                                </span>
+                                <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/80 border border-current">
+                                  시도 횟수: {currentDesign.spelling_attempts || 1}회
+                                </span>
+                              </div>
+                              {currentDesign.spelling_detected_text ? (
+                                <p className="text-xs opacity-90">
+                                  <span className="font-semibold">이미지 인식 텍스트:</span> &quot;{currentDesign.spelling_detected_text}&quot;
+                                </p>
+                              ) : (
+                                <p className="text-xs opacity-80">
+                                  ℹ️ 이미지 내에 텍스트 문구가 없는 깔끔한 순수 일러스트 디자인입니다 (오타 없음).
+                                </p>
+                              )}
+                              {currentDesign.spelling_typo_details && !isNoText && (
+                                <p className="text-xs text-amber-800 bg-amber-100/60 p-2 rounded-lg mt-0.5">
+                                  ℹ️ {currentDesign.spelling_typo_details}
+                                </p>
+                              )}
                             </div>
-                            {(previewDesign || selectedDesign).spelling_detected_text && (
-                              <p className="text-xs opacity-90">
-                                <span className="font-semibold">이미지 인식 텍스트:</span> &quot;{(previewDesign || selectedDesign).spelling_detected_text}&quot;
-                              </p>
-                            )}
-                            {(previewDesign || selectedDesign).spelling_typo_details && (
-                              <p className="text-xs text-amber-800 bg-amber-100/60 p-2 rounded-lg mt-0.5">
-                                ℹ️ {(previewDesign || selectedDesign).spelling_typo_details}
-                              </p>
-                            )}
                           </div>
-                        </div>
-                      )}
+                        );
+                      })()}
 
                       <div className="pt-4 border-t border-gray-100 space-y-3">
                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">고해상도 다운로드 옵션</h4>
