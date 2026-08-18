@@ -1424,16 +1424,19 @@ export default function Home() {
                         </span>
                       )}
                       {design.spelling_verified !== undefined && (() => {
-                        const isNoText = !design.spelling_detected_text && design.spelling_verified;
+                        const hasActualText = Boolean(design.spelling_has_text || (design.spelling_detected_text && design.spelling_detected_text.trim().length > 0));
+                        if (!hasActualText && design.spelling_verified) {
+                          return (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 text-slate-600 bg-slate-100 border border-slate-200" title="이미지 내 텍스트 미포함 (순수 일러스트)">
+                              🎨 텍스트 미포함
+                            </span>
+                          );
+                        }
                         return (
                           <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md inline-flex items-center gap-1 ${
-                            design.spelling_verified 
-                              ? (isNoText ? 'text-slate-700 bg-slate-100 border border-slate-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-200')
-                              : 'text-amber-700 bg-amber-50 border border-amber-200'
-                          }`} title={design.spelling_typo_details || (design.spelling_verified ? (isNoText ? '텍스트 미포함 (순수 일러스트)' : 'Gemini Vision OCR 문구 검증 완료') : '문구 오타 감지됨')}>
-                            {design.spelling_verified 
-                              ? (isNoText ? '🎨 텍스트 미포함' : '✨ Vision 문구검증 완료')
-                              : '⚠️ Vision 오타 의심'}
+                            design.spelling_verified ? 'text-emerald-700 bg-emerald-50 border border-emerald-200' : 'text-amber-700 bg-amber-50 border border-amber-200'
+                          }`} title={design.spelling_typo_details || (design.spelling_verified ? 'Gemini Vision OCR 문구 검증 완료 (Zero-Typo)' : '문구 오타 감지됨')}>
+                            {design.spelling_verified ? '✨ Vision 문구검증 완료' : '⚠️ Vision 오타 의심'}
                             {design.spelling_attempts > 1 && ` (${design.spelling_attempts}회)`}
                           </span>
                         );
@@ -1542,7 +1545,8 @@ export default function Home() {
 
                       {((previewDesign || selectedDesign)?.spelling_verified !== undefined) && (() => {
                         const currentDesign = previewDesign || selectedDesign;
-                        const isNoText = !currentDesign.spelling_detected_text && currentDesign.spelling_verified;
+                        const hasActualText = Boolean(currentDesign.spelling_has_text || (currentDesign.spelling_detected_text && currentDesign.spelling_detected_text.trim().length > 0));
+                        const isNoText = !hasActualText && currentDesign.spelling_verified;
                         
                         return (
                           <div>
@@ -1562,13 +1566,13 @@ export default function Home() {
                                   시도 횟수: {currentDesign.spelling_attempts || 1}회
                                 </span>
                               </div>
-                              {currentDesign.spelling_detected_text ? (
+                              {hasActualText ? (
                                 <p className="text-xs opacity-90">
                                   <span className="font-semibold">이미지 인식 텍스트:</span> &quot;{currentDesign.spelling_detected_text}&quot;
                                 </p>
                               ) : (
                                 <p className="text-xs opacity-80">
-                                  ℹ️ 이미지 내에 텍스트 문구가 없는 깔끔한 순수 일러스트 디자인입니다 (오타 없음).
+                                  ℹ️ 이미지 내에 텍스트 문구가 없는 깔끔한 순수 일러스트 디자인입니다.
                                 </p>
                               )}
                               {currentDesign.spelling_typo_details && !isNoText && (

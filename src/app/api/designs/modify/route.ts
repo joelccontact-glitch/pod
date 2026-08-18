@@ -80,7 +80,8 @@ export async function POST(req: Request) {
       feedback_applied: feedback,
       catchphrase: catchphrase || null,
       spelling_verified: verificationInfo ? verificationInfo.isSpellingCorrect : true,
-      spelling_detected_text: verificationInfo ? verificationInfo.detectedText : (catchphrase || ''),
+      spelling_has_text: verificationInfo ? Boolean(verificationInfo.hasText) : false,
+      spelling_detected_text: verificationInfo ? (verificationInfo.hasText ? verificationInfo.detectedText : '') : '',
       spelling_attempts: totalAttempts,
       spelling_typo_details: verificationInfo ? verificationInfo.typoDetails : '',
     };
