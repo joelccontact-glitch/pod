@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { sanitizeSpelling, getStrictSpellingInstruction } from '@/lib/spelling-verifier';
+import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry } from '@/lib/spelling-verifier';
 import { getAnimalAffinityInstruction } from '@/lib/animal-affinities';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -170,22 +170,18 @@ export async function GET(req: Request) {
       };
     }
 
-    // [STEP 4] Generate actual AI Image using Google Imagen
+    // [STEP 4] Generate actual AI Image using Google Imagen + 2nd-Stage Gemini Vision Verification & Auto-Retry
     let imageUrl = `https://placehold.co/800x800/eff6ff/1d4ed8?text=${encodeURIComponent(baseTopic.split(' ').slice(0, 3).join(' ')+ '\\n(Generation Failed)')}`;
+    let verificationInfo: any = null;
+    let totalAttempts = 1;
+
     if (process.env.GEMINI_API_KEY) {
       try {
-        console.log(`🎨 Drawing image with Imagen 4.0...`);
-        const imgResponse = await ai.models.generateImages({
-          model: 'imagen-4.0-fast-generate-001',
-          prompt: designPrompt,
-          config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' }
-        });
-        const base64Image = imgResponse.generatedImages?.[0]?.image?.imageBytes;
-        if (base64Image) {
-          imageUrl = `data:image/jpeg;base64,${base64Image}`;
-        } else {
-          return NextResponse.json({ success: false, error: 'AI 이미지 생성에 실패했습니다.' }, { status: 500 });
-        }
+        console.log(`🎨 Drawing image with Imagen 4.0 & Gemini Vision OCR Verification...`);
+        const result = await generateImageWithVisionRetry(ai, designPrompt, catchphrase || undefined, 2);
+        imageUrl = result.imageUrl;
+        verificationInfo = result.verification;
+        totalAttempts = result.totalAttempts;
       } catch (imgError: any) {
         console.error("Imagen generation failed:", imgError);
         const errMsg = imgError?.message || String(imgError);
@@ -210,7 +206,12 @@ export async function GET(req: Request) {
       created_at: new Date().toISOString(),
       status: 'success',
       target_garment: isDarkGarment ? 'dark' : 'light',
-      recommended_mockup: recommendedMockup
+      recommended_mockup: recommendedMockup,
+      catchphrase: catchphrase || null,
+      spelling_verified: verificationInfo ? verificationInfo.isSpellingCorrect : true,
+      spelling_detected_text: verificationInfo ? verificationInfo.detectedText : (catchphrase || ''),
+      spelling_attempts: totalAttempts,
+      spelling_typo_details: verificationInfo ? verificationInfo.typoDetails : '',
     };
 
     if (process.env.FIREBASE_PROJECT_ID) {

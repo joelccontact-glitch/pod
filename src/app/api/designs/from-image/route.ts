@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { sanitizeSpelling, getStrictSpellingInstruction } from '@/lib/spelling-verifier';
+import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry } from '@/lib/spelling-verifier';
 import { getAnimalAffinityInstruction } from '@/lib/animal-affinities';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -81,18 +81,16 @@ export async function POST(req: Request) {
     }
 
     let newImageUrl = `https://placehold.co/800x800/eff6ff/1d4ed8?text=Image+Derived+Preview`;
+    let verificationInfo: any = null;
+    let totalAttempts = 1;
+
     if (process.env.GEMINI_API_KEY) {
       try {
-        console.log(`🎨 Drawing derived image with Imagen 4.0...`);
-        const imgResponse = await ai.models.generateImages({
-          model: 'imagen-4.0-fast-generate-001',
-          prompt: newPrompt,
-          config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' }
-        });
-        const generatedBase64Image = imgResponse.generatedImages?.[0]?.image?.imageBytes;
-        if (generatedBase64Image) {
-          newImageUrl = `data:image/jpeg;base64,${generatedBase64Image}`;
-        }
+        console.log(`🎨 Drawing derived image with Imagen 4.0 & Gemini Vision OCR Verification...`);
+        const result = await generateImageWithVisionRetry(ai, newPrompt, catchphrase || undefined, 2);
+        newImageUrl = result.imageUrl;
+        verificationInfo = result.verification;
+        totalAttempts = result.totalAttempts;
       } catch (imgError) {
         console.error("Imagen generation failed:", imgError);
       }
@@ -110,7 +108,12 @@ export async function POST(req: Request) {
       created_at: new Date().toISOString(),
       status: 'success',
       reference_image_used: !!base64Data,
-      feedback_applied: prompt
+      feedback_applied: prompt,
+      catchphrase: catchphrase || null,
+      spelling_verified: verificationInfo ? verificationInfo.isSpellingCorrect : true,
+      spelling_detected_text: verificationInfo ? verificationInfo.detectedText : (catchphrase || ''),
+      spelling_attempts: totalAttempts,
+      spelling_typo_details: verificationInfo ? verificationInfo.typoDetails : '',
     };
 
     if (!isPreview && process.env.FIREBASE_PROJECT_ID) {

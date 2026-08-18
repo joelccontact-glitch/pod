@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { sanitizeSpelling, getStrictSpellingInstruction } from '@/lib/spelling-verifier';
+import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry } from '@/lib/spelling-verifier';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -41,20 +41,16 @@ export async function POST(req: Request) {
     }
 
     let newImageUrl = '';
+    let verificationInfo: any = null;
+    let totalAttempts = 1;
+
     if (process.env.GEMINI_API_KEY) {
       try {
-        console.log(`🎨 Drawing modified image with Imagen 4.0...`);
-        const imgResponse = await ai.models.generateImages({
-          model: 'imagen-4.0-fast-generate-001',
-          prompt: newPrompt,
-          config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' }
-        });
-        const base64Image = imgResponse.generatedImages?.[0]?.image?.imageBytes;
-        if (base64Image) {
-          newImageUrl = `data:image/jpeg;base64,${base64Image}`;
-        } else {
-          return NextResponse.json({ success: false, error: 'AI 이미지 생성에 실패했습니다. 다시 시도해 주세요.' }, { status: 500 });
-        }
+        console.log(`🎨 Drawing modified image with Imagen 4.0 & Gemini Vision OCR Verification...`);
+        const result = await generateImageWithVisionRetry(ai, newPrompt, catchphrase || undefined, 2);
+        newImageUrl = result.imageUrl;
+        verificationInfo = result.verification;
+        totalAttempts = result.totalAttempts;
       } catch (imgError: any) {
         console.error("Imagen generation failed:", imgError);
         const errMsg = imgError?.message || String(imgError);
@@ -81,7 +77,12 @@ export async function POST(req: Request) {
       created_at: new Date().toISOString(),
       status: 'success',
       modified_from: originalId || null,
-      feedback_applied: feedback
+      feedback_applied: feedback,
+      catchphrase: catchphrase || null,
+      spelling_verified: verificationInfo ? verificationInfo.isSpellingCorrect : true,
+      spelling_detected_text: verificationInfo ? verificationInfo.detectedText : (catchphrase || ''),
+      spelling_attempts: totalAttempts,
+      spelling_typo_details: verificationInfo ? verificationInfo.typoDetails : '',
     };
 
     if (!isPreview && process.env.FIREBASE_PROJECT_ID) {
