@@ -196,6 +196,8 @@ export async function GET(req: Request) {
     }
 
     // [STEP 5] Log success to Firebase
+    const styleNameUsed = styleData ? styleData.name : (styleId ? '지정 화풍' : '기본 수채화/벡터 일러스트');
+
     const designData = {
       prompt_hash: promptHash,
       topic: baseTopic,
@@ -208,6 +210,7 @@ export async function GET(req: Request) {
       target_garment: isDarkGarment ? 'dark' : 'light',
       recommended_mockup: recommendedMockup,
       catchphrase: catchphrase || null,
+      style_name: styleNameUsed,
       spelling_verified: verificationInfo ? verificationInfo.isSpellingCorrect : true,
       spelling_has_text: verificationInfo ? Boolean(verificationInfo.hasText) : false,
       spelling_detected_text: verificationInfo ? (verificationInfo.hasText ? verificationInfo.detectedText : '') : '',

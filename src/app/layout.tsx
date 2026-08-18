@@ -24,7 +24,6 @@ export const metadata: Metadata = {
 };
 
 import { Providers } from "./providers";
-import { TopMasterTab } from "@/components/TopMasterTab";
 
 export default function RootLayout({
   children,
@@ -43,7 +42,6 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <Providers>
-          <TopMasterTab />
           <div className="flex-1">{children}</div>
         </Providers>
         <script

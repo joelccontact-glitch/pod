@@ -23,11 +23,10 @@ export async function POST(req: Request) {
     const base64Data = imageBase64 ? imageBase64.replace(/^data:image\/\w+;base64,/, "") : "";
 
     let newPrompt = sanitizeSpelling(prompt);
-
-    let productInfo = { title: `[MOCK] Image derived T-Shirt`, tags: ["mock", "derived"] };
+    let productInfo: any = { title: `[MOCK] Image derived T-Shirt`, tags: ["mock", "derived"] };
+    let styleData: any = null;
 
     if (process.env.GEMINI_API_KEY) {
-      let styleData = null;
       if (styleId && process.env.FIREBASE_PROJECT_ID) {
         const styleDoc = await db.collection('styles').doc(styleId).get();
         if (styleDoc.exists) {
@@ -98,6 +97,8 @@ export async function POST(req: Request) {
     
     const newHash = crypto.createHash('md5').update(newPrompt + Date.now().toString()).digest('hex');
 
+    const styleNameUsed = styleData ? styleData.name : (styleId ? '지정 화풍' : '이미지 맞춤 화풍');
+
     const newDesignData = {
       prompt_hash: newHash,
       topic: productInfo.title,
@@ -110,6 +111,7 @@ export async function POST(req: Request) {
       reference_image_used: !!base64Data,
       feedback_applied: prompt,
       catchphrase: catchphrase || null,
+      style_name: styleNameUsed,
       spelling_verified: verificationInfo ? verificationInfo.isSpellingCorrect : true,
       spelling_has_text: verificationInfo ? Boolean(verificationInfo.hasText) : false,
       spelling_detected_text: verificationInfo ? (verificationInfo.hasText ? verificationInfo.detectedText : '') : '',

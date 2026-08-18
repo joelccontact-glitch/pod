@@ -82,6 +82,19 @@ export default function Home() {
   const [cursorPos, setCursorPos] = useState({ x: -1000, y: -1000 });
   const [isHoveringCanvas, setIsHoveringCanvas] = useState(false);
 
+  const getStyleDisplayName = (design: any) => {
+    if (!design) return '기본 수채화/벡터 일러스트';
+    if (design.style_name) return design.style_name;
+    const textToScan = `${design.prompt || ''} ${design.topic || ''} ${design.title || ''}`.toLowerCase();
+    if (textToScan.includes('cottagecore')) return '코티지코어 감성 (Cottagecore)';
+    if (textToScan.includes('pixel') || textToScan.includes('y2k')) return 'Y2K 레트로 픽셀 (Y2K Pixel Art)';
+    if (textToScan.includes('minimalist') || textToScan.includes('line art')) return '미니멀 라인아트 (Minimal Line Art)';
+    if (textToScan.includes('watercolor')) return '포근한 수채화 (Cozy Watercolor)';
+    if (textToScan.includes('vintage') || textToScan.includes('retro')) return '빈티지 레트로 (Vintage Retro)';
+    if (textToScan.includes('chibi') || textToScan.includes('kawaii')) return '카와이 치비 (Kawaii Chibi)';
+    return '귀여운 수채화/벡터 일러스트';
+  };
+
   useEffect(() => {
     const updateScale = () => {
       if (editCanvasRef.current && editCanvasRef.current.width > 0) {
@@ -1260,7 +1273,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen p-3 sm:p-4 md:p-6 bg-gray-50 text-gray-900 font-sans">
+    <main className="min-h-screen pt-2 sm:pt-3 md:pt-4 px-3 sm:px-4 md:px-6 pb-6 bg-gray-50 text-gray-900 font-sans">
       <div className="max-w-6xl mx-auto space-y-3.5 sm:space-y-4">
         <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-gray-100 gap-2.5 xl:gap-0">
           <div className="shrink-0 w-full xl:w-auto flex justify-between items-start">
@@ -1418,6 +1431,9 @@ export default function Home() {
                       <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md inline-block w-fit">
                         {design.topic}
                       </span>
+                      <span className="text-[10px] sm:text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md inline-flex items-center gap-1 border border-purple-100/80" title={`바탕 화풍: ${getStyleDisplayName(design)}`}>
+                        🎨 {getStyleDisplayName(design)}
+                      </span>
                       {design.target_garment === 'dark' && (
                         <span className="text-[10px] font-bold text-amber-300 bg-slate-900 px-1.5 py-0.5 rounded-md inline-block">
                           🖤 어두운 티셔츠용
@@ -1533,6 +1549,13 @@ export default function Home() {
                       <div>
                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Topic</h4>
                         <p className="text-gray-700 bg-gray-50 px-4 py-3 rounded-xl text-sm border border-gray-100">{previewDesign ? previewDesign.topic : selectedDesign.topic}</p>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Art Style (바탕 화풍)</h4>
+                        <p className="text-purple-700 bg-purple-50/80 px-4 py-3 rounded-xl text-sm border border-purple-100 font-semibold flex items-center gap-2">
+                          <span className="text-base">🎨</span>
+                          <span>{getStyleDisplayName(previewDesign || selectedDesign)}</span>
+                        </p>
                       </div>
                       <div>
                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">SEO Tags</h4>
