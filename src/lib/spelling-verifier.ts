@@ -165,6 +165,7 @@ Return ONLY a JSON object with this exact JSON schema:
 }
 
 const GOOGLE_IMAGE_MODELS = [
+  'imagen-4.0-fast-generate-001',
   'imagen-3.0-generate-002',
   'imagen-3.0-generate-images-002',
   'imagen-3.0-fast-generate-001',
@@ -175,6 +176,7 @@ export function cleanPromptFor2DVector(rawPrompt: string): string {
   if (!rawPrompt) return '';
   return rawPrompt
     .replace(/\b(circular frame|circular border|circle frame|circle border|round frame|round border|badge frame|emblem|ring frame)\b/gi, 'isolated sticker graphic')
+    .replace(/\b(human girl|human boy|human person|human character|woman|man|girl|boy|anime girl|female person)\b/gi, 'cute animal character')
     .replace(/\b(soft watercolor|watercolor shading|pastel watercolor|watercolor blur|realistic fur|3D render|3D realistic|photorealistic|photorealistic rendering|studio lighting|depth of field|bokeh|realistic texture)\b/gi, '2D vector line art graphic with crisp outlines and flat vector colors');
 }
 
@@ -182,7 +184,7 @@ export function buildEnforced2DVectorPrompt(rawPrompt: string, spellingInstructi
   const cleaned = cleanPromptFor2DVector(rawPrompt);
   const typographySection = spellingInstruction ? ` ${spellingInstruction}` : '';
   
-  return `2D vector graphic illustration, cute kawaii 2D vector animal character sticker graphic, clean bold line art with crisp black outlines, flat vector color shading, cute T-shirt graphic layout.${typographySection} ${cleaned}. SUBJECT MANDATE: The subject MUST be an adorable cute animal character, NOT a human person or girl! BACKGROUND MANDATE: The image MUST be a SINGLE isolated 2D graphic illustration centered on a pure solid white background (#FFFFFF) (or pure solid dark background for dark t-shirts). ABSOLUTELY NO CIRCULAR FRAMES, NO RING FRAMES, NO GROUND SHADOWS, NO DROP SHADOWS, NO ROOM WALLS, NO WOODEN TABLES, NO BACKGROUND SCENERY. STRICT NEGATIVE DIRECTIVES: ABSOLUTELY NO human persons, NO human girls, NO human boys, NO human faces, NO 3D rendering, NO photorealism, NO 3D realism, NO photographic lighting, NO realistic fur textures, NO depth of field blur, NO soft pastel watercolor blur, NO background environment scenery.`;
+  return `2D vector graphic illustration, cute 2D vector animal illustration sticker, clean bold line art with crisp black outlines, flat vector colors, cute T-shirt graphic layout.${typographySection} ${cleaned}. SUBJECT RULE: The main subject MUST be an adorable cute animal character! STRICT HUMAN BAN: ABSOLUTELY NO human girls, NO human boys, NO human persons, NO human faces, NO anime girls! BACKGROUND MANDATE: The image MUST be a SINGLE isolated 2D graphic illustration centered on a pure solid white background (#FFFFFF) (or pure solid dark background for dark t-shirts). ABSOLUTELY NO CIRCULAR FRAMES, NO RING FRAMES, NO GROUND SHADOWS, NO DROP SHADOWS, NO ROOM WALLS, NO WOODEN TABLES, NO BACKGROUND SCENERY. STRICT NEGATIVE DIRECTIVES: ABSOLUTELY NO 3D rendering, NO photorealism, NO 3D realism, NO photographic lighting, NO realistic fur textures, NO depth of field blur, NO soft pastel watercolor blur, NO background environment scenery.`;
 }
 
 /**
