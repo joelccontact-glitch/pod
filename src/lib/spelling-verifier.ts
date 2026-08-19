@@ -171,6 +171,20 @@ const GOOGLE_IMAGE_MODELS = [
   'imagen-3.0-fast-generate-images-001',
 ];
 
+export function cleanPromptFor2DVector(rawPrompt: string): string {
+  if (!rawPrompt) return '';
+  return rawPrompt
+    .replace(/\b(circular frame|circular border|circle frame|circle border|round frame|round border|badge frame|emblem|ring frame)\b/gi, 'isolated sticker graphic')
+    .replace(/\b(soft watercolor|watercolor shading|pastel watercolor|watercolor blur|realistic fur|3D render|3D realistic|photorealistic|photorealistic rendering|studio lighting|depth of field|bokeh|realistic texture)\b/gi, '2D vector line art graphic with crisp outlines and flat vector colors');
+}
+
+export function buildEnforced2DVectorPrompt(rawPrompt: string, spellingInstruction?: string): string {
+  const cleaned = cleanPromptFor2DVector(rawPrompt);
+  const typographySection = spellingInstruction ? ` ${spellingInstruction}` : '';
+  
+  return `2D vector graphic illustration, clean bold line art with crisp black outlines, flat vector color shading, cute kawaii T-shirt graphic sticker layout.${typographySection} ${cleaned}. BACKGROUND MANDATE: The image MUST be a SINGLE isolated 2D graphic illustration centered on a pure solid white background (#FFFFFF) (or pure solid dark background for dark t-shirts). ABSOLUTELY NO CIRCULAR FRAMES, NO RING FRAMES, NO GROUND SHADOWS, NO DROP SHADOWS, NO ROOM WALLS, NO WOODEN TABLES, NO BACKGROUND SCENERY. STRICT NEGATIVE DIRECTIVES: ABSOLUTELY NO 3D rendering, NO photorealism, NO 3D realism, NO photographic lighting, NO realistic fur textures, NO depth of field blur, NO soft pastel watercolor blur, NO background environment scenery.`;
+}
+
 /**
  * Multi-Engine Image Generation with Zero-Downtime Fallback:
  * 1. GoogleGenAI SDK (multiple model candidate names)
@@ -180,9 +194,7 @@ const GOOGLE_IMAGE_MODELS = [
 async function callGenerateImagesWithFallback(ai: any, rawPrompt: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY;
 
-  // Enforce 2D Vector Graphic Line Art at the very front of the prompt to prevent 3D photorealistic render fallbacks
-  const vectorStylePrefix = "2D vector graphic illustration, clean bold line art, crisp black outlines, flat vector color shading, cute kawaii T-shirt graphic sticker layout, pure solid white background (#FFFFFF). STRICT NEGATIVE DIRECTIVES: ABSOLUTELY NO 3D rendering, NO photorealism, NO realistic fur, NO background scenery, NO nature landscapes, NO room walls, NO wooden tables, NO floor shadows. ";
-  const prompt = rawPrompt.includes('2D vector graphic illustration') ? rawPrompt : `${vectorStylePrefix}${rawPrompt}`;
+  const prompt = buildEnforced2DVectorPrompt(rawPrompt);
 
   // 1. Try GoogleGenAI SDK model methods
   for (const modelName of GOOGLE_IMAGE_MODELS) {

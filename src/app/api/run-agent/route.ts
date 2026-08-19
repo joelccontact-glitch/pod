@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry } from '@/lib/spelling-verifier';
+import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry, buildEnforced2DVectorPrompt } from '@/lib/spelling-verifier';
 import { getAnimalAffinityInstruction } from '@/lib/animal-affinities';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -138,7 +138,7 @@ export async function GET(req: Request) {
     }
 
     // Always enforce strict 2D vector line art, arched typography script text, and white background rules
-    designPrompt = `${designPrompt}. 2D vector graphic illustration, clean bold line art with crisp black outlines, flat vector color shading, cute kawaii T-shirt graphic sticker layout. ${spellingInstruction} BACKGROUND MANDATE: The image MUST be a SINGLE isolated 2D graphic illustration centered on a pure solid white background (#FFFFFF) (or pure solid dark background for dark t-shirts). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO ROOM WALLS, NO WOODEN TABLES, NO BACKGROUND SCENERY. STRICT NEGATIVE DIRECTIVES: ABSOLUTELY NO 3D rendering, NO photorealism, NO 3D realism, NO photographic lighting, NO realistic fur textures, NO depth of field blur, NO background environment scenery.`;
+    designPrompt = buildEnforced2DVectorPrompt(designPrompt, spellingInstruction);
 
     // [STEP 2] Check for duplicates in Firebase via hash
     const promptHash = crypto.createHash('md5').update(designPrompt).digest('hex');
