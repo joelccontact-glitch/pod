@@ -58,11 +58,11 @@ export function getStrictSpellingInstruction(catchphrase?: string, autoPhrase?: 
   const sanitizedPhrase = catchphrase ? sanitizeSpelling(catchphrase.trim()) : '';
 
   if (sanitizedPhrase) {
-    return `CRUCIAL TYPOGRAPHY & SPELLING RULE: Incorporate the typography text "${sanitizedPhrase}". The text MUST be spelled 100% accurately according to standard English dictionary spelling with ZERO typos (e.g. "Sweet" MUST be S-W-E-E-T, NOT "Sweiet"). This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.`;
+    return `TOP TYPOGRAPHY TEXT MANDATE: MUST feature the typography text "${sanitizedPhrase}" ARCHED GRACEFULLY AT THE TOP OF THE GRAPHIC ILLUSTRATION. The text MUST be spelled 100% accurately according to standard English dictionary spelling with ZERO typos (e.g. "Sweet" MUST be S-W-E-E-T, NOT "Sweiet"). This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.`;
   }
 
   if (autoPhrase) {
-    return `CRUCIAL TYPOGRAPHY & SPELLING RULE: Invent a short, witty, trademark-free phrase (2-4 words, e.g. "Sweet Nibblers") related to the subject. Double-check all English spelling to guarantee 100% dictionary-correct spelling with ZERO typos (e.g., "Sweet" MUST be S-W-E-E-T, NOT "Sweiet"). Incorporate it as typography text drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.`;
+    return `TOP TYPOGRAPHY TEXT MANDATE: Invent a short, witty, trademark-free phrase (2-4 words, e.g. "Sweet Nibblers") related to the subject. Incorporate it as typography text ARCHED GRACEFULLY AT THE TOP OF THE GRAPHIC ILLUSTRATION, drawn in an elegant, cute, hand-drawn script font with 100% dictionary-correct English spelling.`;
   }
 
   return `CRUCIAL SPELLING RULE: All English words generated in typography text MUST be 100% dictionary-correct with ZERO typos.`;
@@ -177,8 +177,12 @@ const GOOGLE_IMAGE_MODELS = [
  * 2. Direct Google Imagen 3 REST API
  * 3. High Precision Flux.1 Engine via Pollinations
  */
-async function callGenerateImagesWithFallback(ai: any, prompt: string): Promise<string> {
+async function callGenerateImagesWithFallback(ai: any, rawPrompt: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY;
+
+  // Enforce 2D Vector Graphic Line Art at the very front of the prompt to prevent 3D photorealistic render fallbacks
+  const vectorStylePrefix = "2D vector graphic illustration, clean bold line art, crisp black outlines, flat vector color shading, cute kawaii T-shirt graphic sticker layout, pure solid white background (#FFFFFF). STRICT NEGATIVE DIRECTIVES: ABSOLUTELY NO 3D rendering, NO photorealism, NO realistic fur, NO background scenery, NO nature landscapes, NO room walls, NO wooden tables, NO floor shadows. ";
+  const prompt = rawPrompt.includes('2D vector graphic illustration') ? rawPrompt : `${vectorStylePrefix}${rawPrompt}`;
 
   // 1. Try GoogleGenAI SDK model methods
   for (const modelName of GOOGLE_IMAGE_MODELS) {
@@ -233,7 +237,8 @@ async function callGenerateImagesWithFallback(ai: any, prompt: string): Promise<
   // 3. Fallback: Ultra-Reliable High Precision Flux.1 Engine via Pollinations
   try {
     console.log(`🎨 Falling back to High Precision Flux.1 AI Engine...`);
-    const cleanPrompt = prompt.length > 400 ? prompt.substring(0, 400) : prompt;
+    // Crucial: keep the vector style prefix at the front so truncation never removes style rules!
+    const cleanPrompt = prompt.length > 500 ? prompt.substring(0, 500) : prompt;
     const seed = Math.floor(Math.random() * 1000000);
     const encodedPrompt = encodeURIComponent(cleanPrompt);
     const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;

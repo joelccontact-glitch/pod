@@ -39,7 +39,7 @@ Return a JSON object with:
       console.log(`🖼️ Generating sample image...`);
       const imgResponse = await ai.models.generateImages({
         model: 'imagen-3.0-generate-002',
-        prompt: `A beautiful icon or simple illustration. strictly following this style: ${promptDescription}. CRITICAL RULE: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery.`,
+        prompt: `A beautiful 2D vector graphic illustration sticker. strictly following this style: ${promptDescription}. 2D vector graphic illustration, clean bold line art with crisp outlines, flat vector color shading. CRITICAL RULE: The image MUST have a pure solid white background (#FFFFFF). ABSOLUTELY NO 3D rendering, NO photorealism, NO background colors, gradients, or scenery.`,
         config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' }
       });
       

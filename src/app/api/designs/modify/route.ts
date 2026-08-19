@@ -38,6 +38,7 @@ export async function POST(req: Request) {
       });
       const productInfoText = textResponse.text;
       productInfo = productInfoText ? JSON.parse(productInfoText) : productInfo;
+      newPrompt = `${newPrompt}. 2D vector graphic illustration, clean bold line art with crisp black outlines, flat vector color shading, cute kawaii T-shirt graphic sticker layout. ${spellingInstruction} BACKGROUND MANDATE: The image MUST be a SINGLE isolated 2D graphic illustration centered on a pure solid white background (#FFFFFF) (or pure solid dark background for dark t-shirts). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO ROOM WALLS, NO WOODEN TABLES, NO BACKGROUND SCENERY. STRICT NEGATIVE DIRECTIVES: ABSOLUTELY NO 3D rendering, NO photorealism, NO 3D realism, NO photographic lighting, NO realistic fur textures, NO depth of field blur, NO background environment scenery.`;
     }
 
     let newImageUrl = '';

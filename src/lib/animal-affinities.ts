@@ -121,16 +121,16 @@ export function getAnimalAffinityInstruction(targetAnimal: string): string {
 
   let styleDirective = '';
   if (isAnthropomorphic) {
-    styleDirective = `STYLE MANDATE: ANTHROPOMORPHIC ANIMAL WITH US HOBBY. Depict ${affinity ? affinity.animalName : targetAnimal} as an ultra-cute, friendly anthropomorphic character wearing cute clothing (e.g., cozy sweater, hoodie, beanie, denim jacket, or sneakers) and enjoying a popular US lifestyle/hobby (e.g., sipping iced coffee/boba, cozy book reading, skateboarding, acoustic guitar, or camping).`;
+    styleDirective = `STYLE MANDATE: ANTHROPOMORPHIC ANIMAL (2D VECTOR LINE ART). Depict ${affinity ? affinity.animalName : targetAnimal} as a cute 2D vector line art character wearing cute clothing (e.g., cozy sweater, hoodie, beanie, denim jacket, or sneakers) and enjoying a popular US lifestyle/hobby (e.g., sipping iced coffee/boba, reading a book, or playing acoustic guitar).`;
   } else {
-    styleDirective = `STYLE MANDATE: AUTHENTIC NATURAL BABY ANIMAL. Depict ${affinity ? affinity.animalName : targetAnimal} in its pure, fluffy, adorable natural baby animal state (no human clothes), in a charming standalone pose.`;
+    styleDirective = `STYLE MANDATE: AUTHENTIC NATURAL BABY ANIMAL (2D VECTOR LINE ART). Depict ${affinity ? affinity.animalName : targetAnimal} in its pure, fluffy, adorable 2D vector baby animal state (no human clothes), in a charming standalone pose.`;
   }
 
   let affinityRule = '';
   if (affinity) {
-    affinityRule = `BIOLOGICAL AFFINITY RULE: Ensure the artwork naturally incorporates elements ${affinity.animalName} actually loves in real life (preferred items: ${affinity.preferredItems.join(', ')}).`;
+    affinityRule = `BIOLOGICAL AFFINITY RULE: Incorporate small standalone props ${affinity.animalName} actually loves in real life (preferred items: ${affinity.preferredItems.join(', ')}). DO NOT draw full background landscapes or scenery environments.`;
     if (affinity.strictExclusions && affinity.strictExclusions.length > 0) {
-      affinityRule += ` STRICT NEGATIVE RULE: DO NOT include biologically mismatched items for ${affinity.animalName} such as: ${affinity.strictExclusions.join(', ')}. (For example, Red Pandas eat bamboo, NOT mushrooms or spores!).`;
+      affinityRule += ` STRICT NEGATIVE RULE: DO NOT include biologically mismatched items for ${affinity.animalName} such as: ${affinity.strictExclusions.join(', ')}.`;
     }
   }
 
