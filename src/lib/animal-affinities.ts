@@ -121,9 +121,9 @@ export function getAnimalAffinityInstruction(targetAnimal: string): string {
 
   let styleDirective = '';
   if (isAnthropomorphic) {
-    styleDirective = `STYLE MANDATE: ANTHROPOMORPHIC ANIMAL (2D VECTOR LINE ART). Depict ${affinity ? affinity.animalName : targetAnimal} as a cute 2D vector line art character wearing cute clothing (e.g., cozy sweater, hoodie, beanie, denim jacket, or sneakers) and enjoying a popular US lifestyle/hobby (e.g., sipping iced coffee/boba, reading a book, or playing acoustic guitar).`;
+    styleDirective = `SUBJECT MANDATE: THE MAIN CHARACTER MUST BE AN ADORABLE CUTE ANIMAL (${affinity ? affinity.animalName : targetAnimal}), NOT A HUMAN. Depict ${affinity ? affinity.animalName : targetAnimal} as a cute, friendly 2D vector line art animal character wearing cute cozy clothes (e.g. sweater, hoodie, beanie) and enjoying a US lifestyle/hobby (e.g. sipping iced boba, reading a book). STRICT NEGATIVE RULE: DO NOT DRAW HUMAN PERSONS, HUMAN GIRLS, HUMAN BOYS, OR HUMAN FACES!`;
   } else {
-    styleDirective = `STYLE MANDATE: AUTHENTIC NATURAL BABY ANIMAL (2D VECTOR LINE ART). Depict ${affinity ? affinity.animalName : targetAnimal} in its pure, fluffy, adorable 2D vector baby animal state (no human clothes), in a charming standalone pose.`;
+    styleDirective = `SUBJECT MANDATE: THE MAIN CHARACTER MUST BE AN ADORABLE CUTE ANIMAL (${affinity ? affinity.animalName : targetAnimal}), NOT A HUMAN. Depict ${affinity ? affinity.animalName : targetAnimal} in its pure, fluffy 2D vector baby animal state (no human clothes), in a charming standalone pose. STRICT NEGATIVE RULE: DO NOT DRAW HUMAN PERSONS, HUMAN GIRLS, HUMAN BOYS, OR HUMAN FACES!`;
   }
 
   let affinityRule = '';

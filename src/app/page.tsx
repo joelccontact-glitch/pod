@@ -1459,6 +1459,11 @@ export default function Home() {
                       })()}
                     </div>
                     <h3 className="font-bold text-gray-800 text-xs sm:text-sm line-clamp-2 leading-snug" title={design.title}>{design.title}</h3>
+                    {design.created_at && (
+                      <p className="text-[10px] text-gray-400 mt-1">
+                        {new Date(design.created_at).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
