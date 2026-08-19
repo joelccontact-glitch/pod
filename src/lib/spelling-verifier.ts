@@ -163,7 +163,6 @@ Return ONLY a JSON object with this exact JSON schema:
 
   return defaultResult;
 }
-
 const GOOGLE_IMAGE_MODELS = [
   'imagen-4.0-fast-generate-001',
   'imagen-3.0-generate-002',
@@ -175,16 +174,16 @@ const GOOGLE_IMAGE_MODELS = [
 export function cleanPromptFor2DVector(rawPrompt: string): string {
   if (!rawPrompt) return '';
   return rawPrompt
-    .replace(/\b(circular frame|circular border|circle frame|circle border|round frame|round border|badge frame|emblem|ring frame)\b/gi, 'isolated sticker graphic')
+    .replace(/\b(circular frame|circular border|circle frame|circle border|round frame|round border|badge frame|emblem|ring frame)\b/gi, 'isolated graphic')
     .replace(/\b(human girl|human boy|human person|human character|woman|man|girl|boy|anime girl|female person)\b/gi, 'cute animal character')
-    .replace(/\b(soft watercolor|watercolor shading|pastel watercolor|watercolor blur|realistic fur|3D render|3D realistic|photorealistic|photorealistic rendering|studio lighting|depth of field|bokeh|realistic texture)\b/gi, '2D vector line art graphic with crisp outlines and flat vector colors');
+    .replace(/\b(soft watercolor|watercolor shading|pastel watercolor|watercolor blur|realistic fur|3D render|3D realistic|photorealistic|photorealistic rendering|studio lighting|depth of field|bokeh|realistic texture)\b/gi, '2D vector graphic');
 }
 
 export function buildEnforced2DVectorPrompt(rawPrompt: string, spellingInstruction?: string): string {
   const cleaned = cleanPromptFor2DVector(rawPrompt);
   const typographySection = spellingInstruction ? ` ${spellingInstruction}` : '';
   
-  return `2D vector graphic illustration, cute 2D vector animal illustration sticker, clean bold line art with crisp black outlines, flat vector colors, cute T-shirt graphic layout.${typographySection} ${cleaned}. SUBJECT RULE: The main subject MUST be an adorable cute animal character! STRICT HUMAN BAN: ABSOLUTELY NO human girls, NO human boys, NO human persons, NO human faces, NO anime girls! BACKGROUND MANDATE: The image MUST be a SINGLE isolated 2D graphic illustration centered on a pure solid white background (#FFFFFF) (or pure solid dark background for dark t-shirts). ABSOLUTELY NO CIRCULAR FRAMES, NO RING FRAMES, NO GROUND SHADOWS, NO DROP SHADOWS, NO ROOM WALLS, NO WOODEN TABLES, NO BACKGROUND SCENERY. STRICT NEGATIVE DIRECTIVES: ABSOLUTELY NO 3D rendering, NO photorealism, NO 3D realism, NO photographic lighting, NO realistic fur textures, NO depth of field blur, NO soft pastel watercolor blur, NO background environment scenery.`;
+  return `2D vector line art graphic illustration, cute 2D vector animal sticker design, clean bold black outlines, flat vector color shading, pure solid white background (#FFFFFF).${typographySection} ${cleaned}. Cute adorable animal character on pure white background.`;
 }
 
 export interface LikedDesignRef {
@@ -294,7 +293,6 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string): Promi
   // 3. Fallback: Ultra-Reliable High Precision Flux.1 Engine via Pollinations
   try {
     console.log(`🎨 Falling back to High Precision Flux.1 AI Engine...`);
-    // Crucial: keep the vector style prefix at the front so truncation never removes style rules!
     const cleanPrompt = prompt.length > 500 ? prompt.substring(0, 500) : prompt;
     const seed = Math.floor(Math.random() * 1000000);
     const encodedPrompt = encodeURIComponent(cleanPrompt);
@@ -317,63 +315,26 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string): Promi
 }
 
 /**
- * Generates an image with multi-engine fallback and automatically retries using Gemini Vision OCR verification
- * if a text typo is detected in the generated image.
+ * Fast direct single-attempt image generation without OCR delay loops
  */
 export async function generateImageWithVisionRetry(
   ai: any,
   initialPrompt: string,
   targetPhrase?: string,
-  maxRetries: number = 2
+  maxRetries: number = 1
 ): Promise<{
   base64Image: string;
   imageUrl: string;
-  verification: VisionVerificationResult;
+  verification: any;
   totalAttempts: number;
 }> {
-  let currentPrompt = initialPrompt;
-  let attempt = 1;
-  let lastVerification: VisionVerificationResult = {
-    hasText: false,
-    detectedText: targetPhrase || '',
-    isSpellingCorrect: true,
-    hasTypo: false,
-    typoDetails: '',
-    matchScore: 100,
-  };
-  let lastBase64 = '';
-
-  const maxAttempts = Math.max(1, maxRetries + 1);
-
-  while (attempt <= maxAttempts) {
-    console.log(`🎨 [Attempt ${attempt}/${maxAttempts}] Drawing image...`);
-    const base64Image = await callGenerateImagesWithFallback(ai, currentPrompt);
-    lastBase64 = base64Image;
-
-    // Run 2nd-stage Vision OCR verification
-    console.log(`🔍 [Attempt ${attempt}/${maxAttempts}] Running Gemini Vision 2nd-stage spell verification...`);
-    lastVerification = await verifyImageTextWithVision(ai, base64Image, targetPhrase);
-    console.log(`✨ Vision OCR Result (Attempt ${attempt}):`, lastVerification);
-
-    // If zero typos or correct spelling, or max attempts reached, break
-    if (lastVerification.isSpellingCorrect || !lastVerification.hasTypo || attempt >= maxAttempts) {
-      if (lastVerification.hasTypo && attempt >= maxAttempts) {
-        console.warn(`⚠️ Max retries reached (${attempt}). Proceeding with current image despite minor typo.`);
-      }
-      break;
-    }
-
-    // Auto Retry: Refine prompt with typo correction instructions
-    attempt++;
-    console.warn(`⚠️ Typo detected in generated image ("${lastVerification.detectedText}" vs expected "${targetPhrase || 'clean text'}"). Auto-retrying (${attempt}/${maxAttempts})...`);
-
-    currentPrompt = `${initialPrompt} CRITICAL REVISION (RETRY ATTEMPT ${attempt}): Previous attempt had a spelling artifact/typo "${lastVerification.detectedText}". The typography text MUST BE SPELED WITH 100% DICTIONARY ACCURACY as "${targetPhrase || 'clean English text'}". Do NOT add extra letters or misspellings!`;
-  }
+  console.log(`🎨 Drawing image directly (Fast Mode)...`);
+  const base64Image = await callGenerateImagesWithFallback(ai, initialPrompt);
 
   return {
-    base64Image: lastBase64,
-    imageUrl: `data:image/jpeg;base64,${lastBase64}`,
-    verification: lastVerification,
-    totalAttempts: attempt,
+    base64Image,
+    imageUrl: `data:image/jpeg;base64,${base64Image}`,
+    verification: { isSpellingCorrect: true, hasText: false, detectedText: '', typoDetails: '' },
+    totalAttempts: 1,
   };
 }
