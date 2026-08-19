@@ -187,6 +187,49 @@ export function buildEnforced2DVectorPrompt(rawPrompt: string, spellingInstructi
   return `2D vector graphic illustration, cute 2D vector animal illustration sticker, clean bold line art with crisp black outlines, flat vector colors, cute T-shirt graphic layout.${typographySection} ${cleaned}. SUBJECT RULE: The main subject MUST be an adorable cute animal character! STRICT HUMAN BAN: ABSOLUTELY NO human girls, NO human boys, NO human persons, NO human faces, NO anime girls! BACKGROUND MANDATE: The image MUST be a SINGLE isolated 2D graphic illustration centered on a pure solid white background (#FFFFFF) (or pure solid dark background for dark t-shirts). ABSOLUTELY NO CIRCULAR FRAMES, NO RING FRAMES, NO GROUND SHADOWS, NO DROP SHADOWS, NO ROOM WALLS, NO WOODEN TABLES, NO BACKGROUND SCENERY. STRICT NEGATIVE DIRECTIVES: ABSOLUTELY NO 3D rendering, NO photorealism, NO 3D realism, NO photographic lighting, NO realistic fur textures, NO depth of field blur, NO soft pastel watercolor blur, NO background environment scenery.`;
 }
 
+export interface LikedDesignRef {
+  topic?: string;
+  prompt?: string;
+  catchphrase?: string;
+  image_url?: string;
+}
+
+export async function fetchLikedDesignsSummary(db: any, limitCount = 4): Promise<{ likedDesigns: LikedDesignRef[]; likedPromptSummary: string; inlineImages: any[] }> {
+  if (!db || !process.env.FIREBASE_PROJECT_ID) {
+    return { likedDesigns: [], likedPromptSummary: '', inlineImages: [] };
+  }
+
+  try {
+    const snap = await db.collection('designs').where('is_liked', '==', true).limit(limitCount).get();
+    if (snap.empty) {
+      return { likedDesigns: [], likedPromptSummary: '', inlineImages: [] };
+    }
+
+    const likedDesigns: LikedDesignRef[] = snap.docs.map((doc: any) => doc.data());
+    const inlineImages: any[] = [];
+    const promptSummaries: string[] = [];
+
+    likedDesigns.forEach((d, idx) => {
+      if (d.prompt) {
+        promptSummaries.push(`- Reference ${idx + 1} (${d.topic || 'Liked Design'}): "${cleanPromptFor2DVector(d.prompt).substring(0, 250)}"`);
+      }
+      if (d.image_url && d.image_url.startsWith('data:image')) {
+        const mimeType = d.image_url.match(/^data:(image\/\w+);base64,/)?.[1] || 'image/jpeg';
+        const base64Data = d.image_url.replace(/^data:image\/\w+;base64,/, "");
+        if (base64Data.length > 100) {
+          inlineImages.push({ inlineData: { data: base64Data, mimeType } });
+        }
+      }
+    });
+
+    const likedPromptSummary = promptSummaries.join('\n');
+    return { likedDesigns, likedPromptSummary, inlineImages };
+  } catch (err) {
+    console.error('Error fetching liked designs summary:', err);
+    return { likedDesigns: [], likedPromptSummary: '', inlineImages: [] };
+  }
+}
+
 /**
  * Multi-Engine Image Generation with Zero-Downtime Fallback:
  * 1. GoogleGenAI SDK (multiple model candidate names)

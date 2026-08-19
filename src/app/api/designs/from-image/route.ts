@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry, buildEnforced2DVectorPrompt } from '@/lib/spelling-verifier';
+import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry, buildEnforced2DVectorPrompt, fetchLikedDesignsSummary } from '@/lib/spelling-verifier';
 import { getAnimalAffinityInstruction } from '@/lib/animal-affinities';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -33,6 +33,9 @@ export async function POST(req: Request) {
           styleData = styleDoc.data();
         }
       }
+
+      const { likedDesigns, likedPromptSummary } = await fetchLikedDesignsSummary(db, 3);
+      const likedInstruction = likedDesigns.length > 0 ? `\nCRITICAL #1 MASTER BENCHMARK: The user LIKED (HEARTED) these favorite designs. Ensure the style matches their aesthetic:\n${likedPromptSummary}\n` : '';
 
       let contentsArray: any[] = [];
       if (styleData) {

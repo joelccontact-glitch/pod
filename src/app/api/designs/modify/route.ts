@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry, buildEnforced2DVectorPrompt } from '@/lib/spelling-verifier';
+import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry, buildEnforced2DVectorPrompt, fetchLikedDesignsSummary } from '@/lib/spelling-verifier';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -22,10 +22,13 @@ export async function POST(req: Request) {
     let productInfo = { title: `[MOCK Modified] ${topic} T-Shirt`, tags: ["mock", "modified"] };
 
     if (process.env.GEMINI_API_KEY) {
+      const { likedDesigns, likedPromptSummary } = await fetchLikedDesignsSummary(db, 3);
+      const likedInstruction = likedDesigns.length > 0 ? `\nCRITICAL #1 MASTER BENCHMARK: The user LIKED (HEARTED) these favorite designs. Ensure the modified prompt maintains their favorite aesthetic:\n${likedPromptSummary}\n` : '';
+
       // 1. Generate new prompt based on feedback
       const promptResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `I have a t-shirt design concept with the original prompt: "${originalPrompt}". ${feedback ? `The user provided the following feedback to modify it: "${feedback}". ` : ''}${spellingInstruction} Generate a new, modified prompt for an image generator (vector art, graphic illustration, pure solid white background (#FFFFFF), NO scenery). CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
+        contents: `I have a t-shirt design concept with the original prompt: "${originalPrompt}". ${feedback ? `The user provided the following feedback to modify it: "${feedback}". ` : ''}${spellingInstruction}${likedInstruction} Generate a new, modified prompt for an image generator (vector art, graphic illustration, pure solid white background (#FFFFFF), NO scenery). CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
       });
       newPrompt = sanitizeSpelling(promptResponse.text?.trim() || originalPrompt);
 

@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
-import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry, buildEnforced2DVectorPrompt } from '@/lib/spelling-verifier';
+import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry, buildEnforced2DVectorPrompt, fetchLikedDesignsSummary } from '@/lib/spelling-verifier';
 import { getAnimalAffinityInstruction } from '@/lib/animal-affinities';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -96,44 +96,52 @@ export async function GET(req: Request) {
       }
     }
 
-    // Fetch liked designs to use as additional inspiration
-    let likedDesigns: any[] = [];
-    if (process.env.FIREBASE_PROJECT_ID) {
-      const likedQuery = await db.collection('designs').where('is_liked', '==', true).limit(3).get();
-      likedDesigns = likedQuery.docs.map((d: any) => d.data());
-    }
+    // Fetch #1 priority liked (heart-marked) designs from Firebase
+    const { likedDesigns, likedPromptSummary, inlineImages: likedInlineImages } = await fetchLikedDesignsSummary(db, 4);
 
     const spellingInstruction = getStrictSpellingInstruction(catchphrase, autoPhrase);
     let designPrompt = sanitizeSpelling(`${baseTopic}, vector art, standalone graphic illustration. ${affinityInstruction}${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction}`);
     
-    if (styleData && process.env.GEMINI_API_KEY) {
-      console.log(`🎨 Applying style: ${styleData.name}`);
+    if (process.env.GEMINI_API_KEY && (likedDesigns.length > 0 || styleData)) {
+      console.log(`🎨 Constructing prompt using Liked Benchmark (${likedDesigns.length} liked designs) & Style Preset (${styleData?.name || 'Default'})...`);
       try {
-        const contents: any[] = [
-          `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${affinityInstruction} ${spellingInstruction}${darkGarmentInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery.`,
-          { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
-        ];
-
+        let systemMsg = `You are an expert T-shirt graphic design prompt engineer.\n`;
+        
         if (likedDesigns.length > 0) {
-          contents[0] += ` Additionally, I am providing ${likedDesigns.length} previously generated image(s) that the user liked. Use them as additional inspiration for the overall vibe and quality.`;
-          likedDesigns.forEach(d => {
-            if (d.image_url && d.image_url.startsWith('data:image')) {
-              const mimeType = d.image_url.match(/^data:(image\/\w+);base64,/)?.[1] || 'image/jpeg';
-              contents.push({ inlineData: { data: d.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType } });
-            }
-          });
+          systemMsg += `CRITICAL #1 MASTER BENCHMARK RULE: The user has explicitly HEART-MARKED (LIKED) ${likedDesigns.length} previous design(s) as their FAVORITES!
+These liked designs are your #1 PRIMARY STYLE BENCHMARK for vector art quality, crisp linework, color palette, typography placement, and overall charm.
+Here are the exact prompts and themes of the user's favorite liked designs:
+${likedPromptSummary}
+
+You MUST generate an image generation prompt for the new topic: "${baseTopic}". ${affinityInstruction} ${spellingInstruction}${darkGarmentInstruction}
+Ensure the new prompt strictly matches the 2D vector line art aesthetic, crisp linework, flat colors, cute charm, and script typography placement of the user's LIKED benchmark designs.
+The output must be ONLY the raw prompt string for an image generator.`;
+        } else {
+          systemMsg += `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${affinityInstruction} ${spellingInstruction}${darkGarmentInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData?.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery.`;
         }
+
+        const contents: any[] = [systemMsg];
+
+        // Attach style reference image if present
+        if (styleData?.image_url && styleData.image_url.startsWith('data:image')) {
+          const mimeType = styleData.image_url.match(/^data:(image\/\w+);base64,/)?.[1] || 'image/jpeg';
+          contents.push({ inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType } });
+        }
+
+        // Attach liked design images as #1 visual reference!
+        likedInlineImages.forEach(imgObj => contents.push(imgObj));
 
         const promptResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
           contents: contents
         });
+
         if (promptResponse.text) {
           designPrompt = sanitizeSpelling(promptResponse.text.trim());
         }
       } catch (err) {
         console.error("Style prompt generation failed, using fallback.");
-        designPrompt = sanitizeSpelling(`${baseTopic}. ${affinityInstruction}${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction} MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}`);
+        designPrompt = sanitizeSpelling(`${baseTopic}. ${affinityInstruction}${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction} ${styleData ? `MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}` : ''}`);
       }
     }
 
