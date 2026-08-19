@@ -240,57 +240,45 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string): Promi
 
   const prompt = buildEnforced2DVectorPrompt(rawPrompt);
 
-  // 1. Try GoogleGenAI SDK model methods
-  for (const modelName of GOOGLE_IMAGE_MODELS) {
-    try {
-      console.log(`🎨 Drawing image with Google model '${modelName}'...`);
-      const response = await ai.models.generateImages({
-        model: modelName,
-        prompt: prompt,
-        config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' },
-      });
-      const base64Image = response.generatedImages?.[0]?.image?.imageBytes;
-      if (base64Image) {
-        return base64Image;
-      }
-    } catch (err: any) {
-      console.warn(`Google GenAI SDK model '${modelName}' failed:`, err?.message || String(err));
-    }
-  }
+  const googleModels = [
+    'gemini-3.1-flash-image',
+    'gemini-2.5-flash-image',
+    'gemini-3.1-flash-image-preview',
+  ];
 
-  // 2. Try Direct Google Imagen 3 REST API
+  // 1. Primary: Direct Google Native Gemini Image Models (gemini-3.1-flash-image & gemini-2.5-flash-image)
   if (apiKey) {
-    try {
-      console.log(`🎨 Trying Direct Google Imagen 3 REST API...`);
-      const googleRes = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-images-002:generate?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            prompt: prompt,
-            config: {
-              numberOfImages: 1,
-              outputMimeType: 'image/jpeg',
-              aspectRatio: '1:1',
-            },
-          }),
+    for (const modelName of googleModels) {
+      try {
+        console.log(`🎨 Drawing high-quality image with Google Model '${modelName}'...`);
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: `Generate a high quality t-shirt design graphic sticker image: ${prompt}` }] }]
+            }),
+          }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          const parts = data.candidates?.[0]?.content?.parts || [];
+          for (const part of parts) {
+            if (part.inlineData && part.inlineData.data) {
+              console.log(`✨ Successfully generated image via Google '${modelName}'!`);
+              return part.inlineData.data;
+            }
+          }
         }
-      );
-      const data = await googleRes.json();
-      if (data.generatedImages && data.generatedImages.length > 0) {
-        const base64Image = data.generatedImages[0].image.imageBytes;
-        if (base64Image) {
-          return base64Image;
-        }
+      } catch (err: any) {
+        console.warn(`Google Model '${modelName}' failed:`, err?.message || String(err));
       }
-      console.warn(`Direct Google Imagen 3 REST API returned no images:`, data);
-    } catch (err: any) {
-      console.warn(`Direct Google Imagen 3 REST API failed:`, err?.message || String(err));
     }
   }
 
-  // 3. Fallback: Ultra-Reliable High Precision Flux.1 Engine via Pollinations
+  // 2. Fallback: High Precision Flux.1 Engine via Pollinations
   try {
     console.log(`🎨 Falling back to High Precision Flux.1 AI Engine...`);
     const cleanPrompt = prompt.length > 500 ? prompt.substring(0, 500) : prompt;
