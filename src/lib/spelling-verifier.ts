@@ -176,6 +176,7 @@ export function cleanPromptFor2DVector(rawPrompt: string): string {
   return rawPrompt
     .replace(/\b(circular frame|circular border|circle frame|circle border|round frame|round border|badge frame|emblem|ring frame)\b/gi, 'isolated graphic')
     .replace(/\b(human girl|human boy|human person|human character|woman|man|girl|boy|anime girl|female person)\b/gi, 'cute animal character')
+    .replace(/\b(photoshop|illustrator|software UI|window border|desktop UI|menu bar|layer panel|toolbar|app screenshot|workspace UI)\b/gi, 'isolated sticker')
     .replace(/\b(soft watercolor|watercolor shading|pastel watercolor|watercolor blur|realistic fur|3D render|3D realistic|photorealistic|photorealistic rendering|studio lighting|depth of field|bokeh|realistic texture)\b/gi, '2D vector graphic');
 }
 
@@ -183,7 +184,7 @@ export function buildEnforced2DVectorPrompt(rawPrompt: string, spellingInstructi
   const cleaned = cleanPromptFor2DVector(rawPrompt);
   const typographySection = spellingInstruction ? ` ${spellingInstruction}` : '';
   
-  return `2D vector line art graphic illustration, cute 2D vector animal sticker design, clean bold black outlines, flat vector color shading, pure solid white background (#FFFFFF).${typographySection} ${cleaned}. Cute adorable animal character on pure white background.`;
+  return `2D vector line art graphic illustration, cute 2D vector animal sticker design, clean bold black outlines, flat vector color shading, pure solid white background (#FFFFFF).${typographySection} ${cleaned}. Cute adorable animal character isolated on pure white background. ABSOLUTELY NO software application windows, NO Photoshop UI, NO Illustrator UI, NO menu bars, NO sidebars, NO layer panels, NO desktop workspace frames!`;
 }
 
 export interface LikedDesignRef {
@@ -257,7 +258,7 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string): Promi
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              contents: [{ parts: [{ text: `Generate a high quality t-shirt design graphic sticker image: ${prompt}` }] }]
+              contents: [{ parts: [{ text: `Generate ONLY the isolated cute 2D vector graphic sticker illustration centered on pure solid white background (#FFFFFF). ABSOLUTELY NO software windows, NO Photoshop UI, NO Illustrator UI, NO menu bars, NO sidebars, NO layer panels, NO desktop frames: ${prompt}` }] }]
             }),
           }
         );
