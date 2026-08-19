@@ -184,7 +184,7 @@ export function buildEnforced2DVectorPrompt(rawPrompt: string, spellingInstructi
   const cleaned = cleanPromptFor2DVector(rawPrompt);
   const typographySection = spellingInstruction ? ` ${spellingInstruction}` : '';
   
-  return `2D vector line art graphic illustration, cute 2D vector animal sticker design, clean bold black outlines, flat vector color shading, pure solid white background (#FFFFFF).${typographySection} ${cleaned}. Cute adorable animal character isolated on pure white background. ABSOLUTELY NO software application windows, NO Photoshop UI, NO Illustrator UI, NO menu bars, NO sidebars, NO layer panels, NO desktop workspace frames!`;
+  return `Square 1:1 ratio 2D vector graphic sticker illustration of ${cleaned}.${typographySection} Isolated cute adorable animal artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`;
 }
 
 export interface LikedDesignRef {
@@ -258,7 +258,7 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string): Promi
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              contents: [{ parts: [{ text: `Generate ONLY the isolated cute 2D vector graphic sticker illustration centered on pure solid white background (#FFFFFF). ABSOLUTELY NO software windows, NO Photoshop UI, NO Illustrator UI, NO menu bars, NO sidebars, NO layer panels, NO desktop frames: ${prompt}` }] }]
+              contents: [{ parts: [{ text: prompt }] }]
             }),
           }
         );
