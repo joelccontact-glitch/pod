@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { sanitizeSpelling, getStrictSpellingInstruction, generateImageWithVisionRetry, buildEnforced2DVectorPrompt, fetchLikedDesignsSummary } from '@/lib/spelling-verifier';
 import { getAnimalAffinityInstruction } from '@/lib/animal-affinities';
+import { getSeasonalTrendInstruction, getActiveUpcomingSeasons } from '@/lib/seasonal-trends';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -31,13 +32,17 @@ export async function GET(req: Request) {
       }
     }
 
-    // [STEP 1] Trend Research using Gemini
+    // [STEP 1] Trend & Seasonal Research using Gemini
     let baseTopic = "Cute minimalist animal illustration";
     const animalList = ['hamsters', 'guinea pigs', 'kittens', 'puppies', 'bunnies', 'ducklings', 'piglets', 'Pygmy Hippos', 'sea otter pups', 'Black Bear Cubs', 'fawns', 'Baby Sloths', 'Baby Hedgehogs', 'baby red pandas'];
     const urlParams = new URL(req.url);
     const requestedAnimal = urlParams.searchParams.get('animal');
+    const requestedSeason = urlParams.searchParams.get('season') || 'auto';
     const targetAnimal = (requestedAnimal && requestedAnimal !== 'random') ? requestedAnimal : animalList[Math.floor(Math.random() * animalList.length)];
     const affinityInstruction = getAnimalAffinityInstruction(targetAnimal);
+
+    // Rule 1.1: 3-month lead time seasonal calculation (도래 3달 전~도래일까지 집중 생성)
+    const { seasonPromptInstruction, activeSeasonInfo } = getSeasonalTrendInstruction(targetAnimal, requestedSeason);
 
     const userCatchphrase = urlParams.searchParams.get('catchphrase') || '';
     const autoPhraseParam = urlParams.searchParams.get('autoPhrase');
@@ -45,9 +50,13 @@ export async function GET(req: Request) {
     let catchphrase = userCatchphrase;
     if (process.env.GEMINI_API_KEY) {
       try {
+        const seasonContextMsg = activeSeasonInfo 
+          ? `UPCOMING SEASON TREND (${activeSeasonInfo.holiday.name} - ${activeSeasonInfo.holiday.koreanName}, D-${activeSeasonInfo.daysRemaining} days away within 3-month window): Focus on generating a top-selling ${activeSeasonInfo.holiday.name} themed graphic design blending ${targetAnimal} with ${activeSeasonInfo.holiday.trendingMotifs.join(', ')}.` 
+          : `Search for top-trending US Etsy/Pinterest design topics.`;
+
         const trendResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents: `Search for recent US trends on Etsy or Pinterest, but strictly adapt the trend to fit a "little paw" (${targetAnimal}) store concept. ${affinityInstruction} Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic featuring the ${targetAnimal} (e.g. "Vintage cottagecore ${targetAnimal} with bamboo").${autoPhrase ? ` 2. "catchphrase": A short, witty, trademark-free phrase (2-4 words) related to the animal or theme, such as "Paws & Bamboo".` : ''}`,
+          contents: `${seasonContextMsg} Adapt the trend to fit a "little paw" (${targetAnimal}) store concept. ${affinityInstruction} ${seasonPromptInstruction} Identify the single most popular trending design style (e.g., Cottagecore Vintage Watercolor, Retro 70s Script, Pastel Kawaii 2D Vector) and combine it into the topic. Return a JSON object with: 1. "theme": exactly 1 t-shirt design theme/topic featuring the ${targetAnimal} and the active season/style.${autoPhrase ? ` 2. "catchphrase": A short, witty, trademark-free phrase (2-4 words) related to the animal or holiday theme, such as "Paws & Pumpkin".` : ''}`,
           config: { responseMimeType: 'application/json' }
         });
         if (trendResponse.text) {
@@ -100,7 +109,7 @@ export async function GET(req: Request) {
     const { likedDesigns, likedPromptSummary, inlineImages: likedInlineImages } = await fetchLikedDesignsSummary(db, 4);
 
     const spellingInstruction = getStrictSpellingInstruction(catchphrase, autoPhrase);
-    let designPrompt = sanitizeSpelling(`${baseTopic}, vector art, standalone graphic illustration. ${affinityInstruction}${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction}`);
+    let designPrompt = sanitizeSpelling(`${baseTopic}, vector art, standalone graphic illustration. ${affinityInstruction} ${seasonPromptInstruction} ${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction}`);
     
     if (process.env.GEMINI_API_KEY && (likedDesigns.length > 0 || styleData)) {
       console.log(`🎨 Constructing prompt using Liked Benchmark (${likedDesigns.length} liked designs) & Style Preset (${styleData?.name || 'Default'})...`);
@@ -113,11 +122,11 @@ These liked designs are your #1 PRIMARY STYLE BENCHMARK for vector art quality, 
 Here are the exact prompts and themes of the user's favorite liked designs:
 ${likedPromptSummary}
 
-You MUST generate an image generation prompt for the new topic: "${baseTopic}". ${affinityInstruction} ${spellingInstruction}${darkGarmentInstruction}
+You MUST generate an image generation prompt for the new topic: "${baseTopic}". ${affinityInstruction} ${seasonPromptInstruction} ${spellingInstruction}${darkGarmentInstruction}
 Ensure the new prompt strictly matches the 2D vector line art aesthetic, crisp linework, flat colors, cute charm, and script typography placement of the user's LIKED benchmark designs.
 The output must be ONLY the raw prompt string for an image generator.`;
         } else {
-          systemMsg += `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${affinityInstruction} ${spellingInstruction}${darkGarmentInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData?.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery.`;
+          systemMsg += `You are an expert prompt engineer. Create an image generation prompt for the topic: "${baseTopic}". ${affinityInstruction} ${seasonPromptInstruction} ${spellingInstruction}${darkGarmentInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference style image, as well as these instructions: "${styleData?.style_prompt}". Do NOT include the subject of the reference image. The output must be ONLY the raw prompt string for an image generator. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery.`;
         }
 
         const contents: any[] = [systemMsg];
@@ -141,7 +150,7 @@ The output must be ONLY the raw prompt string for an image generator.`;
         }
       } catch (err) {
         console.error("Style prompt generation failed, using fallback.");
-        designPrompt = sanitizeSpelling(`${baseTopic}. ${affinityInstruction}${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction} ${styleData ? `MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}` : ''}`);
+        designPrompt = sanitizeSpelling(`${baseTopic}. ${affinityInstruction} ${seasonPromptInstruction} ${darkGarmentInstruction} CRITICAL RULE: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). ABSOLUTELY NO GROUND SHADOWS, NO DROP SHADOWS, NO FLOOR REFLECTIONS, NO PEDESTAL SHADING, AND NO BACKGROUND SHADOWS UNDER THE FEET OR SUBJECT. NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. ${spellingInstruction} ${styleData ? `MUST STRICTLY ADHERE TO THIS STYLE: ${styleData.style_prompt}` : ''}`);
       }
     }
 
@@ -222,6 +231,9 @@ The output must be ONLY the raw prompt string for an image generator.`;
       recommended_mockup: recommendedMockup,
       catchphrase: catchphrase || null,
       style_name: styleNameUsed,
+      season_id: activeSeasonInfo ? activeSeasonInfo.holiday.id : null,
+      season_name: activeSeasonInfo ? `${activeSeasonInfo.holiday.icon} ${activeSeasonInfo.holiday.koreanName}` : null,
+      season_days_remaining: activeSeasonInfo ? activeSeasonInfo.daysRemaining : null,
       spelling_verified: verificationInfo ? verificationInfo.isSpellingCorrect : true,
       spelling_has_text: verificationInfo ? Boolean(verificationInfo.hasText) : false,
       spelling_detected_text: verificationInfo ? (verificationInfo.hasText ? verificationInfo.detectedText : '') : '',

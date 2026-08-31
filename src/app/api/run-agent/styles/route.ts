@@ -2,6 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
+import { getActiveUpcomingSeasons } from '@/lib/seasonal-trends';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -13,10 +14,15 @@ export async function GET(req: Request) {
       throw new Error("GEMINI_API_KEY is not configured.");
     }
 
+    const activeSeasons = getActiveUpcomingSeasons();
+    const seasonContext = activeSeasons.length > 0
+      ? `Active upcoming seasonal holiday in the 3-month window: ${activeSeasons[0].holiday.name} (${activeSeasons[0].holiday.koreanName}, D-${activeSeasons[0].daysRemaining}). Optionally consider top trending design styles for this season.`
+      : `Search for top trending art and design styles currently popular on platforms like Etsy or Pinterest.`;
+
     // 1. Trend Research for a new style
     const trendResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `Identify a highly popular, trending art or design style currently popular on platforms like Etsy or Pinterest (e.g., Cottagecore Watercolor, Y2K Retro Pixel Art, Minimalist Line Art). 
+      contents: `${seasonContext} Identify a highly popular, trending art or design style currently popular on platforms like Etsy or Pinterest (e.g., Cottagecore Watercolor, Y2K Retro Pixel Art, Minimalist Line Art, Retro Holiday Script Vector). 
 Return a JSON object with:
 - "styleName": A very short, catchy name for this style (max 4 words).
 - "promptDescription": A detailed prompt description for an image generator to create an icon or simple illustration perfectly demonstrating this style. CRITICAL: Do NOT include any background colors in this description. The style must assume a pure solid white background.`,

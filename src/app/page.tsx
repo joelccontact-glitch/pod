@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSession, signOut } from "next-auth/react";
 import { MOCKUP_TEMPLATES } from '@/lib/mockups';
 import { processTransparentPNG } from '@/lib/image-processor';
+import { getActiveUpcomingSeasons, SEASONAL_HOLIDAYS, ActiveSeasonInfo } from '@/lib/seasonal-trends';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -45,6 +46,8 @@ export default function Home() {
   const [isAutoAgentModalOpen, setIsAutoAgentModalOpen] = useState(false);
   const [autoAgentAnimal, setAutoAgentAnimal] = useState('random');
   const [autoAgentGarmentColor, setAutoAgentGarmentColor] = useState('random');
+  const [autoAgentSeason, setAutoAgentSeason] = useState('auto');
+  const [activeSeasonsList, setActiveSeasonsList] = useState<ActiveSeasonInfo[]>([]);
 
   const [activeTab, setActiveTab] = useState<'info' | 'mockup' | 'edit'>('info');
   const [selectedMockupId, setSelectedMockupId] = useState(MOCKUP_TEMPLATES[0].id);
@@ -113,6 +116,7 @@ export default function Home() {
   useEffect(() => {
     fetchDesigns(page);
     fetchStyles();
+    setActiveSeasonsList(getActiveUpcomingSeasons());
   }, [page]);
 
   useEffect(() => {
@@ -976,6 +980,9 @@ export default function Home() {
       if (autoAgentGarmentColor && autoAgentGarmentColor !== 'random') {
         url += (url.includes('?') ? '&' : '?') + `garmentColor=${encodeURIComponent(autoAgentGarmentColor)}`;
       }
+      if (autoAgentSeason && autoAgentSeason !== 'auto') {
+        url += (url.includes('?') ? '&' : '?') + `season=${encodeURIComponent(autoAgentSeason)}`;
+      }
       if (autoGeneratePhrase) {
         url += (url.includes('?') ? '&' : '?') + `autoPhrase=true`;
       } else if (globalCatchphrase.trim()) {
@@ -1354,6 +1361,46 @@ export default function Home() {
           </div>
         </header>
 
+        {/* Active Seasonal Trends (D-90 Rule) Banner */}
+        {activeSeasonsList.length > 0 && (
+          <div className="mb-4 p-3.5 bg-gradient-to-r from-orange-50 via-amber-50 to-rose-50 border border-amber-200/80 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="text-xl">🔥</span>
+              <div>
+                <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wider">
+                  도래 3개월 전 유행 시즌 (D-90 트렌드 자동 집중)
+                </h4>
+                <p className="text-xs text-amber-800 font-medium">
+                  현재 미국 POD 시장에서 집중 반영 중인 유행 시즌입니다.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {activeSeasonsList.map(s => (
+                <span
+                  key={s.holiday.id}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-1.5 transition-transform hover:scale-105 cursor-pointer ${
+                    s.isUrgent
+                      ? 'bg-rose-600 text-white border-rose-500 animate-pulse'
+                      : 'bg-white text-amber-900 border-amber-300'
+                  }`}
+                  onClick={() => {
+                    setAutoAgentSeason(s.holiday.id);
+                    setIsAutoAgentModalOpen(true);
+                  }}
+                  title={`${s.holiday.koreanName} - D-${s.daysRemaining}일 남음 (클릭하여 이 시즌으로 생성)`}
+                >
+                  <span>{s.holiday.icon}</span>
+                  <span>{s.holiday.koreanName}</span>
+                  <span className={s.isUrgent ? 'text-amber-200' : 'text-amber-700'}>
+                    D-{s.daysRemaining}
+                  </span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Gallery View */}
         {loadingInitial ? (
           <div className="flex flex-col items-center justify-center py-16 space-y-3">
@@ -1431,6 +1478,11 @@ export default function Home() {
                       <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md inline-block w-fit">
                         {design.topic}
                       </span>
+                      {design.season_name && (
+                        <span className="text-[10px] sm:text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-md inline-flex items-center gap-1 border border-rose-100/80">
+                          {design.season_name} {design.season_days_remaining !== null && design.season_days_remaining !== undefined && `(D-${design.season_days_remaining})`}
+                        </span>
+                      )}
                       <span className="text-[10px] sm:text-[11px] font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md inline-flex items-center gap-1 border border-purple-100/80" title={`바탕 화풍: ${getStyleDisplayName(design)}`}>
                         🎨 {getStyleDisplayName(design)}
                       </span>
@@ -1972,6 +2024,23 @@ export default function Home() {
                 <option value="random">랜덤 (밝은 티셔츠 70%, 검정/네이비 30%)</option>
                 <option value="light">밝은 티셔츠 전용 (흰색/크림)</option>
                 <option value="dark">어두운 티셔츠 전용 (검정/네이비 - 화이트/파스텔 글씨)</option>
+              </select>
+
+              <label className="block text-sm font-semibold text-gray-700 mb-2">유행 시즌 (도래 3달 전 법칙)</label>
+              <select 
+                value={autoAgentSeason}
+                onChange={(e) => setAutoAgentSeason(e.target.value)}
+                className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm mb-6"
+              >
+                <option value="auto">⚡ 자동 (도래 3달 전 활성 시즌 우선)</option>
+                {SEASONAL_HOLIDAYS.map(h => {
+                  const activeInfo = activeSeasonsList.find(s => s.holiday.id === h.id);
+                  return (
+                    <option key={h.id} value={h.id}>
+                      {h.icon} {h.koreanName} ({h.name}) {activeInfo ? `[D-${activeInfo.daysRemaining} 3달전 집중]` : ''}
+                    </option>
+                  );
+                })}
               </select>
 
               <div className="flex items-center gap-2 mb-6 bg-blue-50 p-3 rounded-lg border border-blue-100">
