@@ -16,16 +16,37 @@ export async function POST(req: Request) {
     const zip = new JSZip();
     const folder = zip.folder('Pygmy_Pumpkin_Friends_Sticker_PNG_Bundle');
 
+    const reqUrl = new URL(req.url);
+    const origin = reqUrl.origin;
+
     for (let i = 0; i < designs.length; i++) {
       const d = designs[i];
-      const imageUrl = d.image_url || d.transparent_png_url || d.url;
+      let imageUrl = d.transparent_png_url || d.image_url || d.imageUrl || d.url || d.image || d.preview_url;
       if (!imageUrl) continue;
 
       try {
-        const fetchRes = await fetch(imageUrl);
-        if (!fetchRes.ok) continue;
+        let arrayBuffer: ArrayBuffer;
 
-        const arrayBuffer = await fetchRes.arrayBuffer();
+        if (imageUrl.startsWith('data:image/')) {
+          // Base64 Data URL
+          const base64Data = imageUrl.split(',')[1];
+          const binaryString = atob(base64Data);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let b = 0; b < binaryString.length; b++) {
+            bytes[b] = binaryString.charCodeAt(b);
+          }
+          arrayBuffer = bytes.buffer;
+        } else {
+          // HTTP(S) URL or relative URL
+          const fullUrl = imageUrl.startsWith('/') ? `${origin}${imageUrl}` : imageUrl;
+          const fetchRes = await fetch(fullUrl);
+          if (!fetchRes.ok) {
+            console.error(`Fetch failed for URL ${fullUrl}: status ${fetchRes.status}`);
+            continue;
+          }
+          arrayBuffer = await fetchRes.arrayBuffer();
+        }
+
         const animalName = (d.title || d.prompt || `sticker_${i + 1}`)
           .toLowerCase()
           .replace(/[^a-z0-9]/g, '_')
