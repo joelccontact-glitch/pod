@@ -143,6 +143,42 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
       height: 240,
       blendMode: 'multiply'
     }
+  },
+  {
+    id: 'laptop-sticker',
+    name: '💻 맥북/노트북 스티커 목업',
+    imageUrl: '/mockup_folded.png', // Fallback base layout template
+    overlay: {
+      x: 320,
+      y: 320,
+      width: 360,
+      height: 360,
+      blendMode: 'source-over'
+    }
+  },
+  {
+    id: 'tumbler-sticker',
+    name: '🥤 텀블러/워터보틀 스티커 목업',
+    imageUrl: '/mockup_mug.png',
+    overlay: {
+      x: 350,
+      y: 350,
+      width: 300,
+      height: 300,
+      blendMode: 'source-over'
+    }
+  },
+  {
+    id: 'journal-sticker',
+    name: '📖 다이어리/굿노트 스티커 목업',
+    imageUrl: '/mockup_cream.jpg',
+    overlay: {
+      x: 320,
+      y: 320,
+      width: 360,
+      height: 360,
+      blendMode: 'source-over'
+    }
   }
 ];
 

@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { MOCKUP_TEMPLATES } from '@/lib/mockups';
 import { processTransparentPNG } from '@/lib/image-processor';
 import { getActiveUpcomingSeasons, SEASONAL_HOLIDAYS, ActiveSeasonInfo } from '@/lib/seasonal-trends';
+import { PYGMY_PUMPKIN_SERIES, StickerPreset } from '@/lib/sticker-prompts';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -14,6 +15,11 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Sticker & Digital PNG Pack States
+  const [isStickerMode, setIsStickerMode] = useState(false);
+  const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('pygmy-hippo-latte');
+  const [isExportingBundle, setIsExportingBundle] = useState(false);
   
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
   const [previewDesign, setPreviewDesign] = useState<any>(null);
@@ -948,6 +954,39 @@ export default function Home() {
     }
   };
 
+  const handleExportZIPBundle = async () => {
+    if (!designs || designs.length === 0) {
+      alert('다운로드할 디자인이 없습니다. 먼저 디자인을 생성해 주세요.');
+      return;
+    }
+    try {
+      setIsExportingBundle(true);
+      const res = await fetch('/api/designs/export-bundle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ designs }),
+      });
+
+      if (!res.ok) {
+        throw new Error('ZIP 번들 패키지 다운로드 실패');
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Pygmy_Pumpkin_Friends_Sticker_PNG_Bundle_${Date.now()}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(err.message || 'ZIP 번들 파일 생성 중 오류가 발생했습니다.');
+    } finally {
+      setIsExportingBundle(false);
+    }
+  };
+
   const fetchDesigns = async (currentPage: number = 1, showSpinner: boolean = true) => {
     if (showSpinner) setLoadingInitial(true);
     try {
@@ -1327,6 +1366,24 @@ export default function Home() {
               title="디자인에 포함할 텍스트 (예: Little Paws)"
             />
             <button 
+              onClick={() => setIsStickerMode(!isStickerMode)}
+              className={`flex-1 sm:flex-none font-bold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-all whitespace-nowrap text-xs sm:text-sm border shadow-sm ${
+                isStickerMode 
+                  ? 'bg-rose-500 hover:bg-rose-600 text-white border-rose-600 ring-2 ring-rose-300 animate-pulse' 
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700'
+              }`}
+            >
+              {isStickerMode ? '🏷️ 스티커 모드 (ON)' : '🏷️ 스티커 & 디지털 PNG'}
+            </button>
+            <button 
+              onClick={handleExportZIPBundle}
+              disabled={isExportingBundle || designs.length === 0}
+              className="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-700 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-sm shadow-sm"
+              title="현재 페이지의 디자인들을 300DPI 투명 PNG ZIP 번들로 내보냅니다."
+            >
+              {isExportingBundle ? '📦 압축 생성중...' : '📦 디지털 PNG ZIP 다운로드'}
+            </button>
+            <button 
               onClick={() => setIsManageStylesModalOpen(true)}
               className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm border border-gray-200"
             >
@@ -1360,6 +1417,64 @@ export default function Home() {
             </button>
           </div>
         </header>
+
+        {/* Sticker Mode & Pygmy Pumpkin & Friends Banner */}
+        {isStickerMode && (
+          <div className="mb-4 p-4 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border-2 border-rose-300 rounded-2xl shadow-md space-y-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🦛</span>
+                <div>
+                  <h3 className="text-sm sm:text-base font-bold text-rose-900 flex items-center gap-2">
+                    <span>Pygmy Pumpkin & Friends 10종 스티커 & 디지털 PNG 스토어 모드</span>
+                    <span className="bg-rose-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">HOT Niche</span>
+                  </h3>
+                  <p className="text-xs text-rose-800 font-medium">
+                    흰색 다이컷 테두리 + 생태계 연출(수련/대나무/조개) + 300DPI 투명 PNG로 Etsy 및 스티커 POD 판매에 최적화되었습니다.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleExportZIPBundle}
+                disabled={isExportingBundle || designs.length === 0}
+                className="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition-colors flex items-center justify-center gap-1.5"
+              >
+                <span>📦</span>
+                <span>{isExportingBundle ? 'ZIP 번들 패키징 중...' : '디지털 PNG 패키지(ZIP) 일괄 다운로드'}</span>
+              </button>
+            </div>
+
+            <div className="pt-2 border-t border-rose-200/60">
+              <label className="block text-xs font-bold text-rose-900 mb-1.5">
+                🎯 10종 Pygmy Pumpkin 시리즈 템플릿 선택:
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                {PYGMY_PUMPKIN_SERIES.map((preset) => (
+                  <div
+                    key={preset.id}
+                    onClick={() => {
+                      setSelectedStickerPresetId(preset.id);
+                      setUploadPrompt(preset.prompt);
+                      setIsImageModalOpen(true);
+                    }}
+                    className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all hover:scale-[1.02] shadow-sm ${
+                      selectedStickerPresetId === preset.id
+                        ? 'bg-rose-100 border-rose-500 text-rose-950 font-bold ring-2 ring-rose-400'
+                        : 'bg-white border-rose-200 text-gray-800 hover:bg-rose-50'
+                    }`}
+                  >
+                    <div className="font-bold flex items-center justify-between">
+                      <span>{preset.name}</span>
+                      <span className="text-[10px] text-rose-700 bg-rose-200/60 px-1.5 py-0.5 rounded">생성</span>
+                    </div>
+                    <p className="text-[11px] text-gray-600 line-clamp-1 mt-0.5">{preset.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Active Seasonal Trends (D-90 Rule) Banner */}
         {activeSeasonsList.length > 0 && (
