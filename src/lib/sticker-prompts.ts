@@ -11,6 +11,7 @@ export interface StickerPreset {
   id: string;
   name: string;
   animal: string;
+  animalValue: string;
   affinityObject: string;
   theme: string;
   phrase: string;
@@ -29,6 +30,7 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
     id: 'pygmy-hippo-latte',
     name: '🦛 피그미하마 + 수련 & 펌킨 라떼',
     animal: 'Pygmy Hippo',
+    animalValue: 'pygmy hippo',
     affinityObject: 'Water Lily Lotus Flowers & Leaves',
     theme: 'Cozy Halloween Latte',
     phrase: 'Pygmy Pumpkin Pal',
@@ -39,6 +41,7 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
     id: 'red-panda-boba',
     name: '🦝 레서판다 + 대나무 버블티',
     animal: 'Red Panda',
+    animalValue: 'baby red panda',
     affinityObject: 'Green Bamboo Stems & Leaves',
     theme: 'Bamboo Boba Witch',
     phrase: 'Spooky Bamboo Boba',
@@ -49,6 +52,7 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
     id: 'sea-otter-shell',
     name: '🦦 아기 해달 + 조개껍데기 사탕',
     animal: 'Sea Otter Pup',
+    animalValue: 'sea otter pup',
     affinityObject: 'Seashells & Kelp Leaves',
     theme: 'Sweet Sea Spook',
     phrase: 'Sweetest Sea Spook',
@@ -59,6 +63,7 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
     id: 'hamster-sunflower',
     name: '🐹 햄스터 + 해바라기씨 캔디',
     animal: 'Hamster',
+    animalValue: 'hamster',
     affinityObject: 'Giant Sunflower Seeds & Peanuts',
     theme: 'Pumpkin Seed Monster',
     phrase: 'Little Pumpkin Nibbler',
@@ -69,6 +74,7 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
     id: 'sloth-tropic-leaf',
     name: '🦥 나무늘보 + 나뭇잎 & 마법책',
     animal: 'Baby Sloth',
+    animalValue: 'baby sloth',
     affinityObject: 'Tropical Leaves & Cherry Blossom Branch',
     theme: 'Lazy Spellcaster',
     phrase: 'Too Cozy to Spook',
@@ -79,6 +85,7 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
     id: 'bunny-carrot-cake',
     name: '🐰 토끼 + 당근 컵케이크 & 산딸기',
     animal: 'Bunny',
+    animalValue: 'bunny',
     affinityObject: 'Carrots, Raspberries & Wildflowers',
     theme: 'Sweet Carrot Witch',
     phrase: 'Carrot & Magic',
@@ -89,6 +96,7 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
     id: 'kitten-catnip-fish',
     name: '🐱 아기 고양이 + 캣닙 & 생선 사탕',
     animal: 'Kitten',
+    animalValue: 'kitten',
     affinityObject: 'Catnip Flowers & Milk Bowl',
     theme: 'Midnight Spooky Kitty',
     phrase: 'Purrfectly Spooky',
@@ -99,6 +107,7 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
     id: 'puppy-toy-bone',
     name: '🐶 아기 강아지 + 테니스공 & 뼈다귀',
     animal: 'Puppy',
+    animalValue: 'puppy',
     affinityObject: 'Toy Bones & Paw Prints',
     theme: 'Ghost Hound Pup',
     phrase: 'Bark at the Moon',
@@ -109,6 +118,7 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
     id: 'pygmy-hippo-gamer',
     name: '🎮 피그미하마 + 게임 컨트롤러',
     animal: 'Pygmy Hippo',
+    animalValue: 'pygmy hippo',
     affinityObject: 'Water Lily & Gamer Headset',
     theme: 'Halloween Gamer Hippo',
     phrase: 'Level Up Spooky',
@@ -119,6 +129,7 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
     id: 'red-panda-coder',
     name: '💻 레서판다 + 노트북 디버깅',
     animal: 'Red Panda',
+    animalValue: 'baby red panda',
     affinityObject: 'Bamboo & Laptop',
     theme: 'Halloween Programmer Panda',
     phrase: 'Debugging Till Halloween',

@@ -1455,6 +1455,7 @@ export default function Home() {
                     key={preset.id}
                     onClick={() => {
                       setSelectedStickerPresetId(preset.id);
+                      setSelectedAnimal(preset.animalValue);
                       setUploadPrompt(preset.prompt);
                       setIsImageModalOpen(true);
                     }}
