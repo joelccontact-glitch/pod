@@ -5,6 +5,7 @@ import { MOCKUP_TEMPLATES } from '@/lib/mockups';
 import { processTransparentPNG } from '@/lib/image-processor';
 import { getActiveUpcomingSeasons, SEASONAL_HOLIDAYS, ActiveSeasonInfo } from '@/lib/seasonal-trends';
 import { PYGMY_PUMPKIN_SERIES, StickerPreset } from '@/lib/sticker-prompts';
+import JSZip from 'jszip';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -961,18 +962,44 @@ export default function Home() {
     }
     try {
       setIsExportingBundle(true);
-      const res = await fetch('/api/designs/export-bundle', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ designs }),
-      });
+      const zip = new JSZip();
+      const folder = zip.folder('Pygmy_Pumpkin_Friends_Sticker_PNG_Bundle');
 
-      if (!res.ok) {
-        throw new Error('ZIP 번들 패키지 다운로드 실패');
+      for (let i = 0; i < designs.length; i++) {
+        const d = designs[i];
+        const rawUrl = d.transparent_png_url || (d.id ? `/api/designs/image?id=${d.id}` : d.image_url || d.url);
+        if (!rawUrl) continue;
+
+        try {
+          // Process 300DPI transparent PNG cutout
+          const transparentDataUrl = await processTransparentPNG(rawUrl, {
+            targetWidth: 3000,
+            targetHeight: 3000,
+          });
+
+          // Convert Data URL to binary ArrayBuffer for JSZip
+          const base64Data = transparentDataUrl.split(',')[1];
+          const binaryString = atob(base64Data);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let b = 0; b < len; b++) {
+            bytes[b] = binaryString.charCodeAt(b);
+          }
+
+          const animalName = (d.title || d.prompt || `sticker_${i + 1}`)
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '_')
+            .slice(0, 30);
+
+          const fileName = `${String(i + 1).padStart(2, '0')}_${animalName}_300dpi.png`;
+          folder?.file(fileName, bytes.buffer);
+        } catch (err) {
+          console.error(`Error processing image index ${i} for ZIP:`, err);
+        }
       }
 
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = window.URL.createObjectURL(zipBlob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `Pygmy_Pumpkin_Friends_Sticker_PNG_Bundle_${Date.now()}.zip`;
