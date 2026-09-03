@@ -4,7 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { MOCKUP_TEMPLATES } from '@/lib/mockups';
 import { processTransparentPNG } from '@/lib/image-processor';
 import { getActiveUpcomingSeasons, SEASONAL_HOLIDAYS, ActiveSeasonInfo } from '@/lib/seasonal-trends';
-import { PYGMY_PUMPKIN_SERIES, StickerPreset } from '@/lib/sticker-prompts';
+import { PYGMY_PUMPKIN_SERIES, TERRARIUM_SERIES, StickerPreset } from '@/lib/sticker-prompts';
 import JSZip from 'jszip';
 
 export default function Home() {
@@ -19,7 +19,8 @@ export default function Home() {
 
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(false);
-  const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('pygmy-hippo-latte');
+  const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'terrarium' | 'pumpkin'>('terrarium');
+  const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-jar-base');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
   
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
@@ -1473,11 +1474,36 @@ export default function Home() {
             </div>
 
             <div className="pt-2 border-t border-rose-200/60">
-              <label className="block text-xs font-bold text-rose-900 mb-1.5">
-                🎯 10종 Pygmy Pumpkin 시리즈 템플릿 선택:
-              </label>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <label className="block text-xs font-bold text-rose-900">
+                  🎯 스티커 시리즈 템플릿 선택:
+                </label>
+                <div className="flex items-center gap-1 bg-rose-100/70 p-1 rounded-xl">
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('terrarium')}
+                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'terrarium'
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'text-rose-900 hover:bg-rose-200/50'
+                    }`}
+                  >
+                    🌿 테라리움 꾸미기 시리즈
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('pumpkin')}
+                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'pumpkin'
+                        ? 'bg-rose-600 text-white shadow-sm'
+                        : 'text-rose-900 hover:bg-rose-200/50'
+                    }`}
+                  >
+                    🎃 Pygmy Pumpkin 시리즈
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                {PYGMY_PUMPKIN_SERIES.map((preset) => (
+                {(selectedStickerSeriesTab === 'terrarium' ? TERRARIUM_SERIES : PYGMY_PUMPKIN_SERIES).map((preset) => (
                   <div
                     key={preset.id}
                     onClick={() => {
@@ -1488,13 +1514,19 @@ export default function Home() {
                     }}
                     className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all hover:scale-[1.02] shadow-sm ${
                       selectedStickerPresetId === preset.id
-                        ? 'bg-rose-100 border-rose-500 text-rose-950 font-bold ring-2 ring-rose-400'
+                        ? selectedStickerSeriesTab === 'terrarium'
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold ring-2 ring-emerald-400'
+                          : 'bg-rose-100 border-rose-500 text-rose-950 font-bold ring-2 ring-rose-400'
                         : 'bg-white border-rose-200 text-gray-800 hover:bg-rose-50'
                     }`}
                   >
                     <div className="font-bold flex items-center justify-between">
                       <span>{preset.name}</span>
-                      <span className="text-[10px] text-rose-700 bg-rose-200/60 px-1.5 py-0.5 rounded">생성</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                        selectedStickerSeriesTab === 'terrarium'
+                          ? 'text-emerald-700 bg-emerald-200/60'
+                          : 'text-rose-700 bg-rose-200/60'
+                      }`}>생성</span>
                     </div>
                     <p className="text-[11px] text-gray-600 line-clamp-1 mt-0.5">{preset.description}</p>
                   </div>
