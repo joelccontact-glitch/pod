@@ -19,7 +19,7 @@ export default function Home() {
 
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(false);
-  const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'terrarium' | 'pumpkin'>('terrarium');
+  const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'vivarium' | 'terrarium' | 'pumpkin'>('vivarium');
   const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('vivarium-panorama-complete-guide');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
@@ -964,25 +964,35 @@ export default function Home() {
       return;
     }
 
-    const isTerrariumTab = selectedStickerSeriesTab === 'terrarium';
-    const bundleName = isTerrariumTab ? 'Terrarium_DIY_Sticker_PNG_Bundle' : 'Pygmy_Pumpkin_Friends_Sticker_PNG_Bundle';
+    const currentTab = selectedStickerSeriesTab;
+    let bundleName = 'Vivarium_DIY_Sticker_PNG_Bundle';
+    let seriesTitle = '[비바리움 세트]';
+
+    if (currentTab === 'terrarium') {
+      bundleName = 'Terrarium_DIY_Sticker_PNG_Bundle';
+      seriesTitle = '[테라리움 세트]';
+    } else if (currentTab === 'pumpkin') {
+      bundleName = 'Pygmy_Pumpkin_Friends_Sticker_PNG_Bundle';
+      seriesTitle = '[Pygmy Pumpkin 세트]';
+    }
 
     // Filter designs that belong to the active series tab
     const filteredDesigns = designs.filter((d) => {
       const textToScan = `${d.title || ''} ${d.prompt || ''} ${d.topic || ''} ${d.feedback_applied || ''}`.toLowerCase();
-      const terrariumKeywords = ['terrarium', 'vivarium', 'moss', 'hedgehog', 'sloth', 'chameleon', 'fawn', 'botanical', 'flora', 'tank', 'jar', 'succulent', 'driftwood', 'wood'];
-      
-      const isTerrariumMatch = terrariumKeywords.some((kw) => textToScan.includes(kw));
-
-      return isTerrariumTab ? isTerrariumMatch : !isTerrariumMatch;
+      if (currentTab === 'vivarium') {
+        return textToScan.includes('vivarium') || textToScan.includes('chameleon') || textToScan.includes('frog') || textToScan.includes('driftwood');
+      } else if (currentTab === 'terrarium') {
+        return textToScan.includes('terrarium') || textToScan.includes('jar') || textToScan.includes('soil') || textToScan.includes('succulent') || textToScan.includes('figurine') || textToScan.includes('bunny');
+      } else {
+        return textToScan.includes('pygmy') || textToScan.includes('pumpkin') || textToScan.includes('boba') || textToScan.includes('otter') || textToScan.includes('spooky');
+      }
     });
 
-    // Fallback: If filtering returns empty, use all designs to avoid empty zip
+    // Fallback: If filtering returns empty, ask user confirmation
     const targetDesigns = filteredDesigns.length > 0 ? filteredDesigns : designs;
 
     if (filteredDesigns.length === 0) {
-      const seriesName = isTerrariumTab ? '[테라리움 꾸미기 시리즈]' : '[Pygmy Pumpkin 시리즈]';
-      const confirmDownload = confirm(`현재 ${seriesName} 전용으로 생성된 스티커가 없습니다.\n전체 저장된 이미지(${designs.length}장)를 다운로드하시겠습니까?`);
+      const confirmDownload = confirm(`현재 ${seriesTitle} 전용으로 생성된 스티커가 없습니다.\n전체 저장된 이미지(${designs.length}장)를 다운로드하시겠습니까?`);
       if (!confirmDownload) return;
     }
 
@@ -1538,40 +1548,48 @@ export default function Home() {
                 <span className="text-3xl">🦛</span>
                 <div>
                   <h3 className="text-sm sm:text-base font-bold text-rose-900 flex items-center gap-2">
-                    <span>{selectedStickerSeriesTab === 'terrarium' ? '🌿 테라리움 DIY 꾸미기 스티커 스토어 모드' : 'Pygmy Pumpkin & Friends 10종 스티커 & 디지털 PNG 스토어 모드'}</span>
+                    <span>
+                      {selectedStickerSeriesTab === 'vivarium'
+                        ? '🦎 비바리움 꾸미기 세트 (가로 수조 + 파충류/양서류 생태계)'
+                        : selectedStickerSeriesTab === 'terrarium'
+                        ? '🫙 테라리움 꾸미기 세트 (유리병 + 식물 + 미니 피규어)'
+                        : '🎃 Pygmy Pumpkin & Friends 세트'}
+                    </span>
                     <span className="bg-rose-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">HOT Niche</span>
                   </h3>
                   <p className="text-xs text-rose-800 font-medium">
-                    {selectedStickerSeriesTab === 'terrarium'
-                      ? '아래 템플릿의 [생성] 버튼으로 생성된 테라리움 전용 300DPI 투명 PNG 스티커들만 깔끔하게 분류되어 압축 다운로드됩니다.'
-                      : '흰색 다이컷 테두리 + 생태계 연출(수련/대나무/조개) + 300DPI 투명 PNG로 Etsy 및 스티커 POD 판매에 최적화되었습니다.'}
+                    {selectedStickerSeriesTab === 'vivarium'
+                      ? '실제 생태계에 맞는 파충류/양서류(카멜레온, 청개구리)와 가로 무반사 수조, 유목 지형 300DPI PNG 세트입니다.'
+                      : selectedStickerSeriesTab === 'terrarium'
+                      ? '유리병 속 흙, 이끼, 미니 식물과 장난감 피규어로만 꾸미는 감성 스티커 세트입니다. (동물 갇힘 없음)'
+                      : '흰색 다이컷 테두리 + 생태계 연출(수련/대나무/조개) + 300DPI 투명 PNG 스티커 세트입니다.'}
                   </p>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-2">
-                {selectedStickerSeriesTab === 'terrarium' && (
-                  <div className="flex flex-wrap gap-1.5 w-full sm:w-auto">
-                    <button
-                      onClick={() => handleBatchGenerateSeries('vivarium')}
-                      disabled={isBatchGenerating}
-                      className="flex-1 sm:flex-initial bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600"
-                      title="비바리움 풀세트 (완성본 1종 + 어항/유목/식물/카멜레온 개별 4종) 5장 일괄 연속 자동 생성"
-                    >
-                      <span>⚡️</span>
-                      <span>[비바리움 풀세트] 5종 일괄 자동 생성</span>
-                    </button>
+                {selectedStickerSeriesTab === 'vivarium' && (
+                  <button
+                    onClick={() => handleBatchGenerateSeries('vivarium')}
+                    disabled={isBatchGenerating}
+                    className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600"
+                    title="비바리움 풀세트 (완성본 1종 + 어항/유목/식물/카멜레온 개별 4종) 5장 일괄 연속 자동 생성"
+                  >
+                    <span>⚡️</span>
+                    <span>[비바리움 풀세트] 5종 일괄 자동 생성</span>
+                  </button>
+                )}
 
-                    <button
-                      onClick={() => handleBatchGenerateSeries('terrarium')}
-                      disabled={isBatchGenerating}
-                      className="flex-1 sm:flex-initial bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold py-2 px-3 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-teal-600"
-                      title="테라리움 풀세트 (완성본 1종 + 유리병/흙/식물/피규어/토끼 개별 5종) 6장 일괄 연속 자동 생성"
-                    >
-                      <span>⚡️</span>
-                      <span>[테라리움 풀세트] 6종 일괄 자동 생성</span>
-                    </button>
-                  </div>
+                {selectedStickerSeriesTab === 'terrarium' && (
+                  <button
+                    onClick={() => handleBatchGenerateSeries('terrarium')}
+                    disabled={isBatchGenerating}
+                    className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-teal-600"
+                    title="테라리움 풀세트 (완성본 1종 + 유리병/흙/식물/피규어/토끼 개별 5종) 6장 일괄 연속 자동 생성"
+                  >
+                    <span>⚡️</span>
+                    <span>[테라리움 풀세트] 6종 일괄 자동 생성</span>
+                  </button>
                 )}
 
                 <button
@@ -1600,18 +1618,28 @@ export default function Home() {
             <div className="pt-2 border-t border-rose-200/60">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
                 <label className="block text-xs font-bold text-rose-900">
-                  🎯 스티커 시리즈 템플릿 선택:
+                  🎯 스티커 세트 템플릿 선택:
                 </label>
                 <div className="flex items-center gap-1 bg-rose-100/70 p-1 rounded-xl">
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('vivarium')}
+                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'vivarium'
+                        ? 'bg-emerald-700 text-white shadow-sm'
+                        : 'text-rose-900 hover:bg-rose-200/50'
+                    }`}
+                  >
+                    🦎 비바리움 세트
+                  </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('terrarium')}
                     className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'terrarium'
-                        ? 'bg-emerald-600 text-white shadow-sm'
+                        ? 'bg-teal-700 text-white shadow-sm'
                         : 'text-rose-900 hover:bg-rose-200/50'
                     }`}
                   >
-                    🌿 테라리움 꾸미기 시리즈
+                    🫙 테라리움 세트
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('pumpkin')}
@@ -1621,13 +1649,19 @@ export default function Home() {
                         : 'text-rose-900 hover:bg-rose-200/50'
                     }`}
                   >
-                    🎃 Pygmy Pumpkin 시리즈
+                    🎃 Pygmy Pumpkin 세트
                   </button>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                {(selectedStickerSeriesTab === 'terrarium' ? TERRARIUM_SERIES : PYGMY_PUMPKIN_SERIES).map((preset) => (
+                {(
+                  selectedStickerSeriesTab === 'vivarium'
+                    ? TERRARIUM_SERIES.filter(p => p.id.startsWith('vivarium-'))
+                    : selectedStickerSeriesTab === 'terrarium'
+                    ? TERRARIUM_SERIES.filter(p => p.id.startsWith('terrarium-') || p.id.startsWith('gardener-'))
+                    : PYGMY_PUMPKIN_SERIES
+                ).map((preset) => (
                   <div
                     key={preset.id}
                     onClick={() => {
@@ -1639,8 +1673,10 @@ export default function Home() {
                     }}
                     className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all hover:scale-[1.02] shadow-sm ${
                       selectedStickerPresetId === preset.id
-                        ? selectedStickerSeriesTab === 'terrarium'
+                        ? selectedStickerSeriesTab === 'vivarium'
                           ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold ring-2 ring-emerald-400'
+                          : selectedStickerSeriesTab === 'terrarium'
+                          ? 'bg-teal-50 border-teal-500 text-teal-950 font-bold ring-2 ring-teal-400'
                           : 'bg-rose-100 border-rose-500 text-rose-950 font-bold ring-2 ring-rose-400'
                         : 'bg-white border-rose-200 text-gray-800 hover:bg-rose-50'
                     }`}
@@ -1648,8 +1684,10 @@ export default function Home() {
                     <div className="font-bold flex items-center justify-between">
                       <span>{preset.name}</span>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                        selectedStickerSeriesTab === 'terrarium'
+                        selectedStickerSeriesTab === 'vivarium'
                           ? 'text-emerald-700 bg-emerald-200/60'
+                          : selectedStickerSeriesTab === 'terrarium'
+                          ? 'text-teal-700 bg-teal-200/60'
                           : 'text-rose-700 bg-rose-200/60'
                       }`}>생성</span>
                     </div>
