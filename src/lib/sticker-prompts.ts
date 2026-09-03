@@ -138,7 +138,24 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
   }
 ];
 
+export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
+1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
+2. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
+3. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures, NO labels anywhere in the image. Pure graphic illustration art only.
+4. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
+
 export const TERRARIUM_SERIES: StickerPreset[] = [
+  {
+    id: 'terrarium-complete-guide',
+    name: '🫙✨ [완성 가이드] 테라리움 풀세트 완성본',
+    animal: 'Terrarium Complete Showcase',
+    animalValue: '',
+    affinityObject: 'Glass Jar, Moss, Ferns, Mushrooms & Cute Baby Hedgehog Inside',
+    theme: 'Complete Terrarium Guide',
+    phrase: '',
+    description: '스티커 가이드용! 유리병 속에 이끼, 자갈, 다육식물, 아기 고슴도치까지 모두 조합된 완성본 스티커',
+    prompt: `A cute die-cut sticker design featuring a complete, fully decorated transparent vintage glass mason jar terrarium. Inside the jar is a lush mini ecosystem filled with soft green moss, smooth river pebbles, mini succulents, tiny red mushrooms, and an adorable fluffy baby hedgehog resting happily inside. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+  },
   {
     id: 'terrarium-jar-base',
     name: '🫙 테라리움 빈티지 유리병 & 이끼 베이스',
@@ -146,9 +163,9 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     animalValue: '',
     affinityObject: 'Vintage Mason Jar, Moss Bed, Pebbles & Red Mushrooms',
     theme: 'Cozy Terrarium Base',
-    phrase: 'My Little Terrarium',
-    description: '스티커를 조합해 꾸밀 수 있는 빈티지 메이슨 저 유리병과 이끼 베이스 스티커',
-    prompt: `A cute die-cut sticker design featuring a transparent vintage glass mason jar filled with layers of soft green moss, smooth river pebbles, and tiny red mushrooms inside. Curved text at the top reads "My Little Terrarium" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    phrase: '',
+    description: '스티커를 조합해 꾸밀 수 있는 순수 빈티지 메이슨 저 유리병과 이끼 베이스 스티커 (텍스트 없음)',
+    prompt: `A cute die-cut sticker design featuring a transparent vintage glass mason jar filled with layers of soft green moss, smooth river pebbles, and tiny red mushrooms inside. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'terrarium-hedgehog-acorn',
@@ -157,9 +174,9 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     animalValue: 'baby hedgehog',
     affinityObject: 'Autumn Oak Leaves, Acorns & Green Moss Bed',
     theme: 'Forest Moss Nap',
-    phrase: 'Cozy Little Moss',
-    description: '몽글몽글 이끼 위에서 도토리를 안고 쉬는 뽀송한 아기 고슴도치 스티커',
-    prompt: `A cute die-cut sticker design featuring a fluffy, adorable baby hedgehog resting gently on a soft green moss mound, holding a shiny brown acorn with oak leaves nearby. Curved text reads "Cozy Little Moss" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    phrase: '',
+    description: '몽글몽글 이끼 위에서 도토리를 안고 쉬는 뽀송한 순수 아기 고슴도치 스티커 (텍스트 없음)',
+    prompt: `A cute die-cut sticker design featuring a fluffy, adorable baby hedgehog resting gently on a soft green moss mound, holding a shiny brown acorn with oak leaves nearby. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'terrarium-bunny-gardener',
@@ -168,9 +185,9 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     animalValue: 'bunny',
     affinityObject: 'Plant Spray Bottle, Fern Leaves & Mini Carrots',
     theme: 'Cozy Terrarium Gardener',
-    phrase: 'Plant Parent Bunny',
-    description: '파스텔 후드티를 입고 테라리움 식물에 물을 주는 아기 토끼 스티커',
-    prompt: `A cute die-cut sticker design featuring a lovable baby bunny wearing a cozy oversized pastel green hoodie, holding a tiny water spray bottle for terrarium plants, surrounded by miniature fern leaves and tiny carrots. Curved text reads "Plant Parent Bunny" in an elegant cute script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    phrase: '',
+    description: '파스텔 후드티를 입고 테라리움 식물에 물을 주는 순수 아기 토끼 스티커 (텍스트 없음)',
+    prompt: `A cute die-cut sticker design featuring a lovable baby bunny wearing a cozy oversized pastel green hoodie, holding a tiny water spray bottle for terrarium plants, surrounded by miniature fern leaves and tiny carrots. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'terrarium-sloth-nap',
@@ -179,9 +196,9 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     animalValue: 'baby sloth',
     affinityObject: 'Tropical Green Leaves & Wild Blossom Branch',
     theme: 'Lazy Terrarium Champ',
-    phrase: 'Too Cozy to Move',
-    description: '테라리움 나뭇가지에 귀엽게 매달려 낮잠 자는 나무늘보 스티커',
-    prompt: `A cute die-cut sticker design featuring a fluffy baby sloth hanging lazily from a leafy tropical tree branch inside a terrarium, wearing cozy pajamas. Surrounding elements include lush green monstera leaves and pink blossoms. Curved text reads "Too Cozy to Move" in an elegant script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    phrase: '',
+    description: '테라리움 나뭇가지에 귀엽게 매달려 낮잠 자는 순수 나무늘보 스티커 (텍스트 없음)',
+    prompt: `A cute die-cut sticker design featuring a fluffy baby sloth hanging lazily from a leafy tropical tree branch inside a terrarium, wearing cozy pajamas. Surrounding elements include lush green monstera leaves and pink blossoms. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'terrarium-flora-pack',
@@ -190,9 +207,9 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     animalValue: '',
     affinityObject: 'Mini Succulents, Ferns, Fungi & Pebbles',
     theme: 'Botanical Decor Pack',
-    phrase: 'Wild & Green',
-    description: '어디든 붙여 테라리움을 채울 수 있는 포근한 식물 세트 스티커',
-    prompt: `A cute die-cut sticker design featuring a charming arrangement of mini succulents, fern branches, tiny red mushrooms, and smooth river stones. Curved text reads "Wild & Green" in an elegant cute script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    phrase: '',
+    description: '어디든 붙여 테라리움을 채울 수 있는 순수 식물 세트 스티커 (텍스트 없음)',
+    prompt: `A cute die-cut sticker design featuring a charming arrangement of mini succulents, fern branches, tiny red mushrooms, and smooth river stones. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'terrarium-fawn-wildflower',
@@ -201,9 +218,9 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     animalValue: 'fawn',
     affinityObject: 'Forest Wildflowers, Acorns & Berries',
     theme: 'Cottagecore Forest Fawn',
-    phrase: 'Forest Whispers',
-    description: '들꽃 왕관을 쓰고 도토리를 내려다보는 귀여운 아기 사슴 스티커',
-    prompt: `A cute die-cut sticker design featuring a sweet baby fawn with white spots, wearing a delicate forest wildflower crown, sitting peacefully near green moss and acorns. Curved text reads "Forest Whispers" in an elegant script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    phrase: '',
+    description: '들꽃 왕관을 쓰고 도토리를 내려다보는 순수 아기 사슴 스티커 (텍스트 없음)',
+    prompt: `A cute die-cut sticker design featuring a sweet baby fawn with white spots, wearing a delicate forest wildflower crown, sitting peacefully near green moss and acorns. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   }
 ];
 
