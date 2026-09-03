@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useSession, signOut } from "next-auth/react";
-import { MOCKUP_TEMPLATES } from '@/lib/mockups';
+import { MOCKUP_TEMPLATES, getMockupsForMode } from '@/lib/mockups';
 import { processTransparentPNG } from '@/lib/image-processor';
 import { getActiveUpcomingSeasons, SEASONAL_HOLIDAYS, ActiveSeasonInfo } from '@/lib/seasonal-trends';
 import {
@@ -78,6 +78,14 @@ export default function Home() {
   const loadedMockupImgRef = useRef<{ id: string; img: HTMLImageElement } | null>(null);
   const loadedDesignImgRef = useRef<{ url: string; img: HTMLImageElement | HTMLCanvasElement } | null>(null);
   const drawSequenceRef = useRef<number>(0);
+
+  // Auto-switch mockup when mode changes (POD vs Sticker)
+  useEffect(() => {
+    const availableMockups = getMockupsForMode(isStickerMode);
+    if (availableMockups.length > 0) {
+      setSelectedMockupId(availableMockups[0].id);
+    }
+  }, [isStickerMode]);
 
   const editCanvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -1999,7 +2007,7 @@ export default function Home() {
                             onChange={(e) => setSelectedMockupId(e.target.value)}
                             className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white shadow-xs"
                           >
-                            {MOCKUP_TEMPLATES.map(t => (
+                            {getMockupsForMode(isStickerMode).map(t => (
                               <option key={t.id} value={t.id}>{t.name}</option>
                             ))}
                           </select>
