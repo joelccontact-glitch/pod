@@ -958,16 +958,39 @@ export default function Home() {
 
   const handleExportZIPBundle = async () => {
     if (!designs || designs.length === 0) {
-      alert('다운로드할 디자인이 없습니다. 먼저 디자인을 생성해 주세요.');
+      alert('다운로드할 디자인이 없습니다. 먼저 아래 템플릿 카드의 [생성] 버튼을 눌러 디자인을 만들어 주세요.');
       return;
     }
+
+    const isTerrariumTab = selectedStickerSeriesTab === 'terrarium';
+    const bundleName = isTerrariumTab ? 'Terrarium_DIY_Sticker_PNG_Bundle' : 'Pygmy_Pumpkin_Friends_Sticker_PNG_Bundle';
+
+    // Filter designs that belong to the active series tab
+    const filteredDesigns = designs.filter((d) => {
+      const textToScan = `${d.title || ''} ${d.prompt || ''} ${d.topic || ''} ${d.feedback_applied || ''}`.toLowerCase();
+      const terrariumKeywords = ['terrarium', 'vivarium', 'moss', 'hedgehog', 'sloth', 'chameleon', 'fawn', 'botanical', 'flora', 'tank', 'jar', 'succulent', 'driftwood', 'wood'];
+      
+      const isTerrariumMatch = terrariumKeywords.some((kw) => textToScan.includes(kw));
+
+      return isTerrariumTab ? isTerrariumMatch : !isTerrariumMatch;
+    });
+
+    // Fallback: If filtering returns empty, use all designs to avoid empty zip
+    const targetDesigns = filteredDesigns.length > 0 ? filteredDesigns : designs;
+
+    if (filteredDesigns.length === 0) {
+      const seriesName = isTerrariumTab ? '[테라리움 꾸미기 시리즈]' : '[Pygmy Pumpkin 시리즈]';
+      const confirmDownload = confirm(`현재 ${seriesName} 전용으로 생성된 스티커가 없습니다.\n전체 저장된 이미지(${designs.length}장)를 다운로드하시겠습니까?`);
+      if (!confirmDownload) return;
+    }
+
     try {
       setIsExportingBundle(true);
       const zip = new JSZip();
-      const folder = zip.folder('Pygmy_Pumpkin_Friends_Sticker_PNG_Bundle');
+      const folder = zip.folder(bundleName);
 
-      for (let i = 0; i < designs.length; i++) {
-        const d = designs[i];
+      for (let i = 0; i < targetDesigns.length; i++) {
+        const d = targetDesigns[i];
         const rawUrl = d.transparent_png_url || (d.id ? `/api/designs/image?id=${d.id}` : d.image_url || d.url);
         if (!rawUrl) continue;
 
@@ -987,12 +1010,12 @@ export default function Home() {
             bytes[b] = binaryString.charCodeAt(b);
           }
 
-          const animalName = (d.title || d.prompt || `sticker_${i + 1}`)
+          const itemTitle = (d.title || d.prompt || `sticker_${i + 1}`)
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '_')
             .slice(0, 30);
 
-          const fileName = `${String(i + 1).padStart(2, '0')}_${animalName}_300dpi.png`;
+          const fileName = `${String(i + 1).padStart(2, '0')}_${itemTitle}_300dpi.png`;
           folder?.file(fileName, bytes.buffer);
         } catch (err) {
           console.error(`Error processing image index ${i} for ZIP:`, err);
@@ -1003,7 +1026,7 @@ export default function Home() {
       const url = window.URL.createObjectURL(zipBlob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Pygmy_Pumpkin_Friends_Sticker_PNG_Bundle_${Date.now()}.zip`;
+      a.download = `${bundleName}_${Date.now()}.zip`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -1455,11 +1478,13 @@ export default function Home() {
                 <span className="text-3xl">🦛</span>
                 <div>
                   <h3 className="text-sm sm:text-base font-bold text-rose-900 flex items-center gap-2">
-                    <span>Pygmy Pumpkin & Friends 10종 스티커 & 디지털 PNG 스토어 모드</span>
+                    <span>{selectedStickerSeriesTab === 'terrarium' ? '🌿 테라리움 DIY 꾸미기 스티커 스토어 모드' : 'Pygmy Pumpkin & Friends 10종 스티커 & 디지털 PNG 스토어 모드'}</span>
                     <span className="bg-rose-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">HOT Niche</span>
                   </h3>
                   <p className="text-xs text-rose-800 font-medium">
-                    흰색 다이컷 테두리 + 생태계 연출(수련/대나무/조개) + 300DPI 투명 PNG로 Etsy 및 스티커 POD 판매에 최적화되었습니다.
+                    {selectedStickerSeriesTab === 'terrarium'
+                      ? '아래 템플릿의 [생성] 버튼으로 생성된 테라리움 전용 300DPI 투명 PNG 스티커들만 깔끔하게 분류되어 압축 다운로드됩니다.'
+                      : '흰색 다이컷 테두리 + 생태계 연출(수련/대나무/조개) + 300DPI 투명 PNG로 Etsy 및 스티커 POD 판매에 최적화되었습니다.'}
                   </p>
                 </div>
               </div>
