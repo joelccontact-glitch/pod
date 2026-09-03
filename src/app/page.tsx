@@ -1511,6 +1511,7 @@ export default function Home() {
                       setSelectedStickerPresetId(preset.id);
                       setSelectedAnimal(preset.animalValue);
                       setUploadPrompt(preset.prompt);
+                      setAutoGeneratePhrase(false);
                       setIsImageModalOpen(true);
                     }}
                     className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all hover:scale-[1.02] shadow-sm ${
@@ -2387,18 +2388,25 @@ export default function Home() {
                     </div>
                     
                     <div className="mt-4">
-                      <div className="flex items-center gap-2 mb-4 bg-purple-50 p-3 rounded-lg border border-purple-100">
-                        <input
-                          type="checkbox"
-                          id="auto-phrase-image-modal"
-                          checked={autoGeneratePhrase}
-                          onChange={(e) => setAutoGeneratePhrase(e.target.checked)}
-                          className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500 cursor-pointer"
-                        />
-                        <label htmlFor="auto-phrase-image-modal" className="text-sm font-semibold text-purple-800 cursor-pointer select-none">
-                          위트 문구 자동 생성 (추천)
-                        </label>
-                      </div>
+                      {!uploadPrompt.toLowerCase().includes('die-cut sticker') ? (
+                        <div className="flex items-center gap-2 mb-4 bg-purple-50 p-3 rounded-lg border border-purple-100">
+                          <input
+                            type="checkbox"
+                            id="auto-phrase-image-modal"
+                            checked={autoGeneratePhrase}
+                            onChange={(e) => setAutoGeneratePhrase(e.target.checked)}
+                            className="w-4 h-4 text-purple-600 rounded border-gray-300 focus:ring-purple-500 cursor-pointer"
+                          />
+                          <label htmlFor="auto-phrase-image-modal" className="text-sm font-semibold text-purple-800 cursor-pointer select-none">
+                            위트 문구 자동 생성 (추천)
+                          </label>
+                        </div>
+                      ) : (
+                        <div className="mb-4 bg-emerald-50 p-3 rounded-lg border border-emerald-200 text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
+                          <span>✨</span>
+                          <span>스티커 템플릿 전용 모드: 임의의 무단 문구가 주입되지 않습니다.</span>
+                        </div>
+                      )}
                       <label className="block text-sm font-semibold text-gray-700 mb-2">적용할 화풍 (선택)</label>
                       <select 
                         value={selectedStyleId || ''}

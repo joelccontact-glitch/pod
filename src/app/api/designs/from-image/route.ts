@@ -37,40 +37,55 @@ export async function POST(req: Request) {
       const { likedDesigns, likedPromptSummary } = await fetchLikedDesignsSummary(db, 3);
       const likedInstruction = likedDesigns.length > 0 ? `\nCRITICAL #1 MASTER BENCHMARK: The user LIKED (HEARTED) these favorite designs. Ensure the style matches their aesthetic:\n${likedPromptSummary}\n` : '';
 
+      const isTemplatePrompt = prompt.toLowerCase().includes('die-cut sticker');
+
+      let typographyInstruction = '';
+      if (catchphrase) {
+        typographyInstruction = `CRUCIAL TYPOGRAPHY: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.`;
+      } else if (autoPhrase && !isTemplatePrompt) {
+        typographyInstruction = `CRUCIAL TYPOGRAPHY: Invent a short, witty, trademark-free phrase (2-4 words, e.g., "Tiny Oink") related to the instruction, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.`;
+      } else {
+        typographyInstruction = `STRICT TYPOGRAPHY RULE: DO NOT invent, generate, or add ANY extra text, catchphrases, or typography beyond what is explicitly written in the instruction.`;
+      }
+
       let contentsArray: any[] = [];
       if (styleData) {
         console.log(`🎨 Applying style: ${styleData.name}`);
         if (base64Data) {
           contentsArray = [
-            `You are an expert prompt engineer. The user wants to create a new t-shirt design based on the FIRST image (concept), with the instruction: "${prompt}". ${affinityInstruction} ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : (autoPhrase ? `CRUCIAL: Invent a short, witty, trademark-free phrase (2-4 words, e.g., "Tiny Oink") related to the instruction, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : '')}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the SECOND image (style reference), as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) that captures the essence of the first image but completely applies the style of the second image. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
+            `You are an expert prompt engineer. The user wants to create a new t-shirt design based on the FIRST image (concept), with the instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the SECOND image (style reference), as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) that captures the essence of the first image but completely applies the style of the second image. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
             { inlineData: { data: base64Data, mimeType: 'image/jpeg' } },
             { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
           ];
         } else {
           contentsArray = [
-            `You are an expert prompt engineer. The user wants to create a new t-shirt design based on the instruction: "${prompt}". ${affinityInstruction} ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : (autoPhrase ? `CRUCIAL: Invent a short, witty, trademark-free phrase (2-4 words, e.g., "Tiny Oink") related to the instruction, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : '')}IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference image, as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) that applies the instruction while strictly following the style reference. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
+            `You are an expert prompt engineer. The user wants to create a new t-shirt design based on the instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference image, as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) that applies the instruction while strictly following the style reference. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
             { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
           ];
         }
       } else {
         if (base64Data) {
           contentsArray = [
-            `Analyze this reference image. The user wants to create a new t-shirt design based on this, with the following instruction: "${prompt}". ${affinityInstruction} ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : (autoPhrase ? `CRUCIAL: Invent a short, witty, trademark-free phrase (2-4 words, e.g., "Tiny Oink") related to the instruction, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : '')}Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) that captures the essence of the reference image but applies the user's instruction. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
+            `Analyze this reference image. The user wants to create a new t-shirt design based on this, with the following instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) that captures the essence of the reference image but applies the user's instruction. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
             { inlineData: { data: base64Data, mimeType: 'image/jpeg' } }
           ];
         } else {
           contentsArray = [
-            `You are an expert prompt engineer. Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) based on this instruction: "${prompt}". ${affinityInstruction} ${catchphrase ? `CRUCIAL: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : (autoPhrase ? `CRUCIAL: Invent a short, witty, trademark-free phrase (2-4 words, e.g., "Tiny Oink") related to the instruction, and incorporate it as typography text. This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image. ` : '')}CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`
+            `You are an expert prompt engineer. Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) based on this instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`
           ];
         }
       }
 
       // 1. Generate new prompt based on image(s) + user prompt
-      const promptResponse = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: contentsArray
-      });
-      newPrompt = promptResponse.text?.trim() || prompt;
+      if (isTemplatePrompt) {
+        newPrompt = prompt;
+      } else {
+        const promptResponse = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: contentsArray
+        });
+        newPrompt = promptResponse.text?.trim() || prompt;
+      }
 
       // 2. Generate SEO Content
       const textResponse = await ai.models.generateContent({

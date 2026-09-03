@@ -116,22 +116,23 @@ export function getAnimalAffinityData(targetAnimal: string): AnimalAffinity | nu
 export function getAnimalAffinityInstruction(targetAnimal: string): string {
   const affinity = getAnimalAffinityData(targetAnimal);
 
+  if (!affinity) {
+    return '';
+  }
+
   // Randomly select between Anthropomorphic vs Authentic Natural Baby Animal (~50/50 probability)
   const isAnthropomorphic = Math.random() < 0.5;
 
   let styleDirective = '';
   if (isAnthropomorphic) {
-    styleDirective = `SUBJECT MANDATE: THE MAIN CHARACTER MUST BE AN ADORABLE CUTE ANIMAL (${affinity ? affinity.animalName : targetAnimal}), NOT A HUMAN. Depict ${affinity ? affinity.animalName : targetAnimal} as a cute, friendly 2D vector line art animal character wearing cute cozy clothes (e.g. sweater, hoodie, beanie) and enjoying a US lifestyle/hobby (e.g. sipping iced boba, reading a book). STRICT NEGATIVE RULE: DO NOT DRAW HUMAN PERSONS, HUMAN GIRLS, HUMAN BOYS, OR HUMAN FACES!`;
+    styleDirective = `SUBJECT MANDATE: THE MAIN CHARACTER MUST BE AN ADORABLE CUTE ANIMAL (${affinity.animalName}), NOT A HUMAN. Depict ${affinity.animalName} as a cute, friendly 2D vector line art animal character wearing cute cozy clothes (e.g. sweater, hoodie, beanie) and enjoying a US lifestyle/hobby (e.g. sipping iced boba, reading a book). STRICT NEGATIVE RULE: DO NOT DRAW HUMAN PERSONS, HUMAN GIRLS, HUMAN BOYS, OR HUMAN FACES!`;
   } else {
-    styleDirective = `SUBJECT MANDATE: THE MAIN CHARACTER MUST BE AN ADORABLE CUTE ANIMAL (${affinity ? affinity.animalName : targetAnimal}), NOT A HUMAN. Depict ${affinity ? affinity.animalName : targetAnimal} in its pure, fluffy 2D vector baby animal state (no human clothes), in a charming standalone pose. STRICT NEGATIVE RULE: DO NOT DRAW HUMAN PERSONS, HUMAN GIRLS, HUMAN BOYS, OR HUMAN FACES!`;
+    styleDirective = `SUBJECT MANDATE: THE MAIN CHARACTER MUST BE AN ADORABLE CUTE ANIMAL (${affinity.animalName}), NOT A HUMAN. Depict ${affinity.animalName} in its pure, fluffy 2D vector baby animal state (no human clothes), in a charming standalone pose. STRICT NEGATIVE RULE: DO NOT DRAW HUMAN PERSONS, HUMAN GIRLS, HUMAN BOYS, OR HUMAN FACES!`;
   }
 
-  let affinityRule = '';
-  if (affinity) {
-    affinityRule = `BIOLOGICAL AFFINITY RULE: Incorporate small standalone props ${affinity.animalName} actually loves in real life (preferred items: ${affinity.preferredItems.join(', ')}). DO NOT draw full background landscapes or scenery environments.`;
-    if (affinity.strictExclusions && affinity.strictExclusions.length > 0) {
-      affinityRule += ` STRICT NEGATIVE RULE: DO NOT include biologically mismatched items for ${affinity.animalName} such as: ${affinity.strictExclusions.join(', ')}.`;
-    }
+  let affinityRule = `BIOLOGICAL AFFINITY RULE: Incorporate small standalone props ${affinity.animalName} actually loves in real life (preferred items: ${affinity.preferredItems.join(', ')}). DO NOT draw full background landscapes or scenery environments.`;
+  if (affinity.strictExclusions && affinity.strictExclusions.length > 0) {
+    affinityRule += ` STRICT NEGATIVE RULE: DO NOT include biologically mismatched items for ${affinity.animalName} such as: ${affinity.strictExclusions.join(', ')}.`;
   }
 
   return `${styleDirective} ${affinityRule}`.trim();
