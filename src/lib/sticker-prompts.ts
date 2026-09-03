@@ -201,7 +201,8 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     phrase: '',
     description: '수조 유목 생태계와 어울리는 앙증맞은 파충류/양서류 (미니 카멜레온 & 작은 나뭇잎 청개구리) 스티커',
     prompt: `A cute die-cut sticker design featuring a tiny cute baby green chameleon sitting lazily on a vine branch next to a small adorable green tree frog, small scale proportion designed for a vivarium ecosystem. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
-  },
+  }
+];
 
 export const TERRARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 }, (_, i) => {
   const num = i + 1;
@@ -364,16 +365,4 @@ export function buildStickerPrompt(
   const textPart = phrase ? `Curved text at the top reads "${phrase}" in an elegant, cute, hand-drawn script font.` : '';
   
   return `A cute die-cut sticker design featuring an adorable ${animalName} associated with ${affinityObject}. ${extraStyleDetails} ${textPart} ${STICKER_RULES_PROMPT_SUFFIX}`;
-}
-
-
-export function buildStickerPrompt(
-  animalName: string,
-  affinityObject: string,
-  phrase: string = '',
-  extraStyleDetails: string = ''
-): string {
-  const textPart = phrase ? `Curved text at the top reads "${phrase}" in an elegant, cute, hand-drawn script font.` : '';
-  
-  return `A cute die-cut sticker design featuring a lovable baby ${animalName} sitting happily. Accompanying harmonious biological affinity item: ${affinityObject}. ${extraStyleDetails} ${textPart} ${STICKER_RULES_PROMPT_SUFFIX}`;
 }
