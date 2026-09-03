@@ -142,7 +142,8 @@ export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
 2. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
 3. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures, NO labels anywhere in the image. Pure graphic illustration art only.
-4. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
+4. STRICT NON-REFLECTIVE GLASS RULE: Absolutely NO glass reflections, NO white glare streaks, NO diagonal shine strips across the glass container. The glass tank/jar must be completely clear and transparent without any white reflection lines so stickers can be layered seamlessly inside.
+5. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
 
 export const TERRARIUM_SERIES: StickerPreset[] = [
   {
@@ -164,8 +165,8 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     affinityObject: 'Wide Horizontal Glass Vivarium Tank Outline',
     theme: 'Wide Tank Frame',
     phrase: '',
-    description: '스티커를 안쪽에 채워 넣을 수 있는 가로 파노라마 직사각형 유리 수조 외곽 틀 스티커',
-    prompt: `A cute die-cut sticker design featuring a clean, wide horizontal rectangular glass vivarium tank frame, completely empty inside with a subtle thin gravel layer at the bottom, crisp glass outline aesthetic. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '스티커를 안쪽에 채워 넣을 수 있는 가로 파노라마 직사각형 유리 수조 외곽 틀 스티커 (빛반사선 없음)',
+    prompt: `A cute die-cut sticker design featuring a clean, wide horizontal rectangular glass vivarium tank frame, completely empty inside with a subtle thin gravel layer at the bottom. The glass walls MUST be 100% clear with NO white diagonal glare strips or glass reflection lines, allowing seamless sticker layering. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'terrarium-wide-driftwood-moss',
@@ -208,8 +209,8 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     affinityObject: 'Vintage Mason Jar, Moss Bed, Pebbles & Red Mushrooms',
     theme: 'Cozy Terrarium Base',
     phrase: '',
-    description: '스티커를 조합해 꾸밀 수 있는 순수 빈티지 메이슨 저 유리병과 이끼 베이스 스티커 (텍스트 없음)',
-    prompt: `A cute die-cut sticker design featuring a transparent vintage glass mason jar filled with layers of soft green moss, smooth river pebbles, and tiny red mushrooms inside. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '스티커를 조합해 꾸밀 수 있는 순수 빈티지 메이슨 저 유리병과 이끼 베이스 스티커 (빛반사선 없음)',
+    prompt: `A cute die-cut sticker design featuring a transparent vintage glass mason jar filled with layers of soft green moss, smooth river pebbles, and tiny red mushrooms inside. The glass surface MUST be completely clear without any white diagonal reflection glare lines. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'terrarium-hedgehog-acorn',
