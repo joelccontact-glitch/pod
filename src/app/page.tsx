@@ -1187,7 +1187,8 @@ export default function Home() {
     if (!uploadPrompt.trim()) return;
     setIsGeneratingFromImage(true);
     try {
-      const finalPrompt = selectedAnimal ? `${selectedAnimal} subject, ${uploadPrompt}` : uploadPrompt;
+      const isTemplatePrompt = uploadPrompt.toLowerCase().includes('die-cut sticker');
+      const finalPrompt = (selectedAnimal && !isTemplatePrompt) ? `${selectedAnimal} subject, ${uploadPrompt}` : uploadPrompt;
       const res = await fetch('/api/designs/from-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2359,6 +2360,7 @@ export default function Home() {
                         onChange={(e) => setSelectedAnimal(e.target.value)}
                         className="w-full border border-gray-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white shadow-sm mb-4"
                       >
+                        <option value="">동물 없음 (순수 오브제 / 템플릿 전용)</option>
                         <option value="hamster">햄스터 (Hamster)</option>
                         <option value="guinea pig">기니피그 (Guinea Pig)</option>
                         <option value="kitten">새끼 고양이 (Kitten)</option>
