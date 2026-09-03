@@ -146,8 +146,52 @@ export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 
 export const TERRARIUM_SERIES: StickerPreset[] = [
   {
+    id: 'terrarium-panorama-complete-guide',
+    name: '🖼️✨ [파노라마 가이드] 가로 수조 비바리움 풀세트',
+    animal: 'Panoramic Vivarium Showcase',
+    animalValue: '',
+    affinityObject: 'Horizontal Glass Tank, Driftwood, Moss, Vines & Baby Chameleon',
+    theme: 'Wide Panoramic Vivarium Guide',
+    phrase: '',
+    description: '가로형 와이드 수조 속에 유목, 이끼, 넝쿨, 미니 카멜레온이 배치된 가로 파노라마 완성본 스티커 가이드',
+    prompt: `A cute die-cut sticker design featuring a wide horizontal panoramic rectangular glass vivarium tank. Inside the clear glass tank is a lush micro ecosystem with natural curved driftwood, green moss layers, aquatic climbing vines, smooth river stones, and a tiny cute baby green chameleon resting peacefully on a wooden branch. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+  },
+  {
+    id: 'terrarium-wide-tank-frame',
+    name: '🖼️ [파노라마 핏] 가로 와이드 유리 수조 틀',
+    animal: 'Panoramic Tank Frame',
+    animalValue: '',
+    affinityObject: 'Wide Horizontal Glass Vivarium Tank Outline',
+    theme: 'Wide Tank Frame',
+    phrase: '',
+    description: '스티커를 안쪽에 채워 넣을 수 있는 가로 파노라마 직사각형 유리 수조 외곽 틀 스티커',
+    prompt: `A cute die-cut sticker design featuring a clean, wide horizontal rectangular glass vivarium tank frame, completely empty inside with a subtle thin gravel layer at the bottom, crisp glass outline aesthetic. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+  },
+  {
+    id: 'terrarium-wide-driftwood-moss',
+    name: '🪵 [파노라마 핏] 와이드 유목 & 이끼 지형',
+    animal: 'Vivarium Driftwood & Moss',
+    animalValue: '',
+    affinityObject: 'Wide Horizontal Driftwood Root & Moss Terrain',
+    theme: 'Horizontal Terrain Pack',
+    phrase: '',
+    description: '가로 수조 바닥에 딱 맞춰 붙이는 와이드 자연 유목 뿌리와 이끼 & 조약돌 지형 스티커',
+    prompt: `A cute die-cut sticker design featuring a wide horizontal panorama mound of natural curved driftwood root, smooth river pebbles, and lush green moss bed, perfectly proportioned to fit horizontally inside a vivarium tank. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+  },
+  {
+    id: 'terrarium-vine-chameleon',
+    name: '🦎 [파노라마 핏] 넝쿨 & 미니 카멜레온',
+    animal: 'Baby Chameleon',
+    animalValue: '',
+    affinityObject: 'Climbing Vines & Tiny Baby Chameleon',
+    theme: 'Mini Vivarium Creature',
+    phrase: '',
+    description: '수조 안에 쏙 들어가는 비율의 넝쿨 가지와 귀여운 미니 카멜레온 스티커',
+    prompt: `A cute die-cut sticker design featuring a tiny cute baby green chameleon sitting lazily on a delicate climbing vine branch with green tropical leaves, small proportion designed to fit inside a terrarium vivarium tank. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+  },
+  {
     id: 'terrarium-complete-guide',
-    name: '🫙✨ [완성 가이드] 테라리움 풀세트 완성본',
+    name: '🫙✨ [유리병 가이드] 테라리움 풀세트 완성본',
     animal: 'Terrarium Complete Showcase',
     animalValue: '',
     affinityObject: 'Glass Jar, Moss, Ferns, Mushrooms & Cute Baby Hedgehog Inside',
@@ -158,7 +202,7 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
   },
   {
     id: 'terrarium-jar-base',
-    name: '🫙 테라리움 빈티지 유리병 & 이끼 베이스',
+    name: '🫙 [유리병 핏] 빈티지 유리병 & 이끼 베이스',
     animal: 'Terrarium Container',
     animalValue: '',
     affinityObject: 'Vintage Mason Jar, Moss Bed, Pebbles & Red Mushrooms',

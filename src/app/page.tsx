@@ -20,7 +20,7 @@ export default function Home() {
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(false);
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'terrarium' | 'pumpkin'>('terrarium');
-  const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-complete-guide');
+  const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-panorama-complete-guide');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
   
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
