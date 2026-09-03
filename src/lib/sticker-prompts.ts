@@ -203,17 +203,17 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     prompt: `A cute die-cut sticker design featuring a tiny cute baby green chameleon sitting lazily on a vine branch next to a small adorable green tree frog, small scale proportion designed for a vivarium ecosystem. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
 
-  // --- 2. TERRARIUM SERIES (Glass Jars, Soil, Plants & Toy Miniature Figurines) ---
+  // --- 2. TERRARIUM SERIES (Glass Jars, Soil, Plants & Miniature Ornaments - NO ANIMALS) ---
   {
     id: 'terrarium-jar-complete-guide',
     name: '🫙✨ [테라리움 풀세트] 완성본 썸네일',
     animal: 'Terrarium Complete Showcase',
     animalValue: '',
-    affinityObject: 'Glass Jar, Moss, Succulents & Toy Miniature Figurine Inside',
+    affinityObject: 'Glass Jar, Soil, Moss, Succulents & Mini Fairy House',
     theme: 'Complete Terrarium Guide',
     phrase: '',
-    description: '유리병 속에 흙, 이끼, 미니 다육식물, 그리고 장난감 미니어처 피규어가 장식된 테라리움 풀세트 완성본',
-    prompt: `A cute die-cut sticker design featuring a complete transparent glass mason jar terrarium filled with drainage soil layers, plush green moss, mini succulents, and a tiny cute ceramic hedgehog toy figurine placed as a plant ornament inside. NO glass glare lines. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '유리병 속에 흙, 이끼, 미니 다육식물, 그리고 귀여운 미니 요정 집 피규어가 장식된 100% 순수 식물 테라리움 풀세트 완성본',
+    prompt: `A cute die-cut sticker design featuring a complete transparent glass mason jar terrarium filled with drainage soil layers, plush green moss, 3 mini potted succulents, and a tiny cute fairy cottage miniature house ornament inside. NO animals, NO mammals, NO living creatures. NO glass glare lines. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'terrarium-jar-base',
@@ -223,52 +223,74 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     affinityObject: 'Vintage Mason Jar Container',
     theme: 'Cozy Terrarium Base',
     phrase: '',
-    description: '식물과 이끼 스티커를 채워 넣을 수 있는 무반사 메이슨 저 유리병 스티커',
-    prompt: `A cute die-cut sticker design featuring a clean, transparent vintage glass mason jar container, empty inside with a thin drainage pebble layer at the bottom. The glass surface MUST be completely clear without any white diagonal reflection glare lines. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '식물과 이끼 스티커를 안쪽에 깔끔하게 채워 넣을 수 있는 무반사 메이슨 저 유리병 스티커',
+    prompt: `A cute die-cut sticker design featuring a clean, transparent vintage glass mason jar container, completely empty inside. The glass surface MUST be completely clear without any white diagonal reflection glare lines. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
-    id: 'terrarium-soil-moss',
-    name: '🌱 [테라리움] 배수층 흙 & 몽글몽글 이끼 베이스',
-    animal: 'Soil & Moss Bed',
+    id: 'terrarium-soil-layer',
+    name: '🌱 [테라리움] 배수층 흙 & 조약돌 지층 베이스',
+    animal: 'Soil & Gravel Layer',
     animalValue: '',
-    affinityObject: 'Drainage Soil & Moss Layer',
-    theme: 'Terrarium Base Layer',
+    affinityObject: 'Drainage Soil & Pebbles',
+    theme: 'Terrarium Soil Layer',
     phrase: '',
-    description: '유리병 바닥에 깔아주는 단층 흙, 조약돌, 수분 이끼 베이스 스티커',
-    prompt: `A cute die-cut sticker design featuring a layered mound of dark gardening soil, river pebbles, and plush green moss bed, shaped to fit inside a glass jar terrarium. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '유리병 바닥에 깔아주는 흙, 활성탄, 조약돌 배수층 스티커',
+    prompt: `A cute die-cut sticker design featuring a neat horizontal layered mound of dark gardening soil and smooth river pebbles, proportioned to fit inside the bottom of a glass jar. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
-    id: 'terrarium-succulents-pack',
-    name: '🌵 [테라리움] 미니 다육식물 & 버섯 팩',
-    animal: 'Mini Succulents',
+    id: 'terrarium-moss-mound',
+    name: '🍃 [테라리움] 몽글몽글 푸른 이끼 언덕 베이스',
+    animal: 'Green Moss Mound',
     animalValue: '',
-    affinityObject: 'Mini Succulents & Fungi',
-    theme: 'Terrarium Plants',
+    affinityObject: 'Plush Green Cushion Moss',
+    theme: 'Terrarium Moss',
     phrase: '',
-    description: '테라리움을 아기자기하게 꾸밀 수 있는 다육식물, 미니 빨간 버섯, 에어플랜트 스티커 세트',
-    prompt: `A cute die-cut sticker design featuring a charm cluster of miniature potted succulents, tiny red toadstool mushrooms, and delicate green air plants. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '흙 위에 올리는 포근하고 소복한 수분 이끼 덩어리 스티커',
+    prompt: `A cute die-cut sticker design featuring a soft, plush green cushion moss mound, proportioned to sit nicely inside a glass jar terrarium. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
-    id: 'terrarium-toy-figurine',
-    name: '🧸 [테라리움] 미니 세라믹 장난감 피규어',
-    animal: 'Toy Miniature Figurine',
+    id: 'terrarium-mini-succulents',
+    name: '🌵 [테라리움] 미니 다육식물 3종 세트',
+    animal: 'Mini Succulents Pack',
     animalValue: '',
-    affinityObject: 'Decorative Ceramic Animal Toy Figurine',
-    theme: 'Terrarium Ornament',
+    affinityObject: '3 Small Potted Succulents',
+    theme: 'Succulents Pack',
     phrase: '',
-    description: '유리병 속 이끼 위에 얹는 아기자기한 장난감 고슴도치 미니어처 피규어 스티커',
-    prompt: `A cute die-cut sticker design featuring a tiny cute glossy ceramic hedgehog toy figurine, styled as a garden pot ornament. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '뭉치지 않고 아기자기한 미니 다육식물 3개 팟 세트 스티커 (부착 용이)',
+    prompt: `A cute die-cut sticker design featuring a neat, uncrowded set of 3 tiny individual potted succulents (echeveria, haworthia, and jade plant). Clean separate arrangement, NOT crowded. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
-    id: 'gardener-bunny-outside',
-    name: '🐰 [원예 가드너] 유리병 밖 식물 가꾸는 아기 토끼',
-    animal: 'Gardener Bunny Outside',
-    animalValue: 'bunny',
-    affinityObject: 'Water Spray Bottle & Wildflowers',
-    theme: 'Outside Gardener',
+    id: 'terrarium-mushroom-cluster',
+    name: '🍄 [테라리움] 미니 빨간 버섯 2종',
+    animal: 'Mini Mushrooms',
+    animalValue: '',
+    affinityObject: '2 Tiny Red Mushrooms',
+    theme: 'Terrarium Mushrooms',
     phrase: '',
-    description: '유리병 밖에서 포근한 후드티를 입고 분무기로 화초에 물을 주는 원예가 아기 토끼 스티커',
-    prompt: `A cute die-cut sticker design featuring a lovable baby bunny wearing a cozy oversized pastel green hoodie, sitting OUTSIDE next to garden plants, holding a tiny water spray bottle for watering plants. Positioned freely outside any jar. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '이끼 사이에 포인트로 꽂을 수 있는 앙증맞은 2개의 미니 빨간 버섯 스티커',
+    prompt: `A cute die-cut sticker design featuring a small pair of 2 cute tiny red toadstool mushrooms with white spots, standing side by side. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+  },
+  {
+    id: 'terrarium-fairy-cottage',
+    name: '🏡 [테라리움] 미니 요정 오두막 집 피규어',
+    animal: 'Mini Fairy House',
+    animalValue: '',
+    affinityObject: 'Miniature Ceramic Cottage Toy',
+    theme: 'Terrarium House Ornament',
+    phrase: '',
+    description: '이끼 언덕 위에 올려 연출하는 귀여운 미니 요정 오두막 집 도자기 피규어 스티커',
+    prompt: `A cute die-cut sticker design featuring a tiny cute ceramic miniature fairy cottage house ornament with a red roof, designed as a terrarium pot decoration. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+  },
+  {
+    id: 'terrarium-garden-sign',
+    name: '🪵 [테라리움] 미니 목재 팻말 & 가드닝 도구',
+    animal: 'Mini Wooden Sign & Tools',
+    animalValue: '',
+    affinityObject: 'Miniature Wooden Garden Sign & Tiny Trowel',
+    theme: 'Terrarium Sign Ornament',
+    phrase: '',
+    description: '테라리움 흙에 꽂아주는 미니 나무 팻말과 아담한 모종삽 피규어 스티커',
+    prompt: `A cute die-cut sticker design featuring a tiny cute rustic wooden garden sign post and a miniature trowel shovel, styled as garden planter decor. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   }
 ];
 

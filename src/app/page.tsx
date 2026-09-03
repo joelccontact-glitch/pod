@@ -1585,10 +1585,10 @@ export default function Home() {
                     onClick={() => handleBatchGenerateSeries('terrarium')}
                     disabled={isBatchGenerating}
                     className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-teal-600"
-                    title="테라리움 풀세트 (완성본 1종 + 유리병/흙/식물/피규어/토끼 개별 5종) 6장 일괄 연속 자동 생성"
+                    title="테라리움 풀세트 (완성본 1종 + 유리병/흙/이끼/다육식물/버섯/오두막집/팻말 개별 7종) 8장 일괄 연속 자동 생성"
                   >
                     <span>⚡️</span>
-                    <span>[테라리움 풀세트] 6종 일괄 자동 생성</span>
+                    <span>[테라리움 풀세트] 8종 일괄 자동 생성</span>
                   </button>
                 )}
 
