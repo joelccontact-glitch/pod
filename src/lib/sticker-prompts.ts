@@ -146,126 +146,129 @@ export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 5. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
 
 export const TERRARIUM_SERIES: StickerPreset[] = [
+  // --- 1. VIVARIUM SERIES (Reptiles, Amphibians & Ecosystem Tanks) ---
   {
-    id: 'terrarium-panorama-complete-guide',
-    name: '🖼️✨ [파노라마 가이드] 가로 수조 비바리움 풀세트',
+    id: 'vivarium-panorama-complete-guide',
+    name: '🖼️✨ [비바리움 풀세트] 완성본 썸네일',
     animal: 'Panoramic Vivarium Showcase',
     animalValue: '',
     affinityObject: 'Horizontal Glass Tank, Driftwood, Moss, Vines & Baby Chameleon',
     theme: 'Wide Panoramic Vivarium Guide',
     phrase: '',
-    description: '가로형 와이드 수조 속에 유목, 이끼, 넝쿨, 미니 카멜레온이 배치된 가로 파노라마 완성본 스티커 가이드',
-    prompt: `A cute die-cut sticker design featuring a wide horizontal panoramic rectangular glass vivarium tank. Inside the clear glass tank is a lush micro ecosystem with natural curved driftwood, green moss layers, aquatic climbing vines, smooth river stones, and a tiny cute baby green chameleon resting peacefully on a wooden branch. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '가로형 와이드 수조 속에 유목, 이끼, 넝쿨, 미니 카멜레온과 청개구리가 생태적으로 어우러진 비바리움 풀세트 완성본',
+    prompt: `A cute die-cut sticker design featuring a wide horizontal panoramic rectangular glass vivarium tank. Inside the clear glass tank is a lush real-life vivarium ecosystem with natural curved driftwood, green moss layers, climbing vines, river stones, a tiny cute baby green chameleon resting on a branch, and a tiny leaf tree frog. NO glass glare or reflection lines. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
-    id: 'terrarium-wide-tank-frame',
-    name: '🖼️ [파노라마 핏] 가로 와이드 유리 수조 틀',
+    id: 'vivarium-wide-tank-frame',
+    name: '🖼️ [비바리움] 가로 와이드 무반사 유리 수조 틀',
     animal: 'Panoramic Tank Frame',
     animalValue: '',
     affinityObject: 'Wide Horizontal Glass Vivarium Tank Outline',
     theme: 'Wide Tank Frame',
     phrase: '',
-    description: '스티커를 안쪽에 채워 넣을 수 있는 가로 파노라마 직사각형 유리 수조 외곽 틀 스티커 (빛반사선 없음)',
+    description: '스티커를 안쪽에 자유롭게 채워 넣을 수 있는 가로 파노라마 직사각형 유리 수조 틀 (100% 무반사 투명 유리)',
     prompt: `A cute die-cut sticker design featuring a clean, wide horizontal rectangular glass vivarium tank frame, completely empty inside with a subtle thin gravel layer at the bottom. The glass walls MUST be 100% clear with NO white diagonal glare strips or glass reflection lines, allowing seamless sticker layering. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
-    id: 'terrarium-wide-driftwood-moss',
-    name: '🪵 [파노라마 핏] 와이드 유목 & 이끼 지형',
+    id: 'vivarium-wide-driftwood-moss',
+    name: '🪵 [비바리움] 와이드 유목 뿌리 & 이끼 바닥재',
     animal: 'Vivarium Driftwood & Moss',
     animalValue: '',
     affinityObject: 'Wide Horizontal Driftwood Root & Moss Terrain',
     theme: 'Horizontal Terrain Pack',
     phrase: '',
-    description: '가로 수조 바닥에 딱 맞춰 붙이는 와이드 자연 유목 뿌리와 이끼 & 조약돌 지형 스티커',
+    description: '가로 수조 바닥 비율에 딱 맞춰 깔아주는 자연 유목 뿌리와 이끼 & 조약돌 지형 스티커',
     prompt: `A cute die-cut sticker design featuring a wide horizontal panorama mound of natural curved driftwood root, smooth river pebbles, and lush green moss bed, perfectly proportioned to fit horizontally inside a vivarium tank. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
-    id: 'terrarium-vine-chameleon',
-    name: '🦎 [파노라마 핏] 넝쿨 & 미니 카멜레온',
-    animal: 'Baby Chameleon',
+    id: 'vivarium-vine-flora',
+    name: '🌿 [비바리움] 수생 넝쿨 식물 & 고사리 팩',
+    animal: 'Climbing Vines',
     animalValue: '',
-    affinityObject: 'Climbing Vines & Tiny Baby Chameleon',
-    theme: 'Mini Vivarium Creature',
+    affinityObject: 'Aquatic Climbing Vines & Ferns',
+    theme: 'Vivarium Flora',
     phrase: '',
-    description: '수조 안에 쏙 들어가는 비율의 넝쿨 가지와 귀여운 미니 카멜레온 스티커',
-    prompt: `A cute die-cut sticker design featuring a tiny cute baby green chameleon sitting lazily on a delicate climbing vine branch with green tropical leaves, small proportion designed to fit inside a terrarium vivarium tank. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '수조 유목이나 유리 벽면에 자라나는 넝쿨 식물과 고사리 세트 스티커',
+    prompt: `A cute die-cut sticker design featuring vibrant green climbing tropical vines and miniature fern branches, small proportion designed to fit inside a vivarium tank. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
-    id: 'terrarium-complete-guide',
-    name: '🫙✨ [유리병 가이드] 테라리움 풀세트 완성본',
+    id: 'vivarium-chameleon-frog',
+    name: '🦎 [비바리움] 미니 카멜레온 & 나뭇잎 청개구리',
+    animal: 'Baby Chameleon & Frog',
+    animalValue: '',
+    affinityObject: 'Reptile & Amphibian Species',
+    theme: 'Vivarium Live Creatures',
+    phrase: '',
+    description: '수조 유목 생태계와 어울리는 앙증맞은 파충류/양서류 (미니 카멜레온 & 작은 나뭇잎 청개구리) 스티커',
+    prompt: `A cute die-cut sticker design featuring a tiny cute baby green chameleon sitting lazily on a vine branch next to a small adorable green tree frog, small scale proportion designed for a vivarium ecosystem. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+  },
+
+  // --- 2. TERRARIUM SERIES (Glass Jars, Soil, Plants & Toy Miniature Figurines) ---
+  {
+    id: 'terrarium-jar-complete-guide',
+    name: '🫙✨ [테라리움 풀세트] 완성본 썸네일',
     animal: 'Terrarium Complete Showcase',
     animalValue: '',
-    affinityObject: 'Glass Jar, Moss, Ferns, Mushrooms & Cute Baby Hedgehog Inside',
+    affinityObject: 'Glass Jar, Moss, Succulents & Toy Miniature Figurine Inside',
     theme: 'Complete Terrarium Guide',
     phrase: '',
-    description: '스티커 가이드용! 유리병 속에 이끼, 자갈, 다육식물, 아기 고슴도치까지 모두 조합된 완성본 스티커',
-    prompt: `A cute die-cut sticker design featuring a complete, fully decorated transparent vintage glass mason jar terrarium. Inside the jar is a lush mini ecosystem filled with soft green moss, smooth river pebbles, mini succulents, tiny red mushrooms, and an adorable fluffy baby hedgehog resting happily inside. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '유리병 속에 흙, 이끼, 미니 다육식물, 그리고 장난감 미니어처 피규어가 장식된 테라리움 풀세트 완성본',
+    prompt: `A cute die-cut sticker design featuring a complete transparent glass mason jar terrarium filled with drainage soil layers, plush green moss, mini succulents, and a tiny cute ceramic hedgehog toy figurine placed as a plant ornament inside. NO glass glare lines. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'terrarium-jar-base',
-    name: '🫙 [유리병 핏] 빈티지 유리병 & 이끼 베이스',
+    name: '🫙 [테라리움] 빈티지 메이슨 저 유리병',
     animal: 'Terrarium Container',
     animalValue: '',
-    affinityObject: 'Vintage Mason Jar, Moss Bed, Pebbles & Red Mushrooms',
+    affinityObject: 'Vintage Mason Jar Container',
     theme: 'Cozy Terrarium Base',
     phrase: '',
-    description: '스티커를 조합해 꾸밀 수 있는 순수 빈티지 메이슨 저 유리병과 이끼 베이스 스티커 (빛반사선 없음)',
-    prompt: `A cute die-cut sticker design featuring a transparent vintage glass mason jar filled with layers of soft green moss, smooth river pebbles, and tiny red mushrooms inside. The glass surface MUST be completely clear without any white diagonal reflection glare lines. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '식물과 이끼 스티커를 채워 넣을 수 있는 무반사 메이슨 저 유리병 스티커',
+    prompt: `A cute die-cut sticker design featuring a clean, transparent vintage glass mason jar container, empty inside with a thin drainage pebble layer at the bottom. The glass surface MUST be completely clear without any white diagonal reflection glare lines. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
-    id: 'terrarium-hedgehog-acorn',
-    name: '🦔 이끼 침대 위 아기 고슴도치 & 도토리',
-    animal: 'Baby Hedgehog',
-    animalValue: 'baby hedgehog',
-    affinityObject: 'Autumn Oak Leaves, Acorns & Green Moss Bed',
-    theme: 'Forest Moss Nap',
-    phrase: '',
-    description: '몽글몽글 이끼 위에서 도토리를 안고 쉬는 뽀송한 순수 아기 고슴도치 스티커 (텍스트 없음)',
-    prompt: `A cute die-cut sticker design featuring a fluffy, adorable baby hedgehog resting gently on a soft green moss mound, holding a shiny brown acorn with oak leaves nearby. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
-  },
-  {
-    id: 'terrarium-bunny-gardener',
-    name: '🐰 가드너 아기 토끼 + 분무기 & 고사리',
-    animal: 'Bunny',
-    animalValue: 'bunny',
-    affinityObject: 'Plant Spray Bottle, Fern Leaves & Mini Carrots',
-    theme: 'Cozy Terrarium Gardener',
-    phrase: '',
-    description: '파스텔 후드티를 입고 테라리움 식물에 물을 주는 순수 아기 토끼 스티커 (텍스트 없음)',
-    prompt: `A cute die-cut sticker design featuring a lovable baby bunny wearing a cozy oversized pastel green hoodie, holding a tiny water spray bottle for terrarium plants, surrounded by miniature fern leaves and tiny carrots. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
-  },
-  {
-    id: 'terrarium-sloth-nap',
-    name: '🦥 나뭇가지 낮잠 아기 나무늘보',
-    animal: 'Baby Sloth',
-    animalValue: 'baby sloth',
-    affinityObject: 'Tropical Green Leaves & Wild Blossom Branch',
-    theme: 'Lazy Terrarium Champ',
-    phrase: '',
-    description: '테라리움 나뭇가지에 귀엽게 매달려 낮잠 자는 순수 나무늘보 스티커 (텍스트 없음)',
-    prompt: `A cute die-cut sticker design featuring a fluffy baby sloth hanging lazily from a leafy tropical tree branch inside a terrarium, wearing cozy pajamas. Surrounding elements include lush green monstera leaves and pink blossoms. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
-  },
-  {
-    id: 'terrarium-flora-pack',
-    name: '🌵 테라리움 식물 팩 (다육식물 & 버섯 & 이끼)',
-    animal: 'Terrarium Flora',
+    id: 'terrarium-soil-moss',
+    name: '🌱 [테라리움] 배수층 흙 & 몽글몽글 이끼 베이스',
+    animal: 'Soil & Moss Bed',
     animalValue: '',
-    affinityObject: 'Mini Succulents, Ferns, Fungi & Pebbles',
-    theme: 'Botanical Decor Pack',
+    affinityObject: 'Drainage Soil & Moss Layer',
+    theme: 'Terrarium Base Layer',
     phrase: '',
-    description: '어디든 붙여 테라리움을 채울 수 있는 순수 식물 세트 스티커 (텍스트 없음)',
-    prompt: `A cute die-cut sticker design featuring a charming arrangement of mini succulents, fern branches, tiny red mushrooms, and smooth river stones. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '유리병 바닥에 깔아주는 단층 흙, 조약돌, 수분 이끼 베이스 스티커',
+    prompt: `A cute die-cut sticker design featuring a layered mound of dark gardening soil, river pebbles, and plush green moss bed, shaped to fit inside a glass jar terrarium. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
-    id: 'terrarium-fawn-wildflower',
-    name: '🦌 들꽃 안은 아기 사슴',
-    animal: 'Fawn',
-    animalValue: 'fawn',
-    affinityObject: 'Forest Wildflowers, Acorns & Berries',
-    theme: 'Cottagecore Forest Fawn',
+    id: 'terrarium-succulents-pack',
+    name: '🌵 [테라리움] 미니 다육식물 & 버섯 팩',
+    animal: 'Mini Succulents',
+    animalValue: '',
+    affinityObject: 'Mini Succulents & Fungi',
+    theme: 'Terrarium Plants',
     phrase: '',
-    description: '들꽃 왕관을 쓰고 도토리를 내려다보는 순수 아기 사슴 스티커 (텍스트 없음)',
-    prompt: `A cute die-cut sticker design featuring a sweet baby fawn with white spots, wearing a delicate forest wildflower crown, sitting peacefully near green moss and acorns. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    description: '테라리움을 아기자기하게 꾸밀 수 있는 다육식물, 미니 빨간 버섯, 에어플랜트 스티커 세트',
+    prompt: `A cute die-cut sticker design featuring a charm cluster of miniature potted succulents, tiny red toadstool mushrooms, and delicate green air plants. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+  },
+  {
+    id: 'terrarium-toy-figurine',
+    name: '🧸 [테라리움] 미니 세라믹 장난감 피규어',
+    animal: 'Toy Miniature Figurine',
+    animalValue: '',
+    affinityObject: 'Decorative Ceramic Animal Toy Figurine',
+    theme: 'Terrarium Ornament',
+    phrase: '',
+    description: '유리병 속 이끼 위에 얹는 아기자기한 장난감 고슴도치 미니어처 피규어 스티커',
+    prompt: `A cute die-cut sticker design featuring a tiny cute glossy ceramic hedgehog toy figurine, styled as a garden pot ornament. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+  },
+  {
+    id: 'gardener-bunny-outside',
+    name: '🐰 [원예 가드너] 유리병 밖 식물 가꾸는 아기 토끼',
+    animal: 'Gardener Bunny Outside',
+    animalValue: 'bunny',
+    affinityObject: 'Water Spray Bottle & Wildflowers',
+    theme: 'Outside Gardener',
+    phrase: '',
+    description: '유리병 밖에서 포근한 후드티를 입고 분무기로 화초에 물을 주는 원예가 아기 토끼 스티커',
+    prompt: `A cute die-cut sticker design featuring a lovable baby bunny wearing a cozy oversized pastel green hoodie, sitting OUTSIDE next to garden plants, holding a tiny water spray bottle for watering plants. Positioned freely outside any jar. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   }
 ];
 

@@ -20,8 +20,10 @@ export default function Home() {
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(false);
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'terrarium' | 'pumpkin'>('terrarium');
-  const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-panorama-complete-guide');
+  const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('vivarium-panorama-complete-guide');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
+  const [isBatchGenerating, setIsBatchGenerating] = useState(false);
+  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; label: string }>({ current: 0, total: 0, label: '' });
   
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
   const [previewDesign, setPreviewDesign] = useState<any>(null);
@@ -1038,6 +1040,64 @@ export default function Home() {
     }
   };
 
+  const handleBatchGenerateSeries = async (packType: 'vivarium' | 'terrarium') => {
+    let targetPresets = TERRARIUM_SERIES.filter((p) =>
+      packType === 'vivarium'
+        ? p.id.startsWith('vivarium-')
+        : p.id.startsWith('terrarium-') || p.id.startsWith('gardener-')
+    );
+
+    if (targetPresets.length === 0) return;
+
+    const packName = packType === 'vivarium' ? '[비바리움 풀세트]' : '[테라리움 풀세트]';
+    const confirmed = confirm(
+      `${packName} 자동 일괄 생성을 시작하시겠습니까?\n\n• 완성본 썸네일 1종\n• 포함 요소 개별 스티커 ${targetPresets.length - 1}종\n\n총 ${targetPresets.length}장의 300DPI 고화질 스티커가 순차적으로 연속 생성되어 갤러리에 저장됩니다.`
+    );
+    if (!confirmed) return;
+
+    setIsBatchGenerating(true);
+    let successCount = 0;
+
+    for (let i = 0; i < targetPresets.length; i++) {
+      const preset = targetPresets[i];
+      setBatchProgress({ current: i + 1, total: targetPresets.length, label: preset.name });
+
+      try {
+        const res = await fetch('/api/designs/from-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64: '',
+            prompt: preset.prompt,
+            isPreview: true,
+            styleId: selectedStyleId,
+            catchphrase: '',
+            autoPhrase: false
+          })
+        });
+        const data = await res.json();
+
+        if (data.success && data.data) {
+          await fetch('/api/designs/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: data.data.id,
+              designData: data.data
+            })
+          });
+          successCount++;
+        }
+      } catch (e) {
+        console.error(`Batch generation failed for ${preset.name}:`, e);
+      }
+    }
+
+    setIsBatchGenerating(false);
+    alert(`${packName} 일괄 자동 생성이 완료되었습니다! (성공: ${successCount}/${targetPresets.length}장)\n새로 생성된 스티커들을 갤러리 및 ZIP 다운로드로 확인해 보세요.`);
+    fetchDesigns(1, false);
+  };
+
   const fetchDesigns = async (currentPage: number = 1, showSpinner: boolean = true) => {
     if (showSpinner) setLoadingInitial(true);
     try {
@@ -1489,15 +1549,53 @@ export default function Home() {
                 </div>
               </div>
 
-              <button
-                onClick={handleExportZIPBundle}
-                disabled={isExportingBundle || designs.length === 0}
-                className="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition-colors flex items-center justify-center gap-1.5"
-              >
-                <span>📦</span>
-                <span>{isExportingBundle ? 'ZIP 번들 패키징 중...' : '디지털 PNG 패키지(ZIP) 일괄 다운로드'}</span>
-              </button>
+              <div className="flex flex-col sm:flex-row items-center gap-2">
+                {selectedStickerSeriesTab === 'terrarium' && (
+                  <div className="flex flex-wrap gap-1.5 w-full sm:w-auto">
+                    <button
+                      onClick={() => handleBatchGenerateSeries('vivarium')}
+                      disabled={isBatchGenerating}
+                      className="flex-1 sm:flex-initial bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600"
+                      title="비바리움 풀세트 (완성본 1종 + 어항/유목/식물/카멜레온 개별 4종) 5장 일괄 연속 자동 생성"
+                    >
+                      <span>⚡️</span>
+                      <span>[비바리움 풀세트] 5종 일괄 자동 생성</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleBatchGenerateSeries('terrarium')}
+                      disabled={isBatchGenerating}
+                      className="flex-1 sm:flex-initial bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold py-2 px-3 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-teal-600"
+                      title="테라리움 풀세트 (완성본 1종 + 유리병/흙/식물/피규어/토끼 개별 5종) 6장 일괄 연속 자동 생성"
+                    >
+                      <span>⚡️</span>
+                      <span>[테라리움 풀세트] 6종 일괄 자동 생성</span>
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  onClick={handleExportZIPBundle}
+                  disabled={isExportingBundle || designs.length === 0}
+                  className="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition-colors flex items-center justify-center gap-1.5 shrink-0"
+                >
+                  <span>📦</span>
+                  <span>{isExportingBundle ? 'ZIP 번들 패키징 중...' : '디지털 PNG 패키지(ZIP) 일괄 다운로드'}</span>
+                </button>
+              </div>
             </div>
+
+            {isBatchGenerating && (
+              <div className="p-3 bg-emerald-100 border border-emerald-300 rounded-xl text-xs font-bold text-emerald-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-inner">
+                <div className="flex items-center gap-2">
+                  <span className="h-4 w-4 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin shrink-0" />
+                  <span>풀세트 연속 자동 생성 중: <span className="underline">{batchProgress.label}</span></span>
+                </div>
+                <span className="bg-emerald-200/80 px-2 py-0.5 rounded font-mono">
+                  {batchProgress.current} / {batchProgress.total} 장 생성 완료
+                </span>
+              </div>
+            )}
 
             <div className="pt-2 border-t border-rose-200/60">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
