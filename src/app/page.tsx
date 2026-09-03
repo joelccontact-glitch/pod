@@ -4,7 +4,16 @@ import { useSession, signOut } from "next-auth/react";
 import { MOCKUP_TEMPLATES } from '@/lib/mockups';
 import { processTransparentPNG } from '@/lib/image-processor';
 import { getActiveUpcomingSeasons, SEASONAL_HOLIDAYS, ActiveSeasonInfo } from '@/lib/seasonal-trends';
-import { PYGMY_PUMPKIN_SERIES, TERRARIUM_SERIES, StickerPreset } from '@/lib/sticker-prompts';
+import {
+  TERRARIUM_SERIES,
+  PYGMY_PUMPKIN_SERIES,
+  TERRARIUM_20_SERIES,
+  VIVARIUM_20_SERIES,
+  SALT_AQUARIUM_20_SERIES,
+  FRESH_AQUARIUM_20_SERIES,
+  StickerPreset,
+  buildStickerPrompt,
+} from '@/lib/sticker-prompts';
 import JSZip from 'jszip';
 
 export default function Home() {
@@ -19,8 +28,8 @@ export default function Home() {
 
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(false);
-  const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'vivarium' | 'terrarium' | 'pumpkin'>('vivarium');
-  const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('vivarium-panorama-complete-guide');
+  const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'terrarium20' | 'vivarium20' | 'saltaquarium20' | 'freshaquarium20'>('terrarium20');
+  const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-20-pack-1');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; label: string }>({ current: 0, total: 0, label: '' });
@@ -965,30 +974,33 @@ export default function Home() {
     }
 
     const currentTab = selectedStickerSeriesTab;
-    let bundleName = 'Vivarium_DIY_Sticker_PNG_Bundle';
-    let seriesTitle = '[비바리움 세트]';
+    let bundleName = 'Terrarium_20_Stickers_Bundle';
+    let seriesTitle = '[테라리움 완성 세트 (20종)]';
 
-    if (currentTab === 'terrarium') {
-      bundleName = 'Terrarium_DIY_Sticker_PNG_Bundle';
-      seriesTitle = '[테라리움 세트]';
-    } else if (currentTab === 'pumpkin') {
-      bundleName = 'Pygmy_Pumpkin_Friends_Sticker_PNG_Bundle';
-      seriesTitle = '[Pygmy Pumpkin 세트]';
+    if (currentTab === 'vivarium20') {
+      bundleName = 'Vivarium_20_Stickers_Bundle';
+      seriesTitle = '[비바리움 완성 세트 (20종)]';
+    } else if (currentTab === 'saltaquarium20') {
+      bundleName = 'Saltwater_Aquarium_20_Stickers_Bundle';
+      seriesTitle = '[해수어항 완성 세트 (20종)]';
+    } else if (currentTab === 'freshaquarium20') {
+      bundleName = 'Freshwater_Aquarium_20_Stickers_Bundle';
+      seriesTitle = '[열대어 어항 완성 세트 (20종)]';
     }
 
-    // Filter designs that belong to the active series tab
     const filteredDesigns = designs.filter((d) => {
       const textToScan = `${d.title || ''} ${d.prompt || ''} ${d.topic || ''} ${d.feedback_applied || ''}`.toLowerCase();
-      if (currentTab === 'vivarium') {
-        return textToScan.includes('vivarium') || textToScan.includes('chameleon') || textToScan.includes('frog') || textToScan.includes('driftwood');
-      } else if (currentTab === 'terrarium') {
-        return textToScan.includes('terrarium') || textToScan.includes('jar') || textToScan.includes('soil') || textToScan.includes('succulent') || textToScan.includes('figurine') || textToScan.includes('bunny');
+      if (currentTab === 'terrarium20') {
+        return textToScan.includes('terrarium');
+      } else if (currentTab === 'vivarium20') {
+        return textToScan.includes('vivarium') || textToScan.includes('chameleon') || textToScan.includes('frog') || textToScan.includes('gecko');
+      } else if (currentTab === 'saltaquarium20') {
+        return textToScan.includes('saltwater') || textToScan.includes('marine') || textToScan.includes('clownfish') || textToScan.includes('tang') || textToScan.includes('coral');
       } else {
-        return textToScan.includes('pygmy') || textToScan.includes('pumpkin') || textToScan.includes('boba') || textToScan.includes('otter') || textToScan.includes('spooky');
+        return textToScan.includes('freshwater') || textToScan.includes('betta') || textToScan.includes('guppy') || textToScan.includes('tetra');
       }
     });
 
-    // Fallback: If filtering returns empty, ask user confirmation
     const targetDesigns = filteredDesigns.length > 0 ? filteredDesigns : designs;
 
     if (filteredDesigns.length === 0) {
@@ -1007,13 +1019,11 @@ export default function Home() {
         if (!rawUrl) continue;
 
         try {
-          // Process 300DPI transparent PNG cutout
           const transparentDataUrl = await processTransparentPNG(rawUrl, {
             targetWidth: 3000,
             targetHeight: 3000,
           });
 
-          // Convert Data URL to binary ArrayBuffer for JSZip
           const base64Data = transparentDataUrl.split(',')[1];
           const binaryString = atob(base64Data);
           const len = binaryString.length;
@@ -1050,18 +1060,23 @@ export default function Home() {
     }
   };
 
-  const handleBatchGenerateSeries = async (packType: 'vivarium' | 'terrarium') => {
-    let targetPresets = TERRARIUM_SERIES.filter((p) =>
-      packType === 'vivarium'
-        ? p.id.startsWith('vivarium-')
-        : p.id.startsWith('terrarium-') || p.id.startsWith('gardener-')
-    );
+  const handleBatchGenerateSeries = async (packType: 'terrarium20' | 'vivarium20' | 'saltaquarium20' | 'freshaquarium20') => {
+    let targetPresets = TERRARIUM_20_SERIES;
+    let packName = '[테라리움 완성 세트 20종 팩]';
 
-    if (targetPresets.length === 0) return;
+    if (packType === 'vivarium20') {
+      targetPresets = VIVARIUM_20_SERIES;
+      packName = '[비바리움 완성 세트 20종 팩]';
+    } else if (packType === 'saltaquarium20') {
+      targetPresets = SALT_AQUARIUM_20_SERIES;
+      packName = '[해수어항 완성 세트 20종 팩]';
+    } else if (packType === 'freshaquarium20') {
+      targetPresets = FRESH_AQUARIUM_20_SERIES;
+      packName = '[열대어 어항 완성 세트 20종 팩]';
+    }
 
-    const packName = packType === 'vivarium' ? '[비바리움 풀세트]' : '[테라리움 풀세트]';
     const confirmed = confirm(
-      `${packName} 자동 일괄 생성을 시작하시겠습니까?\n\n• 완성본 썸네일 1종\n• 포함 요소 개별 스티커 ${targetPresets.length - 1}종\n\n총 ${targetPresets.length}장의 300DPI 고화질 스티커가 순차적으로 연속 생성되어 갤러리에 저장됩니다.`
+      `${packName} 자동 일괄 생성을 시작하시겠습니까?\n\n• 서로 다른 독창적 20가지 완성형 디자인\n\n총 20장의 300DPI 고화질 PNG 스티커가 순차적으로 연속 자동 생성되어 갤러리에 저장됩니다.`
     );
     if (!confirmed) return;
 
@@ -1104,7 +1119,7 @@ export default function Home() {
     }
 
     setIsBatchGenerating(false);
-    alert(`${packName} 일괄 자동 생성이 완료되었습니다! (성공: ${successCount}/${targetPresets.length}장)\n새로 생성된 스티커들을 갤러리 및 ZIP 다운로드로 확인해 보세요.`);
+    alert(`${packName} 일괄 자동 생성이 완료되었습니다! (성공: ${successCount}/${targetPresets.length}장)\n새로 생성된 20종 스티커를 갤러리 및 ZIP 패키지 다운로드로 확인해 보세요.`);
     fetchDesigns(1, false);
   };
 
@@ -1491,11 +1506,11 @@ export default function Home() {
               onClick={() => setIsStickerMode(!isStickerMode)}
               className={`flex-1 sm:flex-none font-bold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-all whitespace-nowrap text-xs sm:text-sm border shadow-sm ${
                 isStickerMode 
-                  ? 'bg-rose-500 hover:bg-rose-600 text-white border-rose-600 ring-2 ring-rose-300 animate-pulse' 
-                  : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700'
+                  ? 'bg-teal-600 hover:bg-teal-700 text-white border-teal-700 ring-2 ring-teal-300' 
+                  : 'bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-700'
               }`}
             >
-              {isStickerMode ? '🏷️ 스티커 모드 (ON)' : '🏷️ 스티커 & 디지털 PNG'}
+              {isStickerMode ? '📦 Etsy 스티커 팩 모드 (ON)' : '👕 POD 실물 커머스 모드 (ON)'}
             </button>
             <button 
               onClick={handleExportZIPBundle}
@@ -1542,60 +1557,52 @@ export default function Home() {
 
         {/* Sticker Mode & Pygmy Pumpkin & Friends Banner */}
         {isStickerMode && (
-          <div className="mb-4 p-4 bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border-2 border-rose-300 rounded-2xl shadow-md space-y-3">
+          <div className="mb-4 p-4 bg-gradient-to-r from-teal-50 via-emerald-50 to-cyan-50 border-2 border-teal-300 rounded-2xl shadow-md space-y-3">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <span className="text-3xl">🦛</span>
+                <span className="text-3xl">📦</span>
                 <div>
-                  <h3 className="text-sm sm:text-base font-bold text-rose-900 flex items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-bold text-teal-900 flex items-center gap-2">
                     <span>
-                      {selectedStickerSeriesTab === 'vivarium'
-                        ? '🦎 비바리움 꾸미기 세트 (가로 수조 + 파충류/양서류 생태계)'
-                        : selectedStickerSeriesTab === 'terrarium'
-                        ? '🫙 테라리움 꾸미기 세트 (유리병 + 식물 + 미니 피규어)'
-                        : '🎃 Pygmy Pumpkin & Friends 세트'}
+                      {selectedStickerSeriesTab === 'terrarium20'
+                        ? '🫙 테라리움 완성 20종 스티커 팩 모드 (Etsy 디지털 다운로드 전용)'
+                        : selectedStickerSeriesTab === 'vivarium20'
+                        ? '🦎 비바리움 완성 20종 스티커 팩 모드 (Etsy 디지털 다운로드 전용)'
+                        : selectedStickerSeriesTab === 'saltaquarium20'
+                        ? '🪸 해수어항 완성 20종 스티커 팩 모드 (Etsy 디지털 다운로드 전용)'
+                        : '🐠 열대어 어항 완성 20종 스티커 팩 모드 (Etsy 디지털 다운로드 전용)'}
                     </span>
-                    <span className="bg-rose-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">HOT Niche</span>
+                    <span className="bg-teal-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Etsy Best Niche</span>
                   </h3>
-                  <p className="text-xs text-rose-800 font-medium">
-                    {selectedStickerSeriesTab === 'vivarium'
-                      ? '실제 생태계에 맞는 파충류/양서류(카멜레온, 청개구리)와 가로 무반사 수조, 유목 지형 300DPI PNG 세트입니다.'
-                      : selectedStickerSeriesTab === 'terrarium'
-                      ? '유리병 속 흙, 이끼, 미니 식물과 장난감 피규어로만 꾸미는 감성 스티커 세트입니다. (동물 갇힘 없음)'
-                      : '흰색 다이컷 테두리 + 생태계 연출(수련/대나무/조개) + 300DPI 투명 PNG 스티커 세트입니다.'}
+                  <p className="text-xs text-teal-800 font-medium">
+                    버튼 한 번으로 독창적인 20가지 완성형 300DPI 투명 PNG 스티커를 일괄 생성하여 Etsy 팩 ZIP 파일로 다운로드합니다.
                   </p>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-2">
-                {selectedStickerSeriesTab === 'vivarium' && (
-                  <button
-                    onClick={() => handleBatchGenerateSeries('vivarium')}
-                    disabled={isBatchGenerating}
-                    className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600"
-                    title="비바리움 풀세트 (완성본 1종 + 어항/유목/식물/카멜레온 개별 4종) 5장 일괄 연속 자동 생성"
-                  >
-                    <span>⚡️</span>
-                    <span>[비바리움 풀세트] 5종 일괄 자동 생성</span>
-                  </button>
-                )}
-
-                {selectedStickerSeriesTab === 'terrarium' && (
-                  <button
-                    onClick={() => handleBatchGenerateSeries('terrarium')}
-                    disabled={isBatchGenerating}
-                    className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-teal-600"
-                    title="테라리움 풀세트 (완성본 1종 + 유리병/흙/이끼/다육식물/버섯/오두막집/팻말 개별 7종) 8장 일괄 연속 자동 생성"
-                  >
-                    <span>⚡️</span>
-                    <span>[테라리움 풀세트] 8종 일괄 자동 생성</span>
-                  </button>
-                )}
+                <button
+                  onClick={() => handleBatchGenerateSeries(selectedStickerSeriesTab)}
+                  disabled={isBatchGenerating}
+                  className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600"
+                  title="선택된 팩 20종 자동 일괄 연속 생성"
+                >
+                  <span>⚡️</span>
+                  <span>
+                    {selectedStickerSeriesTab === 'terrarium20'
+                      ? '[테라리움 20종] 일괄 생성'
+                      : selectedStickerSeriesTab === 'vivarium20'
+                      ? '[비바리움 20종] 일괄 생성'
+                      : selectedStickerSeriesTab === 'saltaquarium20'
+                      ? '[해수어항 20종] 일괄 생성'
+                      : '[열대어어항 20종] 일괄 생성'}
+                  </span>
+                </button>
 
                 <button
                   onClick={handleExportZIPBundle}
                   disabled={isExportingBundle || designs.length === 0}
-                  className="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition-colors flex items-center justify-center gap-1.5 shrink-0"
+                  className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition-colors flex items-center justify-center gap-1.5 shrink-0"
                 >
                   <span>📦</span>
                   <span>{isExportingBundle ? 'ZIP 번들 패키징 중...' : '디지털 PNG 패키지(ZIP) 일괄 다운로드'}</span>
@@ -1607,7 +1614,7 @@ export default function Home() {
               <div className="p-3 bg-emerald-100 border border-emerald-300 rounded-xl text-xs font-bold text-emerald-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-inner">
                 <div className="flex items-center gap-2">
                   <span className="h-4 w-4 rounded-full border-2 border-emerald-600 border-t-transparent animate-spin shrink-0" />
-                  <span>풀세트 연속 자동 생성 중: <span className="underline">{batchProgress.label}</span></span>
+                  <span>20종 팩 연속 자동 생성 중: <span className="underline">{batchProgress.label}</span></span>
                 </div>
                 <span className="bg-emerald-200/80 px-2 py-0.5 rounded font-mono">
                   {batchProgress.current} / {batchProgress.total} 장 생성 완료
@@ -1615,52 +1622,64 @@ export default function Home() {
               </div>
             )}
 
-            <div className="pt-2 border-t border-rose-200/60">
+            <div className="pt-2 border-t border-teal-200/60">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                <label className="block text-xs font-bold text-rose-900">
-                  🎯 스티커 세트 템플릿 선택:
+                <label className="block text-xs font-bold text-teal-900">
+                  🎯 Etsy 틈새 스티커 팩 테마 선택 (20 Unique Stickers Pack):
                 </label>
-                <div className="flex items-center gap-1 bg-rose-100/70 p-1 rounded-xl">
+                <div className="flex flex-wrap items-center gap-1 bg-teal-100/70 p-1 rounded-xl">
                   <button
-                    onClick={() => setSelectedStickerSeriesTab('vivarium')}
+                    onClick={() => setSelectedStickerSeriesTab('terrarium20')}
                     className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'vivarium'
-                        ? 'bg-emerald-700 text-white shadow-sm'
-                        : 'text-rose-900 hover:bg-rose-200/50'
-                    }`}
-                  >
-                    🦎 비바리움 세트
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('terrarium')}
-                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'terrarium'
+                      selectedStickerSeriesTab === 'terrarium20'
                         ? 'bg-teal-700 text-white shadow-sm'
-                        : 'text-rose-900 hover:bg-rose-200/50'
+                        : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🫙 테라리움 세트
+                    🫙 테라리움 (20종)
                   </button>
                   <button
-                    onClick={() => setSelectedStickerSeriesTab('pumpkin')}
+                    onClick={() => setSelectedStickerSeriesTab('vivarium20')}
                     className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'pumpkin'
-                        ? 'bg-rose-600 text-white shadow-sm'
-                        : 'text-rose-900 hover:bg-rose-200/50'
+                      selectedStickerSeriesTab === 'vivarium20'
+                        ? 'bg-emerald-700 text-white shadow-sm'
+                        : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🎃 Pygmy Pumpkin 세트
+                    🦎 비바리움 (20종)
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('saltaquarium20')}
+                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'saltaquarium20'
+                        ? 'bg-cyan-700 text-white shadow-sm'
+                        : 'text-teal-900 hover:bg-teal-200/50'
+                    }`}
+                  >
+                    🪸 해수어항 (20종)
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('freshaquarium20')}
+                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'freshaquarium20'
+                        ? 'bg-blue-700 text-white shadow-sm'
+                        : 'text-teal-900 hover:bg-teal-200/50'
+                    }`}
+                  >
+                    🐠 열대어어항 (20종)
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 max-h-96 overflow-y-auto pr-1">
                 {(
-                  selectedStickerSeriesTab === 'vivarium'
-                    ? TERRARIUM_SERIES.filter(p => p.id.startsWith('vivarium-'))
-                    : selectedStickerSeriesTab === 'terrarium'
-                    ? TERRARIUM_SERIES.filter(p => p.id.startsWith('terrarium-') || p.id.startsWith('gardener-'))
-                    : PYGMY_PUMPKIN_SERIES
+                  selectedStickerSeriesTab === 'terrarium20'
+                    ? TERRARIUM_20_SERIES
+                    : selectedStickerSeriesTab === 'vivarium20'
+                    ? VIVARIUM_20_SERIES
+                    : selectedStickerSeriesTab === 'saltaquarium20'
+                    ? SALT_AQUARIUM_20_SERIES
+                    : FRESH_AQUARIUM_20_SERIES
                 ).map((preset) => (
                   <div
                     key={preset.id}
@@ -1671,25 +1690,15 @@ export default function Home() {
                       setAutoGeneratePhrase(false);
                       setIsImageModalOpen(true);
                     }}
-                    className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all hover:scale-[1.02] shadow-sm ${
+                    className={`p-2 rounded-xl border text-xs cursor-pointer transition-all hover:scale-[1.02] shadow-sm ${
                       selectedStickerPresetId === preset.id
-                        ? selectedStickerSeriesTab === 'vivarium'
-                          ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold ring-2 ring-emerald-400'
-                          : selectedStickerSeriesTab === 'terrarium'
-                          ? 'bg-teal-50 border-teal-500 text-teal-950 font-bold ring-2 ring-teal-400'
-                          : 'bg-rose-100 border-rose-500 text-rose-950 font-bold ring-2 ring-rose-400'
-                        : 'bg-white border-rose-200 text-gray-800 hover:bg-rose-50'
+                        ? 'bg-teal-100 border-teal-600 text-teal-950 font-bold ring-2 ring-teal-400'
+                        : 'bg-white border-teal-200 text-gray-800 hover:bg-teal-50'
                     }`}
                   >
                     <div className="font-bold flex items-center justify-between">
-                      <span>{preset.name}</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                        selectedStickerSeriesTab === 'vivarium'
-                          ? 'text-emerald-700 bg-emerald-200/60'
-                          : selectedStickerSeriesTab === 'terrarium'
-                          ? 'text-teal-700 bg-teal-200/60'
-                          : 'text-rose-700 bg-rose-200/60'
-                      }`}>생성</span>
+                      <span className="truncate pr-1">{preset.name}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded text-teal-700 bg-teal-200/60 shrink-0">생성</span>
                     </div>
                     <p className="text-[11px] text-gray-600 line-clamp-1 mt-0.5">{preset.description}</p>
                   </div>
