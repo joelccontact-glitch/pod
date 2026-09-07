@@ -38,6 +38,94 @@ export default function Home() {
   const [previewDesign, setPreviewDesign] = useState<any>(null);
   const [feedback, setFeedback] = useState('');
   const [modifying, setModifying] = useState(false);
+
+  // Multi-select & Trash Bin States
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedIdsForDelete, setSelectedIdsForDelete] = useState<string[]>([]);
+  const [isTrashModalOpen, setIsTrashModalOpen] = useState(false);
+  const [trashDesigns, setTrashDesigns] = useState<any[]>([]);
+  const [selectedIdsInTrash, setSelectedIdsInTrash] = useState<string[]>([]);
+  const [loadingTrash, setLoadingTrash] = useState(false);
+
+  const fetchTrashDesigns = async () => {
+    setLoadingTrash(true);
+    try {
+      const res = await fetch('/api/designs/trash');
+      const data = await res.json();
+      if (data.success) {
+        setTrashDesigns(data.data || []);
+      }
+    } catch (e) {
+      console.error('Error fetching trash designs:', e);
+    } finally {
+      setLoadingTrash(false);
+    }
+  };
+
+  const handleMoveToTrash = async (targetIds: string[]) => {
+    if (targetIds.length === 0) return;
+    if (!confirm(`선택한 ${targetIds.length}개 항목을 삭제함으로 이동하시겠습니까?\n(삭제함에서 15일간 보관 후 자동 영구 삭제됩니다)`)) return;
+
+    try {
+      const res = await fetch('/api/designs/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: targetIds, permanent: false })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDesigns(prev => prev.filter(d => !targetIds.includes(d.id)));
+        setSelectedIdsForDelete([]);
+        if (selectedDesign && targetIds.includes(selectedDesign.id)) {
+          setSelectedDesign(null);
+        }
+      }
+    } catch (e) {
+      console.error('Error moving to trash:', e);
+      alert('삭제함 이동 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleRestoreFromTrash = async (targetIds: string[]) => {
+    if (targetIds.length === 0) return;
+    try {
+      const res = await fetch('/api/designs/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: targetIds })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTrashDesigns(prev => prev.filter(d => !targetIds.includes(d.id)));
+        setSelectedIdsInTrash([]);
+        fetchDesigns(); // refresh main gallery
+      }
+    } catch (e) {
+      console.error('Error restoring design:', e);
+      alert('복원 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handlePermanentDelete = async (targetIds: string[]) => {
+    if (targetIds.length === 0) return;
+    if (!confirm(`선택한 ${targetIds.length}개 항목을 영구 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다!`)) return;
+
+    try {
+      const res = await fetch('/api/designs/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: targetIds, permanent: true })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTrashDesigns(prev => prev.filter(d => !targetIds.includes(d.id)));
+        setSelectedIdsInTrash([]);
+      }
+    } catch (e) {
+      console.error('Error permanently deleting:', e);
+      alert('영구 삭제 중 오류가 발생했습니다.');
+    }
+  };
   
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [uploadImageBase64, setUploadImageBase64] = useState('');
@@ -1511,6 +1599,26 @@ export default function Home() {
               title="디자인에 포함할 텍스트 (예: Little Paws)"
             />
             <button 
+              onClick={() => {
+                setIsSelectMode(!isSelectMode);
+                if (isSelectMode) setSelectedIdsForDelete([]);
+              }}
+              className={`flex-1 sm:flex-none font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-all whitespace-nowrap text-xs sm:text-sm border ${
+                isSelectMode ? 'bg-rose-600 text-white border-rose-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border-gray-200'
+              }`}
+            >
+              {isSelectMode ? `☑️ 선택 해제 (${selectedIdsForDelete.length})` : '☑️ 다중 선택 삭제'}
+            </button>
+            <button 
+              onClick={() => {
+                setIsTrashModalOpen(true);
+                fetchTrashDesigns();
+              }}
+              className="flex-1 sm:flex-none bg-stone-700 hover:bg-stone-800 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm shadow-sm flex items-center gap-1"
+            >
+              <span>🗑️ 삭제함</span>
+            </button>
+            <button 
               onClick={() => setIsStickerMode(!isStickerMode)}
               className={`flex-1 sm:flex-none font-bold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-all whitespace-nowrap text-xs sm:text-sm border shadow-sm ${
                 isStickerMode 
@@ -1801,16 +1909,39 @@ export default function Home() {
               {designs.map((design) => (
                 <div 
                   key={design.id} 
-                  className={`bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative ${viewMode === 'grid' ? 'rounded-2xl' : 'rounded-xl flex flex-row h-28 sm:h-36'}`} 
+                  className={`bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative ${
+                    selectedIdsForDelete.includes(design.id) ? 'ring-2 ring-rose-500 border-rose-300 bg-rose-50/20' : ''
+                  } ${viewMode === 'grid' ? 'rounded-2xl' : 'rounded-xl flex flex-row h-28 sm:h-36'}`} 
                   onClick={() => {
-                    setSelectedDesign(design);
-                    if (design.recommended_mockup) {
-                      setSelectedMockupId(design.recommended_mockup);
+                    if (isSelectMode) {
+                      if (selectedIdsForDelete.includes(design.id)) {
+                        setSelectedIdsForDelete(prev => prev.filter(id => id !== design.id));
+                      } else {
+                        setSelectedIdsForDelete(prev => [...prev, design.id]);
+                      }
+                    } else {
+                      setSelectedDesign(design);
+                      if (design.recommended_mockup) {
+                        setSelectedMockupId(design.recommended_mockup);
+                      }
                     }
                   }}
                 >
                   <div className={`${viewMode === 'grid' ? 'aspect-square' : 'w-28 sm:w-36 flex-shrink-0'} bg-gray-200 relative`}>
                     <img src={design.image_url} alt={design.title} className="w-full h-full object-cover" />
+                    
+                    {/* Select mode checkbox */}
+                    {isSelectMode && (
+                      <div className="absolute top-2 left-2 z-10">
+                        <input
+                          type="checkbox"
+                          checked={selectedIdsForDelete.includes(design.id)}
+                          onChange={() => {}}
+                          className="w-5 h-5 accent-rose-600 rounded cursor-pointer shadow-md"
+                        />
+                      </div>
+                    )}
+
                     <div className="absolute top-1.5 right-1.5 flex gap-1.5 opacity-100 transition-opacity backdrop-blur-sm">
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleToggleLikeDesign(design.id, !design.is_liked); }}
@@ -1820,9 +1951,9 @@ export default function Home() {
                         <svg className="w-4 h-4" fill={design.is_liked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
                       </button>
                       <button 
-                        onClick={(e) => { e.stopPropagation(); handleDelete(design.id); }}
+                        onClick={(e) => { e.stopPropagation(); handleMoveToTrash([design.id]); }}
                         className="bg-white/90 hover:bg-red-50 text-gray-400 hover:text-red-500 p-1.5 rounded-full shadow-sm border border-gray-200 transition-colors flex items-center justify-center w-7 h-7"
-                        title="삭제"
+                        title="삭제함으로 이동"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                       </button>
@@ -2795,6 +2926,201 @@ export default function Home() {
                 className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-gray-700" 
                 onClick={(e) => e.stopPropagation()} 
               />
+            </div>
+          </div>
+        )}
+
+        {/* Floating Action Bar for Multi-Select */}
+        {isSelectMode && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-stone-900/90 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-4 border border-stone-700 animate-bounce-short">
+            <span className="text-sm font-semibold">
+              <strong className="text-rose-400 font-bold">{selectedIdsForDelete.length}개</strong> 선택됨
+            </span>
+            <button
+              onClick={() => {
+                if (selectedIdsForDelete.length === designs.length) {
+                  setSelectedIdsForDelete([]);
+                } else {
+                  setSelectedIdsForDelete(designs.map(d => d.id));
+                }
+              }}
+              className="text-xs bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-lg transition-colors border border-stone-600"
+            >
+              {selectedIdsForDelete.length === designs.length ? '전체 해제' : '전체 선택'}
+            </button>
+            <button
+              onClick={() => handleMoveToTrash(selectedIdsForDelete)}
+              disabled={selectedIdsForDelete.length === 0}
+              className="text-xs font-bold bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white px-4 py-1.5 rounded-lg transition-colors shadow-sm flex items-center gap-1.5"
+            >
+              <span>🗑️</span>
+              <span>선택 항목 삭제함으로 이동</span>
+            </button>
+            <button
+              onClick={() => {
+                setIsSelectMode(false);
+                setSelectedIdsForDelete([]);
+              }}
+              className="text-stone-400 hover:text-white text-xs font-medium pl-1"
+            >
+              닫기
+            </button>
+          </div>
+        )}
+
+        {/* 🗑️ Trash Bin Modal */}
+        {isTrashModalOpen && (
+          <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl border border-stone-200 animate-fadeIn">
+              {/* Trash Header */}
+              <div className="p-4 sm:p-6 bg-gradient-to-r from-stone-800 via-stone-900 to-zinc-900 text-white flex justify-between items-center shrink-0">
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                    <span>🗑️ 삭제함 (Trash Bin)</span>
+                    <span className="text-xs font-normal bg-rose-500/30 text-rose-300 px-2.5 py-0.5 rounded-full border border-rose-400/30">
+                      {trashDesigns.length}개 보관 중
+                    </span>
+                  </h3>
+                  <p className="text-xs text-stone-400 mt-1">
+                    💡 삭제함에 들어온 이미지는 <strong>15일간 보관</strong>되며, 15일이 지나면 자동 영구 삭제됩니다. 복원 버튼을 눌러 갤러리로 되돌릴 수 있습니다.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsTrashModalOpen(false)}
+                  className="text-stone-400 hover:text-white text-2xl font-bold w-10 h-10 rounded-full flex items-center justify-center hover:bg-stone-800 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Trash Action Toolbar */}
+              <div className="p-3 sm:p-4 bg-stone-100 border-b border-stone-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      if (selectedIdsInTrash.length === trashDesigns.length) {
+                        setSelectedIdsInTrash([]);
+                      } else {
+                        setSelectedIdsInTrash(trashDesigns.map(t => t.id));
+                      }
+                    }}
+                    className="text-xs bg-white border border-stone-300 text-stone-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-stone-50 transition-colors"
+                  >
+                    {selectedIdsInTrash.length === trashDesigns.length ? '전체 해제' : '전체 선택'}
+                  </button>
+                  <span className="text-xs font-medium text-stone-600">
+                    {selectedIdsInTrash.length}개 선택됨
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleRestoreFromTrash(selectedIdsInTrash)}
+                    disabled={selectedIdsInTrash.length === 0}
+                    className="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-3.5 py-1.5 rounded-lg transition-colors shadow-xs flex items-center gap-1"
+                  >
+                    <span>↺</span>
+                    <span>선택 복원 ({selectedIdsInTrash.length})</span>
+                  </button>
+                  <button
+                    onClick={() => handlePermanentDelete(selectedIdsInTrash)}
+                    disabled={selectedIdsInTrash.length === 0}
+                    className="text-xs font-bold bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white px-3.5 py-1.5 rounded-lg transition-colors shadow-xs flex items-center gap-1"
+                  >
+                    <span>❌</span>
+                    <span>선택 영구 삭제 ({selectedIdsInTrash.length})</span>
+                  </button>
+                  <button
+                    onClick={() => handlePermanentDelete(trashDesigns.map(t => t.id))}
+                    disabled={trashDesigns.length === 0}
+                    className="text-xs font-bold bg-stone-800 hover:bg-stone-900 disabled:opacity-50 text-stone-200 px-3.5 py-1.5 rounded-lg transition-colors shadow-xs"
+                  >
+                    🗑️ 삭제함 모두 비우기
+                  </button>
+                </div>
+              </div>
+
+              {/* Trash Grid List */}
+              <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-stone-50">
+                {loadingTrash ? (
+                  <div className="py-20 text-center text-stone-500 font-medium">
+                    <div className="w-8 h-8 border-4 border-stone-300 border-t-stone-700 rounded-full animate-spin mx-auto mb-3"></div>
+                    삭제함 목록을 불러오는 중입니다...
+                  </div>
+                ) : trashDesigns.length === 0 ? (
+                  <div className="py-24 text-center text-stone-400 font-medium space-y-2">
+                    <div className="text-4xl mb-2">🗑️</div>
+                    <p className="text-base text-stone-600 font-semibold">삭제함이 비어 있습니다.</p>
+                    <p className="text-xs text-stone-400">삭제한 이미지가 이곳에 15일간 안전하게 보관됩니다.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {trashDesigns.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`bg-white rounded-2xl overflow-hidden border shadow-xs transition-all relative flex flex-col justify-between ${
+                          selectedIdsInTrash.includes(item.id) ? 'ring-2 ring-emerald-500 border-emerald-400 bg-emerald-50/20' : 'border-stone-200 hover:shadow-md'
+                        }`}
+                      >
+                        {/* Checkbox */}
+                        <div className="absolute top-2 left-2 z-10">
+                          <input
+                            type="checkbox"
+                            checked={selectedIdsInTrash.includes(item.id)}
+                            onChange={() => {
+                              if (selectedIdsInTrash.includes(item.id)) {
+                                setSelectedIdsInTrash(prev => prev.filter(id => id !== item.id));
+                              } else {
+                                setSelectedIdsInTrash(prev => [...prev, item.id]);
+                              }
+                            }}
+                            className="w-5 h-5 accent-emerald-600 rounded cursor-pointer shadow-md"
+                          />
+                        </div>
+
+                        {/* Expiry Badge */}
+                        <div className="absolute top-2 right-2 z-10 bg-amber-500 text-white font-bold text-[10px] px-2 py-0.5 rounded-full shadow-md">
+                          D-{item.daysLeft ?? 15}일 남음
+                        </div>
+
+                        {/* Image Preview */}
+                        <div className="aspect-square bg-stone-100 relative overflow-hidden">
+                          <img src={item.image_url} alt={item.title} className="w-full h-full object-cover opacity-90" />
+                        </div>
+
+                        {/* Card Meta Info */}
+                        <div className="p-3 flex flex-col gap-1.5 flex-1 justify-between">
+                          <div>
+                            <span className="text-[10px] font-semibold text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md inline-block">
+                              {item.topic || '이미지'}
+                            </span>
+                            <h4 className="text-xs font-bold text-stone-800 line-clamp-1 mt-1">
+                              {item.title || 'Untitled Graphic'}
+                            </h4>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-stone-100">
+                            <button
+                              onClick={() => handleRestoreFromTrash([item.id])}
+                              className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-xs py-1.5 rounded-xl transition-colors flex items-center justify-center gap-1"
+                            >
+                              <span>↺</span>
+                              <span>복원</span>
+                            </button>
+                            <button
+                              onClick={() => handlePermanentDelete([item.id])}
+                              className="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs py-1.5 rounded-xl transition-colors flex items-center justify-center gap-1"
+                            >
+                              <span>❌</span>
+                              <span>영구삭제</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

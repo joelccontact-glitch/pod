@@ -29,28 +29,30 @@ export async function GET(request: Request) {
       });
     }
 
-    const countSnapshot = await db.collection('designs').count().get();
-    const total = countSnapshot.data().count;
-
+    // Fetch non-deleted designs
     const designsSnapshot = await db.collection('designs')
       .orderBy('created_at', 'desc')
-      .offset(offsetNum)
-      .limit(limitNum)
       .get();
       
-    const designs = designsSnapshot.docs.map((doc: any) => {
-      const data = doc.data();
-      const versionTs = data.updated_at ? new Date(data.updated_at).getTime() : (data.created_at ? new Date(data.created_at).getTime() : Date.now());
-      return {
-        id: doc.id,
-        ...data,
-        image_url: data.image_url?.startsWith('data:image/') ? `/api/designs/image?id=${doc.id}&v=${versionTs}` : data.image_url
-      };
-    });
+    const allDesigns = designsSnapshot.docs
+      .map((doc: any) => {
+        const data = doc.data();
+        if (data.is_deleted) return null;
+        const versionTs = data.updated_at ? new Date(data.updated_at).getTime() : (data.created_at ? new Date(data.created_at).getTime() : Date.now());
+        return {
+          id: doc.id,
+          ...data,
+          image_url: data.image_url?.startsWith('data:image/') ? `/api/designs/image?id=${doc.id}&v=${versionTs}` : data.image_url
+        };
+      })
+      .filter((item: any) => item !== null);
+
+    const total = allDesigns.length;
+    const paginatedDesigns = allDesigns.slice(offsetNum, offsetNum + limitNum);
 
     return NextResponse.json({ 
       success: true, 
-      data: designs,
+      data: paginatedDesigns,
       total,
       page,
       totalPages: Math.ceil(total / limitNum)

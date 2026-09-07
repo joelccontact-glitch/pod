@@ -4,7 +4,7 @@ import { db } from '@/lib/firebase-admin';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { id, ids, permanent } = body;
+    const { id, ids } = body;
 
     const targetIds: string[] = ids || (id ? [id] : []);
 
@@ -14,35 +14,30 @@ export async function POST(req: Request) {
 
     if (process.env.FIREBASE_PROJECT_ID) {
       const batch = db.batch();
-      const now = new Date().toISOString();
 
       for (const targetId of targetIds) {
         const docRef = db.collection('designs').doc(targetId);
-        if (permanent) {
-          batch.delete(docRef);
-        } else {
-          batch.update(docRef, {
-            is_deleted: true,
-            deleted_at: now
-          });
-        }
+        batch.update(docRef, {
+          is_deleted: false,
+          deleted_at: null
+        });
       }
 
       await batch.commit();
       return NextResponse.json({
         success: true,
-        message: permanent ? 'Permanently deleted successfully' : 'Moved to trash successfully',
+        message: 'Restored successfully',
         count: targetIds.length
       });
     } else {
       return NextResponse.json({
         success: true,
-        message: '[MOCK MODE] Operation completed',
+        message: '[MOCK MODE] Restored successfully',
         count: targetIds.length
       });
     }
   } catch (error: any) {
-    console.error('Error deleting design:', error);
+    console.error('Error restoring design:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
