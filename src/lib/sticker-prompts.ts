@@ -143,7 +143,8 @@ export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 2. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
 3. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures, NO labels anywhere in the image. Pure graphic illustration art only.
 4. STRICT NON-REFLECTIVE GLASS RULE: Absolutely NO glass reflections, NO white glare streaks, NO diagonal shine strips across the glass container. The glass tank/jar must be completely clear and transparent without any white reflection lines so stickers can be layered seamlessly inside.
-5. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
+5. STRICT NO MAMMALS/BIRDS IN AQUARIUM RULE: Absolutely NO sea otters, NO penguins, NO mammals, NO birds, NO land/aerial animals inside or trapped in any aquarium tank or glass container. ONLY real marine/freshwater fish, seahorses, jellyfish, sea anemones, corals, aquatic snails, shrimps, and water plants.
+6. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
 
 export const TERRARIUM_SERIES: StickerPreset[] = [
   // --- 1. VIVARIUM SERIES (Reptiles, Amphibians & Ecosystem Tanks) ---
@@ -296,12 +297,12 @@ export const SALT_AQUARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 
     { name: '불가사리 & 흰 모래 해수어항', desc: '주황 불가사리와 맑은 바다 모래 해수어항', detail: 'glass saltwater tank with a friendly orange starfish resting on white coral sand' },
     { name: '해파리 & 야광 산호 해수어항', desc: '몽환적 핑크 해파리가 반짝이는 어항', detail: 'glass marine tank with a glowing pastel pink jellyfish floating gracefully near coral reef' },
     { name: '엔젤피쉬(관상어) 해수어항', desc: '줄무늬 해수 엔젤피쉬와 산호초 어항', detail: 'glass saltwater tank with a cute striped emperor angelfish among glowing sea anemones' },
-    { name: '아기 해달 & 해초 해수어항', desc: '배영하는 아기 해달과 해초 산호 어항', detail: 'glass marine tank featuring a cute baby sea otter floating on its back near kelp' },
+    { name: '패럿피쉬 & 튜브 산호 해수어항', desc: '파스텔 무지개 빛 패럿피쉬와 튜브 산호 어항', detail: 'glass marine tank featuring a cute colorful pastel parrotfish swimming near pink tube corals' },
     { name: '쏠배감펭(라이언피쉬) 해수어항', desc: '화려한 지느러미의 귀여운 라이언피쉬 어항', detail: 'glass saltwater tank with a cute lionfish with elaborate fins near purple coral rocks' },
     { name: '가리비 조개 & 진주 해수어항', desc: '입 벌린 가리비 조개와 진주 보석 해수어항', detail: 'glass marine tank featuring an open scallop shell with a shiny pearl on sea sand' },
     { name: '청소 새우 & 산호 해수어항', desc: '빨간 줄무늬 청소 새우와 산호초 어항', detail: 'glass saltwater tank with a cute red-striped cleaner shrimp on live rock' },
     { name: '산호 숲 & 아기 물고기 해수어항', desc: '형광 산호가 숲처럼 우거진 해수어항', detail: 'glass marine tank filled with a dense forest of colorful corals and tiny blue fish' },
-    { name: '아기 펭귄 & 바다 모래 해수어항', desc: '헤엄치는 아기 펭귄이 연출된 해수 수조', detail: 'glass saltwater tank with a tiny cute baby penguin swimming underwater near coral' },
+    { name: '퀸 엔젤피쉬 & 야광 해면 해수어항', desc: '우아한 퀸 엔젤피쉬와 야광 해면 산호 어항', detail: 'glass saltwater tank with a majestic baby queen angelfish swimming near glowing sea sponges' },
     { name: '파노라마 해수 마스터 어항', desc: '크라운피쉬, 산호초, 해마가 조화로운 해수어항', detail: 'panoramic glass saltwater tank filled with clownfish, corals, seahorse, and white sand' }
   ][i];
 
