@@ -33,11 +33,33 @@ export default function Home() {
 
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(false);
+  const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'terrarium20' | 'vivarium20' | 'saltaquarium20' | 'freshaquarium20'>('terrarium20');
   const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-20-pack-1');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; label: string }>({ current: 0, total: 0, label: '' });
+
+  // Synchronized Handlers for Tab and Mode
+  const handleSelectCategoryTab = (tab: 'pod' | 'sticker' | 'all') => {
+    setSelectedCategoryTab(tab);
+    setPage(1);
+    if (tab === 'sticker') {
+      setIsStickerMode(true);
+    } else {
+      setIsStickerMode(false); // POD or All defaults to POD Mode
+    }
+  };
+
+  const handleToggleStickerMode = () => {
+    const nextStickerMode = !isStickerMode;
+    setIsStickerMode(nextStickerMode);
+    if (nextStickerMode) {
+      setSelectedCategoryTab('sticker');
+    } else {
+      setSelectedCategoryTab('pod');
+    }
+  };
   
   const [selectedDesign, setSelectedDesign] = useState<any>(null);
   const [previewDesign, setPreviewDesign] = useState<any>(null);
@@ -1626,7 +1648,7 @@ export default function Home() {
               <span>🗑️ 삭제함</span>
             </button>
             <button 
-              onClick={() => setIsStickerMode(!isStickerMode)}
+              onClick={handleToggleStickerMode}
               className={`flex-1 sm:flex-none font-bold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-all whitespace-nowrap text-xs sm:text-sm border shadow-sm ${
                 isStickerMode 
                   ? 'bg-teal-600 hover:bg-teal-700 text-white border-teal-700 ring-2 ring-teal-300' 
@@ -1680,36 +1702,55 @@ export default function Home() {
 
         {/* Sticker Mode & Pygmy Pumpkin & Friends Banner */}
         {isStickerMode && (
-          <div className="mb-4 p-4 bg-gradient-to-r from-teal-50 via-emerald-50 to-cyan-50 border-2 border-teal-300 rounded-2xl shadow-md space-y-3">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="mb-4 bg-gradient-to-r from-teal-50 via-emerald-50 to-cyan-50 border-2 border-teal-300 rounded-2xl shadow-md overflow-hidden transition-all">
+            {/* Collapsible Header Bar */}
+            <div 
+              onClick={() => setIsStickerBannerExpanded(!isStickerBannerExpanded)}
+              className="p-3.5 sm:p-4 cursor-pointer hover:bg-teal-100/50 transition-colors flex items-center justify-between gap-3 select-none"
+            >
               <div className="flex items-center gap-3">
-                <span className="text-3xl">📦</span>
+                <span className="text-2xl sm:text-3xl">📦</span>
                 <div>
                   <h3 className="text-sm sm:text-base font-bold text-teal-900 flex items-center gap-2">
                     <span>
                       {selectedStickerSeriesTab === 'terrarium20'
-                        ? '🫙 테라리움 완성 20종 스티커 팩 모드 (Etsy 디지털 다운로드 전용)'
+                        ? '🫙 테라리움 완성 20종 스티커 팩 (Etsy 전용)'
                         : selectedStickerSeriesTab === 'vivarium20'
-                        ? '🦎 비바리움 완성 20종 스티커 팩 모드 (Etsy 디지털 다운로드 전용)'
+                        ? '🦎 비바리움 완성 20종 스티커 팩 (Etsy 전용)'
                         : selectedStickerSeriesTab === 'saltaquarium20'
-                        ? '🪸 해수어항 완성 20종 스티커 팩 모드 (Etsy 디지털 다운로드 전용)'
-                        : '🐠 열대어 어항 완성 20종 스티커 팩 모드 (Etsy 디지털 다운로드 전용)'}
+                        ? '🪸 해수어항 완성 20종 스티커 팩 (Etsy 전용)'
+                        : '🐠 열대어 어항 완성 20종 스티커 팩 (Etsy 전용)'}
                     </span>
                     <span className="bg-teal-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Etsy Best Niche</span>
                   </h3>
-                  <p className="text-xs text-teal-800 font-medium">
-                    버튼 한 번으로 독창적인 20가지 완성형 300DPI 투명 PNG 스티커를 일괄 생성하여 Etsy 팩 ZIP 파일로 다운로드합니다.
+                  <p className="text-xs text-teal-700 font-medium hidden sm:block">
+                    버튼 한 번으로 20가지 완성형 300DPI 스티커 일괄 생성 & ZIP 다운로드
                   </p>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-2">
-                <button
-                  onClick={() => handleBatchGenerateSeries(selectedStickerSeriesTab)}
-                  disabled={isBatchGenerating}
-                  className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600"
-                  title="선택된 팩 20종 자동 일괄 연속 생성"
-                >
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-teal-800 bg-white/80 border border-teal-300 px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-1">
+                  <span>{isStickerBannerExpanded ? '▲ 메뉴 접기' : '▼ 20종 생성 메뉴 펼치기'}</span>
+                </span>
+              </div>
+            </div>
+
+            {/* Collapsible Content Section (Collapsed by default) */}
+            {isStickerBannerExpanded && (
+              <div className="p-4 border-t border-teal-200/80 space-y-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <p className="text-xs text-teal-800 font-medium">
+                    버튼 한 번으로 독창적인 20가지 완성형 300DPI 투명 PNG 스티커를 일괄 생성하여 Etsy 팩 ZIP 파일로 다운로드합니다.
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-2">
+                    <button
+                      onClick={() => handleBatchGenerateSeries(selectedStickerSeriesTab)}
+                      disabled={isBatchGenerating}
+                      className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600"
+                      title="선택된 팩 20종 자동 일괄 연속 생성"
+                    >
                   <span>⚡️</span>
                   <span>
                     {selectedStickerSeriesTab === 'terrarium20'
@@ -1730,8 +1771,8 @@ export default function Home() {
                   <span>📦</span>
                   <span>{isExportingBundle ? 'ZIP 번들 패키징 중...' : '디지털 PNG 패키지(ZIP) 일괄 다운로드'}</span>
                 </button>
-              </div>
-            </div>
+                  </div>
+                </div>
 
             {isBatchGenerating && (
               <div className="p-3 bg-emerald-100 border border-emerald-300 rounded-xl text-xs font-bold text-emerald-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-inner">
@@ -1830,6 +1871,8 @@ export default function Home() {
             </div>
           </div>
         )}
+      </div>
+    )}
 
         {/* Active Seasonal Trends (D-90 Rule) Banner */}
         {activeSeasonsList.length > 0 && (
@@ -1875,7 +1918,7 @@ export default function Home() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-2xl border border-gray-200 shadow-xs">
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
-              onClick={() => { setSelectedCategoryTab('pod'); setPage(1); }}
+              onClick={() => handleSelectCategoryTab('pod')}
               className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
                 selectedCategoryTab === 'pod'
                   ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300'
@@ -1889,7 +1932,7 @@ export default function Home() {
             </button>
 
             <button
-              onClick={() => { setSelectedCategoryTab('sticker'); setPage(1); }}
+              onClick={() => handleSelectCategoryTab('sticker')}
               className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
                 selectedCategoryTab === 'sticker'
                   ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-300'
@@ -1903,7 +1946,7 @@ export default function Home() {
             </button>
 
             <button
-              onClick={() => { setSelectedCategoryTab('all'); setPage(1); }}
+              onClick={() => handleSelectCategoryTab('all')}
               className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 ${
                 selectedCategoryTab === 'all'
                   ? 'bg-stone-800 text-white shadow-sm'
