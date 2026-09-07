@@ -1895,7 +1895,7 @@ export default function Home() {
     )}
 
         {/* Active Seasonal Trends (D-90 Rule) Banner */}
-        {activeSeasonsList.length > 0 && (
+        {!isStickerMode && activeSeasonsList.length > 0 && (
           <div className="mb-4 p-3.5 bg-gradient-to-r from-orange-50 via-amber-50 to-rose-50 border border-amber-200/80 rounded-2xl shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <span className="text-xl">🔥</span>
