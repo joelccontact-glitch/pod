@@ -69,11 +69,18 @@ export async function GET(request: Request) {
         }
 
         const versionTs = data.updated_at ? new Date(data.updated_at).getTime() : (data.created_at ? new Date(data.created_at).getTime() : Date.now());
+        
+        // Exclude heavy raw base64 data string from list response to shrink payload from 10MB to 50KB!
+        const { image_url: rawImg, ...restData } = data;
+        const optimizedImageUrl = (rawImg && rawImg.startsWith('data:image/')) 
+          ? `/api/designs/image?id=${doc.id}&v=${versionTs}` 
+          : (rawImg || `/api/designs/image?id=${doc.id}&v=${versionTs}`);
+
         return {
           id: doc.id,
-          ...data,
+          ...restData,
           design_type: resolvedType,
-          image_url: data.image_url?.startsWith('data:image/') ? `/api/designs/image?id=${doc.id}&v=${versionTs}` : data.image_url
+          image_url: optimizedImageUrl
         };
       })
       .filter((item: any) => {

@@ -1985,7 +1985,13 @@ export default function Home() {
                   }}
                 >
                   <div className={`${viewMode === 'grid' ? 'aspect-square' : 'w-28 sm:w-36 flex-shrink-0'} bg-gray-200 relative`}>
-                    <img src={design.image_url} alt={design.title} className="w-full h-full object-cover" />
+                    <img 
+                      src={design.image_url} 
+                      alt={design.title} 
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover transition-opacity duration-300" 
+                    />
                     
                     {/* Select mode checkbox */}
                     {isSelectMode && (
