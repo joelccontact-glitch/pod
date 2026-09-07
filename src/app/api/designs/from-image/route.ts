@@ -127,6 +127,7 @@ export async function POST(req: Request) {
       tags: productInfo.tags,
       image_url: newImageUrl,
       created_at: new Date().toISOString(),
+      design_type: (prompt.toLowerCase().includes('die-cut sticker') || prompt.includes('스티커') || prompt.includes('어항') || prompt.includes('테라리움') || prompt.includes('비바리움')) ? 'sticker' : 'pod',
       status: 'success',
       reference_image_used: !!base64Data,
       feedback_applied: prompt,

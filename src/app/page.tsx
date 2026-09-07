@@ -26,6 +26,11 @@ export default function Home() {
   const [totalCount, setTotalCount] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+  // Main Category Tab State ('pod' | 'sticker' | 'all')
+  const [selectedCategoryTab, setSelectedCategoryTab] = useState<'pod' | 'sticker' | 'all'>('pod');
+  const [podCount, setPodCount] = useState<number>(0);
+  const [stickerCount, setStickerCount] = useState<number>(0);
+
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(false);
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'terrarium20' | 'vivarium20' | 'saltaquarium20' | 'freshaquarium20'>('terrarium20');
@@ -232,7 +237,7 @@ export default function Home() {
     fetchDesigns(page);
     fetchStyles();
     setActiveSeasonsList(getActiveUpcomingSeasons());
-  }, [page]);
+  }, [page, selectedCategoryTab]);
 
   useEffect(() => {
     if (activeTab === 'mockup' && selectedDesign) {
@@ -1222,13 +1227,15 @@ export default function Home() {
   const fetchDesigns = async (currentPage: number = 1, showSpinner: boolean = true) => {
     if (showSpinner) setLoadingInitial(true);
     try {
-      const res = await fetch(`/api/designs?page=${currentPage}&limit=12`);
+      const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}`);
       const data = await res.json();
       if (data.success) {
         setDesigns(data.data);
         const newTotalPages = data.totalPages || 1;
         setTotalPages(newTotalPages);
         setTotalCount(data.total || 0);
+        if (data.podCount !== undefined) setPodCount(data.podCount);
+        if (data.stickerCount !== undefined) setStickerCount(data.stickerCount);
 
         if (currentPage > newTotalPages && newTotalPages > 0) {
           setPage(newTotalPages);
@@ -1863,6 +1870,56 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* Main Category Filter Tabs (POD vs Sticker Pack) */}
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-2xl border border-gray-200 shadow-xs">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              onClick={() => { setSelectedCategoryTab('pod'); setPage(1); }}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
+                selectedCategoryTab === 'pod'
+                  ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <span>👕 POD 실물 상품</span>
+              <span className={`text-[11px] px-2 py-0.5 rounded-full ${selectedCategoryTab === 'pod' ? 'bg-indigo-700 text-indigo-100' : 'bg-gray-200 text-gray-600'}`}>
+                {podCount}
+              </span>
+            </button>
+
+            <button
+              onClick={() => { setSelectedCategoryTab('sticker'); setPage(1); }}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
+                selectedCategoryTab === 'sticker'
+                  ? 'bg-teal-600 text-white shadow-sm ring-2 ring-teal-300'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <span>📦 스티커 팩</span>
+              <span className={`text-[11px] px-2 py-0.5 rounded-full ${selectedCategoryTab === 'sticker' ? 'bg-teal-700 text-teal-100' : 'bg-gray-200 text-gray-600'}`}>
+                {stickerCount}
+              </span>
+            </button>
+
+            <button
+              onClick={() => { setSelectedCategoryTab('all'); setPage(1); }}
+              className={`px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                selectedCategoryTab === 'all'
+                  ? 'bg-stone-800 text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              <span>🌐 전체 보기</span>
+            </button>
+          </div>
+
+          <div className="text-xs text-gray-500 font-medium hidden sm:block">
+            {selectedCategoryTab === 'pod' && '👕 단품 티셔츠 / 텀블러 / 에코백 / 머그컵 등 실물 커머스 그래픽'}
+            {selectedCategoryTab === 'sticker' && '📦 테라리움 / 비바리움 / 해수어항 / 열대어어항 스티커 팩'}
+            {selectedCategoryTab === 'all' && '🌐 생성된 모든 디자인 종합 리스트'}
+          </div>
+        </div>
 
         {/* Gallery View */}
         {loadingInitial ? (

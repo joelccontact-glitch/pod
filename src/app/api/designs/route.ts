@@ -29,23 +29,59 @@ export async function GET(request: Request) {
       });
     }
 
+    const filterType = searchParams.get('type') || 'all'; // 'pod' | 'sticker' | 'all'
+
     // Fetch non-deleted designs
     const designsSnapshot = await db.collection('designs')
       .orderBy('created_at', 'desc')
       .get();
       
+    let podCount = 0;
+    let stickerCount = 0;
+
     const allDesigns = designsSnapshot.docs
       .map((doc: any) => {
         const data = doc.data();
         if (data.is_deleted) return null;
+
+        // Auto-detect design type for legacy entries
+        let resolvedType: 'pod' | 'sticker' = data.design_type || 'pod';
+        const searchStr = `${data.topic || ''} ${data.theme || ''} ${data.title || ''} ${data.stickerPresetId || ''} ${data.prompt || ''}`.toLowerCase();
+        
+        if (
+          data.is_sticker || 
+          data.design_type === 'sticker' || 
+          searchStr.includes('sticker') || 
+          searchStr.includes('스티커') || 
+          searchStr.includes('terrarium') || 
+          searchStr.includes('테라리움') || 
+          searchStr.includes('vivarium') || 
+          searchStr.includes('비바리움') || 
+          searchStr.includes('aquarium') || 
+          searchStr.includes('어항') || 
+          searchStr.includes('pygmy')
+        ) {
+          resolvedType = 'sticker';
+          stickerCount++;
+        } else {
+          resolvedType = 'pod';
+          podCount++;
+        }
+
         const versionTs = data.updated_at ? new Date(data.updated_at).getTime() : (data.created_at ? new Date(data.created_at).getTime() : Date.now());
         return {
           id: doc.id,
           ...data,
+          design_type: resolvedType,
           image_url: data.image_url?.startsWith('data:image/') ? `/api/designs/image?id=${doc.id}&v=${versionTs}` : data.image_url
         };
       })
-      .filter((item: any) => item !== null);
+      .filter((item: any) => {
+        if (!item) return false;
+        if (filterType === 'pod') return item.design_type === 'pod';
+        if (filterType === 'sticker') return item.design_type === 'sticker';
+        return true;
+      });
 
     const total = allDesigns.length;
     const paginatedDesigns = allDesigns.slice(offsetNum, offsetNum + limitNum);
@@ -54,6 +90,8 @@ export async function GET(request: Request) {
       success: true, 
       data: paginatedDesigns,
       total,
+      podCount,
+      stickerCount,
       page,
       totalPages: Math.ceil(total / limitNum)
     });
