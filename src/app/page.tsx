@@ -2177,7 +2177,7 @@ export default function Home() {
                     onClick={() => setActiveTab('mockup')} 
                     className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-1.5 ${activeTab === 'mockup' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-400 hover:text-gray-700'}`}
                   >
-                    👕 목업
+                    {isStickerMode ? '📦 스티커 디스플레이' : '👕 목업'}
                   </button>
                   <button 
                     onClick={() => setActiveTab('edit')} 
@@ -2217,8 +2217,6 @@ export default function Home() {
                         </div>
                       </div>
 
-
-
                       <div className="pt-4 border-t border-gray-100 space-y-3">
                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">고해상도 다운로드 옵션</h4>
                         <div className="flex flex-col sm:flex-row gap-2.5">
@@ -2248,7 +2246,7 @@ export default function Home() {
                             className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
                           >
                             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            <span>👕 2.5K 목업</span>
+                            <span>{isStickerMode ? '📦 스티커 디스플레이 다운' : '👕 2.5K 목업'}</span>
                           </button>
                         </div>
                       </div>
@@ -2257,6 +2255,14 @@ export default function Home() {
                   )}
                   {activeTab === 'mockup' && (
                     <div className="flex flex-col items-center h-full min-h-[400px]">
+                      {isStickerMode && (
+                        <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3 text-xs text-teal-950 w-full flex items-start gap-2">
+                          <span className="text-base shrink-0">💡</span>
+                          <div>
+                            <span className="font-bold">Etsy 스티커 셀링 핵심 노하우:</span> 스티커 베스트셀러는 의류 목업 대신 <span className="font-bold text-teal-700">전체 20종 스티커 종합 컬렉션 디스플레이</span>와 <span className="font-bold text-teal-700">대표 마스터 썸네일 커버 표지(00_Master_Sticker_Pack_Cover.png)</span>를 메인으로 노출할 때 가장 높은 판매 전환율을 기록합니다.
+                          </div>
+                        </div>
+                      )}
                       <div className="w-full mb-4 flex flex-col gap-3">
                         <div className="flex flex-col w-full gap-2.5">
                           <select 
@@ -2272,11 +2278,11 @@ export default function Home() {
                           <div className="grid grid-cols-2 gap-2 w-full">
                             <button 
                               onClick={downloadMockup}
-                              title="Etsy 2.5K 목업 다운로드"
+                              title="Etsy 고화질 목업 다운로드"
                               className="bg-orange-500 hover:bg-orange-600 active:scale-98 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 w-full whitespace-nowrap"
                             >
                               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                              <span>👕 2.5K 목업</span>
+                              <span>{isStickerMode ? '📦 스티커 디스플레이 다운' : '👕 2.5K 목업'}</span>
                             </button>
                             
                             <button 

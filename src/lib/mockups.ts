@@ -148,21 +148,8 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   // --- 📦 Etsy Digital PNG Sticker Pack Mockups ---
   {
-    id: 'laptop-sticker',
-    name: '💻 맥북/노트북 상판 스티커 목업',
-    imageUrl: '/mockup_laptop.jpg',
-    category: 'sticker',
-    overlay: {
-      x: 390,
-      y: 430,
-      width: 320,
-      height: 320,
-      blendMode: 'source-over'
-    }
-  },
-  {
     id: 'journal-sticker',
-    name: '📖 다이어리/굿노트 플래너 스티커 목업',
+    name: '📖 다이어리 / 굿노트 플래너 스티커 디스플레이',
     imageUrl: '/mockup_journal.jpg',
     category: 'sticker',
     overlay: {
@@ -174,8 +161,21 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     }
   },
   {
+    id: 'laptop-sticker',
+    name: '💻 맥북 / 투명 폰케이스 스티커 디스플레이',
+    imageUrl: '/mockup_laptop.jpg',
+    category: 'sticker',
+    overlay: {
+      x: 390,
+      y: 430,
+      width: 320,
+      height: 320,
+      blendMode: 'source-over'
+    }
+  },
+  {
     id: 'tumbler-sticker',
-    name: '🥤 텀블러/보틀 다이컷 스티커 목업',
+    name: '🥤 텀블러 / 보틀 다이컷 스티커 디스플레이',
     imageUrl: '/mockup_tumbler.jpg',
     category: 'sticker',
     overlay: {
@@ -183,19 +183,6 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
       y: 450,
       width: 200,
       height: 250,
-      blendMode: 'source-over'
-    }
-  },
-  {
-    id: 'phone-sticker',
-    name: '📱 투명 폰케이스/아이패드 스티커 목업',
-    imageUrl: '/mockup_laptop.jpg',
-    category: 'sticker',
-    overlay: {
-      x: 430,
-      y: 400,
-      width: 240,
-      height: 240,
       blendMode: 'source-over'
     }
   }
