@@ -1659,6 +1659,12 @@ export default function Home() {
               <span>🗑️ 삭제함</span>
             </button>
             <button 
+              onClick={() => setIsManageStylesModalOpen(true)}
+              className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm border border-gray-200 flex items-center gap-1"
+            >
+              ⚙️ 화풍 관리
+            </button>
+            <button 
               onClick={handleToggleStickerMode}
               className={`flex-1 sm:flex-none font-bold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-all whitespace-nowrap text-xs sm:text-sm border shadow-sm ${
                 isStickerMode 
@@ -1668,48 +1674,51 @@ export default function Home() {
             >
               {isStickerMode ? '📦 Etsy 스티커 팩 모드 (ON)' : '👕 POD 실물 커머스 모드 (ON)'}
             </button>
-            <button 
-              onClick={handleExportZIPBundle}
-              disabled={isExportingBundle || designs.length === 0}
-              className="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-700 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-sm shadow-sm"
-              title="현재 페이지의 디자인들을 300DPI 투명 PNG ZIP 번들로 내보냅니다."
-            >
-              {isExportingBundle ? '📦 압축 생성중...' : '📦 디지털 PNG ZIP 다운로드'}
-            </button>
-            <button 
-              onClick={() => setIsManageStylesModalOpen(true)}
-              className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm border border-gray-200"
-            >
-              화풍 관리
-            </button>
-            <button 
-              onClick={() => setIsStyleModalOpen(true)}
-              className="flex-1 sm:flex-none bg-orange-500 hover:bg-orange-600 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm"
-            >
-              화풍 등록
-            </button>
-            <button 
-              onClick={handleManualTrendSearch}
-              disabled={isGeneratingTrend}
-              className="flex-1 sm:flex-none bg-indigo-500 hover:bg-indigo-600 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-sm"
-            >
-              {isGeneratingTrend ? '트렌드 분석중..' : '트렌드화풍 생성'}
-            </button>
-            <button 
-              onClick={() => setIsImageModalOpen(true)}
-              className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm"
-            >
-              이미지 생성
-            </button>
-            <button 
-              onClick={() => setIsAutoAgentModalOpen(true)}
-              disabled={loading}
-              className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-sm"
-            >
-              {loading ? '생성 중..' : '자동 생성'}
-            </button>
+            {isStickerMode && (
+              <button 
+                onClick={handleExportZIPBundle}
+                disabled={isExportingBundle || designs.length === 0}
+                className="flex-1 sm:flex-none bg-amber-600 hover:bg-amber-700 text-white font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors disabled:opacity-50 whitespace-nowrap text-xs sm:text-sm shadow-sm"
+                title="현재 스티커 디자인들을 300DPI 투명 PNG ZIP 번들로 내보냅니다."
+              >
+                {isExportingBundle ? '📦 압축 생성중...' : '📦 디지털 PNG ZIP 다운로드'}
+              </button>
+            )}
           </div>
         </header>
+
+        {/* POD Commercial Mode Action Toolbar */}
+        {!isStickerMode && (
+          <div className="mb-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border border-indigo-200/80 rounded-2xl p-3.5 sm:p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <span className="text-2xl sm:text-3xl shrink-0">👕</span>
+              <div>
+                <h3 className="text-xs sm:text-sm font-bold text-indigo-950 flex items-center gap-1.5">
+                  <span>POD 실물 커머스 전용 이미지 생성</span>
+                  <span className="bg-indigo-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">POD Mode</span>
+                </h3>
+                <p className="text-[11px] sm:text-xs text-indigo-700 font-medium">
+                  반팔티, 후드티, 머그컵 등 실물 커머스 상품에 최적화된 고화질 그래픽을 생성합니다.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+              <button 
+                onClick={() => setIsImageModalOpen(true)}
+                className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-xl transition-all shadow-sm text-xs sm:text-sm flex items-center justify-center gap-1.5"
+              >
+                <span>🎨 이미지 생성</span>
+              </button>
+              <button 
+                onClick={() => setIsAutoAgentModalOpen(true)}
+                disabled={loading}
+                className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl transition-all disabled:opacity-50 shadow-sm text-xs sm:text-sm flex items-center justify-center gap-1.5"
+              >
+                <span>🤖 {loading ? '생성 중..' : '자동 생성'}</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Sticker Mode & Pygmy Pumpkin & Friends Banner */}
         {isStickerMode && (
@@ -2877,7 +2886,29 @@ export default function Home() {
               <button onClick={() => { setIsManageStylesModalOpen(false); setEditingStyleId(null); }} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold z-10 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">×</button>
               
               <div className="p-6 sm:p-8 flex flex-col h-full">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">⚙️ 화풍 관리</h2>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-gray-100 pr-8">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+                      <span>⚙️ 화풍 관리</span>
+                    </h2>
+                    <p className="text-xs text-gray-500 mt-0.5">화풍을 새로 등록하거나 트렌드 화풍을 생성/관리할 수 있습니다.</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      onClick={() => setIsStyleModalOpen(true)}
+                      className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3.5 rounded-xl transition-colors text-xs sm:text-sm shadow-sm flex items-center gap-1 shrink-0"
+                    >
+                      <span>➕ 화풍 등록</span>
+                    </button>
+                    <button 
+                      onClick={handleManualTrendSearch}
+                      disabled={isGeneratingTrend}
+                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3.5 rounded-xl transition-colors disabled:opacity-50 text-xs sm:text-sm shadow-sm flex items-center gap-1 shrink-0"
+                    >
+                      <span>✨ {isGeneratingTrend ? '트렌드 분석중..' : '트렌드화풍 생성'}</span>
+                    </button>
+                  </div>
+                </div>
                 
                 <div className="overflow-y-auto flex-1 custom-scrollbar space-y-4">
                   {styles.length === 0 ? (
