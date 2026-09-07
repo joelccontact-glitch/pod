@@ -144,7 +144,8 @@ export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 3. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures, NO labels anywhere in the image. Pure graphic illustration art only.
 4. STRICT NON-REFLECTIVE GLASS RULE: Absolutely NO glass reflections, NO white glare streaks, NO diagonal shine strips across the glass container. The glass tank/jar must be completely clear and transparent without any white reflection lines so stickers can be layered seamlessly inside.
 5. STRICT NO MAMMALS/BIRDS IN AQUARIUM RULE: Absolutely NO sea otters, NO penguins, NO mammals, NO birds, NO land/aerial animals inside or trapped in any aquarium tank or glass container. ONLY real marine/freshwater fish, seahorses, jellyfish, sea anemones, corals, aquatic snails, shrimps, and water plants.
-6. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
+6. STRICT WATER-FILLED AQUARIUM RULE: Every aquarium tank MUST be visibly filled with translucent blue aquatic water, featuring a clear rippling water surface line near the top rim, water reflections, and tiny floating water bubbles around swimming fish. Absolutely NO dry empty glass boxes.
+7. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
 
 export const TERRARIUM_SERIES: StickerPreset[] = [
   // --- 1. VIVARIUM SERIES (Reptiles, Amphibians & Ecosystem Tanks) ---
@@ -315,32 +316,32 @@ export const SALT_AQUARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 
     theme: 'Saltwater Aquarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `A cute die-cut sticker design featuring a clean glass saltwater marine aquarium tank. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `A cute die-cut sticker design featuring a clean glass saltwater marine aquarium tank completely filled with clear aquatic water, with a visible water surface line near the top rim and floating water bubbles. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   };
 });
 
 export const FRESH_AQUARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 }, (_, i) => {
   const num = i + 1;
   const items = [
-    { name: '화려한 드레스 베타 열대어항', desc: '붉은 드레스 지느러미 베타와 나나 수초 어항', detail: 'glass freshwater aquarium tank with a gorgeous red veil-tail betta fish swimming among green aquatic plants' },
-    { name: '네온 테트라 무리 열대어항', desc: '반짝이는 파란 네온 테트라들이 헤엄치는 수초 어항', detail: 'glass freshwater tank with a swarm of glowing blue neon tetra fish swimming near driftwood' },
-    { name: '화려한 네온 구피 열대어항', desc: '화려한 꼬리의 파스텔 구피 두 마리와 수초 어항', detail: 'glass aquarium tank featuring a pair of colorful fancy guppy fish with flowing tails' },
-    { name: '엔젤피쉬 & 수초 유목 어항', desc: '우아한 줄무늬 엔젤피쉬와 유목 수초 어항', detail: 'glass freshwater aquarium tank with a cute striped freshwater angelfish near tall green water plants' },
-    { name: '알비노 코리도라스 열대어항', desc: '바닥을 훑는 귀여운 핑크 코리도라스 어항', detail: 'glass freshwater tank featuring a cute chubby corydoras catfish sitting on river gravel' },
-    { name: '블랙 마블 베타 열대어항', desc: '검은색과 파란빛이 조화로운 마블 베타 어항', detail: 'glass aquarium tank with a stunning black and blue marble betta fish among green ferns' },
-    { name: '옐로우 드레스 구피 열대어항', desc: '선명한 노란 드레스 꼬리 구피 어항', detail: 'glass freshwater tank with a shiny yellow fancy guppy swimming near moss stones' },
-    { name: '체리 새우 & 이끼 유목 어항', desc: '빨간 체리 새우들이 유목 이끼 위 노는 어항', detail: 'glass aquarium tank featuring cute tiny red cherry shrimps grazing on mossy driftwood' },
-    { name: '디스커스(원반 물고기) 열대어항', desc: '원반 모양 화려한 주황 디스커스 열대어항', detail: 'glass freshwater tank with a majestic colorful discus fish swimming near Amazon sword plants' },
-    { name: '골든 알지이더 & 자갈 어항', desc: '귀여운 노란 이끼먹는 물고기와 수초 어항', detail: 'glass aquarium tank with a cute golden algae eater fish near smooth river pebbles' },
-    { name: '파스텔 핑크 베타 열대어항', desc: '분홍빛 드레스 지느러미 아기 베타 어항', detail: 'glass freshwater tank with a cute pastel pink halfmoon betta fish near green water plants' },
-    { name: '카디날 테트라 수초 어항', desc: '붉고 푸른 카디날 테트라와 수초 어항', detail: 'glass aquarium tank with vibrant cardinal tetras swimming near green moss' },
-    { name: '드워프 구라미 열대어항', desc: '알록달록 드워프 구라미와 나나 수초 어항', detail: 'glass freshwater tank featuring a colorful cute dwarf gourami fish swimming near rocks' },
-    { name: '화려한 삼색 구피 열대어항', desc: '삼색 화려한 지느러미의 프리미엄 구피 어항', detail: 'glass aquarium tank with a fancy tri-color guppy fish gliding over gravel' },
-    { name: '애플 스네일 달팽이 열대어항', desc: '노란 동글동글 애플 스네일 달팽이 수초 어항', detail: 'glass freshwater tank featuring a cute yellow mystery apple snail crawling on water leaves' },
-    { name: '오토싱(이끼 물고기) 열대어항', desc: '유리 벽면에 찰싹 붙은 미니 오토싱 어항', detail: 'glass freshwater aquarium tank with a tiny cute otocinclus catfish resting on a plant leaf' },
-    { name: '수초 숲 & 자갈 바닥 어항', desc: '푸른 수초가 숲처럼 우거진 힐링 수초 어항', detail: 'glass aquarium tank filled with lush green aquatic moss, stem plants, and pebbles' },
-    { name: '유목 아치 & 구피 무리 어항', desc: '유목 아치 다리 아래 헤엄치는 구피 어항', detail: 'glass freshwater tank with a curved wooden driftwood arch and swimming tiny colorful fish' },
-    { name: '화이트 다이아몬드 베타 어항', desc: '순백색 우아한 다이아몬드 베타 어항', detail: 'glass freshwater tank with a pristine white veil-tail betta fish swimming among lush green plants' },
+    { name: '화려한 드레스 베타 열대어항', desc: '붉은 드레스 지느러미 베타와 나나 수초 어항', detail: 'freshwater aquarium tank with a gorgeous red veil-tail betta fish swimming among green aquatic plants' },
+    { name: '네온 테트라 무리 열대어항', desc: '반짝이는 파란 네온 테트라들이 헤엄치는 수초 어항', detail: 'freshwater tank with a swarm of glowing blue neon tetra fish swimming near driftwood' },
+    { name: '화려한 네온 구피 열대어항', desc: '화려한 꼬리의 파스텔 구피 두 마리와 수초 어항', detail: 'aquarium tank featuring a pair of colorful fancy guppy fish with flowing tails' },
+    { name: '엔젤피쉬 & 수초 유목 어항', desc: '우아한 줄무늬 엔젤피쉬와 유목 수초 어항', detail: 'freshwater aquarium tank with a cute striped freshwater angelfish near tall green water plants' },
+    { name: '알비노 코리도라스 열대어항', desc: '바닥을 훑는 귀여운 핑크 코리도라스 어항', detail: 'freshwater tank featuring a cute chubby corydoras catfish sitting on river gravel' },
+    { name: '블랙 마블 베타 열대어항', desc: '검은색과 파란빛이 조화로운 마블 베타 어항', detail: 'aquarium tank with a stunning black and blue marble betta fish among green ferns' },
+    { name: '옐로우 드레스 구피 열대어항', desc: '선명한 노란 드레스 꼬리 구피 어항', detail: 'freshwater tank with a shiny yellow fancy guppy swimming near moss stones' },
+    { name: '체리 새우 & 이끼 유목 어항', desc: '빨간 체리 새우들이 유목 이끼 위 노는 어항', detail: 'aquarium tank featuring cute tiny red cherry shrimps grazing on mossy driftwood' },
+    { name: '디스커스(원반 물고기) 열대어항', desc: '원반 모양 화려한 주황 디스커스 열대어항', detail: 'freshwater tank with a majestic colorful discus fish swimming near Amazon sword plants' },
+    { name: '골든 알지이더 & 자갈 어항', desc: '귀여운 노란 이끼먹는 물고기와 수초 어항', detail: 'aquarium tank with a cute golden algae eater fish near smooth river pebbles' },
+    { name: '파스텔 핑크 베타 열대어항', desc: '분홍빛 드레스 지느러미 아기 베타 어항', detail: 'freshwater tank with a cute pastel pink halfmoon betta fish near green water plants' },
+    { name: '카디날 테트라 수초 어항', desc: '붉고 푸른 카디날 테트라와 수초 어항', detail: 'aquarium tank with vibrant cardinal tetras swimming near green moss' },
+    { name: '드워프 구라미 열대어항', desc: '알록달록 드워프 구라미와 나나 수초 어항', detail: 'freshwater tank featuring a colorful cute dwarf gourami fish swimming near rocks' },
+    { name: '화려한 삼색 구피 열대어항', desc: '삼색 화려한 지느러미의 프리미엄 구피 어항', detail: 'aquarium tank with a fancy tri-color guppy fish gliding over gravel' },
+    { name: '애플 스네일 달팽이 열대어항', desc: '노란 동글동글 애플 스네일 달팽이 수초 어항', detail: 'freshwater tank featuring a cute yellow mystery apple snail crawling on water leaves' },
+    { name: '오토싱(이끼 물고기) 열대어항', desc: '유리 벽면에 찰싹 붙은 미니 오토싱 어항', detail: 'freshwater aquarium tank with a tiny cute otocinclus catfish resting on a plant leaf' },
+    { name: '수초 숲 & 자갈 바닥 어항', desc: '푸른 수초가 숲처럼 우거진 힐링 수초 어항', detail: 'aquarium tank filled with lush green aquatic moss, stem plants, and pebbles' },
+    { name: '유목 아치 & 구피 무리 어항', desc: '유목 아치 다리 아래 헤엄치는 구피 어항', detail: 'freshwater tank with a curved wooden driftwood arch and swimming tiny colorful fish' },
+    { name: '화이트 다이아몬드 베타 어항', desc: '순백색 우아한 다이아몬드 베타 어항', detail: 'freshwater tank with a pristine white veil-tail betta fish swimming among lush green plants' },
     { name: '파노라마 열대어 마스터 수초 어항', desc: '베타, 구피, 테트라, 수초가 어우러진 완성 어항', detail: 'panoramic glass freshwater aquarium tank filled with betta fish, guppies, lush water plants, and driftwood' }
   ][i];
 
@@ -353,7 +354,7 @@ export const FRESH_AQUARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20
     theme: 'Freshwater Aquarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `A cute die-cut sticker design featuring a clean glass freshwater aquarium tank. Inside is a beautiful ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `A cute die-cut sticker design featuring a clean glass freshwater aquarium tank completely filled with translucent blue aquatic water, with a visible water surface line near the top rim and tiny floating water bubbles. Inside is a beautiful ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   };
 });
 
