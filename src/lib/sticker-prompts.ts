@@ -207,8 +207,20 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
   }
 ];
 
-export const TERRARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 }, (_, i) => {
-  const num = i + 1;
+export const TERRARIUM_20_SERIES: StickerPreset[] = [
+  {
+    id: 'terrarium-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 테라리움 20종 스티커 팩 대표 커버 표지',
+    animal: 'Terrarium Master Cover',
+    animalValue: '',
+    affinityObject: 'Terrarium Master Cover',
+    theme: 'Terrarium 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 테라리움 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration. Centered cute bold pink script typography reading "20+ CUTE TERRARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut terrarium glass jar sticker samples arranged artistically on a soft cream pastel grid background. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
   const items = [
     { name: '메이슨 저 다육이 테라리움', desc: '빈티지 메이슨 저 안의 몽글몽글 다육식물 3종과 이끼', detail: 'transparent mason jar terrarium filled with 3 mini potted succulents, plush green moss, and river pebbles' },
     { name: '요정 오두막 집 테라리움', desc: '이끼 언덕 위 빨간 지붕 미니 요정 오두막 집 피규어', detail: 'glass jar terrarium featuring a tiny ceramic red-roof fairy cottage house figurine resting on plush moss' },
@@ -242,11 +254,23 @@ export const TERRARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 }, (
     phrase: '',
     description: items.desc,
     prompt: `A cute die-cut sticker design featuring a complete, fully decorated ${items.detail}. NO animals, NO mammals, NO living creatures. NO glass reflection glare lines. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
-  };
-});
+  }
+}) as unknown as StickerPreset[]];
 
-export const VIVARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 }, (_, i) => {
-  const num = i + 1;
+export const VIVARIUM_20_SERIES: StickerPreset[] = [
+  {
+    id: 'vivarium-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 비바리움 20종 스티커 팩 대표 커버 표지',
+    animal: 'Vivarium Master Cover',
+    animalValue: '',
+    affinityObject: 'Vivarium Master Cover',
+    theme: 'Vivarium 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 비바리움 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration. Centered cute bold pink script typography reading "20+ CUTE VIVARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut vivarium glass tank sticker samples with reptiles and frogs arranged artistically on a soft pastel background. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
   const items = [
     { name: '미니 카멜레온 수조 비바리움', desc: '가로 수조 유목 위 나른하게 쉰 미니 카멜레온', detail: 'wide horizontal glass vivarium tank with curved driftwood, moss, climbing vines, and a tiny cute baby green chameleon resting on a branch' },
     { name: '나뭇잎 청개구리 수조 비바리움', desc: '몬스테라 잎 위 아기 청개구리가 앉은 비바리움', detail: 'horizontal glass vivarium tank featuring a tiny cute green tree frog perched on a monstera leaf' },
@@ -280,11 +304,23 @@ export const VIVARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 }, (_
     phrase: '',
     description: items.desc,
     prompt: `A cute die-cut sticker design featuring a clean, wide horizontal panoramic rectangular glass vivarium tank. Inside is a lush ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
-  };
-});
+  }
+}) as unknown as StickerPreset[]];
 
-export const SALT_AQUARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 }, (_, i) => {
-  const num = i + 1;
+export const SALT_AQUARIUM_20_SERIES: StickerPreset[] = [
+  {
+    id: 'salt-aquarium-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 해수어항 20종 스티커 팩 대표 커버 표지',
+    animal: 'Saltwater Aquarium Master Cover',
+    animalValue: '',
+    affinityObject: 'Saltwater Aquarium Master Cover',
+    theme: 'Saltwater Aquarium 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 해수어항 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration. Centered cute bold pink script typography reading "20+ SALTWATER AQUARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut marine aquarium glass tank sticker samples with clownfish, blue tang, and seahorses arranged artistically on a soft pastel ocean background. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
   const items = [
     { name: '크라운피쉬 & 말미잘 해수어항', desc: '주황색 크라운피쉬(니모)와 핑크 말미잘 어항', detail: 'glass saltwater aquarium tank with a cute orange clownfish swimming near a soft pink sea anemone and live rock' },
     { name: '블루탱 & 산호초 해수어항', desc: '파란색 블루탱(도리)과 형광 산호초 어항', detail: 'glass marine aquarium tank featuring a cute blue tang fish swimming amidst vibrant glowing coral reef' },
@@ -318,11 +354,23 @@ export const SALT_AQUARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 
     phrase: '',
     description: items.desc,
     prompt: `A cute die-cut sticker design featuring a clean glass saltwater marine aquarium tank completely filled with clear aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
-  };
-});
+  }
+}) as unknown as StickerPreset[]];
 
-export const FRESH_AQUARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 }, (_, i) => {
-  const num = i + 1;
+export const FRESH_AQUARIUM_20_SERIES: StickerPreset[] = [
+  {
+    id: 'fresh-aquarium-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 열대어어항 20종 스티커 팩 대표 커버 표지',
+    animal: 'Freshwater Aquarium Master Cover',
+    animalValue: '',
+    affinityObject: 'Freshwater Aquarium Master Cover',
+    theme: 'Freshwater Aquarium 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 열대어어항 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration. Centered cute bold pink script typography reading "20+ FRESHWATER AQUARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut freshwater aquarium glass tank sticker samples with betta fish, guppies, and tetras arranged artistically on a soft pastel water background. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
   const items = [
     { name: '화려한 드레스 베타 열대어항', desc: '붉은 드레스 지느러미 베타와 나나 수초 어항', detail: 'freshwater aquarium tank with a gorgeous red veil-tail betta fish swimming among green aquatic plants' },
     { name: '네온 테트라 무리 열대어항', desc: '반짝이는 파란 네온 테트라들이 헤엄치는 수초 어항', detail: 'freshwater tank with a swarm of glowing blue neon tetra fish swimming near driftwood' },
@@ -356,8 +404,8 @@ export const FRESH_AQUARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20
     phrase: '',
     description: items.desc,
     prompt: `A cute die-cut sticker design featuring a clean glass freshwater aquarium tank completely filled with translucent blue aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a beautiful ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
-  };
-});
+  }
+}) as unknown as StickerPreset[]];
 
 export function buildStickerPrompt(
   animalName: string,

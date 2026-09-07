@@ -1160,7 +1160,18 @@ export default function Home() {
             .replace(/[^a-z0-9]/g, '_')
             .slice(0, 30);
 
-          const fileName = `${String(i + 1).padStart(2, '0')}_${itemTitle}_300dpi.png`;
+          let fileName = `${String(i + 1).padStart(2, '0')}_${itemTitle}_300dpi.png`;
+          const isCover = d.title?.includes('마스터 썸네일') || d.title?.includes('대표 커버 표지') || d.prompt?.toLowerCase().includes('master cover');
+          if (isCover) {
+            fileName = `00_Master_Sticker_Pack_Cover.png`;
+          } else {
+            const hasCover = targetDesigns.some(td => td.title?.includes('마스터 썸네일') || td.title?.includes('대표 커버 표지') || td.prompt?.toLowerCase().includes('master cover'));
+            if (hasCover) {
+              const coverIndex = targetDesigns.findIndex(td => td.title?.includes('마스터 썸네일') || td.title?.includes('대표 커버 표지') || td.prompt?.toLowerCase().includes('master cover'));
+              const stickerNum = i > coverIndex ? i : i + 1;
+              fileName = `${String(stickerNum).padStart(2, '0')}_${itemTitle}_300dpi.png`;
+            }
+          }
           folder?.file(fileName, bytes.buffer);
         } catch (err) {
           console.error(`Error processing image index ${i} for ZIP:`, err);
@@ -1199,7 +1210,7 @@ export default function Home() {
     }
 
     const confirmed = confirm(
-      `${packName} 자동 일괄 생성을 시작하시겠습니까?\n\n• 서로 다른 독창적 20가지 완성형 디자인\n\n총 20장의 300DPI 고화질 PNG 스티커가 순차적으로 연속 자동 생성되어 갤러리에 저장됩니다.`
+      `${packName} 자동 일괄 생성을 시작하시겠습니까?\n\n• 마스터 썸네일 표지 1장 + 스티커 20종 (총 ${targetPresets.length}장)\n\n300DPI 고화질 PNG 이미지가 순차적으로 연속 자동 생성되어 갤러리에 저장됩니다.`
     );
     if (!confirmed) return;
 
