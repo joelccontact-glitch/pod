@@ -144,8 +144,9 @@ export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 3. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures, NO labels anywhere in the image. Pure graphic illustration art only.
 4. STRICT NON-REFLECTIVE GLASS RULE: Absolutely NO glass reflections, NO white glare streaks, NO diagonal shine strips across the glass container. The glass tank/jar must be completely clear and transparent without any white reflection lines so stickers can be layered seamlessly inside.
 5. STRICT NO MAMMALS/BIRDS IN AQUARIUM RULE: Absolutely NO sea otters, NO penguins, NO mammals, NO birds, NO land/aerial animals inside or trapped in any aquarium tank or glass container. ONLY real marine/freshwater fish, seahorses, jellyfish, sea anemones, corals, aquatic snails, shrimps, and water plants.
-6. STRICT WATER-FILLED AQUARIUM RULE: Every aquarium tank MUST be visibly filled with translucent blue aquatic water, featuring a clear rippling water surface line near the top rim, water reflections, and tiny floating water bubbles around swimming fish. Absolutely NO dry empty glass boxes.
-7. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
+6. STRICT WATER-FILLED AQUARIUM RULE: Every aquarium tank MUST be visibly filled with translucent blue aquatic water, featuring a clear rippling water surface line near the top rim.
+7. STRICT BUBBLE POSITION RULE: All water bubbles MUST stay 100% INSIDE the aquatic water inside the aquarium tank. Absolutely NO floating water bubbles outside the glass tank or floating in the air above the rim.
+8. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
 
 export const TERRARIUM_SERIES: StickerPreset[] = [
   // --- 1. VIVARIUM SERIES (Reptiles, Amphibians & Ecosystem Tanks) ---
@@ -316,7 +317,7 @@ export const SALT_AQUARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20 
     theme: 'Saltwater Aquarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `A cute die-cut sticker design featuring a clean glass saltwater marine aquarium tank completely filled with clear aquatic water, with a visible water surface line near the top rim and floating water bubbles. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `A cute die-cut sticker design featuring a clean glass saltwater marine aquarium tank completely filled with clear aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   };
 });
 
@@ -354,7 +355,7 @@ export const FRESH_AQUARIUM_20_SERIES: StickerPreset[] = Array.from({ length: 20
     theme: 'Freshwater Aquarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `A cute die-cut sticker design featuring a clean glass freshwater aquarium tank completely filled with translucent blue aquatic water, with a visible water surface line near the top rim and tiny floating water bubbles. Inside is a beautiful ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `A cute die-cut sticker design featuring a clean glass freshwater aquarium tank completely filled with translucent blue aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a beautiful ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
   };
 });
 
