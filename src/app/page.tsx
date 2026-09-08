@@ -1228,6 +1228,7 @@ export default function Home() {
           body: JSON.stringify({
             imageBase64: '',
             prompt: preset.prompt,
+            title: preset.name,
             isPreview: true,
             styleId: selectedStyleId,
             catchphrase: '',
@@ -1237,12 +1238,18 @@ export default function Home() {
         const data = await res.json();
 
         if (data.success && data.data) {
+          const designToSave = {
+            ...data.data,
+            title: preset.name,
+            topic: preset.name,
+            design_type: 'sticker'
+          };
           await fetch('/api/designs/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               id: data.data.id,
-              designData: data.data
+              designData: designToSave
             })
           });
           successCount++;
@@ -2026,10 +2033,22 @@ export default function Home() {
 
             <section className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4.5" : "flex flex-col gap-3"}>
 
-              {designs.map((design) => (
+              {designs.map((design) => {
+                const isMasterCover = Boolean(
+                  design.title?.includes('마스터 썸네일') || 
+                  design.title?.includes('대표 커버') || 
+                  design.topic?.includes('마스터 썸네일') || 
+                  design.prompt?.toLowerCase().includes('master cover')
+                );
+
+                return (
                 <div 
                   key={design.id} 
-                  className={`bg-white overflow-hidden shadow-sm border border-gray-100 hover:shadow-md transition-shadow group cursor-pointer relative ${
+                  className={`bg-white overflow-hidden transition-all group cursor-pointer relative ${
+                    isMasterCover 
+                      ? 'ring-2 ring-amber-400 border-amber-300 bg-amber-50/20 shadow-md' 
+                      : 'border border-gray-100 hover:shadow-md shadow-sm'
+                  } ${
                     selectedIdsForDelete.includes(design.id) ? 'ring-2 ring-rose-500 border-rose-300 bg-rose-50/20' : ''
                   } ${viewMode === 'grid' ? 'rounded-2xl' : 'rounded-xl flex flex-row h-28 sm:h-36'}`} 
                   onClick={() => {
@@ -2056,6 +2075,13 @@ export default function Home() {
                       className="w-full h-full object-cover transition-opacity duration-300" 
                     />
                     
+                    {/* Master Cover Overlay Badge */}
+                    {isMasterCover && (
+                      <span className="absolute top-1.5 left-1.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] sm:text-[11px] font-extrabold px-2 py-0.5 rounded-lg shadow-md z-10 border border-amber-300 flex items-center gap-1">
+                        🌟 마스터 표지
+                      </span>
+                    )}
+
                     {/* Select mode checkbox */}
                     {isSelectMode && (
                       <div className="absolute top-2 left-2 z-10">
@@ -2087,6 +2113,11 @@ export default function Home() {
                   </div>
                   <div className={`p-2.5 sm:p-3 flex flex-col justify-center ${viewMode === 'list' ? 'flex-1 min-w-0' : ''}`}>
                     <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                      {isMasterCover && (
+                        <span className="text-[10px] sm:text-[11px] font-extrabold text-amber-950 bg-amber-200 border border-amber-400 px-2 py-0.5 rounded-md inline-flex items-center gap-1 shadow-2xs">
+                          🌟 마스터 썸네일
+                        </span>
+                      )}
                       <span className="text-[11px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md inline-block w-fit">
                         {design.topic}
                       </span>
@@ -2112,7 +2143,8 @@ export default function Home() {
                     )}
                   </div>
                 </div>
-              ))}
+              );
+              })}
               {designs.length === 0 && !loading && (
                 <div className="col-span-full text-center py-12 text-gray-500">생성된 디자인이 없습니다.</div>
               )}
@@ -2190,6 +2222,25 @@ export default function Home() {
                 <div className="p-5 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
                   {activeTab === 'info' && (
                     <>
+                      {Boolean(
+                        (selectedDesign?.title || '').includes('마스터') || 
+                        (selectedDesign?.title || '').includes('대표 커버') || 
+                        (selectedDesign?.prompt || '').toLowerCase().includes('master cover')
+                      ) && (
+                        <div className="mb-3.5 p-3 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl shadow-xs flex items-center gap-2.5">
+                          <span className="text-xl shrink-0">🌟</span>
+                          <div>
+                            <h4 className="text-xs sm:text-sm font-extrabold text-amber-950 flex items-center gap-1.5">
+                              <span>Etsy 스티커 팩 대표 마스터 썸네일 커버 표지</span>
+                              <span className="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">Master Cover</span>
+                            </h4>
+                            <p className="text-[11px] sm:text-xs text-amber-900 mt-0.5 font-medium">
+                              Etsy 판매 등록 시 <span className="font-bold underline text-amber-950">1번 메인 대표 썸네일 표지</span>로 노출하는 그래픽입니다.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
                       <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{previewDesign ? previewDesign.title : selectedDesign.title}</h2>
                   <div className="flex gap-2 mb-6">
                     <button onClick={() => handleCopy(previewDesign ? previewDesign.title : selectedDesign.title)} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-medium transition-colors">제목 복사</button>

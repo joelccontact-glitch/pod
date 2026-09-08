@@ -9,7 +9,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { imageBase64, prompt, isPreview, styleId, catchphrase: rawCatchphrase, autoPhrase } = await req.json();
+    const { imageBase64, prompt, isPreview, styleId, catchphrase: rawCatchphrase, autoPhrase, title: presetTitle } = await req.json();
 
     if (!prompt) {
       return NextResponse.json({ success: false, error: 'Prompt is required' }, { status: 400 });
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const base64Data = imageBase64 ? imageBase64.replace(/^data:image\/\w+;base64,/, "") : "";
 
     let newPrompt = sanitizeSpelling(prompt);
-    let productInfo: any = { title: `[MOCK] Image derived T-Shirt`, tags: ["mock", "derived"] };
+    let productInfo: any = { title: presetTitle || `[MOCK] Image derived T-Shirt`, tags: ["mock", "derived"] };
     let styleData: any = null;
 
     if (process.env.GEMINI_API_KEY) {
@@ -87,14 +87,18 @@ export async function POST(req: Request) {
         newPrompt = promptResponse.text?.trim() || prompt;
       }
 
-      // 2. Generate SEO Content
-      const textResponse = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `Please create an Etsy t-shirt product title and 13 SEO tags for a design described as: '${newPrompt}'. Format as JSON with keys 'title' and 'tags'.`,
-        config: { responseMimeType: 'application/json' }
-      });
-      const productInfoText = textResponse.text;
-      productInfo = productInfoText ? JSON.parse(productInfoText) : productInfo;
+      // 2. Generate SEO Content (use presetTitle if provided)
+      if (presetTitle) {
+        productInfo.title = presetTitle;
+      } else {
+        const textResponse = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: `Please create an Etsy t-shirt product title and 13 SEO tags for a design described as: '${newPrompt}'. Format as JSON with keys 'title' and 'tags'.`,
+          config: { responseMimeType: 'application/json' }
+        });
+        const productInfoText = textResponse.text;
+        productInfo = productInfoText ? JSON.parse(productInfoText) : productInfo;
+      }
     }
 
     newPrompt = buildEnforced2DVectorPrompt(newPrompt, spellingInstruction);
@@ -118,16 +122,32 @@ export async function POST(req: Request) {
     const newHash = crypto.createHash('md5').update(newPrompt + Date.now().toString()).digest('hex');
 
     const styleNameUsed = styleData ? styleData.name : (styleId ? '지정 화풍' : '이미지 맞춤 화풍');
+    const finalTitle = presetTitle || productInfo.title;
+
+    const lowerScan = `${finalTitle} ${newPrompt} ${prompt}`.toLowerCase();
+    const isSticker = (
+      lowerScan.includes('sticker') ||
+      lowerScan.includes('스티커') ||
+      lowerScan.includes('terrarium') ||
+      lowerScan.includes('테라리움') ||
+      lowerScan.includes('vivarium') ||
+      lowerScan.includes('비바리움') ||
+      lowerScan.includes('aquarium') ||
+      lowerScan.includes('어항') ||
+      lowerScan.includes('master cover') ||
+      lowerScan.includes('마스터') ||
+      lowerScan.includes('표지')
+    );
 
     const newDesignData = {
       prompt_hash: newHash,
-      topic: productInfo.title,
+      topic: finalTitle,
       prompt: newPrompt,
-      title: productInfo.title,
-      tags: productInfo.tags,
+      title: finalTitle,
+      tags: productInfo.tags || ['sticker', 'etsy', 'digital download'],
       image_url: newImageUrl,
       created_at: new Date().toISOString(),
-      design_type: (prompt.toLowerCase().includes('die-cut sticker') || prompt.includes('스티커') || prompt.includes('어항') || prompt.includes('테라리움') || prompt.includes('비바리움')) ? 'sticker' : 'pod',
+      design_type: isSticker ? 'sticker' : 'pod',
       status: 'success',
       reference_image_used: !!base64Data,
       feedback_applied: prompt,
