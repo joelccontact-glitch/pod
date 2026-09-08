@@ -1154,7 +1154,7 @@ export default function Home() {
             bytes[b] = binaryString.charCodeAt(b);
           }
 
-          const isCover = isCoverDesign(d);
+          const isCover = i === 0 || isCoverDesign(d);
           const itemTitle = (d.title || d.prompt || `sticker_${i + 1}`)
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '_')
@@ -1162,7 +1162,7 @@ export default function Home() {
             .slice(0, 30);
 
           let fileName = '';
-          if (isCover) {
+          if (isCover && i === 0) {
             fileName = `00_Master_Sticker_Pack_Cover.png`;
           } else {
             fileName = `${String(stickerCounter).padStart(2, '0')}_${itemTitle}_300dpi.png`;
