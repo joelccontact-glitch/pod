@@ -37,6 +37,9 @@ export default function Home() {
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'terrarium20' | 'vivarium20' | 'saltaquarium20' | 'freshaquarium20'>('terrarium20');
   const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-20-pack-1');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
+  const [isBatchZipModalOpen, setIsBatchZipModalOpen] = useState(false);
+  const [batchZipSessions, setBatchZipSessions] = useState<any[]>([]);
+  const [allZipPool, setAllZipPool] = useState<any[]>([]);
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; label: string }>({ current: 0, total: 0, label: '' });
 
@@ -1090,6 +1093,82 @@ export default function Home() {
     }
   };
 
+  const downloadBatchSession = async (targetDesigns: any[], sessionName: string) => {
+    try {
+      setIsExportingBundle(true);
+      setIsBatchZipModalOpen(false);
+
+      // Sort: Master Cover first, then stickers chronologically (01 -> 20)
+      targetDesigns.sort((a, b) => {
+        const aIsCover = Boolean(a.title?.includes('마스터') || a.title?.includes('대표 커버') || a.prompt?.toLowerCase().includes('master cover'));
+        const bIsCover = Boolean(b.title?.includes('마스터') || b.title?.includes('대표 커버') || b.prompt?.toLowerCase().includes('master cover'));
+        if (aIsCover && !bIsCover) return -1;
+        if (!aIsCover && bIsCover) return 1;
+        const aTime = new Date(a.created_at || 0).getTime();
+        const bTime = new Date(b.created_at || 0).getTime();
+        return aTime - bTime;
+      });
+
+      const zip = new JSZip();
+      const folder = zip.folder(sessionName);
+
+      let stickerCounter = 1;
+      for (let i = 0; i < targetDesigns.length; i++) {
+        const d = targetDesigns[i];
+        const rawUrl = d.transparent_png_url || (d.id ? `/api/designs/image?id=${d.id}` : d.image_url || d.url);
+        if (!rawUrl) continue;
+
+        try {
+          const transparentDataUrl = await processTransparentPNG(rawUrl, {
+            targetWidth: 3000,
+            targetHeight: 3000,
+          });
+
+          const base64Data = transparentDataUrl.split(',')[1];
+          const binaryString = atob(base64Data);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let b = 0; b < len; b++) {
+            bytes[b] = binaryString.charCodeAt(b);
+          }
+
+          const isCover = Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'));
+          const itemTitle = (d.title || d.prompt || `sticker_${i + 1}`)
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '_')
+            .replace(/_+/g, '_')
+            .slice(0, 30);
+
+          let fileName = '';
+          if (isCover) {
+            fileName = `00_Master_Sticker_Pack_Cover.png`;
+          } else {
+            fileName = `${String(stickerCounter).padStart(2, '0')}_${itemTitle}_300dpi.png`;
+            stickerCounter++;
+          }
+
+          folder?.file(fileName, bytes.buffer);
+        } catch (err) {
+          console.error(`Error processing image index ${i} for ZIP:`, err);
+        }
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = window.URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${sessionName}_${Date.now()}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      alert(err.message || 'ZIP 번들 파일 생성 중 오류가 발생했습니다.');
+    } finally {
+      setIsExportingBundle(false);
+    }
+  };
+
   const handleExportZIPBundle = async () => {
     const currentTab = selectedStickerSeriesTab;
     let bundleName = 'Terrarium_20_Stickers_Bundle';
@@ -1151,103 +1230,67 @@ export default function Home() {
       }
 
       const pool = filteredDesigns.length > 0 ? filteredDesigns : allFetchedDesigns;
-
-      // Sort by created_at desc (newest first) to locate the latest batch execution
       pool.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
 
-      // Identify the most recent Master Cover in the pool
-      const latestCoverIndex = pool.findIndex(d => 
+      // Identify all Master Cover items (each cover represents a batch generation session)
+      const covers = pool.filter(d => 
         Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'))
       );
 
+      if (covers.length > 1) {
+        // Multiple batch sessions exist -> Build session list and open Batch Selection Modal
+        const sessions: any[] = [];
+        covers.forEach((cover, idx) => {
+          const coverTime = new Date(cover.created_at || 0).getTime();
+          const batchStickers = pool.filter(d => {
+            const isCover = Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'));
+            if (isCover) return false;
+            const itemTime = new Date(d.created_at || 0).getTime();
+            return Math.abs(itemTime - coverTime) <= 25 * 60 * 1000;
+          }).slice(0, 20);
+
+          const dateObj = new Date(cover.created_at || Date.now());
+          const formattedDate = dateObj.toLocaleDateString('ko-KR', {
+            year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+          });
+
+          sessions.push({
+            id: cover.id || `session-${idx}`,
+            batchName: `${bundleName}_Batch_${covers.length - idx}`,
+            dateStr: formattedDate,
+            cover,
+            stickers: batchStickers,
+            totalCount: 1 + batchStickers.length,
+            isLatest: idx === 0
+          });
+        });
+
+        setBatchZipSessions(sessions);
+        setAllZipPool(pool);
+        setIsExportingBundle(false);
+        setIsBatchZipModalOpen(true);
+        return;
+      }
+
+      // If only 1 batch session (or no cover), download directly
       let targetDesigns: any[] = [];
-
-      if (latestCoverIndex !== -1) {
-        const latestCover = pool[latestCoverIndex];
+      if (covers.length === 1) {
+        const latestCover = covers[0];
         const coverTime = new Date(latestCover.created_at || 0).getTime();
-
-        // Group the 20 stickers created in the same batch session window (within +-15 minutes of latest cover)
-        const batchStickers = pool.filter((d, idx) => {
-          if (idx === latestCoverIndex) return false;
+        const batchStickers = pool.filter(d => {
           const isCover = Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'));
           if (isCover) return false;
           const itemTime = new Date(d.created_at || 0).getTime();
-          return Math.abs(itemTime - coverTime) <= 15 * 60 * 1000;
+          return Math.abs(itemTime - coverTime) <= 25 * 60 * 1000;
         }).slice(0, 20);
-
         targetDesigns = [latestCover, ...batchStickers];
       } else {
-        // If no cover is present, take the latest 20 stickers
         targetDesigns = pool.slice(0, 20);
       }
 
-      // Sort batchDesigns: Master Cover first, then stickers chronologically (01 -> 20)
-      targetDesigns.sort((a, b) => {
-        const aIsCover = Boolean(a.title?.includes('마스터') || a.title?.includes('대표 커버') || a.prompt?.toLowerCase().includes('master cover'));
-        const bIsCover = Boolean(b.title?.includes('마스터') || b.title?.includes('대표 커버') || b.prompt?.toLowerCase().includes('master cover'));
-        if (aIsCover && !bIsCover) return -1;
-        if (!aIsCover && bIsCover) return 1;
-        const aTime = new Date(a.created_at || 0).getTime();
-        const bTime = new Date(b.created_at || 0).getTime();
-        return aTime - bTime;
-      });
-
-      const zip = new JSZip();
-      const folder = zip.folder(bundleName);
-
-      let stickerCounter = 1;
-      for (let i = 0; i < targetDesigns.length; i++) {
-        const d = targetDesigns[i];
-        const rawUrl = d.transparent_png_url || (d.id ? `/api/designs/image?id=${d.id}` : d.image_url || d.url);
-        if (!rawUrl) continue;
-
-        try {
-          const transparentDataUrl = await processTransparentPNG(rawUrl, {
-            targetWidth: 3000,
-            targetHeight: 3000,
-          });
-
-          const base64Data = transparentDataUrl.split(',')[1];
-          const binaryString = atob(base64Data);
-          const len = binaryString.length;
-          const bytes = new Uint8Array(len);
-          for (let b = 0; b < len; b++) {
-            bytes[b] = binaryString.charCodeAt(b);
-          }
-
-          const isCover = Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'));
-          const itemTitle = (d.title || d.prompt || `sticker_${i + 1}`)
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '_')
-            .replace(/_+/g, '_')
-            .slice(0, 30);
-
-          let fileName = '';
-          if (isCover) {
-            fileName = `00_Master_Sticker_Pack_Cover.png`;
-          } else {
-            fileName = `${String(stickerCounter).padStart(2, '0')}_${itemTitle}_300dpi.png`;
-            stickerCounter++;
-          }
-
-          folder?.file(fileName, bytes.buffer);
-        } catch (err) {
-          console.error(`Error processing image index ${i} for ZIP:`, err);
-        }
-      }
-
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
-      const url = window.URL.createObjectURL(zipBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${bundleName}_${Date.now()}.zip`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
+      await downloadBatchSession(targetDesigns, bundleName);
     } catch (err: any) {
       alert(err.message || 'ZIP 번들 파일 생성 중 오류가 발생했습니다.');
-    } finally {
       setIsExportingBundle(false);
     }
   };
@@ -3383,6 +3426,76 @@ export default function Home() {
                     ))}
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 📦 Batch ZIP Session Selector Modal */}
+        {isBatchZipModalOpen && (
+          <div className="fixed inset-0 bg-black/60 z-[75] flex items-center justify-center p-4 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative animate-in fade-in zoom-in duration-200 border border-teal-100">
+              <button 
+                onClick={() => setIsBatchZipModalOpen(false)} 
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 text-xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+              >
+                ×
+              </button>
+
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">📦</span>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">생성 회차별 ZIP 다운로드 선택</h3>
+                  <p className="text-xs text-gray-500">다운로드하실 스티커 팩 생성 회차(배치)를 선택해 주세요.</p>
+                </div>
+              </div>
+
+              <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
+                {batchZipSessions.map((session, idx) => (
+                  <div
+                    key={session.id}
+                    onClick={() => downloadBatchSession([session.cover, ...session.stickers], session.batchName)}
+                    className={`p-3.5 rounded-2xl border cursor-pointer transition-all hover:scale-[1.01] shadow-xs flex items-center justify-between gap-3 ${
+                      session.isLatest
+                        ? 'bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border-teal-300 hover:border-teal-500 ring-2 ring-teal-400/40'
+                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-12 h-12 rounded-xl bg-white border border-gray-200 overflow-hidden shrink-0 shadow-xs">
+                        <img src={session.cover.image_url} alt={session.cover.title} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs font-bold text-gray-900 truncate">
+                            {session.isLatest ? '⚡️ [최신 회차]' : `📦 [${batchZipSessions.length - idx}회차]`} {session.dateStr}
+                          </span>
+                          {session.isLatest && (
+                            <span className="bg-teal-600 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded">최신</span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-gray-600 mt-0.5 font-medium truncate">
+                          • 마스터 표지 1장 + 스티커 {session.stickers.length}종 (총 {session.totalCount}장)
+                        </p>
+                      </div>
+                    </div>
+
+                    <button className={`text-xs font-bold px-3 py-2 rounded-xl text-white shadow-xs shrink-0 transition-colors ${
+                      session.isLatest ? 'bg-teal-700 hover:bg-teal-800' : 'bg-gray-700 hover:bg-gray-800'
+                    }`}>
+                      다운로드
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
+                <button
+                  onClick={() => downloadBatchSession(allZipPool, `${selectedStickerSeriesTab}_All_Combined`)}
+                  className="w-full bg-stone-800 hover:bg-stone-900 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5"
+                >
+                  <span>🌐 전체 누적 스티커 통합 다운로드 (총 {allZipPool.length}장)</span>
+                </button>
               </div>
             </div>
           </div>
