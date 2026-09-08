@@ -1142,8 +1142,6 @@ export default function Home() {
         }
       });
 
-      const targetDesigns = filteredDesigns.length > 0 ? filteredDesigns : allFetchedDesigns;
-
       if (filteredDesigns.length === 0) {
         const confirmDownload = confirm(`현재 ${seriesTitle} 전용으로 생성된 스티커가 없습니다.\n전체 저장된 이미지(${allFetchedDesigns.length}장)를 다운로드하시겠습니까?`);
         if (!confirmDownload) {
@@ -1152,7 +1150,38 @@ export default function Home() {
         }
       }
 
-      // Sort: Master Cover first, then stickers chronologically (Sticker 1 -> Sticker 20)
+      const pool = filteredDesigns.length > 0 ? filteredDesigns : allFetchedDesigns;
+
+      // Sort by created_at desc (newest first) to locate the latest batch execution
+      pool.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+
+      // Identify the most recent Master Cover in the pool
+      const latestCoverIndex = pool.findIndex(d => 
+        Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'))
+      );
+
+      let targetDesigns: any[] = [];
+
+      if (latestCoverIndex !== -1) {
+        const latestCover = pool[latestCoverIndex];
+        const coverTime = new Date(latestCover.created_at || 0).getTime();
+
+        // Group the 20 stickers created in the same batch session window (within +-15 minutes of latest cover)
+        const batchStickers = pool.filter((d, idx) => {
+          if (idx === latestCoverIndex) return false;
+          const isCover = Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'));
+          if (isCover) return false;
+          const itemTime = new Date(d.created_at || 0).getTime();
+          return Math.abs(itemTime - coverTime) <= 15 * 60 * 1000;
+        }).slice(0, 20);
+
+        targetDesigns = [latestCover, ...batchStickers];
+      } else {
+        // If no cover is present, take the latest 20 stickers
+        targetDesigns = pool.slice(0, 20);
+      }
+
+      // Sort batchDesigns: Master Cover first, then stickers chronologically (01 -> 20)
       targetDesigns.sort((a, b) => {
         const aIsCover = Boolean(a.title?.includes('마스터') || a.title?.includes('대표 커버') || a.prompt?.toLowerCase().includes('master cover'));
         const bIsCover = Boolean(b.title?.includes('마스터') || b.title?.includes('대표 커버') || b.prompt?.toLowerCase().includes('master cover'));
