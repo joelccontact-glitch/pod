@@ -243,6 +243,28 @@ export default function Home() {
     return '귀여운 수채화/벡터 일러스트';
   };
 
+  const isCoverDesign = (d: any) => {
+    if (!d) return false;
+    const scanStr = `${d.title || ''} ${d.topic || ''} ${d.prompt || ''} ${d.feedback_applied || ''} ${d.stickerPresetId || ''} ${d.id || ''}`.toLowerCase();
+    return (
+      scanStr.includes('마스터') ||
+      scanStr.includes('대표 커버') ||
+      scanStr.includes('표지') ||
+      scanStr.includes('master cover') ||
+      scanStr.includes('bundle cover') ||
+      scanStr.includes('pack cover') ||
+      scanStr.includes('cover graphic') ||
+      scanStr.includes('sticker bundle master') ||
+      scanStr.includes('20+ cute') ||
+      scanStr.includes('20+ sticker') ||
+      scanStr.includes('etsy digital sticker bundle') ||
+      scanStr.includes('terrarium-20-pack-cover') ||
+      scanStr.includes('vivarium-20-pack-cover') ||
+      scanStr.includes('saltaquarium-20-pack-cover') ||
+      scanStr.includes('freshaquarium-20-pack-cover')
+    );
+  };
+
   useEffect(() => {
     const updateScale = () => {
       if (editCanvasRef.current && editCanvasRef.current.width > 0) {
@@ -1100,8 +1122,8 @@ export default function Home() {
 
       // Sort: Master Cover first, then stickers chronologically (01 -> 20)
       targetDesigns.sort((a, b) => {
-        const aIsCover = Boolean(a.title?.includes('마스터') || a.title?.includes('대표 커버') || a.prompt?.toLowerCase().includes('master cover'));
-        const bIsCover = Boolean(b.title?.includes('마스터') || b.title?.includes('대표 커버') || b.prompt?.toLowerCase().includes('master cover'));
+        const aIsCover = isCoverDesign(a);
+        const bIsCover = isCoverDesign(b);
         if (aIsCover && !bIsCover) return -1;
         if (!aIsCover && bIsCover) return 1;
         const aTime = new Date(a.created_at || 0).getTime();
@@ -1132,7 +1154,7 @@ export default function Home() {
             bytes[b] = binaryString.charCodeAt(b);
           }
 
-          const isCover = Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'));
+          const isCover = isCoverDesign(d);
           const itemTitle = (d.title || d.prompt || `sticker_${i + 1}`)
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '_')
@@ -1188,7 +1210,7 @@ export default function Home() {
     try {
       setIsExportingBundle(true);
 
-      // Fetch ALL non-deleted designs from backend database (ignoring client page limit of 12)
+      // Fetch ALL non-deleted designs from backend database
       let allFetchedDesigns: any[] = [];
       try {
         const res = await fetch(`/api/designs?limit=1000&type=all`);
@@ -1232,21 +1254,18 @@ export default function Home() {
       const pool = filteredDesigns.length > 0 ? filteredDesigns : allFetchedDesigns;
       pool.sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
 
-      // Identify all Master Cover items (each cover represents a batch generation session)
-      const covers = pool.filter(d => 
-        Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'))
-      );
+      // Identify all Master Cover items using robust isCoverDesign check
+      const covers = pool.filter(d => isCoverDesign(d));
 
-      if (covers.length > 1) {
-        // Multiple batch sessions exist -> Build session list and open Batch Selection Modal
-        const sessions: any[] = [];
+      const sessions: any[] = [];
+
+      if (covers.length > 0) {
         covers.forEach((cover, idx) => {
           const coverTime = new Date(cover.created_at || 0).getTime();
           const batchStickers = pool.filter(d => {
-            const isCover = Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'));
-            if (isCover) return false;
+            if (isCoverDesign(d)) return false;
             const itemTime = new Date(d.created_at || 0).getTime();
-            return Math.abs(itemTime - coverTime) <= 25 * 60 * 1000;
+            return Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
           }).slice(0, 20);
 
           const dateObj = new Date(cover.created_at || Date.now());
@@ -1264,31 +1283,31 @@ export default function Home() {
             isLatest: idx === 0
           });
         });
-
-        setBatchZipSessions(sessions);
-        setAllZipPool(pool);
-        setIsExportingBundle(false);
-        setIsBatchZipModalOpen(true);
-        return;
-      }
-
-      // If only 1 batch session (or no cover), download directly
-      let targetDesigns: any[] = [];
-      if (covers.length === 1) {
-        const latestCover = covers[0];
-        const coverTime = new Date(latestCover.created_at || 0).getTime();
-        const batchStickers = pool.filter(d => {
-          const isCover = Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'));
-          if (isCover) return false;
-          const itemTime = new Date(d.created_at || 0).getTime();
-          return Math.abs(itemTime - coverTime) <= 25 * 60 * 1000;
-        }).slice(0, 20);
-        targetDesigns = [latestCover, ...batchStickers];
       } else {
-        targetDesigns = pool.slice(0, 20);
+        // Fallback: If no explicit cover design is found, group the latest 20 items into a session
+        const fallbackCover = pool[0];
+        const fallbackStickers = pool.slice(1, 21);
+        const dateObj = new Date(fallbackCover?.created_at || Date.now());
+        const formattedDate = dateObj.toLocaleDateString('ko-KR', {
+          year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+        });
+
+        sessions.push({
+          id: `fallback-session`,
+          batchName: `${bundleName}_Batch_1`,
+          dateStr: formattedDate,
+          cover: fallbackCover,
+          stickers: fallbackStickers,
+          totalCount: pool.length > 21 ? 21 : pool.length,
+          isLatest: true
+        });
       }
 
-      await downloadBatchSession(targetDesigns, bundleName);
+      // Open Modal Window ALWAYS so user can see batch choices!
+      setBatchZipSessions(sessions);
+      setAllZipPool(pool);
+      setIsExportingBundle(false);
+      setIsBatchZipModalOpen(true);
     } catch (err: any) {
       alert(err.message || 'ZIP 번들 파일 생성 중 오류가 발생했습니다.');
       setIsExportingBundle(false);
@@ -2135,12 +2154,7 @@ export default function Home() {
             <section className={viewMode === 'grid' ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-4.5" : "flex flex-col gap-3"}>
 
               {designs.map((design) => {
-                const isMasterCover = Boolean(
-                  design.title?.includes('마스터 썸네일') || 
-                  design.title?.includes('대표 커버') || 
-                  design.topic?.includes('마스터 썸네일') || 
-                  design.prompt?.toLowerCase().includes('master cover')
-                );
+                const isMasterCover = isCoverDesign(design);
 
                 return (
                 <div 
@@ -2323,11 +2337,7 @@ export default function Home() {
                 <div className="p-5 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
                   {activeTab === 'info' && (
                     <>
-                      {Boolean(
-                        (selectedDesign?.title || '').includes('마스터') || 
-                        (selectedDesign?.title || '').includes('대표 커버') || 
-                        (selectedDesign?.prompt || '').toLowerCase().includes('master cover')
-                      ) && (
+                      {isCoverDesign(selectedDesign) && (
                         <div className="mb-3.5 p-3 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl shadow-xs flex items-center gap-2.5">
                           <span className="text-xl shrink-0">🌟</span>
                           <div>

@@ -59,7 +59,12 @@ export async function GET(request: Request) {
           searchStr.includes('비바리움') || 
           searchStr.includes('aquarium') || 
           searchStr.includes('어항') || 
-          searchStr.includes('pygmy')
+          searchStr.includes('pygmy') ||
+          searchStr.includes('master') ||
+          searchStr.includes('cover') ||
+          searchStr.includes('bundle') ||
+          searchStr.includes('마스터') ||
+          searchStr.includes('표지')
         ) {
           resolvedType = 'sticker';
           stickerCount++;
