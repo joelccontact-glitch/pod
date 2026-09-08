@@ -1091,11 +1091,6 @@ export default function Home() {
   };
 
   const handleExportZIPBundle = async () => {
-    if (!designs || designs.length === 0) {
-      alert('다운로드할 디자인이 없습니다. 먼저 아래 템플릿 카드의 [생성] 버튼을 눌러 디자인을 만들어 주세요.');
-      return;
-    }
-
     const currentTab = selectedStickerSeriesTab;
     let bundleName = 'Terrarium_20_Stickers_Bundle';
     let seriesTitle = '[테라리움 완성 세트 (20종)]';
@@ -1111,31 +1106,67 @@ export default function Home() {
       seriesTitle = '[열대어 어항 완성 세트 (20종)]';
     }
 
-    const filteredDesigns = designs.filter((d) => {
-      const textToScan = `${d.title || ''} ${d.prompt || ''} ${d.topic || ''} ${d.feedback_applied || ''}`.toLowerCase();
-      if (currentTab === 'terrarium20') {
-        return textToScan.includes('terrarium');
-      } else if (currentTab === 'vivarium20') {
-        return textToScan.includes('vivarium') || textToScan.includes('chameleon') || textToScan.includes('frog') || textToScan.includes('gecko');
-      } else if (currentTab === 'saltaquarium20') {
-        return textToScan.includes('saltwater') || textToScan.includes('marine') || textToScan.includes('clownfish') || textToScan.includes('tang') || textToScan.includes('coral');
-      } else {
-        return textToScan.includes('freshwater') || textToScan.includes('betta') || textToScan.includes('guppy') || textToScan.includes('tetra');
-      }
-    });
-
-    const targetDesigns = filteredDesigns.length > 0 ? filteredDesigns : designs;
-
-    if (filteredDesigns.length === 0) {
-      const confirmDownload = confirm(`현재 ${seriesTitle} 전용으로 생성된 스티커가 없습니다.\n전체 저장된 이미지(${designs.length}장)를 다운로드하시겠습니까?`);
-      if (!confirmDownload) return;
-    }
-
     try {
       setIsExportingBundle(true);
+
+      // Fetch ALL non-deleted designs from backend database (ignoring client page limit of 12)
+      let allFetchedDesigns: any[] = [];
+      try {
+        const res = await fetch(`/api/designs?limit=1000&type=all`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          allFetchedDesigns = data.data;
+        } else {
+          allFetchedDesigns = designs;
+        }
+      } catch (e) {
+        allFetchedDesigns = designs;
+      }
+
+      if (!allFetchedDesigns || allFetchedDesigns.length === 0) {
+        alert('다운로드할 디자인이 없습니다. 먼저 아래 템플릿 카드의 [생성] 버튼을 눌러 디자인을 만들어 주세요.');
+        setIsExportingBundle(false);
+        return;
+      }
+
+      const filteredDesigns = allFetchedDesigns.filter((d) => {
+        const textToScan = `${d.title || ''} ${d.prompt || ''} ${d.topic || ''} ${d.feedback_applied || ''}`.toLowerCase();
+        if (currentTab === 'terrarium20') {
+          return textToScan.includes('terrarium') || textToScan.includes('테라리움');
+        } else if (currentTab === 'vivarium20') {
+          return textToScan.includes('vivarium') || textToScan.includes('비바리움') || textToScan.includes('chameleon') || textToScan.includes('frog') || textToScan.includes('gecko');
+        } else if (currentTab === 'saltaquarium20') {
+          return textToScan.includes('saltwater') || textToScan.includes('marine') || textToScan.includes('clownfish') || textToScan.includes('tang') || textToScan.includes('coral') || textToScan.includes('해수어항');
+        } else {
+          return textToScan.includes('freshwater') || textToScan.includes('betta') || textToScan.includes('guppy') || textToScan.includes('tetra') || textToScan.includes('열대어') || textToScan.includes('어항');
+        }
+      });
+
+      const targetDesigns = filteredDesigns.length > 0 ? filteredDesigns : allFetchedDesigns;
+
+      if (filteredDesigns.length === 0) {
+        const confirmDownload = confirm(`현재 ${seriesTitle} 전용으로 생성된 스티커가 없습니다.\n전체 저장된 이미지(${allFetchedDesigns.length}장)를 다운로드하시겠습니까?`);
+        if (!confirmDownload) {
+          setIsExportingBundle(false);
+          return;
+        }
+      }
+
+      // Sort: Master Cover first, then stickers chronologically (Sticker 1 -> Sticker 20)
+      targetDesigns.sort((a, b) => {
+        const aIsCover = Boolean(a.title?.includes('마스터') || a.title?.includes('대표 커버') || a.prompt?.toLowerCase().includes('master cover'));
+        const bIsCover = Boolean(b.title?.includes('마스터') || b.title?.includes('대표 커버') || b.prompt?.toLowerCase().includes('master cover'));
+        if (aIsCover && !bIsCover) return -1;
+        if (!aIsCover && bIsCover) return 1;
+        const aTime = new Date(a.created_at || 0).getTime();
+        const bTime = new Date(b.created_at || 0).getTime();
+        return aTime - bTime;
+      });
+
       const zip = new JSZip();
       const folder = zip.folder(bundleName);
 
+      let stickerCounter = 1;
       for (let i = 0; i < targetDesigns.length; i++) {
         const d = targetDesigns[i];
         const rawUrl = d.transparent_png_url || (d.id ? `/api/designs/image?id=${d.id}` : d.image_url || d.url);
@@ -1155,23 +1186,21 @@ export default function Home() {
             bytes[b] = binaryString.charCodeAt(b);
           }
 
+          const isCover = Boolean(d.title?.includes('마스터') || d.title?.includes('대표 커버') || d.prompt?.toLowerCase().includes('master cover'));
           const itemTitle = (d.title || d.prompt || `sticker_${i + 1}`)
             .toLowerCase()
             .replace(/[^a-z0-9]/g, '_')
+            .replace(/_+/g, '_')
             .slice(0, 30);
 
-          let fileName = `${String(i + 1).padStart(2, '0')}_${itemTitle}_300dpi.png`;
-          const isCover = d.title?.includes('마스터 썸네일') || d.title?.includes('대표 커버 표지') || d.prompt?.toLowerCase().includes('master cover');
+          let fileName = '';
           if (isCover) {
             fileName = `00_Master_Sticker_Pack_Cover.png`;
           } else {
-            const hasCover = targetDesigns.some(td => td.title?.includes('마스터 썸네일') || td.title?.includes('대표 커버 표지') || td.prompt?.toLowerCase().includes('master cover'));
-            if (hasCover) {
-              const coverIndex = targetDesigns.findIndex(td => td.title?.includes('마스터 썸네일') || td.title?.includes('대표 커버 표지') || td.prompt?.toLowerCase().includes('master cover'));
-              const stickerNum = i > coverIndex ? i : i + 1;
-              fileName = `${String(stickerNum).padStart(2, '0')}_${itemTitle}_300dpi.png`;
-            }
+            fileName = `${String(stickerCounter).padStart(2, '0')}_${itemTitle}_300dpi.png`;
+            stickerCounter++;
           }
+
           folder?.file(fileName, bytes.buffer);
         } catch (err) {
           console.error(`Error processing image index ${i} for ZIP:`, err);
