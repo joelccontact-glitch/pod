@@ -108,8 +108,12 @@ export async function GET(request: Request) {
           const theme = (data.theme || '').toLowerCase();
           const text = `${title} ${topic} ${prompt} ${theme}`;
 
+          // Priority 0: Explicit DB Field (If already set in Firestore)
+          if (data.sticker_sub && ['terrarium', 'vivarium', 'saltaquarium', 'freshaquarium'].includes(data.sticker_sub)) {
+            stickerSub = data.sticker_sub;
+          }
           // Priority 1: Explicit presetId prefix matching
-          if (presetId.startsWith('fresh-aquarium') || presetId.startsWith('freshaquarium')) {
+          else if (presetId.startsWith('fresh-aquarium') || presetId.startsWith('freshaquarium')) {
             stickerSub = 'freshaquarium';
           } else if (presetId.startsWith('salt-aquarium') || presetId.startsWith('saltaquarium')) {
             stickerSub = 'saltaquarium';

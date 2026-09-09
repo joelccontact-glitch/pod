@@ -140,6 +140,21 @@ export async function POST(req: Request) {
     const newHash = crypto.createHash('md5').update(newPrompt + Date.now().toString()).digest('hex');
     const styleNameUsed = styleData ? styleData.name : (styleId ? '지정 화풍' : '이미지 맞춤 화풍');
 
+    let stickerSub: string | null = null;
+    if (isSticker) {
+      if (lowerScan.includes('fresh-aquarium') || lowerScan.includes('freshaquarium') || lowerScan.includes('열대어어항') || lowerScan.includes('열대어 어항') || lowerScan.includes('freshwater')) {
+        stickerSub = 'freshaquarium';
+      } else if (lowerScan.includes('salt-aquarium') || lowerScan.includes('saltaquarium') || lowerScan.includes('해수어항') || lowerScan.includes('해수 어항') || lowerScan.includes('saltwater')) {
+        stickerSub = 'saltaquarium';
+      } else if (lowerScan.includes('vivarium') || lowerScan.includes('비바리움')) {
+        stickerSub = 'vivarium';
+      } else if (lowerScan.includes('terrarium') || lowerScan.includes('테라리움')) {
+        stickerSub = 'terrarium';
+      } else {
+        stickerSub = 'freshaquarium';
+      }
+    }
+
     const newDesignData = {
       prompt_hash: newHash,
       topic: finalTitle,
@@ -149,6 +164,7 @@ export async function POST(req: Request) {
       image_url: newImageUrl,
       created_at: new Date().toISOString(),
       design_type: isSticker ? 'sticker' : 'pod',
+      sticker_sub: stickerSub,
       status: 'success',
       reference_image_used: !!base64Data,
       feedback_applied: prompt,
