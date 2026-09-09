@@ -54,6 +54,27 @@ export default function Home() {
   const [allZipPool, setAllZipPool] = useState<any[]>([]);
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; label: string }>({ current: 0, total: 0, label: '' });
+  const [isMigrating, setIsMigrating] = useState(false);
+
+  const handleRunMigration = async () => {
+    if (!confirm('기존 DB에 저장된 모든 스티커 데이터에 영문 카테고리(sticker_sub: terrarium/vivarium/saltaquarium/freshaquarium) 일괄 업데이트를 진행하시겠습니까?')) return;
+    setIsMigrating(true);
+    try {
+      const res = await fetch('/api/designs/migrate');
+      const data = await res.json();
+      if (data.success) {
+        alert(`✨ 기존 DB 레거시 데이터 마이그레이션 완료!\n\n총 ${data.totalCount}개 데이터 중 ${data.updatedCount}개 항목에 영문 서브 카테고리(sticker_sub)가 Firestore DB에 저장되었습니다.`);
+        fetchDesigns(1);
+      } else {
+        alert('마이그레이션 실패: ' + data.error);
+      }
+    } catch (e) {
+      console.error(e);
+      alert('마이그레이션 중 오류가 발생했습니다.');
+    } finally {
+      setIsMigrating(false);
+    }
+  };
 
   // Synchronized Handlers for Tab and Mode
   const handleSelectCategoryTab = (tab: 'pod' | 'sticker' | 'all') => {
@@ -1831,6 +1852,14 @@ export default function Home() {
               className="flex-1 sm:flex-none bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm border border-gray-200 flex items-center gap-1"
             >
               ⚙️ 화풍 관리
+            </button>
+            <button 
+              onClick={handleRunMigration}
+              disabled={isMigrating}
+              className="flex-1 sm:flex-none bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm border border-blue-200 flex items-center gap-1 disabled:opacity-50"
+              title="기존 DB 항목에 영문 서브 카테고리(sticker_sub) 필드를 일괄 업데이트합니다."
+            >
+              <span>{isMigrating ? '⏳ 동기화 중...' : '🔄 DB 데이터 동기화'}</span>
             </button>
             <button 
               onClick={handleToggleStickerMode}
