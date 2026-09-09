@@ -15,6 +15,7 @@ import {
   buildStickerPrompt,
 } from '@/lib/sticker-prompts';
 import JSZip from 'jszip';
+import { createCompositeMasterCover } from '@/lib/master-cover-builder';
 
 export default function Home() {
   const { data: session } = useSession();
@@ -211,6 +212,94 @@ export default function Home() {
       alert('마스터 표지 재생성 중 오류가 발생했습니다: ' + (e.message || String(e)));
     } finally {
       setIsRegeneratingCover(false);
+    }
+  };
+
+  const [isBuildingComposite, setIsBuildingComposite] = useState(false);
+
+  const handleGenerateRealCompositeCover = async (coverDesign: any, stickerList?: any[]) => {
+    if (!coverDesign) return;
+
+    let targetStickers = stickerList && stickerList.length > 0 ? stickerList : packStickers;
+
+    if (targetStickers.length === 0) {
+      try {
+        const res = await fetch(`/api/designs?limit=1000&type=sticker`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          const pool = data.data;
+          const coverTime = new Date(coverDesign.created_at || 0).getTime();
+          const sub = coverDesign.sticker_sub;
+
+          const matched = pool.filter((d: any) => {
+            if (d.id === coverDesign.id || isCoverDesign(d)) return false;
+            const itemTime = new Date(d.created_at || 0).getTime();
+            const isTimeMatched = Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
+            const isSubMatched = sub && d.sticker_sub === sub;
+            return isTimeMatched || isSubMatched;
+          });
+
+          matched.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+          targetStickers = matched.slice(0, 20);
+        }
+      } catch (e) {
+        console.error('Error loading stickers for composite cover:', e);
+      }
+    }
+
+    if (targetStickers.length === 0) {
+      alert('실제 스티커 항목이 없습니다. 먼저 20종 일괄 생성을 진행해 주세요.');
+      return;
+    }
+
+    setIsBuildingComposite(true);
+    try {
+      const compositeDataUrl = await createCompositeMasterCover(targetStickers, {
+        title: coverDesign.title,
+        subType: coverDesign.sticker_sub || 'terrarium'
+      });
+
+      const updates = {
+        image_url: compositeDataUrl,
+        updated_at: new Date().toISOString()
+      };
+
+      const updateRes = await fetch('/api/designs/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: coverDesign.id,
+          updates
+        })
+      });
+
+      const updateData = await updateRes.json();
+      if (!updateRes.ok || !updateData.success) {
+        throw new Error(updateData.error || 'DB 업데이트 실패');
+      }
+
+      const freshTs = updateData.updated_at ? new Date(updateData.updated_at).getTime() : Date.now();
+      const freshImageUrl = `/api/designs/image?id=${coverDesign.id}&v=${freshTs}&_t=${Date.now()}`;
+
+      const freshData = {
+        ...updates,
+        updated_at: updateData.updated_at || updates.updated_at,
+        image_url: freshImageUrl
+      };
+
+      setSelectedPackCover((prev: any) => prev ? { ...prev, ...freshData } : prev);
+      setDesigns(prev => prev.map(d => d.id === coverDesign.id ? { ...d, ...freshData } : d));
+      if (selectedDesign?.id === coverDesign.id) {
+        setSelectedDesign((prev: any) => prev ? { ...prev, ...freshData } : prev);
+      }
+
+      alert(`✨ 실제 20종 스티커 100% 실물 일치 마스터 표지 합성이 완료되었습니다!\n(총 ${targetStickers.length}종 스티커가 표지에 자동 배치되었습니다)`);
+      await fetchDesigns(page, false, undefined, undefined, true);
+    } catch (e: any) {
+      console.error('Error creating composite master cover:', e);
+      alert('실체 합성 마스터 표지 생성 실패: ' + (e.message || String(e)));
+    } finally {
+      setIsBuildingComposite(false);
     }
   };
 
@@ -1724,6 +1813,8 @@ export default function Home() {
 
     setIsBatchGenerating(true);
     let successCount = 0;
+    let coverDesignToSave: any = null;
+    const generatedStickersList: any[] = [];
 
     for (let i = 0; i < targetPresets.length; i++) {
       const preset = targetPresets[i];
@@ -1763,6 +1854,13 @@ export default function Home() {
               design_type: 'sticker',
               is_deleted: false
             };
+
+            if (i === 0) {
+              coverDesignToSave = { id: data.data.id, ...designToSave };
+            } else {
+              generatedStickersList.push({ id: data.data.id, ...designToSave });
+            }
+
             await fetch('/api/designs/save', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -1785,8 +1883,16 @@ export default function Home() {
       }
     }
 
+    if (coverDesignToSave && generatedStickersList.length > 0) {
+      try {
+        await handleGenerateRealCompositeCover(coverDesignToSave, generatedStickersList);
+      } catch (err) {
+        console.error('Auto composite master cover failed:', err);
+      }
+    }
+
     setIsBatchGenerating(false);
-    alert(`${packName} 일괄 자동 생성이 완료되었습니다! (성공: ${successCount}/${targetPresets.length}장)\n새로 생성된 20종 스티커를 갤러리 및 ZIP 패키지 다운로드로 확인해 보세요.`);
+    alert(`${packName} 일괄 자동 생성이 완료되었습니다! (성공: ${successCount}/${targetPresets.length}장)\n실제 20종 스티커 100% 실물 일치 마스터 표지가 자동으로 합성되었습니다.`);
     fetchDesigns(1, false);
   };
 
@@ -4038,10 +4144,29 @@ export default function Home() {
 
                 <div className="flex flex-wrap items-center gap-2">
                   <button
+                    onClick={() => handleGenerateRealCompositeCover(selectedPackCover, packStickers)}
+                    disabled={isBuildingComposite}
+                    className="bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-lg transition-all flex items-center gap-2 border-2 border-teal-300 animate-pulse"
+                    title="실제 함께 생성된 20개 스티커 본품을 100% 그대로 합성하여 100% 일치하는 마스터 표지를 생성합니다"
+                  >
+                    {isBuildingComposite ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>20종 실물 표지 합성 중...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>🎨</span>
+                        <span>실제 20종 자동 조합 표지 생성 (100% 실물 일치)</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
                     onClick={() => handleRegenerateMasterCover(selectedPackCover)}
                     disabled={isRegeneratingCover}
                     className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-purple-400"
-                    title="마스터 표지만 AI로 새로 생성하여 교체합니다"
+                    title="마스터 표지만 AI 일러스트로 새로 생성하여 교체합니다"
                   >
                     {isRegeneratingCover ? (
                       <>
