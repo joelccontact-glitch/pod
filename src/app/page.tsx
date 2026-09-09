@@ -26,6 +26,8 @@ export default function Home() {
   const [totalCount, setTotalCount] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+
   // Main Category Tab State ('pod' | 'sticker' | 'all')
   const [selectedCategoryTab, setSelectedCategoryTab] = useState<'pod' | 'sticker' | 'all'>('sticker');
   const [podCount, setPodCount] = useState<number>(0);
@@ -317,7 +319,7 @@ export default function Home() {
     fetchDesigns(page);
     fetchStyles();
     setActiveSeasonsList(getActiveUpcomingSeasons());
-  }, [page, selectedCategoryTab, selectedStickerSubTab]);
+  }, [page, selectedCategoryTab, selectedStickerSubTab, searchKeyword]);
 
   useEffect(() => {
     if (activeTab === 'mockup' && selectedDesign) {
@@ -1264,15 +1266,18 @@ export default function Home() {
       }
 
       const filteredDesigns = allFetchedDesigns.filter((d) => {
+        const presetId = (d.stickerPresetId || d.id || '').toLowerCase();
         const textToScan = `${d.title || ''} ${d.prompt || ''} ${d.topic || ''} ${d.feedback_applied || ''}`.toLowerCase();
+        const sub = d.sticker_sub;
+
         if (currentTab === 'terrarium20') {
-          return textToScan.includes('terrarium') || textToScan.includes('테라리움');
+          return sub === 'terrarium' || presetId.startsWith('terrarium') || textToScan.includes('terrarium') || textToScan.includes('테라리움');
         } else if (currentTab === 'vivarium20') {
-          return textToScan.includes('vivarium') || textToScan.includes('비바리움') || textToScan.includes('chameleon') || textToScan.includes('frog') || textToScan.includes('gecko');
+          return sub === 'vivarium' || presetId.startsWith('vivarium') || textToScan.includes('vivarium') || textToScan.includes('비바리움');
         } else if (currentTab === 'saltaquarium20') {
-          return textToScan.includes('saltwater') || textToScan.includes('marine') || textToScan.includes('clownfish') || textToScan.includes('tang') || textToScan.includes('coral') || textToScan.includes('해수어항');
+          return sub === 'saltaquarium' || presetId.startsWith('salt-aquarium') || presetId.startsWith('saltaquarium') || textToScan.includes('saltaquarium') || textToScan.includes('saltwater') || textToScan.includes('해수어항');
         } else {
-          return textToScan.includes('freshwater') || textToScan.includes('betta') || textToScan.includes('guppy') || textToScan.includes('tetra') || textToScan.includes('열대어') || textToScan.includes('어항');
+          return sub === 'freshaquarium' || presetId.startsWith('fresh-aquarium') || presetId.startsWith('freshaquarium') || textToScan.includes('freshaquarium') || textToScan.includes('freshwater') || textToScan.includes('열대어어항') || textToScan.includes('열대어 어항');
         }
       });
 
@@ -1417,11 +1422,12 @@ export default function Home() {
     fetchDesigns(1, false);
   };
 
-  const fetchDesigns = async (currentPage: number = 1, showSpinner: boolean = true, subOverride?: string) => {
+  const fetchDesigns = async (currentPage: number = 1, showSpinner: boolean = true, subOverride?: string, searchOverride?: string) => {
     if (showSpinner) setLoadingInitial(true);
     try {
       const activeSub = subOverride !== undefined ? subOverride : selectedStickerSubTab;
-      const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}&subType=${activeSub}`);
+      const activeSearch = searchOverride !== undefined ? searchOverride : searchKeyword;
+      const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}&subType=${activeSub}&search=${encodeURIComponent(activeSearch.trim())}`);
       const data = await res.json();
       if (data.success) {
         setDesigns(data.data);
@@ -2096,9 +2102,9 @@ export default function Home() {
           </div>
         )}
 
-        {/* Main Category Filter Tabs (POD vs Sticker Pack) */}
+        {/* Main Category Filter Tabs (POD vs Sticker Pack & Keyword Search) */}
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-2xl border border-gray-200 shadow-xs">
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap flex-1 min-w-0">
             <button
               onClick={() => handleSelectCategoryTab('sticker')}
               className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
@@ -2139,10 +2145,33 @@ export default function Home() {
             </button>
           </div>
 
-          <div className="text-xs text-gray-500 font-medium hidden sm:block">
-            {selectedCategoryTab === 'pod' && '👕 단품 티셔츠 / 텀블러 / 에코백 / 머그컵 등 실물 커머스 그래픽'}
-            {selectedCategoryTab === 'sticker' && '📦 클릭하여 각 테마별 스티커 팩을 선택 조회가 가능합니다.'}
-            {selectedCategoryTab === 'all' && '🌐 생성된 모든 디자인 종합 리스트'}
+          {/* Keyword Search Input Box */}
+          <div className="relative w-full sm:w-auto sm:min-w-[240px] max-w-full">
+            <input
+              type="text"
+              value={searchKeyword}
+              onChange={(e) => {
+                setSearchKeyword(e.target.value);
+                setPage(1);
+              }}
+              placeholder="🔍 키워드 검색 (예: 오리, 베타, 햄스터...)"
+              className="w-full bg-gray-50 hover:bg-white focus:bg-white border border-gray-200 rounded-xl pl-8 pr-8 py-1.5 sm:py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs transition-colors text-gray-800"
+            />
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none">
+              🔍
+            </span>
+            {searchKeyword && (
+              <button
+                onClick={() => {
+                  setSearchKeyword('');
+                  setPage(1);
+                }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-200"
+                title="검색어 지우기"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
 

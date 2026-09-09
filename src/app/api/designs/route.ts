@@ -31,6 +31,7 @@ export async function GET(request: Request) {
 
     const filterType = searchParams.get('type') || 'all'; // 'pod' | 'sticker' | 'all'
     const subType = searchParams.get('subType') || 'all'; // 'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium'
+    const searchQuery = (searchParams.get('search') || searchParams.get('q') || '').trim().toLowerCase();
 
     // Fetch non-deleted designs
     const designsSnapshot = await db.collection('designs')
@@ -157,6 +158,15 @@ export async function GET(request: Request) {
       })
       .filter((item: any) => {
         if (!item) return false;
+
+        // 1. Keyword search filter
+        if (searchQuery) {
+          const tagsStr = Array.isArray(item.tags) ? item.tags.join(' ') : (item.tags || '');
+          const searchableText = `${item.title || ''} ${item.topic || ''} ${item.prompt || ''} ${item.catchphrase || ''} ${item.season_name || ''} ${tagsStr}`.toLowerCase();
+          if (!searchableText.includes(searchQuery)) return false;
+        }
+
+        // 2. Type & SubType filter
         if (filterType === 'pod') return item.design_type === 'pod';
         if (filterType === 'sticker') {
           if (item.design_type !== 'sticker') return false;
