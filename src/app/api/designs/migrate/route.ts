@@ -12,9 +12,7 @@ export async function GET() {
       return NextResponse.json({ success: true, updatedCount: 0, message: 'No designs found.' });
     }
 
-    let updatedCount = 0;
-    const batch = db.batch();
-    let batchOperationCount = 0;
+    const itemsToUpdate: { ref: any; data: any }[] = [];
 
     snapshot.docs.forEach((doc: any) => {
       const data = doc.data();
@@ -129,25 +127,33 @@ export async function GET() {
 
       // Update if design_type or sticker_sub is missing or inconsistent
       if (data.design_type !== resolvedType || data.sticker_sub !== stickerSub) {
-        batch.update(doc.ref, {
-          design_type: resolvedType,
-          sticker_sub: stickerSub,
-          updated_at: new Date().toISOString()
+        itemsToUpdate.push({
+          ref: doc.ref,
+          data: {
+            design_type: resolvedType,
+            sticker_sub: stickerSub,
+            updated_at: new Date().toISOString()
+          }
         });
-        updatedCount++;
-        batchOperationCount++;
       }
     });
 
-    if (batchOperationCount > 0) {
+    // Chunk update operations in mini batches of 50 to avoid Firestore Transaction Too Big limits
+    const CHUNK_SIZE = 50;
+    for (let i = 0; i < itemsToUpdate.length; i += CHUNK_SIZE) {
+      const chunk = itemsToUpdate.slice(i, i + CHUNK_SIZE);
+      const batch = db.batch();
+      chunk.forEach(item => {
+        batch.update(item.ref, item.data);
+      });
       await batch.commit();
     }
 
     return NextResponse.json({
       success: true,
       totalCount: snapshot.size,
-      updatedCount,
-      message: `Successfully migrated ${updatedCount} out of ${snapshot.size} designs in Firestore.`
+      updatedCount: itemsToUpdate.length,
+      message: `Successfully migrated ${itemsToUpdate.length} out of ${snapshot.size} designs in Firestore.`
     });
   } catch (error: any) {
     console.error('Migration error:', error);
