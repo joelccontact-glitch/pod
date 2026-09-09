@@ -217,7 +217,7 @@ export const TERRARIUM_20_SERIES: StickerPreset[] = [
     theme: 'Terrarium 20 Pack Cover',
     phrase: '',
     description: 'Etsy 판매용 20종 테라리움 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
-    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration. Centered cute bold pink script typography reading "20+ CUTE TERRARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut terrarium glass jar sticker samples arranged artistically on a soft cream pastel grid background. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE TERRARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut terrarium glass jar sticker samples (succulents, moss, tiny fairy cottages, stone lanterns) arranged artistically. STRICT NO MAMMALS/BIRDS RULE: Absolutely NO land animals, NO foxes, NO birds, NO cats, NO dogs, NO rodents inside or around the terrarium glass jars. Pure botanical green moss, potted succulents, fairy cottages, stone lanterns, mushrooms, and plant terrariums ONLY. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
   },
   ...Array.from({ length: 20 }, (_, i) => {
     const num = i + 1;
@@ -267,7 +267,7 @@ export const VIVARIUM_20_SERIES: StickerPreset[] = [
     theme: 'Vivarium 20 Pack Cover',
     phrase: '',
     description: 'Etsy 판매용 20종 비바리움 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
-    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration. Centered cute bold pink script typography reading "20+ CUTE VIVARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut vivarium glass tank sticker samples with reptiles and frogs arranged artistically on a soft pastel background. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE VIVARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut vivarium glass tank sticker samples with reptiles, chameleons, and frogs arranged artistically. STRICT NO LAND MAMMALS/BIRDS RULE: Absolutely NO land mammals, NO foxes, NO birds, NO cats, NO dogs inside or around the vivarium tanks. ONLY reptiles, amphibians (chameleons, geckos, frogs), driftwood, moss, and tropical plants. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
   },
   ...Array.from({ length: 20 }, (_, i) => {
     const num = i + 1;
@@ -317,7 +317,7 @@ export const SALT_AQUARIUM_20_SERIES: StickerPreset[] = [
     theme: 'Saltwater Aquarium 20 Pack Cover',
     phrase: '',
     description: 'Etsy 판매용 20종 해수어항 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
-    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration. Centered cute bold pink script typography reading "20+ SALTWATER AQUARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut marine aquarium glass tank sticker samples with clownfish, blue tang, and seahorses arranged artistically on a soft pastel ocean background. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ SALTWATER AQUARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut marine aquarium glass tank sticker samples with clownfish, blue tang, and seahorses arranged artistically. STRICT NO LAND ANIMALS/MAMMALS/BIRDS RULE: Absolutely NO land animals, NO mammals, NO foxes, NO birds, NO cats, NO dogs inside or around the marine tanks. ONLY marine sea life, clownfish, blue tang, seahorses, coral reefs, and sea anemones. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
   },
   ...Array.from({ length: 20 }, (_, i) => {
     const num = i + 1;
@@ -367,7 +367,7 @@ export const FRESH_AQUARIUM_20_SERIES: StickerPreset[] = [
     theme: 'Freshwater Aquarium 20 Pack Cover',
     phrase: '',
     description: 'Etsy 판매용 20종 열대어어항 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
-    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration. Centered cute bold pink script typography reading "20+ FRESHWATER AQUARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut freshwater aquarium glass tank sticker samples with betta fish, guppies, and tetras arranged artistically on a soft pastel water background. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ FRESHWATER AQUARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut freshwater aquarium glass tank sticker samples with betta fish, guppies, and tetras arranged artistically. STRICT NO LAND ANIMALS/MAMMALS/BIRDS RULE: Absolutely NO land animals, NO mammals, NO foxes, NO birds, NO cats, NO dogs inside or around the freshwater tanks. ONLY freshwater aquatic fish, betta fish, guppies, aquatic green plants, and driftwood. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
   },
   ...Array.from({ length: 20 }, (_, i) => {
     const num = i + 1;
