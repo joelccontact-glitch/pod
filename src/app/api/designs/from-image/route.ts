@@ -37,7 +37,16 @@ export async function POST(req: Request) {
       const { likedDesigns, likedPromptSummary } = await fetchLikedDesignsSummary(db, 3);
       const likedInstruction = likedDesigns.length > 0 ? `\nCRITICAL #1 MASTER BENCHMARK: The user LIKED (HEARTED) these favorite designs. Ensure the style matches their aesthetic:\n${likedPromptSummary}\n` : '';
 
-      const isTemplatePrompt = prompt.toLowerCase().includes('die-cut sticker');
+      const promptLower = prompt.toLowerCase();
+      const isTemplatePrompt = (
+        promptLower.includes('die-cut') ||
+        promptLower.includes('master cover') ||
+        promptLower.includes('sticker bundle') ||
+        promptLower.includes('etsy digital sticker') ||
+        promptLower.includes('20+ cute') ||
+        promptLower.includes('20+ sticker') ||
+        promptLower.includes('master cover graphic')
+      );
 
       let typographyInstruction = '';
       if (catchphrase) {

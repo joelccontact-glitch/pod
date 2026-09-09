@@ -1576,44 +1576,57 @@ export default function Home() {
       const preset = targetPresets[i];
       setBatchProgress({ current: i + 1, total: targetPresets.length, label: preset.name });
 
-      try {
-        const res = await fetch('/api/designs/from-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            imageBase64: '',
-            prompt: preset.prompt,
-            title: preset.name,
-            isPreview: true,
-            styleId: selectedStyleId,
-            catchphrase: '',
-            autoPhrase: false
-          })
-        });
-        const data = await res.json();
+      let attempts = 0;
+      let generatedSuccess = false;
 
-        if (data.success && data.data) {
-          const subKey = packType === 'terrarium20' ? 'terrarium' : packType === 'vivarium20' ? 'vivarium' : packType === 'saltaquarium20' ? 'saltaquarium' : 'freshaquarium';
-          const designToSave = {
-            ...data.data,
-            title: preset.name,
-            topic: preset.name,
-            stickerPresetId: preset.id,
-            sticker_sub: subKey,
-            design_type: 'sticker'
-          };
-          await fetch('/api/designs/save', {
+      while (attempts < 2 && !generatedSuccess) {
+        attempts++;
+        try {
+          const res = await fetch('/api/designs/from-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              id: data.data.id,
-              designData: designToSave
+              imageBase64: '',
+              prompt: preset.prompt,
+              title: preset.name,
+              isPreview: true,
+              styleId: selectedStyleId,
+              catchphrase: '',
+              autoPhrase: false
             })
           });
-          successCount++;
+          const data = await res.json();
+
+          if (data.success && data.data) {
+            const subKey = packType === 'terrarium20' ? 'terrarium' : packType === 'vivarium20' ? 'vivarium' : packType === 'saltaquarium20' ? 'saltaquarium' : 'freshaquarium';
+            const designToSave = {
+              ...data.data,
+              title: preset.name,
+              topic: preset.name,
+              stickerPresetId: preset.id,
+              sticker_sub: subKey,
+              design_type: 'sticker',
+              is_deleted: false
+            };
+            await fetch('/api/designs/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: data.data.id,
+                designData: designToSave
+              })
+            });
+            successCount++;
+            generatedSuccess = true;
+
+            // Immediately refresh gallery list right after Master Cover (index 0) finishes generating!
+            if (i === 0) {
+              fetchDesigns(1, false);
+            }
+          }
+        } catch (e) {
+          console.error(`Batch generation attempt ${attempts} failed for ${preset.name}:`, e);
         }
-      } catch (e) {
-        console.error(`Batch generation failed for ${preset.name}:`, e);
       }
     }
 
