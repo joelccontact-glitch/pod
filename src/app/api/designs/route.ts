@@ -50,64 +50,26 @@ export async function GET(request: Request) {
         const data = doc.data();
         if (data.is_deleted) return null;
 
-        // Auto-detect design type for entries
         let resolvedType: 'pod' | 'sticker' = 'pod';
 
-        const titleTopic = `${data.title || ''} ${data.topic || ''} ${data.prompt || ''} ${data.stickerPresetId || ''} ${data.theme || ''}`.toLowerCase();
-
-        // 1. Explicit POD apparel titles (T-Shirt, Mug, Tumbler, etc.)
-        const isPodTitle = (
-          titleTopic.includes('t-shirt') ||
-          titleTopic.includes('shirt') ||
-          titleTopic.includes('tee') ||
-          titleTopic.includes('mug') ||
-          titleTopic.includes('tumbler') ||
-          titleTopic.includes('티셔츠') ||
-          titleTopic.includes('머그컵')
-        );
-
-        // 2. Explicit Sticker titles, themes, or niche keywords
-        const isStickerTitleOrType = (
-          data.is_sticker === true ||
-          data.design_type === 'sticker' ||
-          Boolean(data.stickerPresetId) ||
-          titleTopic.includes('스티커') ||
-          titleTopic.includes('sticker') ||
-          titleTopic.includes('die-cut') ||
-          titleTopic.includes('terrarium') ||
-          titleTopic.includes('테라리움') ||
-          titleTopic.includes('succulent') ||
-          titleTopic.includes('다육식물') ||
-          titleTopic.includes('vivarium') ||
-          titleTopic.includes('비바리움') ||
-          titleTopic.includes('chameleon') ||
-          titleTopic.includes('gecko') ||
-          titleTopic.includes('saltaquarium') ||
-          titleTopic.includes('saltwater') ||
-          titleTopic.includes('해수어항') ||
-          titleTopic.includes('해수 어항') ||
-          titleTopic.includes('clownfish') ||
-          titleTopic.includes('seahorse') ||
-          titleTopic.includes('freshaquarium') ||
-          titleTopic.includes('freshwater') ||
-          titleTopic.includes('열대어어항') ||
-          titleTopic.includes('열대어 어항') ||
-          titleTopic.includes('betta') ||
-          titleTopic.includes('guppy') ||
-          titleTopic.includes('aquarium') ||
-          titleTopic.includes('master cover') ||
-          titleTopic.includes('마스터 썸네일') ||
-          titleTopic.includes('마스터 표지')
-        );
-
-        if (isStickerTitleOrType) {
+        // 1. Strict DB Field Priority for design_type
+        if (data.design_type === 'sticker' || data.is_sticker === true) {
           resolvedType = 'sticker';
-        } else if (isPodTitle) {
-          resolvedType = 'pod';
         } else if (data.design_type === 'pod') {
           resolvedType = 'pod';
         } else {
-          resolvedType = 'pod';
+          // Fallback parsing ONLY for legacy documents where design_type is missing in DB
+          const titleTopic = `${data.title || ''} ${data.topic || ''} ${data.prompt || ''} ${data.stickerPresetId || ''} ${data.theme || ''}`.toLowerCase();
+          const isStickerTitleOrType = (
+            Boolean(data.stickerPresetId) ||
+            titleTopic.includes('스티커') ||
+            titleTopic.includes('sticker') ||
+            titleTopic.includes('die-cut') ||
+            titleTopic.includes('master cover') ||
+            titleTopic.includes('마스터 썸네일') ||
+            titleTopic.includes('마스터 표지')
+          );
+          resolvedType = isStickerTitleOrType ? 'sticker' : 'pod';
         }
 
         let stickerSub: 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'other' = 'other';
