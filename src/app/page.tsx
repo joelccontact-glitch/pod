@@ -61,6 +61,93 @@ export default function Home() {
   const [selectedPackCover, setSelectedPackCover] = useState<any>(null);
   const [packStickers, setPackStickers] = useState<any[]>([]);
   const [loadingPackStickers, setLoadingPackStickers] = useState(false);
+  const [isRegeneratingCover, setIsRegeneratingCover] = useState(false);
+
+  const handleRegenerateMasterCover = async (coverDesign: any) => {
+    if (!coverDesign) return;
+
+    const userFeedback = prompt(
+      `[${coverDesign.title || '마스터 표지'}] 단독 재생성\n\n마스터 표지 이미지를 AI로 새로 생성하여 교체합니다.\n필요시 추가 수정/요청사항을 입력해 주세요 (선택사항, 빈칸으로 두면 기본 마스터 표지 지시문 적용):`,
+      ''
+    );
+
+    if (userFeedback === null) return;
+
+    setIsRegeneratingCover(true);
+    try {
+      let basePrompt = coverDesign.prompt || '';
+      const presetId = (coverDesign.stickerPresetId || coverDesign.id || '').toLowerCase();
+      const sub = coverDesign.sticker_sub;
+
+      if (presetId.includes('terrarium') || sub === 'terrarium') {
+        const p = TERRARIUM_20_SERIES.find(s => s.id === 'terrarium-20-pack-cover');
+        if (p) basePrompt = p.prompt;
+      } else if (presetId.includes('vivarium') || sub === 'vivarium') {
+        const p = VIVARIUM_20_SERIES.find(s => s.id === 'vivarium-20-pack-cover');
+        if (p) basePrompt = p.prompt;
+      } else if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium') || sub === 'saltaquarium') {
+        const p = SALT_AQUARIUM_20_SERIES.find(s => s.id === 'salt-aquarium-20-pack-cover');
+        if (p) basePrompt = p.prompt;
+      } else if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium') || sub === 'freshaquarium') {
+        const p = FRESH_AQUARIUM_20_SERIES.find(s => s.id === 'fresh-aquarium-20-pack-cover');
+        if (p) basePrompt = p.prompt;
+      }
+
+      const finalPrompt = userFeedback.trim() 
+        ? `${basePrompt}. Additional user request: ${userFeedback.trim()}`
+        : basePrompt;
+
+      const res = await fetch('/api/designs/from-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageBase64: '',
+          prompt: finalPrompt,
+          title: coverDesign.title,
+          isPreview: true,
+          styleId: selectedStyleId,
+          catchphrase: '',
+          autoPhrase: false
+        })
+      });
+
+      const data = await res.json();
+      if (data.success && data.data?.image_url) {
+        const newImageUrl = data.data.image_url;
+
+        const updates = {
+          image_url: newImageUrl,
+          prompt: finalPrompt,
+          updated_at: new Date().toISOString()
+        };
+
+        await fetch('/api/designs/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: coverDesign.id,
+            updates
+          })
+        });
+
+        setSelectedPackCover((prev: any) => prev ? { ...prev, ...updates } : prev);
+        setDesigns(prev => prev.map(d => d.id === coverDesign.id ? { ...d, ...updates } : d));
+        if (selectedDesign?.id === coverDesign.id) {
+          setSelectedDesign((prev: any) => prev ? { ...prev, ...updates } : prev);
+        }
+
+        alert('✨ 마스터 표지가 새 이미지로 성공적으로 단독 재생성되었습니다!');
+        fetchDesigns(page, false, undefined, undefined, true);
+      } else {
+        alert('마스터 표지 생성 실패: ' + (data.error || '오류가 발생했습니다.'));
+      }
+    } catch (e: any) {
+      console.error('Error regenerating master cover:', e);
+      alert('마스터 표지 재생성 중 오류가 발생했습니다: ' + (e.message || String(e)));
+    } finally {
+      setIsRegeneratingCover(false);
+    }
+  };
 
   const handleOpenPackDetail = async (coverDesign: any) => {
     setSelectedPackCover(coverDesign);
@@ -2480,34 +2567,43 @@ export default function Home() {
         ) : (
           <>
             {/* Top Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-1.5 mb-3.5">
-                <button 
-                  onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  disabled={page === 1 || loadingInitial}
-                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm bg-white"
-                >
-                  이전
-                </button>
-                <div className="flex gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                    <button
-                      key={p}
-                      onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                      disabled={loadingInitial}
-                      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-xs sm:text-sm font-medium transition-colors ${page === p ? 'bg-blue-600 text-white shadow-sm' : 'border border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'}`}
-                    >
-                      {p}
-                    </button>
-                  ))}
+            {totalCount > 0 && (
+              <div className="flex flex-wrap justify-between items-center gap-2 mb-3.5 bg-white/80 p-2.5 rounded-2xl border border-gray-200/80 shadow-xs">
+                <div className="text-xs text-gray-500 font-semibold flex items-center gap-1.5 pl-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>
+                    {selectedCategoryTab === 'sticker' ? '🌟 마스터 표지 목록' : '🎨 디자인 목록'}: 총 <strong className="text-gray-900 font-extrabold">{totalCount}</strong>개 중 {page} / {totalPages} 페이지
+                  </span>
                 </div>
-                <button 
-                  onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  disabled={page === totalPages || loadingInitial}
-                  className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors shadow-sm bg-white"
-                >
-                  다음
-                </button>
+                
+                <div className="flex items-center gap-1.5">
+                  <button 
+                    onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    disabled={page === 1 || loadingInitial}
+                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors shadow-xs bg-white"
+                  >
+                    이전
+                  </button>
+                  <div className="flex gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                      <button
+                        key={p}
+                        onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                        disabled={loadingInitial}
+                        className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-xs sm:text-sm font-medium transition-colors ${page === p ? 'bg-blue-600 text-white shadow-xs font-bold' : 'border border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'}`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    disabled={page === totalPages || loadingInitial}
+                    className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors shadow-xs bg-white"
+                  >
+                    다음
+                  </button>
+                </div>
               </div>
             )}
 
@@ -2574,6 +2670,15 @@ export default function Home() {
                     )}
 
                     <div className="absolute top-1.5 right-1.5 flex gap-1.5 opacity-100 transition-opacity backdrop-blur-sm">
+                      {isMasterCover && (
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleRegenerateMasterCover(design); }}
+                          className="bg-purple-600 hover:bg-purple-700 text-white p-1.5 rounded-full shadow-sm border border-purple-400 transition-colors flex items-center justify-center w-7 h-7"
+                          title="마스터 표지 단독 재생성"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        </button>
+                      )}
                       <button 
                         onClick={(e) => { e.stopPropagation(); handleToggleLikeDesign(design.id, !design.is_liked); }}
                         className={`bg-white/90 hover:bg-white p-1.5 rounded-full shadow-sm border border-gray-200 transition-colors flex items-center justify-center w-7 h-7 ${design.is_liked ? 'text-red-500' : 'text-gray-400 hover:text-red-400'}`}
@@ -2630,35 +2735,40 @@ export default function Home() {
 
             </section>
 
-            {/* Pagination Controls */}
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-2 pt-8">
-                <button 
-                  onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  disabled={page === 1 || loadingInitial}
-                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-                >
-                  이전
-                </button>
-                <div className="flex gap-1">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                    <button
-                      key={p}
-                      onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                      disabled={loadingInitial}
-                      className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${page === p ? 'bg-blue-600 text-white' : 'border border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-                    >
-                      {p}
-                    </button>
-                  ))}
+            {/* Bottom Pagination Controls */}
+            {totalCount > 0 && (
+              <div className="flex flex-wrap justify-between items-center gap-2 pt-6 pb-2 border-t border-gray-100 mt-4">
+                <div className="text-xs text-gray-500 font-semibold pl-1">
+                  총 <strong className="text-gray-900 font-extrabold">{totalCount}</strong>개 중 {page} / {totalPages} 페이지
                 </div>
-                <button 
-                  onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                  disabled={page === totalPages || loadingInitial}
-                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-                >
-                  다음
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button 
+                    onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    disabled={page === 1 || loadingInitial}
+                    className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors bg-white shadow-xs"
+                  >
+                    이전
+                  </button>
+                  <div className="flex gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                      <button
+                        key={p}
+                        onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                        disabled={loadingInitial}
+                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-sm font-medium transition-colors ${page === p ? 'bg-blue-600 text-white font-bold shadow-xs' : 'border border-gray-200 text-gray-600 hover:bg-gray-50 bg-white'}`}
+                      >
+                        {p}
+                      </button>
+                    ))}
+                  </div>
+                  <button 
+                    onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    disabled={page === totalPages || loadingInitial}
+                    className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 transition-colors bg-white shadow-xs"
+                  >
+                    다음
+                  </button>
+                </div>
               </div>
             )}
           </>
@@ -3859,6 +3969,39 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => handleRegenerateMasterCover(selectedPackCover)}
+                    disabled={isRegeneratingCover}
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-purple-400"
+                    title="마스터 표지만 AI로 새로 생성하여 교체합니다"
+                  >
+                    {isRegeneratingCover ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>표지 재생성 중...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>🔄</span>
+                        <span>마스터 표지 단독 재생성</span>
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setSelectedDesign(selectedPackCover);
+                      if (selectedPackCover.recommended_mockup) {
+                        setSelectedMockupId(selectedPackCover.recommended_mockup);
+                      }
+                    }}
+                    className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
+                    title="마스터 표지를 상세보기 모달에서 지우개/텍스트/AI수정합니다"
+                  >
+                    <span>🛠️</span>
+                    <span>표지 상세 편집·AI수정</span>
+                  </button>
+
                   <button
                     onClick={() => downloadBatchSession([selectedPackCover, ...packStickers], `${selectedPackCover.topic || 'Sticker_Pack'}_Bundle`)}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-emerald-500"
