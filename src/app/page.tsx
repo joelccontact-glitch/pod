@@ -185,21 +185,69 @@ export default function Home() {
 
   const handleMoveToTrash = async (targetIds: string[]) => {
     if (targetIds.length === 0) return;
-    if (!confirm(`선택한 ${targetIds.length}개 항목을 삭제함으로 이동하시겠습니까?\n(삭제함에서 15일간 보관 후 자동 영구 삭제됩니다)`)) return;
+
+    let finalTargetIds = [...targetIds];
+    let coverCount = 0;
+    let childCount = 0;
+
+    try {
+      const res = await fetch(`/api/designs?limit=1000&type=sticker`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        const pool = data.data;
+
+        const selectedCovers = pool.filter((d: any) => targetIds.includes(d.id) && isCoverDesign(d));
+        coverCount = selectedCovers.length;
+
+        if (coverCount > 0) {
+          const childIdsSet = new Set<string>();
+
+          selectedCovers.forEach((cover: any) => {
+            const coverTime = new Date(cover.created_at || 0).getTime();
+            const sub = cover.sticker_sub;
+            const presetId = (cover.stickerPresetId || cover.id || '').toLowerCase();
+
+            pool.forEach((d: any) => {
+              if (d.id === cover.id || isCoverDesign(d)) return;
+              const itemTime = new Date(d.created_at || 0).getTime();
+              const isTimeMatched = Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
+              const isSubMatched = sub && d.sticker_sub === sub;
+              const isPresetMatched = presetId && d.stickerPresetId && d.stickerPresetId.startsWith(presetId.replace('-cover', ''));
+
+              if (isTimeMatched || isSubMatched || isPresetMatched) {
+                childIdsSet.add(d.id);
+              }
+            });
+          });
+
+          childCount = childIdsSet.size;
+          finalTargetIds = Array.from(new Set([...targetIds, ...Array.from(childIdsSet)]));
+        }
+      }
+    } catch (e) {
+      console.error('Error finding child stickers for cascade delete:', e);
+    }
+
+    const confirmMsg = coverCount > 0
+      ? `선택한 마스터 팩 ${coverCount}개 및 포함된 하위 스티커 ${childCount}개 (총 ${finalTargetIds.length}개 항목)를 삭제함으로 이동하시겠습니까?\n(삭제함에서 15일간 보관 후 자동 영구 삭제됩니다)`
+      : `선택한 ${finalTargetIds.length}개 항목을 삭제함으로 이동하시겠습니까?\n(삭제함에서 15일간 보관 후 자동 영구 삭제됩니다)`;
+
+    if (!confirm(confirmMsg)) return;
 
     try {
       const res = await fetch('/api/designs/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: targetIds, permanent: false })
+        body: JSON.stringify({ ids: finalTargetIds, permanent: false })
       });
       const data = await res.json();
       if (data.success) {
-        setDesigns(prev => prev.filter(d => !targetIds.includes(d.id)));
+        setDesigns(prev => prev.filter(d => !finalTargetIds.includes(d.id)));
         setSelectedIdsForDelete([]);
-        if (selectedDesign && targetIds.includes(selectedDesign.id)) {
+        if (selectedDesign && finalTargetIds.includes(selectedDesign.id)) {
           setSelectedDesign(null);
         }
+        fetchDesigns(page, false);
       }
     } catch (e) {
       console.error('Error moving to trash:', e);
@@ -209,17 +257,58 @@ export default function Home() {
 
   const handleRestoreFromTrash = async (targetIds: string[]) => {
     if (targetIds.length === 0) return;
+
+    let finalTargetIds = [...targetIds];
+    let coverCount = 0;
+    let childCount = 0;
+
+    try {
+      const res = await fetch('/api/designs/trash');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        const pool = data.data;
+
+        const selectedCovers = pool.filter((d: any) => targetIds.includes(d.id) && isCoverDesign(d));
+        coverCount = selectedCovers.length;
+
+        if (coverCount > 0) {
+          const childIdsSet = new Set<string>();
+
+          selectedCovers.forEach((cover: any) => {
+            const coverTime = new Date(cover.created_at || 0).getTime();
+            const sub = cover.sticker_sub;
+
+            pool.forEach((d: any) => {
+              if (d.id === cover.id || isCoverDesign(d)) return;
+              const itemTime = new Date(d.created_at || 0).getTime();
+              const isTimeMatched = Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
+              const isSubMatched = sub && d.sticker_sub === sub;
+
+              if (isTimeMatched || isSubMatched) {
+                childIdsSet.add(d.id);
+              }
+            });
+          });
+
+          childCount = childIdsSet.size;
+          finalTargetIds = Array.from(new Set([...targetIds, ...Array.from(childIdsSet)]));
+        }
+      }
+    } catch (e) {
+      console.error('Error finding child stickers for cascade restore:', e);
+    }
+
     try {
       const res = await fetch('/api/designs/restore', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: targetIds })
+        body: JSON.stringify({ ids: finalTargetIds })
       });
       const data = await res.json();
       if (data.success) {
-        setTrashDesigns(prev => prev.filter(d => !targetIds.includes(d.id)));
+        setTrashDesigns(prev => prev.filter(d => !finalTargetIds.includes(d.id)));
         setSelectedIdsInTrash([]);
-        fetchDesigns(); // refresh main gallery
+        fetchDesigns();
       }
     } catch (e) {
       console.error('Error restoring design:', e);
@@ -229,18 +318,64 @@ export default function Home() {
 
   const handlePermanentDelete = async (targetIds: string[]) => {
     if (targetIds.length === 0) return;
-    if (!confirm(`선택한 ${targetIds.length}개 항목을 영구 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다!`)) return;
+
+    let finalTargetIds = [...targetIds];
+    let coverCount = 0;
+    let childCount = 0;
+
+    try {
+      const res = await fetch('/api/designs/trash');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        const pool = data.data;
+
+        const selectedCovers = pool.filter((d: any) => targetIds.includes(d.id) && isCoverDesign(d));
+        coverCount = selectedCovers.length;
+
+        if (coverCount > 0) {
+          const childIdsSet = new Set<string>();
+
+          selectedCovers.forEach((cover: any) => {
+            const coverTime = new Date(cover.created_at || 0).getTime();
+            const sub = cover.sticker_sub;
+
+            pool.forEach((d: any) => {
+              if (d.id === cover.id || isCoverDesign(d)) return;
+              const itemTime = new Date(d.created_at || 0).getTime();
+              const isTimeMatched = Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
+              const isSubMatched = sub && d.sticker_sub === sub;
+
+              if (isTimeMatched || isSubMatched) {
+                childIdsSet.add(d.id);
+              }
+            });
+          });
+
+          childCount = childIdsSet.size;
+          finalTargetIds = Array.from(new Set([...targetIds, ...Array.from(childIdsSet)]));
+        }
+      }
+    } catch (e) {
+      console.error('Error finding child stickers for cascade permanent delete:', e);
+    }
+
+    const confirmMsg = coverCount > 0
+      ? `선택한 마스터 팩 ${coverCount}개 및 포함된 하위 스티커 ${childCount}개 (총 ${finalTargetIds.length}개 항목)를 영구 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다!`
+      : `선택한 ${finalTargetIds.length}개 항목을 영구 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다!`;
+
+    if (!confirm(confirmMsg)) return;
 
     try {
       const res = await fetch('/api/designs/delete', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids: targetIds, permanent: true })
+        body: JSON.stringify({ ids: finalTargetIds, permanent: true })
       });
       const data = await res.json();
       if (data.success) {
-        setTrashDesigns(prev => prev.filter(d => !targetIds.includes(d.id)));
+        setTrashDesigns(prev => prev.filter(d => !finalTargetIds.includes(d.id)));
         setSelectedIdsInTrash([]);
+        fetchDesigns();
       }
     } catch (e) {
       console.error('Error permanently deleting:', e);
