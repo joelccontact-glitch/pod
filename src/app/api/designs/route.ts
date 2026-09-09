@@ -108,12 +108,8 @@ export async function GET(request: Request) {
           const theme = (data.theme || '').toLowerCase();
           const text = `${title} ${topic} ${prompt} ${theme}`;
 
-          // Priority 0: Explicit DB Field (If already set in Firestore)
-          if (data.sticker_sub && ['terrarium', 'vivarium', 'saltaquarium', 'freshaquarium'].includes(data.sticker_sub)) {
-            stickerSub = data.sticker_sub;
-          }
           // Priority 1: Explicit presetId prefix matching
-          else if (presetId.startsWith('fresh-aquarium') || presetId.startsWith('freshaquarium')) {
+          if (presetId.startsWith('fresh-aquarium') || presetId.startsWith('freshaquarium')) {
             stickerSub = 'freshaquarium';
           } else if (presetId.startsWith('salt-aquarium') || presetId.startsWith('saltaquarium')) {
             stickerSub = 'saltaquarium';
@@ -122,7 +118,29 @@ export async function GET(request: Request) {
           } else if (presetId.startsWith('terrarium')) {
             stickerSub = 'terrarium';
           } 
-          // Priority 2: Niche Keyword Priority (Terrarium & Succulent -> Vivarium -> Saltwater Aquarium -> Freshwater Aquarium)
+          // Priority 2: Explicit Title & Topic Matching (HIGHEST DETERMINISTIC INTENT)
+          else if (
+            title.includes('열대어어항') || title.includes('열대어 어항') || title.includes('freshwater aquarium') || title.includes('fresh aquarium') ||
+            topic.includes('열대어어항') || topic.includes('열대어 어항') || topic.includes('freshwater aquarium')
+          ) {
+            stickerSub = 'freshaquarium';
+          } else if (
+            title.includes('해수어항') || title.includes('해수 어항') || title.includes('saltwater aquarium') || title.includes('salt aquarium') ||
+            topic.includes('해수어항') || topic.includes('해수 어항') || topic.includes('saltwater aquarium')
+          ) {
+            stickerSub = 'saltaquarium';
+          } else if (
+            title.includes('비바리움') || title.includes('vivarium') ||
+            topic.includes('비바리움') || topic.includes('vivarium')
+          ) {
+            stickerSub = 'vivarium';
+          } else if (
+            title.includes('테라리움') || title.includes('terrarium') ||
+            topic.includes('테라리움') || topic.includes('terrarium')
+          ) {
+            stickerSub = 'terrarium';
+          }
+          // Priority 3: Keyword / Prompt text matching (Fallback when title has no explicit series tag)
           else if (
             text.includes('terrarium') || text.includes('테라리움') || text.includes('succulent') || text.includes('다육식물') || text.includes('teacup succulent') || text.includes('moss jar')
           ) {
@@ -132,11 +150,11 @@ export async function GET(request: Request) {
           ) {
             stickerSub = 'vivarium';
           } else if (
-            text.includes('saltaquarium') || text.includes('saltwater') || text.includes('해수어항') || text.includes('해수 어항') || text.includes('clownfish') || text.includes('seahorse') || text.includes('anemone') || text.includes('coral tank') || text.includes('angelfish')
+            text.includes('saltaquarium') || text.includes('saltwater') || text.includes('해수어항') || text.includes('해수 어항') || text.includes('clownfish') || text.includes('seahorse') || text.includes('anemone') || text.includes('coral tank') || text.includes('blue tang')
           ) {
             stickerSub = 'saltaquarium';
           } else if (
-            text.includes('freshaquarium') || text.includes('freshwater') || text.includes('열대어어항') || text.includes('열대어 어항') || text.includes('열대어') || text.includes('betta') || text.includes('guppy') || text.includes('neon tetra') || text.includes('goldfish') || text.includes('어항')
+            text.includes('freshaquarium') || text.includes('freshwater') || text.includes('열대어어항') || text.includes('열대어 어항') || text.includes('열대어') || text.includes('betta') || text.includes('guppy') || text.includes('neon tetra') || text.includes('angelfish') || text.includes('goldfish') || text.includes('오토싱') || text.includes('애플 스네일') || text.includes('어항')
           ) {
             stickerSub = 'freshaquarium';
           } else {
