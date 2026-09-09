@@ -17,56 +17,34 @@ export async function GET() {
 
     snapshot.docs.forEach((doc: any) => {
       const data = doc.data();
-      const titleTopic = `${data.title || ''} ${data.topic || ''} ${data.prompt || ''} ${data.stickerPresetId || ''} ${data.theme || ''}`.toLowerCase();
-      
-      const isPodTitle = (
-        titleTopic.includes('t-shirt') ||
-        titleTopic.includes('shirt') ||
-        titleTopic.includes('tee') ||
-        titleTopic.includes('mug') ||
-        titleTopic.includes('tumbler') ||
-        titleTopic.includes('티셔츠') ||
-        titleTopic.includes('머그컵')
+      const titleLower = `${data.title || ''} ${data.topic || ''}`.toLowerCase();
+      const isExplicitStickerPresetOrTag = (
+        Boolean(data.stickerPresetId) ||
+        titleLower.includes('스티커') ||
+        titleLower.includes('sticker pack') ||
+        titleLower.includes('sticker bundle') ||
+        titleLower.includes('마스터 썸네일') ||
+        titleLower.includes('마스터 표지') ||
+        titleLower.includes('대표 커버')
       );
 
-      const isStickerTitleOrType = (
-        data.is_sticker === true ||
-        data.design_type === 'sticker' ||
-        Boolean(data.stickerPresetId) ||
-        titleTopic.includes('스티커') ||
-        titleTopic.includes('sticker') ||
-        titleTopic.includes('die-cut') ||
-        titleTopic.includes('terrarium') ||
-        titleTopic.includes('테라리움') ||
-        titleTopic.includes('succulent') ||
-        titleTopic.includes('다육식물') ||
-        titleTopic.includes('vivarium') ||
-        titleTopic.includes('비바리움') ||
-        titleTopic.includes('chameleon') ||
-        titleTopic.includes('gecko') ||
-        titleTopic.includes('saltaquarium') ||
-        titleTopic.includes('saltwater') ||
-        titleTopic.includes('해수어항') ||
-        titleTopic.includes('해수 어항') ||
-        titleTopic.includes('clownfish') ||
-        titleTopic.includes('seahorse') ||
-        titleTopic.includes('freshaquarium') ||
-        titleTopic.includes('freshwater') ||
-        titleTopic.includes('열대어어항') ||
-        titleTopic.includes('열대어 어항') ||
-        titleTopic.includes('betta') ||
-        titleTopic.includes('guppy') ||
-        titleTopic.includes('aquarium') ||
-        titleTopic.includes('master cover') ||
-        titleTopic.includes('마스터 썸네일') ||
-        titleTopic.includes('마스터 표지')
+      const isPodApparelTitle = (
+        titleLower.includes('t-shirt') ||
+        titleLower.includes('shirt') ||
+        titleLower.includes('tee') ||
+        titleLower.includes('mug') ||
+        titleLower.includes('tumbler') ||
+        titleLower.includes('티셔츠') ||
+        titleLower.includes('머그컵')
       );
 
       let resolvedType: 'pod' | 'sticker' = 'pod';
-      if (isStickerTitleOrType) {
+      if (isExplicitStickerPresetOrTag) {
         resolvedType = 'sticker';
-      } else if (isPodTitle) {
+      } else if (isPodApparelTitle) {
         resolvedType = 'pod';
+      } else if (data.design_type === 'sticker' || data.is_sticker === true) {
+        resolvedType = 'sticker';
       } else if (data.design_type === 'pod') {
         resolvedType = 'pod';
       } else {

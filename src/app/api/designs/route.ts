@@ -77,24 +77,38 @@ export async function GET(request: Request) {
 
         let resolvedType: 'pod' | 'sticker' = 'pod';
 
-        // 1. Strict DB Field Priority for design_type
-        if (data.design_type === 'sticker' || data.is_sticker === true) {
+        // 1. Strict Determination of POD Apparel vs Sticker Pack
+        const titleLower = `${data.title || ''} ${data.topic || ''}`.toLowerCase();
+        const isExplicitStickerPresetOrTag = (
+          Boolean(data.stickerPresetId) ||
+          titleLower.includes('스티커') ||
+          titleLower.includes('sticker pack') ||
+          titleLower.includes('sticker bundle') ||
+          titleLower.includes('마스터 썸네일') ||
+          titleLower.includes('마스터 표지') ||
+          titleLower.includes('대표 커버')
+        );
+
+        const isPodApparelTitle = (
+          titleLower.includes('t-shirt') ||
+          titleLower.includes('shirt') ||
+          titleLower.includes('tee') ||
+          titleLower.includes('mug') ||
+          titleLower.includes('tumbler') ||
+          titleLower.includes('티셔츠') ||
+          titleLower.includes('머그컵')
+        );
+
+        if (isExplicitStickerPresetOrTag) {
+          resolvedType = 'sticker';
+        } else if (isPodApparelTitle) {
+          resolvedType = 'pod';
+        } else if (data.design_type === 'sticker' || data.is_sticker === true) {
           resolvedType = 'sticker';
         } else if (data.design_type === 'pod') {
           resolvedType = 'pod';
         } else {
-          // Fallback parsing ONLY for legacy documents where design_type is missing in DB
-          const titleTopic = `${data.title || ''} ${data.topic || ''} ${data.prompt || ''} ${data.stickerPresetId || ''} ${data.theme || ''}`.toLowerCase();
-          const isStickerTitleOrType = (
-            Boolean(data.stickerPresetId) ||
-            titleTopic.includes('스티커') ||
-            titleTopic.includes('sticker') ||
-            titleTopic.includes('die-cut') ||
-            titleTopic.includes('master cover') ||
-            titleTopic.includes('마스터 썸네일') ||
-            titleTopic.includes('마스터 표지')
-          );
-          resolvedType = isStickerTitleOrType ? 'sticker' : 'pod';
+          resolvedType = 'pod';
         }
 
         let stickerSub: 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'other' = 'other';
