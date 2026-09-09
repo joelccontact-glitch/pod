@@ -11,12 +11,14 @@ export async function POST(req: Request) {
     }
 
     if (process.env.FIREBASE_PROJECT_ID) {
+      const nowIso = new Date().toISOString();
       const designRef = db.collection('designs').doc(id);
-      await designRef.update({
+      await designRef.set({
         ...updates,
-        updated_at: new Date().toISOString()
-      });
+        updated_at: nowIso
+      }, { merge: true });
       clearDesignsCache();
+      return NextResponse.json({ success: true, updated_at: nowIso });
     }
 
     return NextResponse.json({ success: true });

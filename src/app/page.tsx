@@ -121,7 +121,7 @@ export default function Home() {
           updated_at: new Date().toISOString()
         };
 
-        await fetch('/api/designs/update', {
+        const updateRes = await fetch('/api/designs/update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -130,14 +130,28 @@ export default function Home() {
           })
         });
 
-        setSelectedPackCover((prev: any) => prev ? { ...prev, ...updates } : prev);
-        setDesigns(prev => prev.map(d => d.id === coverDesign.id ? { ...d, ...updates } : d));
+        const updateData = await updateRes.json();
+        if (!updateRes.ok || !updateData.success) {
+          throw new Error(updateData.error || 'Firestore DB 업데이트 실패');
+        }
+
+        const freshTs = updateData.updated_at ? new Date(updateData.updated_at).getTime() : Date.now();
+        const freshImageUrl = `/api/designs/image?id=${coverDesign.id}&v=${freshTs}&_t=${Date.now()}`;
+
+        const freshData = {
+          ...updates,
+          updated_at: updateData.updated_at || updates.updated_at,
+          image_url: freshImageUrl
+        };
+
+        setSelectedPackCover((prev: any) => prev ? { ...prev, ...freshData } : prev);
+        setDesigns(prev => prev.map(d => d.id === coverDesign.id ? { ...d, ...freshData } : d));
         if (selectedDesign?.id === coverDesign.id) {
-          setSelectedDesign((prev: any) => prev ? { ...prev, ...updates } : prev);
+          setSelectedDesign((prev: any) => prev ? { ...prev, ...freshData } : prev);
         }
 
         alert('✨ 마스터 표지가 새 이미지로 성공적으로 단독 재생성되었습니다!');
-        fetchDesigns(page, false, undefined, undefined, true);
+        await fetchDesigns(page, false, undefined, undefined, true);
       } else {
         alert('마스터 표지 생성 실패: ' + (data.error || '오류가 발생했습니다.'));
       }
