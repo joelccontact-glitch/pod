@@ -101,7 +101,25 @@ export async function POST(req: Request) {
       }
     }
 
-    newPrompt = buildEnforced2DVectorPrompt(newPrompt, spellingInstruction);
+    const finalTitle = presetTitle || productInfo.title;
+    const lowerScan = `${finalTitle} ${presetTitle || ''} ${prompt || ''}`.toLowerCase();
+    const isSticker = (
+      lowerScan.includes('sticker pack') ||
+      lowerScan.includes('스티커') ||
+      lowerScan.includes('terrarium') ||
+      lowerScan.includes('테라리움') ||
+      lowerScan.includes('vivarium') ||
+      lowerScan.includes('비바리움') ||
+      lowerScan.includes('saltaquarium') ||
+      lowerScan.includes('해수어항') ||
+      lowerScan.includes('freshaquarium') ||
+      lowerScan.includes('열대어어항') ||
+      lowerScan.includes('master cover') ||
+      lowerScan.includes('마스터 썸네일') ||
+      lowerScan.includes('마스터 표지')
+    );
+
+    newPrompt = buildEnforced2DVectorPrompt(newPrompt, spellingInstruction, isSticker);
 
     let newImageUrl = `https://placehold.co/800x800/eff6ff/1d4ed8?text=Image+Derived+Preview`;
     let verificationInfo: any = null;
@@ -120,24 +138,7 @@ export async function POST(req: Request) {
     }
     
     const newHash = crypto.createHash('md5').update(newPrompt + Date.now().toString()).digest('hex');
-
     const styleNameUsed = styleData ? styleData.name : (styleId ? '지정 화풍' : '이미지 맞춤 화풍');
-    const finalTitle = presetTitle || productInfo.title;
-
-    const lowerScan = `${finalTitle} ${newPrompt} ${prompt}`.toLowerCase();
-    const isSticker = (
-      lowerScan.includes('sticker') ||
-      lowerScan.includes('스티커') ||
-      lowerScan.includes('terrarium') ||
-      lowerScan.includes('테라리움') ||
-      lowerScan.includes('vivarium') ||
-      lowerScan.includes('비바리움') ||
-      lowerScan.includes('aquarium') ||
-      lowerScan.includes('어항') ||
-      lowerScan.includes('master cover') ||
-      lowerScan.includes('마스터') ||
-      lowerScan.includes('표지')
-    );
 
     const newDesignData = {
       prompt_hash: newHash,

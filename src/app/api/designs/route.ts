@@ -44,32 +44,55 @@ export async function GET(request: Request) {
         const data = doc.data();
         if (data.is_deleted) return null;
 
-        // Auto-detect design type for legacy entries
-        let resolvedType: 'pod' | 'sticker' = data.design_type || 'pod';
-        const searchStr = `${data.topic || ''} ${data.theme || ''} ${data.title || ''} ${data.stickerPresetId || ''} ${data.prompt || ''}`.toLowerCase();
-        
-        if (
-          data.is_sticker || 
-          data.design_type === 'sticker' || 
-          searchStr.includes('sticker') || 
-          searchStr.includes('스티커') || 
-          searchStr.includes('terrarium') || 
-          searchStr.includes('테라리움') || 
-          searchStr.includes('vivarium') || 
-          searchStr.includes('비바리움') || 
-          searchStr.includes('aquarium') || 
-          searchStr.includes('어항') || 
-          searchStr.includes('pygmy') ||
-          searchStr.includes('master') ||
-          searchStr.includes('cover') ||
-          searchStr.includes('bundle') ||
-          searchStr.includes('마스터') ||
-          searchStr.includes('표지')
-        ) {
+        // Auto-detect design type for entries
+        let resolvedType: 'pod' | 'sticker' = 'pod';
+
+        const titleTopic = `${data.title || ''} ${data.topic || ''} ${data.stickerPresetId || ''}`.toLowerCase();
+
+        // 1. Explicit POD apparel titles (T-Shirt, Mug, Tumbler, etc.)
+        const isPodTitle = (
+          titleTopic.includes('t-shirt') ||
+          titleTopic.includes('shirt') ||
+          titleTopic.includes('tee') ||
+          titleTopic.includes('mug') ||
+          titleTopic.includes('tumbler') ||
+          titleTopic.includes('티셔츠') ||
+          titleTopic.includes('머그컵')
+        );
+
+        // 2. Explicit Sticker titles or metadata flags
+        const isStickerTitleOrType = (
+          data.is_sticker === true ||
+          data.design_type === 'sticker' ||
+          Boolean(data.stickerPresetId) ||
+          titleTopic.includes('스티커') ||
+          titleTopic.includes('sticker pack') ||
+          titleTopic.includes('terrarium') ||
+          titleTopic.includes('테라리움') ||
+          titleTopic.includes('vivarium') ||
+          titleTopic.includes('비바리움') ||
+          titleTopic.includes('saltaquarium') ||
+          titleTopic.includes('해수어항') ||
+          titleTopic.includes('freshaquarium') ||
+          titleTopic.includes('열대어어항') ||
+          titleTopic.includes('master cover') ||
+          titleTopic.includes('마스터 썸네일') ||
+          titleTopic.includes('마스터 표지')
+        );
+
+        if (isPodTitle && !isStickerTitleOrType) {
+          resolvedType = 'pod';
+        } else if (isStickerTitleOrType) {
           resolvedType = 'sticker';
-          stickerCount++;
+        } else if (data.design_type === 'pod') {
+          resolvedType = 'pod';
         } else {
           resolvedType = 'pod';
+        }
+
+        if (resolvedType === 'sticker') {
+          stickerCount++;
+        } else {
           podCount++;
         }
 

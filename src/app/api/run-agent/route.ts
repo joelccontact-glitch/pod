@@ -226,6 +226,7 @@ The output must be ONLY the raw prompt string for an image generator.`;
       tags: productInfo.tags,
       image_url: imageUrl,
       created_at: new Date().toISOString(),
+      design_type: 'pod',
       status: 'success',
       target_garment: isDarkGarment ? 'dark' : 'light',
       recommended_mockup: recommendedMockup,

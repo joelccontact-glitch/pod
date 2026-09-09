@@ -180,11 +180,12 @@ export function cleanPromptFor2DVector(rawPrompt: string): string {
     .replace(/\b(soft watercolor|watercolor shading|pastel watercolor|watercolor blur|realistic fur|3D render|3D realistic|photorealistic|photorealistic rendering|studio lighting|depth of field|bokeh|realistic texture)\b/gi, '2D vector graphic');
 }
 
-export function buildEnforced2DVectorPrompt(rawPrompt: string, spellingInstruction?: string): string {
+export function buildEnforced2DVectorPrompt(rawPrompt: string, spellingInstruction?: string, isSticker: boolean = false): string {
   const cleaned = cleanPromptFor2DVector(rawPrompt);
   const typographySection = spellingInstruction ? ` ${spellingInstruction}` : '';
+  const typeDescriptor = isSticker ? 'sticker illustration' : 't-shirt graphic illustration';
   
-  return `Square 1:1 ratio 2D vector graphic sticker illustration of ${cleaned}.${typographySection} Isolated cute adorable animal artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`;
+  return `Square 1:1 ratio 2D vector graphic ${typeDescriptor} of ${cleaned}.${typographySection} Isolated cute adorable animal artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`;
 }
 
 export interface LikedDesignRef {

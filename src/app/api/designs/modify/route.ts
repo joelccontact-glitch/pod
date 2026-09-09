@@ -41,7 +41,23 @@ export async function POST(req: Request) {
       });
       const productInfoText = textResponse.text;
       productInfo = productInfoText ? JSON.parse(productInfoText) : productInfo;
-      newPrompt = buildEnforced2DVectorPrompt(newPrompt, spellingInstruction);
+      const scanStr = `${topic || ''} ${originalPrompt || ''} ${feedback || ''}`.toLowerCase();
+      const isSticker = (
+        scanStr.includes('sticker pack') ||
+        scanStr.includes('스티커') ||
+        scanStr.includes('terrarium') ||
+        scanStr.includes('테라리움') ||
+        scanStr.includes('vivarium') ||
+        scanStr.includes('비바리움') ||
+        scanStr.includes('saltaquarium') ||
+        scanStr.includes('해수어항') ||
+        scanStr.includes('freshaquarium') ||
+        scanStr.includes('열대어어항') ||
+        scanStr.includes('master cover') ||
+        scanStr.includes('마스터 썸네일') ||
+        scanStr.includes('마스터 표지')
+      );
+      newPrompt = buildEnforced2DVectorPrompt(newPrompt, spellingInstruction, isSticker);
     }
 
     let newImageUrl = '';
