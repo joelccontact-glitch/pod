@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
 
+// In-memory cache for fast pagination and instant responses (< 5ms)
+let cachedSnapshotDocs: { id: string; data: any }[] | null = null;
+let lastCacheTime = 0;
+const CACHE_TTL_MS = 10000; // 10 seconds cache
+
+export function clearDesignsCache() {
+  cachedSnapshotDocs = null;
+  lastCacheTime = 0;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -32,11 +42,27 @@ export async function GET(request: Request) {
     const filterType = searchParams.get('type') || 'all'; // 'pod' | 'sticker' | 'all'
     const subType = searchParams.get('subType') || 'all'; // 'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium'
     const searchQuery = (searchParams.get('search') || searchParams.get('q') || '').trim().toLowerCase();
+    const nocache = searchParams.get('nocache') === 'true';
 
-    // Fetch non-deleted designs
-    const designsSnapshot = await db.collection('designs')
-      .orderBy('created_at', 'desc')
-      .get();
+    const now = Date.now();
+    if (nocache || !cachedSnapshotDocs || (now - lastCacheTime > CACHE_TTL_MS)) {
+      // Fetch ONLY lightweight metadata fields from Firestore (excludes heavy base64 images!)
+      const designsSnapshot = await db.collection('designs')
+        .orderBy('created_at', 'desc')
+        .select(
+          'title', 'topic', 'prompt', 'tags', 'stickerPresetId', 'theme',
+          'sticker_sub', 'design_type', 'is_sticker', 'is_deleted',
+          'created_at', 'updated_at', 'catchphrase', 'season_name',
+          'style_name', 'feedback_applied', 'is_liked', 'prompt_hash'
+        )
+        .get();
+
+      cachedSnapshotDocs = designsSnapshot.docs.map((doc: any) => ({
+        id: doc.id,
+        data: doc.data()
+      }));
+      lastCacheTime = now;
+    }
       
     let podCount = 0;
     let stickerCount = 0;
@@ -45,10 +71,9 @@ export async function GET(request: Request) {
     let saltaquariumCount = 0;
     let freshaquariumCount = 0;
 
-    const allDesigns = designsSnapshot.docs
-      .map((doc: any) => {
-        const data = doc.data();
-        if (data.is_deleted) return null;
+    const allDesigns = (cachedSnapshotDocs || [])
+      .map(({ id: docId, data }: any) => {
+        if (!data || data.is_deleted) return null;
 
         let resolvedType: 'pod' | 'sticker' = 'pod';
 
@@ -76,7 +101,7 @@ export async function GET(request: Request) {
 
         if (resolvedType === 'sticker') {
           stickerCount++;
-          const presetId = (data.stickerPresetId || doc.id || '').toLowerCase();
+          const presetId = (data.stickerPresetId || docId || '').toLowerCase();
           const title = (data.title || '').toLowerCase();
           const topic = (data.topic || '').toLowerCase();
           const prompt = (data.prompt || '').toLowerCase();
@@ -131,11 +156,11 @@ export async function GET(request: Request) {
         // Exclude heavy raw base64 data string from list response to shrink payload from 10MB to 50KB!
         const { image_url: rawImg, ...restData } = data;
         const optimizedImageUrl = (rawImg && rawImg.startsWith('data:image/')) 
-          ? `/api/designs/image?id=${doc.id}&v=${versionTs}` 
-          : (rawImg || `/api/designs/image?id=${doc.id}&v=${versionTs}`);
+          ? `/api/designs/image?id=${docId}&v=${versionTs}` 
+          : (rawImg || `/api/designs/image?id=${docId}&v=${versionTs}`);
 
         return {
-          id: doc.id,
+          id: docId,
           ...restData,
           design_type: resolvedType,
           sticker_sub: stickerSub,
