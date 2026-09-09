@@ -4,7 +4,7 @@ import { db } from '@/lib/firebase-admin';
 // In-memory cache for fast pagination and instant responses (< 5ms)
 let cachedSnapshotDocs: { id: string; data: any }[] | null = null;
 let lastCacheTime = 0;
-const CACHE_TTL_MS = 10000; // 10 seconds cache
+const CACHE_TTL_MS = 2000; // 2 seconds cache for instant UI updates
 
 export function clearDesignsCache() {
   cachedSnapshotDocs = null;

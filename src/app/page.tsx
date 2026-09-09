@@ -247,7 +247,7 @@ export default function Home() {
         if (selectedDesign && finalTargetIds.includes(selectedDesign.id)) {
           setSelectedDesign(null);
         }
-        fetchDesigns(page, false);
+        fetchDesigns(page, false, undefined, undefined, true);
       }
     } catch (e) {
       console.error('Error moving to trash:', e);
@@ -308,7 +308,7 @@ export default function Home() {
       if (data.success) {
         setTrashDesigns(prev => prev.filter(d => !finalTargetIds.includes(d.id)));
         setSelectedIdsInTrash([]);
-        fetchDesigns();
+        fetchDesigns(page, false, undefined, undefined, true);
       }
     } catch (e) {
       console.error('Error restoring design:', e);
@@ -375,7 +375,7 @@ export default function Home() {
       if (data.success) {
         setTrashDesigns(prev => prev.filter(d => !finalTargetIds.includes(d.id)));
         setSelectedIdsInTrash([]);
-        fetchDesigns();
+        fetchDesigns(page, false, undefined, undefined, true);
       }
     } catch (e) {
       console.error('Error permanently deleting:', e);
@@ -1635,13 +1635,14 @@ export default function Home() {
     fetchDesigns(1, false);
   };
 
-  const fetchDesigns = async (currentPage: number = 1, showSpinner: boolean = true, subOverride?: string, searchOverride?: string) => {
+  const fetchDesigns = async (currentPage: number = 1, showSpinner: boolean = true, subOverride?: string, searchOverride?: string, forceNoCache: boolean = false) => {
     if (showSpinner) setLoadingInitial(true);
     try {
       const activeSub = subOverride !== undefined ? subOverride : selectedStickerSubTab;
       const activeSearch = searchOverride !== undefined ? searchOverride : searchKeyword;
       const onlyCoversParam = selectedCategoryTab === 'sticker' ? '&onlyCovers=true' : '';
-      const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}&subType=${activeSub}&search=${encodeURIComponent(activeSearch.trim())}${onlyCoversParam}`);
+      const nocacheParam = forceNoCache ? '&nocache=true' : '';
+      const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}&subType=${activeSub}&search=${encodeURIComponent(activeSearch.trim())}${onlyCoversParam}${nocacheParam}`);
       const data = await res.json();
       if (data.success) {
         setDesigns(data.data);
