@@ -56,6 +56,47 @@ export default function Home() {
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; label: string }>({ current: 0, total: 0, label: '' });
   const [isMigrating, setIsMigrating] = useState(false);
 
+  // Sticker Pack 20-Pack Bundle Detail View Modal States
+  const [isPackDetailModalOpen, setIsPackDetailModalOpen] = useState(false);
+  const [selectedPackCover, setSelectedPackCover] = useState<any>(null);
+  const [packStickers, setPackStickers] = useState<any[]>([]);
+  const [loadingPackStickers, setLoadingPackStickers] = useState(false);
+
+  const handleOpenPackDetail = async (coverDesign: any) => {
+    setSelectedPackCover(coverDesign);
+    setIsPackDetailModalOpen(true);
+    setLoadingPackStickers(true);
+    setPackStickers([]);
+
+    try {
+      const res = await fetch(`/api/designs?limit=1000&type=sticker`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        const pool = data.data;
+        const coverTime = new Date(coverDesign.created_at || 0).getTime();
+        const sub = coverDesign.sticker_sub;
+
+        const matched = pool.filter((d: any) => {
+          if (d.id === coverDesign.id) return false;
+          if (isCoverDesign(d)) return false;
+
+          const itemTime = new Date(d.created_at || 0).getTime();
+          const isTimeMatched = Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
+          const isSubMatched = sub && d.sticker_sub === sub;
+
+          return isTimeMatched || isSubMatched;
+        });
+
+        matched.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+        setPackStickers(matched.slice(0, 20));
+      }
+    } catch (e) {
+      console.error('Error fetching pack stickers:', e);
+    } finally {
+      setLoadingPackStickers(false);
+    }
+  };
+
   const handleRunMigration = async () => {
     if (!confirm('기존 DB에 저장된 모든 스티커 데이터에 영문 카테고리(sticker_sub: terrarium/vivarium/saltaquarium/freshaquarium) 일괄 업데이트를 진행하시겠습니까?')) return;
     setIsMigrating(true);
@@ -1448,7 +1489,8 @@ export default function Home() {
     try {
       const activeSub = subOverride !== undefined ? subOverride : selectedStickerSubTab;
       const activeSearch = searchOverride !== undefined ? searchOverride : searchKeyword;
-      const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}&subType=${activeSub}&search=${encodeURIComponent(activeSearch.trim())}`);
+      const onlyCoversParam = selectedCategoryTab === 'sticker' ? '&onlyCovers=true' : '';
+      const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}&subType=${activeSub}&search=${encodeURIComponent(activeSearch.trim())}${onlyCoversParam}`);
       const data = await res.json();
       if (data.success) {
         setDesigns(data.data);
@@ -2340,9 +2382,13 @@ export default function Home() {
                         setSelectedIdsForDelete(prev => [...prev, design.id]);
                       }
                     } else {
-                      setSelectedDesign(design);
-                      if (design.recommended_mockup) {
-                        setSelectedMockupId(design.recommended_mockup);
+                      if (selectedCategoryTab === 'sticker' || isMasterCover) {
+                        handleOpenPackDetail(design);
+                      } else {
+                        setSelectedDesign(design);
+                        if (design.recommended_mockup) {
+                          setSelectedMockupId(design.recommended_mockup);
+                        }
                       }
                     }
                   }}
@@ -3600,6 +3646,218 @@ export default function Home() {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🌟 Sticker 20-Pack Bundle Detail View Modal (마스터 썸네일 클릭 시 20종 전용 뷰어) */}
+        {isPackDetailModalOpen && selectedPackCover && (
+          <div className="fixed inset-0 bg-black/70 z-[70] flex items-center justify-center p-3 sm:p-6 backdrop-blur-md">
+            <div className="bg-white rounded-3xl max-w-6xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-teal-200 animate-fadeIn">
+              
+              {/* Modal Header */}
+              <div className="p-4 sm:p-6 bg-gradient-to-r from-teal-900 via-emerald-900 to-slate-900 text-white flex justify-between items-center shrink-0">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 border border-white/20 overflow-hidden shrink-0 shadow-md">
+                    <img 
+                      src={selectedPackCover.image_url} 
+                      alt={selectedPackCover.title} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="bg-amber-400 text-amber-950 text-[10px] sm:text-xs font-extrabold px-2.5 py-0.5 rounded-full shadow-xs uppercase tracking-wider">
+                        🌟 마스터 썸네일 팩
+                      </span>
+                      <span className="bg-teal-500/30 text-teal-200 text-[10px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full border border-teal-400/30">
+                        {selectedPackCover.sticker_sub ? selectedPackCover.sticker_sub.toUpperCase() : 'STICKER PACK'}
+                      </span>
+                    </div>
+                    <h3 className="text-base sm:text-xl font-bold text-white truncate">
+                      {selectedPackCover.title || selectedPackCover.topic || 'Etsy 20종 스티커 마스터 팩'}
+                    </h3>
+                    <p className="text-xs text-teal-200 mt-0.5 font-medium flex items-center gap-2">
+                      <span>📅 생성일: {new Date(selectedPackCover.created_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                      <span>•</span>
+                      <span className="text-amber-300 font-bold">
+                        총 {1 + packStickers.length}장 (마스터 표지 1장 + 스티커 {packStickers.length}종)
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsPackDetailModalOpen(false)}
+                  className="text-teal-200 hover:text-white text-2xl font-bold w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Action Toolbar */}
+              <div className="p-3 sm:p-4 bg-teal-50/90 border-b border-teal-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-teal-900 bg-teal-100 border border-teal-300 px-3 py-1.5 rounded-xl">
+                    📦 세트 구성: 표지 1장 + 하위 스티커 {packStickers.length}종
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => downloadBatchSession([selectedPackCover, ...packStickers], `${selectedPackCover.topic || 'Sticker_Pack'}_Bundle`)}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-emerald-500"
+                  >
+                    <span>📦</span>
+                    <span>이 팩 전체 {packStickers.length}종 ZIP 일괄 다운로드</span>
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      try {
+                        const transparentDataUrl = await processTransparentPNG(selectedPackCover.image_url, { targetWidth: 3000, targetHeight: 3000 });
+                        const a = document.createElement('a');
+                        a.href = transparentDataUrl;
+                        a.download = `00_Master_Cover_${selectedPackCover.id || Date.now()}.png`;
+                        a.click();
+                      } catch (e) {
+                        const a = document.createElement('a');
+                        a.href = selectedPackCover.image_url;
+                        a.download = `00_Master_Cover_${selectedPackCover.id || Date.now()}.jpg`;
+                        a.click();
+                      }
+                    }}
+                    className="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
+                  >
+                    <span>🖼️</span>
+                    <span>마스터 표지 다운로드</span>
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      const allIds = [selectedPackCover.id, ...packStickers.map(s => s.id)];
+                      if (confirm(`이 마스터 팩 및 포함된 20개 스티커 전체 (${allIds.length}개 항목)를 삭제함으로 이동하시겠습니까?`)) {
+                        await handleMoveToTrash(allIds);
+                        setIsPackDetailModalOpen(false);
+                      }
+                    }}
+                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
+                  >
+                    <span>🗑️</span>
+                    <span>팩 전체 삭제</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Grid Content Section */}
+              <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-stone-50">
+                {loadingPackStickers ? (
+                  <div className="py-24 text-center text-teal-800 font-medium space-y-3">
+                    <div className="w-10 h-10 border-4 border-teal-300 border-t-teal-700 rounded-full animate-spin mx-auto"></div>
+                    <p className="text-sm">팩에 포함된 20종 스티커 목록을 불러오는 중입니다...</p>
+                  </div>
+                ) : packStickers.length === 0 ? (
+                  <div className="py-20 text-center text-gray-500 font-medium space-y-2">
+                    <div className="text-4xl mb-2">🖼️</div>
+                    <p className="text-base text-gray-700 font-bold">하위 스티커 항목을 찾을 수 없습니다.</p>
+                    <p className="text-xs text-gray-500">마스터 썸네일 단독 항목이거나 스티커 작성을 완료해 주세요.</p>
+                  </div>
+                ) : (
+                  <div>
+                    <h4 className="text-xs font-extrabold text-teal-950 uppercase tracking-wider mb-3 flex items-center justify-between">
+                      <span>🎨 개별 스티커 세부 목록 ({packStickers.length}종)</span>
+                      <span className="text-[11px] text-teal-700 font-normal">개별 항목 클릭 시 수정 / 목업 편집 모달 열림</span>
+                    </h4>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
+                      {packStickers.map((sticker, idx) => (
+                        <div
+                          key={sticker.id || idx}
+                          className="bg-white rounded-2xl border border-teal-100 hover:border-teal-400 overflow-hidden shadow-xs hover:shadow-md transition-all group relative flex flex-col justify-between"
+                        >
+                          {/* Sticker Number Badge */}
+                          <span className="absolute top-2 left-2 z-10 bg-teal-800 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-sm">
+                            #{String(idx + 1).padStart(2, '0')}
+                          </span>
+
+                          {/* Image Preview */}
+                          <div 
+                            className="aspect-square bg-gray-100 relative overflow-hidden cursor-pointer"
+                            onClick={() => {
+                              setSelectedDesign(sticker);
+                              if (sticker.recommended_mockup) {
+                                setSelectedMockupId(sticker.recommended_mockup);
+                              }
+                            }}
+                          >
+                            <img
+                              src={sticker.image_url}
+                              alt={sticker.title || `Sticker #${idx + 1}`}
+                              loading="lazy"
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <span className="bg-white/90 text-teal-900 text-xs font-bold px-3 py-1.5 rounded-xl shadow-md">
+                                🔍 상세보기 / 편집
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Title & Actions */}
+                          <div className="p-2.5 flex flex-col justify-between flex-1 gap-2">
+                            <div>
+                              <h5 className="text-xs font-bold text-gray-800 line-clamp-1">
+                                {sticker.title || sticker.topic || `Sticker #${idx + 1}`}
+                              </h5>
+                              <p className="text-[10px] text-gray-400 line-clamp-1 mt-0.5">
+                                {sticker.prompt}
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-1.5 pt-1.5 border-t border-gray-100">
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  try {
+                                    const transparentDataUrl = await processTransparentPNG(sticker.image_url, { targetWidth: 3000, targetHeight: 3000 });
+                                    const a = document.createElement('a');
+                                    a.href = transparentDataUrl;
+                                    a.download = `${String(idx + 1).padStart(2, '0')}_sticker_${sticker.id || Date.now()}.png`;
+                                    a.click();
+                                  } catch (err) {
+                                    const a = document.createElement('a');
+                                    a.href = sticker.image_url;
+                                    a.download = `sticker_${sticker.id || Date.now()}.jpg`;
+                                    a.click();
+                                  }
+                                }}
+                                className="w-full bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 font-bold text-[11px] py-1 rounded-lg transition-colors flex items-center justify-center gap-1"
+                                title="300DPI 고화질 PNG 다운로드"
+                              >
+                                <span>📥</span>
+                                <span>PNG</span>
+                              </button>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMoveToTrash([sticker.id]);
+                                  setPackStickers(prev => prev.filter(s => s.id !== sticker.id));
+                                }}
+                                className="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-[11px] py-1 rounded-lg transition-colors flex items-center justify-center gap-1"
+                                title="삭제함으로 이동"
+                              >
+                                <span>🗑️</span>
+                                <span>삭제</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

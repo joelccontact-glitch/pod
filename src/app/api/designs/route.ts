@@ -42,6 +42,7 @@ export async function GET(request: Request) {
     const filterType = searchParams.get('type') || 'all'; // 'pod' | 'sticker' | 'all'
     const subType = searchParams.get('subType') || 'all'; // 'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium'
     const searchQuery = (searchParams.get('search') || searchParams.get('q') || '').trim().toLowerCase();
+    const onlyCovers = searchParams.get('onlyCovers') === 'true';
     const nocache = searchParams.get('nocache') === 'true';
 
     const now = Date.now();
@@ -213,10 +214,30 @@ export async function GET(request: Request) {
         if (filterType === 'pod') return item.design_type === 'pod';
         if (filterType === 'sticker') {
           if (item.design_type !== 'sticker') return false;
-          if (subType === 'terrarium') return item.sticker_sub === 'terrarium';
-          if (subType === 'vivarium') return item.sticker_sub === 'vivarium';
-          if (subType === 'saltaquarium') return item.sticker_sub === 'saltaquarium';
-          if (subType === 'freshaquarium') return item.sticker_sub === 'freshaquarium';
+          if (subType === 'terrarium' && item.sticker_sub !== 'terrarium') return false;
+          if (subType === 'vivarium' && item.sticker_sub !== 'vivarium') return false;
+          if (subType === 'saltaquarium' && item.sticker_sub !== 'saltaquarium') return false;
+          if (subType === 'freshaquarium' && item.sticker_sub !== 'freshaquarium') return false;
+          
+          if (onlyCovers) {
+            const scanStr = `${item.title || ''} ${item.topic || ''} ${item.prompt || ''} ${item.stickerPresetId || ''} ${item.id || ''}`.toLowerCase();
+            const isExplicitCover = (
+              scanStr.includes('terrarium-20-pack-cover') ||
+              scanStr.includes('vivarium-20-pack-cover') ||
+              scanStr.includes('saltaquarium-20-pack-cover') ||
+              scanStr.includes('freshaquarium-20-pack-cover') ||
+              scanStr.includes('마스터 썸네일') ||
+              scanStr.includes('마스터 표지') ||
+              scanStr.includes('대표 커버') ||
+              scanStr.includes('master cover') ||
+              scanStr.includes('bundle cover') ||
+              scanStr.includes('pack cover') ||
+              scanStr.includes('20+ cute') ||
+              scanStr.includes('20+ sticker') ||
+              scanStr.includes('etsy digital sticker bundle')
+            );
+            if (!isExplicitCover) return false;
+          }
           return true;
         }
         return true;
