@@ -63,6 +63,56 @@ export default function Home() {
   const [loadingPackStickers, setLoadingPackStickers] = useState(false);
   const [isRegeneratingCover, setIsRegeneratingCover] = useState(false);
 
+  const compressImageForFirestore = (dataUrl: string, maxBytes: number = 800000): Promise<string> => {
+    return new Promise((resolve) => {
+      if (!dataUrl || !dataUrl.startsWith('data:image/') || dataUrl.length <= maxBytes) {
+        resolve(dataUrl);
+        return;
+      }
+
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.src = dataUrl;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width || 1024;
+        let height = img.height || 1024;
+        const maxDim = 1024;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(dataUrl);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        let quality = 0.85;
+        let compressed = canvas.toDataURL('image/jpeg', quality);
+
+        while (compressed.length > maxBytes && quality > 0.3) {
+          quality -= 0.1;
+          compressed = canvas.toDataURL('image/jpeg', quality);
+        }
+
+        resolve(compressed);
+      };
+      img.onerror = () => resolve(dataUrl);
+    });
+  };
+
   const handleRegenerateMasterCover = async (coverDesign: any) => {
     if (!coverDesign) return;
 
@@ -113,10 +163,11 @@ export default function Home() {
 
       const data = await res.json();
       if (data.success && data.data?.image_url) {
-        const newImageUrl = data.data.image_url;
+        const rawImageUrl = data.data.image_url;
+        const compressedUrl = await compressImageForFirestore(rawImageUrl, 800000);
 
         const updates = {
-          image_url: newImageUrl,
+          image_url: compressedUrl,
           prompt: finalPrompt,
           updated_at: new Date().toISOString()
         };
@@ -1258,11 +1309,12 @@ export default function Home() {
   };
 
   const saveManualEdit = async () => {
-    const dataUrl = getFinalCanvasDataUrl();
-    if (!dataUrl || !selectedDesign) return;
+    const rawDataUrl = getFinalCanvasDataUrl();
+    if (!rawDataUrl || !selectedDesign) return;
     
     setIsSavingManual(true);
     try {
+      const dataUrl = await compressImageForFirestore(rawDataUrl, 800000);
       const res = await fetch('/api/designs/save-manual', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1700,8 +1752,10 @@ export default function Home() {
 
           if (data.success && data.data) {
             const subKey = packType === 'terrarium20' ? 'terrarium' : packType === 'vivarium20' ? 'vivarium' : packType === 'saltaquarium20' ? 'saltaquarium' : 'freshaquarium';
+            const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
             const designToSave = {
               ...data.data,
+              image_url: compressedUrl,
               title: preset.name,
               topic: preset.name,
               stickerPresetId: preset.id,
