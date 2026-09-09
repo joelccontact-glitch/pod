@@ -116,6 +116,7 @@ export async function GET(request: Request) {
 
         if (resolvedType === 'sticker') {
           stickerCount++;
+          const explicitSub = data.sticker_sub;
           const presetId = (data.stickerPresetId || docId || '').toLowerCase();
           const title = (data.title || '').toLowerCase();
           const topic = (data.topic || '').toLowerCase();
@@ -123,8 +124,12 @@ export async function GET(request: Request) {
           const theme = (data.theme || '').toLowerCase();
           const text = `${title} ${topic} ${prompt} ${theme}`;
 
+          // Priority 0: Explicit sticker_sub saved in Firestore DB
+          if (explicitSub && ['terrarium', 'vivarium', 'saltaquarium', 'freshaquarium'].includes(explicitSub)) {
+            stickerSub = explicitSub;
+          }
           // Priority 1: Explicit presetId prefix matching
-          if (presetId.startsWith('fresh-aquarium') || presetId.startsWith('freshaquarium')) {
+          else if (presetId.startsWith('fresh-aquarium') || presetId.startsWith('freshaquarium')) {
             stickerSub = 'freshaquarium';
           } else if (presetId.startsWith('salt-aquarium') || presetId.startsWith('saltaquarium')) {
             stickerSub = 'saltaquarium';

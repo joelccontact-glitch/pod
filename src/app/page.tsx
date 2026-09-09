@@ -1458,10 +1458,13 @@ export default function Home() {
         const data = await res.json();
 
         if (data.success && data.data) {
+          const subKey = packType === 'terrarium20' ? 'terrarium' : packType === 'vivarium20' ? 'vivarium' : packType === 'saltaquarium20' ? 'saltaquarium' : 'freshaquarium';
           const designToSave = {
             ...data.data,
             title: preset.name,
             topic: preset.name,
+            stickerPresetId: preset.id,
+            sticker_sub: subKey,
             design_type: 'sticker'
           };
           await fetch('/api/designs/save', {
