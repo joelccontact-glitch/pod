@@ -30,6 +30,7 @@ export async function GET(request: Request) {
     }
 
     const filterType = searchParams.get('type') || 'all'; // 'pod' | 'sticker' | 'all'
+    const subType = searchParams.get('subType') || 'all'; // 'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium'
 
     // Fetch non-deleted designs
     const designsSnapshot = await db.collection('designs')
@@ -38,6 +39,10 @@ export async function GET(request: Request) {
       
     let podCount = 0;
     let stickerCount = 0;
+    let terrariumCount = 0;
+    let vivariumCount = 0;
+    let saltaquariumCount = 0;
+    let freshaquariumCount = 0;
 
     const allDesigns = designsSnapshot.docs
       .map((doc: any) => {
@@ -90,8 +95,46 @@ export async function GET(request: Request) {
           resolvedType = 'pod';
         }
 
+        let stickerSub: 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'other' = 'other';
+
         if (resolvedType === 'sticker') {
           stickerCount++;
+          const presetId = (data.stickerPresetId || doc.id || '').toLowerCase();
+          const text = `${data.title || ''} ${data.topic || ''} ${data.prompt || ''} ${data.theme || ''}`.toLowerCase();
+
+          if (presetId.startsWith('terrarium') || text.includes('terrarium') || text.includes('테라리움')) {
+            stickerSub = 'terrarium';
+            terrariumCount++;
+          } else if (presetId.startsWith('vivarium') || text.includes('vivarium') || text.includes('비바리움') || text.includes('chameleon') || text.includes('gecko')) {
+            stickerSub = 'vivarium';
+            vivariumCount++;
+          } else if (
+            presetId.startsWith('salt-aquarium') || 
+            presetId.startsWith('saltaquarium') || 
+            text.includes('saltaquarium') || 
+            text.includes('saltwater') || 
+            text.includes('해수어항') || 
+            text.includes('clownfish') || 
+            text.includes('seahorse')
+          ) {
+            stickerSub = 'saltaquarium';
+            saltaquariumCount++;
+          } else if (
+            presetId.startsWith('fresh-aquarium') || 
+            presetId.startsWith('freshaquarium') || 
+            text.includes('freshaquarium') || 
+            text.includes('freshwater') || 
+            text.includes('열대어어항') || 
+            text.includes('열대어') || 
+            text.includes('어항') || 
+            text.includes('betta') || 
+            text.includes('guppy')
+          ) {
+            stickerSub = 'freshaquarium';
+            freshaquariumCount++;
+          } else {
+            stickerSub = 'other';
+          }
         } else {
           podCount++;
         }
@@ -108,13 +151,21 @@ export async function GET(request: Request) {
           id: doc.id,
           ...restData,
           design_type: resolvedType,
+          sticker_sub: stickerSub,
           image_url: optimizedImageUrl
         };
       })
       .filter((item: any) => {
         if (!item) return false;
         if (filterType === 'pod') return item.design_type === 'pod';
-        if (filterType === 'sticker') return item.design_type === 'sticker';
+        if (filterType === 'sticker') {
+          if (item.design_type !== 'sticker') return false;
+          if (subType === 'terrarium') return item.sticker_sub === 'terrarium';
+          if (subType === 'vivarium') return item.sticker_sub === 'vivarium';
+          if (subType === 'saltaquarium') return item.sticker_sub === 'saltaquarium';
+          if (subType === 'freshaquarium') return item.sticker_sub === 'freshaquarium';
+          return true;
+        }
         return true;
       });
 
@@ -127,6 +178,13 @@ export async function GET(request: Request) {
       total,
       podCount,
       stickerCount,
+      stickerSubCounts: {
+        all: stickerCount,
+        terrarium: terrariumCount,
+        vivarium: vivariumCount,
+        saltaquarium: saltaquariumCount,
+        freshaquarium: freshaquariumCount
+      },
       page,
       totalPages: Math.ceil(total / limitNum)
     });

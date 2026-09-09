@@ -31,6 +31,16 @@ export default function Home() {
   const [podCount, setPodCount] = useState<number>(0);
   const [stickerCount, setStickerCount] = useState<number>(0);
 
+  // Sticker Sub-Category Filter State ('all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium')
+  const [selectedStickerSubTab, setSelectedStickerSubTab] = useState<'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium'>('all');
+  const [stickerSubCounts, setStickerSubCounts] = useState<{ all: number; terrarium: number; vivarium: number; saltaquarium: number; freshaquarium: number }>({
+    all: 0,
+    terrarium: 0,
+    vivarium: 0,
+    saltaquarium: 0,
+    freshaquarium: 0
+  });
+
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(true);
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
@@ -46,11 +56,28 @@ export default function Home() {
   // Synchronized Handlers for Tab and Mode
   const handleSelectCategoryTab = (tab: 'pod' | 'sticker' | 'all') => {
     setSelectedCategoryTab(tab);
+    setSelectedStickerSubTab('all');
     setPage(1);
     if (tab === 'sticker') {
       setIsStickerMode(true);
     } else {
       setIsStickerMode(false); // POD or All defaults to POD Mode
+    }
+  };
+
+  const handleSelectStickerSubTab = (sub: 'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium') => {
+    setSelectedStickerSubTab(sub);
+    setPage(1);
+    if (sub !== 'all') {
+      const seriesMap: Record<string, 'terrarium20' | 'vivarium20' | 'saltaquarium20' | 'freshaquarium20'> = {
+        terrarium: 'terrarium20',
+        vivarium: 'vivarium20',
+        saltaquarium: 'saltaquarium20',
+        freshaquarium: 'freshaquarium20'
+      };
+      if (seriesMap[sub]) {
+        setSelectedStickerSeriesTab(seriesMap[sub]);
+      }
     }
   };
 
@@ -290,7 +317,7 @@ export default function Home() {
     fetchDesigns(page);
     fetchStyles();
     setActiveSeasonsList(getActiveUpcomingSeasons());
-  }, [page, selectedCategoryTab]);
+  }, [page, selectedCategoryTab, selectedStickerSubTab]);
 
   useEffect(() => {
     if (activeTab === 'mockup' && selectedDesign) {
@@ -1390,10 +1417,11 @@ export default function Home() {
     fetchDesigns(1, false);
   };
 
-  const fetchDesigns = async (currentPage: number = 1, showSpinner: boolean = true) => {
+  const fetchDesigns = async (currentPage: number = 1, showSpinner: boolean = true, subOverride?: string) => {
     if (showSpinner) setLoadingInitial(true);
     try {
-      const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}`);
+      const activeSub = subOverride !== undefined ? subOverride : selectedStickerSubTab;
+      const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}&subType=${activeSub}`);
       const data = await res.json();
       if (data.success) {
         setDesigns(data.data);
@@ -1402,6 +1430,7 @@ export default function Home() {
         setTotalCount(data.total || 0);
         if (data.podCount !== undefined) setPodCount(data.podCount);
         if (data.stickerCount !== undefined) setStickerCount(data.stickerCount);
+        if (data.stickerSubCounts !== undefined) setStickerSubCounts(data.stickerSubCounts);
 
         if (currentPage > newTotalPages && newTotalPages > 0) {
           setPage(newTotalPages);
@@ -2112,10 +2141,91 @@ export default function Home() {
 
           <div className="text-xs text-gray-500 font-medium hidden sm:block">
             {selectedCategoryTab === 'pod' && '👕 단품 티셔츠 / 텀블러 / 에코백 / 머그컵 등 실물 커머스 그래픽'}
-            {selectedCategoryTab === 'sticker' && '📦 테라리움 / 비바리움 / 해수어항 / 열대어어항 스티커 팩'}
+            {selectedCategoryTab === 'sticker' && '📦 클릭하여 각 테마별 스티커 팩을 선택 조회가 가능합니다.'}
             {selectedCategoryTab === 'all' && '🌐 생성된 모든 디자인 종합 리스트'}
           </div>
         </div>
+
+        {/* Sticker Pack Sub-Category Filter Bar (Terrarium / Vivarium / Saltwater / Freshwater / All) */}
+        {selectedCategoryTab === 'sticker' && (
+          <div className="mb-4 bg-teal-50/90 p-2 sm:p-2.5 rounded-2xl border border-teal-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto w-full pb-1 sm:pb-0 custom-scrollbar">
+              <span className="text-xs font-bold text-teal-950 shrink-0 mr-1 flex items-center gap-1">
+                <span>🎯 테마별 필터:</span>
+              </span>
+
+              <button
+                onClick={() => handleSelectStickerSubTab('all')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                  selectedStickerSubTab === 'all'
+                    ? 'bg-teal-700 text-white shadow-xs ring-1 ring-teal-400'
+                    : 'bg-white text-teal-900 hover:bg-teal-100 border border-teal-200'
+                }`}
+              >
+                <span>🌐 스티커 전체</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'all' ? 'bg-teal-900 text-teal-100' : 'bg-teal-100 text-teal-800'}`}>
+                  {stickerSubCounts.all || stickerCount}
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSelectStickerSubTab('terrarium')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                  selectedStickerSubTab === 'terrarium'
+                    ? 'bg-teal-700 text-white shadow-xs ring-1 ring-teal-400'
+                    : 'bg-white text-teal-900 hover:bg-teal-100 border border-teal-200'
+                }`}
+              >
+                <span>🫙 테라리움</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'terrarium' ? 'bg-teal-900 text-teal-100' : 'bg-teal-100 text-teal-800'}`}>
+                  {stickerSubCounts.terrarium || 0}
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSelectStickerSubTab('vivarium')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                  selectedStickerSubTab === 'vivarium'
+                    ? 'bg-emerald-700 text-white shadow-xs ring-1 ring-emerald-400'
+                    : 'bg-white text-emerald-950 hover:bg-emerald-100 border border-emerald-200'
+                }`}
+              >
+                <span>🦎 비바리움</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'vivarium' ? 'bg-emerald-900 text-emerald-100' : 'bg-emerald-100 text-emerald-800'}`}>
+                  {stickerSubCounts.vivarium || 0}
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSelectStickerSubTab('saltaquarium')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                  selectedStickerSubTab === 'saltaquarium'
+                    ? 'bg-cyan-700 text-white shadow-xs ring-1 ring-cyan-400'
+                    : 'bg-white text-cyan-950 hover:bg-cyan-100 border border-cyan-200'
+                }`}
+              >
+                <span>🪸 해수어항</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'saltaquarium' ? 'bg-cyan-900 text-cyan-100' : 'bg-cyan-100 text-cyan-800'}`}>
+                  {stickerSubCounts.saltaquarium || 0}
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSelectStickerSubTab('freshaquarium')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                  selectedStickerSubTab === 'freshaquarium'
+                    ? 'bg-blue-700 text-white shadow-xs ring-1 ring-blue-400'
+                    : 'bg-white text-blue-950 hover:bg-blue-100 border border-blue-200'
+                }`}
+              >
+                <span>🐠 열대어어항</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'freshaquarium' ? 'bg-blue-900 text-blue-100' : 'bg-blue-100 text-blue-800'}`}>
+                  {stickerSubCounts.freshaquarium || 0}
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Gallery View */}
         {loadingInitial ? (
