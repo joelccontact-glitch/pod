@@ -27,12 +27,12 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   // Main Category Tab State ('pod' | 'sticker' | 'all')
-  const [selectedCategoryTab, setSelectedCategoryTab] = useState<'pod' | 'sticker' | 'all'>('pod');
+  const [selectedCategoryTab, setSelectedCategoryTab] = useState<'pod' | 'sticker' | 'all'>('sticker');
   const [podCount, setPodCount] = useState<number>(0);
   const [stickerCount, setStickerCount] = useState<number>(0);
 
   // Sticker & Digital PNG Pack States
-  const [isStickerMode, setIsStickerMode] = useState(false);
+  const [isStickerMode, setIsStickerMode] = useState(true);
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'terrarium20' | 'vivarium20' | 'saltaquarium20' | 'freshaquarium20'>('terrarium20');
   const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-20-pack-1');
@@ -2065,20 +2065,6 @@ export default function Home() {
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-2xl border border-gray-200 shadow-xs">
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
-              onClick={() => handleSelectCategoryTab('pod')}
-              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
-                selectedCategoryTab === 'pod'
-                  ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <span>👕 POD 실물 상품</span>
-              <span className={`text-[11px] px-2 py-0.5 rounded-full ${selectedCategoryTab === 'pod' ? 'bg-indigo-700 text-indigo-100' : 'bg-gray-200 text-gray-600'}`}>
-                {podCount}
-              </span>
-            </button>
-
-            <button
               onClick={() => handleSelectCategoryTab('sticker')}
               className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
                 selectedCategoryTab === 'sticker'
@@ -2089,6 +2075,20 @@ export default function Home() {
               <span>📦 스티커 팩</span>
               <span className={`text-[11px] px-2 py-0.5 rounded-full ${selectedCategoryTab === 'sticker' ? 'bg-teal-700 text-teal-100' : 'bg-gray-200 text-gray-600'}`}>
                 {stickerCount}
+              </span>
+            </button>
+
+            <button
+              onClick={() => handleSelectCategoryTab('pod')}
+              className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
+                selectedCategoryTab === 'pod'
+                  ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <span>👕 POD 실물 상품</span>
+              <span className={`text-[11px] px-2 py-0.5 rounded-full ${selectedCategoryTab === 'pod' ? 'bg-indigo-700 text-indigo-100' : 'bg-gray-200 text-gray-600'}`}>
+                {podCount}
               </span>
             </button>
 
