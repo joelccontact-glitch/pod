@@ -47,6 +47,7 @@ export default function Home() {
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(true);
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
+  const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'terrarium20' | 'vivarium20' | 'saltaquarium20' | 'freshaquarium20'>('terrarium20');
   const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-20-pack-1');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
@@ -2499,39 +2500,55 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 max-h-96 overflow-y-auto pr-1">
-                {(
-                  selectedStickerSeriesTab === 'terrarium20'
-                    ? TERRARIUM_20_SERIES
-                    : selectedStickerSeriesTab === 'vivarium20'
-                    ? VIVARIUM_20_SERIES
-                    : selectedStickerSeriesTab === 'saltaquarium20'
-                    ? SALT_AQUARIUM_20_SERIES
-                    : FRESH_AQUARIUM_20_SERIES
-                ).map((preset) => (
-                  <div
-                    key={preset.id}
-                    onClick={() => {
-                      setSelectedStickerPresetId(preset.id);
-                      setSelectedAnimal(preset.animalValue);
-                      setUploadPrompt(preset.prompt);
-                      setAutoGeneratePhrase(false);
-                      setIsImageModalOpen(true);
-                    }}
-                    className={`p-2 rounded-xl border text-xs cursor-pointer transition-all hover:scale-[1.02] shadow-sm ${
-                      selectedStickerPresetId === preset.id
-                        ? 'bg-teal-100 border-teal-600 text-teal-950 font-bold ring-2 ring-teal-400'
-                        : 'bg-white border-teal-200 text-gray-800 hover:bg-teal-50'
-                    }`}
-                  >
-                    <div className="font-bold flex items-center justify-between">
-                      <span className="truncate pr-1">{preset.name}</span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded text-teal-700 bg-teal-200/60 shrink-0">생성</span>
-                    </div>
-                    <p className="text-[11px] text-gray-600 line-clamp-1 mt-0.5">{preset.description}</p>
-                  </div>
-                ))}
+              <div className="mt-2 mb-1">
+                <button
+                  type="button"
+                  onClick={() => setIsPresetGridExpanded(!isPresetGridExpanded)}
+                  className="w-full py-2 px-3 text-xs font-bold text-teal-800 bg-white hover:bg-teal-50 border border-teal-300 rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition-all select-none"
+                >
+                  <span>
+                    {isPresetGridExpanded
+                      ? '▲ 개별 20종 템플릿 카드 목록 접기'
+                      : '▼ 개별 20종 템플릿 카드 목록 보기 (21개 항목)'}
+                  </span>
+                </button>
               </div>
+
+              {isPresetGridExpanded && (
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 max-h-96 overflow-y-auto pr-1">
+                  {(
+                    selectedStickerSeriesTab === 'terrarium20'
+                      ? TERRARIUM_20_SERIES
+                      : selectedStickerSeriesTab === 'vivarium20'
+                      ? VIVARIUM_20_SERIES
+                      : selectedStickerSeriesTab === 'saltaquarium20'
+                      ? SALT_AQUARIUM_20_SERIES
+                      : FRESH_AQUARIUM_20_SERIES
+                  ).map((preset) => (
+                    <div
+                      key={preset.id}
+                      onClick={() => {
+                        setSelectedStickerPresetId(preset.id);
+                        setSelectedAnimal(preset.animalValue);
+                        setUploadPrompt(preset.prompt);
+                        setAutoGeneratePhrase(false);
+                        setIsImageModalOpen(true);
+                      }}
+                      className={`p-2 rounded-xl border text-xs cursor-pointer transition-all hover:scale-[1.02] shadow-sm ${
+                        selectedStickerPresetId === preset.id
+                          ? 'bg-teal-100 border-teal-600 text-teal-950 font-bold ring-2 ring-teal-400'
+                          : 'bg-white border-teal-200 text-gray-800 hover:bg-teal-50'
+                      }`}
+                    >
+                      <div className="font-bold flex items-center justify-between">
+                        <span className="truncate pr-1">{preset.name}</span>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded text-teal-700 bg-teal-200/60 shrink-0">생성</span>
+                      </div>
+                      <p className="text-[11px] text-gray-600 line-clamp-1 mt-0.5">{preset.description}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
