@@ -1854,14 +1854,6 @@ export default function Home() {
               ⚙️ 화풍 관리
             </button>
             <button 
-              onClick={handleRunMigration}
-              disabled={isMigrating}
-              className="flex-1 sm:flex-none bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-colors whitespace-nowrap text-xs sm:text-sm border border-blue-200 flex items-center gap-1 disabled:opacity-50"
-              title="기존 DB 항목에 영문 서브 카테고리(sticker_sub) 필드를 일괄 업데이트합니다."
-            >
-              <span>{isMigrating ? '⏳ 동기화 중...' : '🔄 DB 데이터 동기화'}</span>
-            </button>
-            <button 
               onClick={handleToggleStickerMode}
               className={`flex-1 sm:flex-none font-bold py-1.5 px-2.5 sm:py-2 sm:px-3.5 rounded-xl transition-all whitespace-nowrap text-xs sm:text-sm border shadow-sm ${
                 isStickerMode 
