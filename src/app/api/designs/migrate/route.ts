@@ -16,7 +16,7 @@ export async function GET() {
 
     snapshot.docs.forEach((doc: any) => {
       const data = doc.data();
-      const titleTopic = `${data.title || ''} ${data.topic || ''} ${data.stickerPresetId || ''}`.toLowerCase();
+      const titleTopic = `${data.title || ''} ${data.topic || ''} ${data.prompt || ''} ${data.stickerPresetId || ''} ${data.theme || ''}`.toLowerCase();
       
       const isPodTitle = (
         titleTopic.includes('t-shirt') ||
@@ -33,26 +33,39 @@ export async function GET() {
         data.design_type === 'sticker' ||
         Boolean(data.stickerPresetId) ||
         titleTopic.includes('스티커') ||
-        titleTopic.includes('sticker pack') ||
+        titleTopic.includes('sticker') ||
+        titleTopic.includes('die-cut') ||
         titleTopic.includes('terrarium') ||
         titleTopic.includes('테라리움') ||
+        titleTopic.includes('succulent') ||
+        titleTopic.includes('다육식물') ||
         titleTopic.includes('vivarium') ||
         titleTopic.includes('비바리움') ||
+        titleTopic.includes('chameleon') ||
+        titleTopic.includes('gecko') ||
         titleTopic.includes('saltaquarium') ||
+        titleTopic.includes('saltwater') ||
         titleTopic.includes('해수어항') ||
+        titleTopic.includes('해수 어항') ||
+        titleTopic.includes('clownfish') ||
+        titleTopic.includes('seahorse') ||
         titleTopic.includes('freshaquarium') ||
+        titleTopic.includes('freshwater') ||
         titleTopic.includes('열대어어항') ||
         titleTopic.includes('열대어 어항') ||
+        titleTopic.includes('betta') ||
+        titleTopic.includes('guppy') ||
+        titleTopic.includes('aquarium') ||
         titleTopic.includes('master cover') ||
         titleTopic.includes('마스터 썸네일') ||
         titleTopic.includes('마스터 표지')
       );
 
       let resolvedType: 'pod' | 'sticker' = 'pod';
-      if (isPodTitle && !isStickerTitleOrType) {
-        resolvedType = 'pod';
-      } else if (isStickerTitleOrType) {
+      if (isStickerTitleOrType) {
         resolvedType = 'sticker';
+      } else if (isPodTitle) {
+        resolvedType = 'pod';
       } else if (data.design_type === 'pod') {
         resolvedType = 'pod';
       } else {
@@ -79,46 +92,22 @@ export async function GET() {
         } else if (presetId.startsWith('terrarium')) {
           stickerSub = 'terrarium';
         }
-        // Priority 2: Title & Topic
+        // Priority 2: Niche Keyword Priority (Terrarium & Succulent -> Vivarium -> Saltwater Aquarium -> Freshwater Aquarium)
         else if (
-          title.includes('열대어어항') || title.includes('열대어 어항') || title.includes('freshwater aquarium') || title.includes('fresh aquarium') ||
-          topic.includes('열대어어항') || topic.includes('열대어 어항') || topic.includes('freshwater aquarium')
-        ) {
-          stickerSub = 'freshaquarium';
-        } else if (
-          title.includes('해수어항') || title.includes('해수 어항') || title.includes('saltwater aquarium') || title.includes('salt aquarium') ||
-          topic.includes('해수어항') || topic.includes('해수 어항') || topic.includes('saltwater aquarium')
-        ) {
-          stickerSub = 'saltaquarium';
-        } else if (
-          title.includes('비바리움') || title.includes('vivarium') ||
-          topic.includes('비바리움') || topic.includes('vivarium')
-        ) {
-          stickerSub = 'vivarium';
-        } else if (
-          title.includes('테라리움') || title.includes('terrarium') ||
-          topic.includes('테라리움') || topic.includes('terrarium')
+          text.includes('terrarium') || text.includes('테라리움') || text.includes('succulent') || text.includes('다육식물') || text.includes('teacup succulent') || text.includes('moss jar')
         ) {
           stickerSub = 'terrarium';
-        }
-        // Priority 3: Species & Keywords
-        else if (
-          text.includes('freshaquarium') || text.includes('freshwater') || text.includes('열대어어항') || text.includes('열대어 어항') || text.includes('열대어') || text.includes('betta') || text.includes('guppy') || text.includes('neon tetra') || text.includes('angelfish') || text.includes('goldfish')
-        ) {
-          stickerSub = 'freshaquarium';
-        } else if (
-          text.includes('saltaquarium') || text.includes('saltwater') || text.includes('해수어항') || text.includes('해수 어항') || text.includes('clownfish') || text.includes('seahorse') || text.includes('anemone')
-        ) {
-          stickerSub = 'saltaquarium';
         } else if (
           text.includes('vivarium') || text.includes('비바리움') || text.includes('chameleon') || text.includes('gecko') || text.includes('dart frog') || text.includes('tree frog')
         ) {
           stickerSub = 'vivarium';
         } else if (
-          text.includes('terrarium') || text.includes('테라리움') || text.includes('succulent') || text.includes('moss jar')
+          text.includes('saltaquarium') || text.includes('saltwater') || text.includes('해수어항') || text.includes('해수 어항') || text.includes('clownfish') || text.includes('seahorse') || text.includes('anemone') || text.includes('coral tank') || text.includes('angelfish')
         ) {
-          stickerSub = 'terrarium';
-        } else if (text.includes('어항')) {
+          stickerSub = 'saltaquarium';
+        } else if (
+          text.includes('freshaquarium') || text.includes('freshwater') || text.includes('열대어어항') || text.includes('열대어 어항') || text.includes('열대어') || text.includes('betta') || text.includes('guppy') || text.includes('neon tetra') || text.includes('goldfish') || text.includes('어항')
+        ) {
           stickerSub = 'freshaquarium';
         } else {
           stickerSub = 'other';
