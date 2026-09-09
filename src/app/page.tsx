@@ -246,10 +246,20 @@ export default function Home() {
   const isCoverDesign = (d: any) => {
     if (!d) return false;
     const scanStr = `${d.title || ''} ${d.topic || ''} ${d.prompt || ''} ${d.feedback_applied || ''} ${d.stickerPresetId || ''} ${d.id || ''}`.toLowerCase();
+    
+    // Explicit preset IDs for 20-pack master covers
+    const explicitCoverIds = [
+      'terrarium-20-pack-cover',
+      'vivarium-20-pack-cover',
+      'saltaquarium-20-pack-cover',
+      'freshaquarium-20-pack-cover'
+    ];
+    if (explicitCoverIds.some(id => scanStr.includes(id))) return true;
+
     return (
-      scanStr.includes('마스터') ||
+      scanStr.includes('마스터 썸네일') ||
+      scanStr.includes('마스터 표지') ||
       scanStr.includes('대표 커버') ||
-      scanStr.includes('표지') ||
       scanStr.includes('master cover') ||
       scanStr.includes('bundle cover') ||
       scanStr.includes('pack cover') ||
@@ -257,11 +267,7 @@ export default function Home() {
       scanStr.includes('sticker bundle master') ||
       scanStr.includes('20+ cute') ||
       scanStr.includes('20+ sticker') ||
-      scanStr.includes('etsy digital sticker bundle') ||
-      scanStr.includes('terrarium-20-pack-cover') ||
-      scanStr.includes('vivarium-20-pack-cover') ||
-      scanStr.includes('saltaquarium-20-pack-cover') ||
-      scanStr.includes('freshaquarium-20-pack-cover')
+      scanStr.includes('etsy digital sticker bundle')
     );
   };
 

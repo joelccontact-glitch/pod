@@ -391,7 +391,7 @@ export const FRESH_AQUARIUM_20_SERIES: StickerPreset[] = [
     { name: '수초 숲 & 자갈 바닥 어항', desc: '푸른 수초가 숲처럼 우거진 힐링 수초 어항', detail: 'aquarium tank filled with lush green aquatic moss, stem plants, and pebbles' },
     { name: '유목 아치 & 구피 무리 어항', desc: '유목 아치 다리 아래 헤엄치는 구피 어항', detail: 'freshwater tank with a curved wooden driftwood arch and swimming tiny colorful fish' },
     { name: '화이트 다이아몬드 베타 어항', desc: '순백색 우아한 다이아몬드 베타 어항', detail: 'freshwater tank with a pristine white veil-tail betta fish swimming among lush green plants' },
-    { name: '파노라마 열대어 마스터 수초 어항', desc: '베타, 구피, 테트라, 수초가 어우러진 완성 어항', detail: 'panoramic glass freshwater aquarium tank filled with betta fish, guppies, lush water plants, and driftwood' }
+    { name: '파노라마 종합 열대어 수초 어항', desc: '베타, 구피, 테트라, 수초가 어우러진 완성 어항', detail: 'panoramic glass freshwater aquarium tank filled with betta fish, guppies, lush water plants, and driftwood' }
   ][i];
 
   return {
