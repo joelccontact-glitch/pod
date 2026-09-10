@@ -26,6 +26,7 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [dbApiError, setDbApiError] = useState<string | null>(null);
 
   const [searchKeyword, setSearchKeyword] = useState<string>('');
 
@@ -1907,6 +1908,7 @@ export default function Home() {
       const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}&subType=${activeSub}&search=${encodeURIComponent(activeSearch.trim())}${onlyCoversParam}${nocacheParam}`);
       const data = await res.json();
       if (data.success) {
+        setDbApiError(null);
         setDesigns(data.data);
         const newTotalPages = data.totalPages || 1;
         setTotalPages(newTotalPages);
@@ -1918,9 +1920,12 @@ export default function Home() {
         if (currentPage > newTotalPages && newTotalPages > 0) {
           setPage(newTotalPages);
         }
+      } else {
+        setDbApiError(data.error || '데이터베이스 조회 중 오류가 발생했습니다.');
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to fetch designs', e);
+      setDbApiError(e?.message || '네트워크 통신 중 오류가 발생했습니다.');
     }
     if (showSpinner) setLoadingInitial(false);
   };
@@ -2331,6 +2336,29 @@ export default function Home() {
             )}
           </div>
         </header>
+
+        {/* Database Error / Quota Exceeded Notification Banner */}
+        {dbApiError && (
+          <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 text-amber-900 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl shrink-0">⚠️</span>
+              <div>
+                <h4 className="font-extrabold text-sm sm:text-base">데이터베이스 일일 한도(Quota Exceeded) 소진 안내</h4>
+                <p className="text-xs sm:text-sm text-amber-800 mt-0.5">
+                  {dbApiError.includes('Quota exceeded') || dbApiError.includes('RESOURCE_EXHAUSTED')
+                    ? 'Firebase 무료 플랜의 하루 읽기/쓰기 한도(5만 회)가 소진되어 잠시 갤러리를 불러오지 못하고 있습니다. 사용자의 생성 이미지 및 삭제함 데이터는 DB에 100% 안전하게 보관되어 있으며, 오늘 오후 4시(PST 리셋) 또는 Blaze 요금제 전환 시 원상 복구됩니다.'
+                    : dbApiError}
+                </p>
+              </div>
+            </div>
+            <button 
+              onClick={() => fetchDesigns(page, true, undefined, undefined, true)}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl shrink-0 transition-colors shadow-sm"
+            >
+              🔄 다시 시도
+            </button>
+          </div>
+        )}
 
         {/* POD Commercial Mode Action Toolbar */}
         {!isStickerMode && (
