@@ -173,34 +173,41 @@ export async function createCompositeMasterCover(
     subColor = '#D97706';
   }
 
-  // 10 Representative Anchor Slots around center emblem for FULL CANVAS Etsy/Snoopy style
-  // Canvas size: 3000 x 3000
+  // 14 Representative Anchor Slots around center typography to fill all blank spaces (Canvas size: 3000 x 3000)
   const ANCHOR_SLOTS = [
-    // TOP ROW (4 large stickers side by side across top)
-    { x: 420,  y: 480,  tilt: -8, scale: 1.05 },
-    { x: 1140, y: 400,  tilt: 6,  scale: 1.0 },
-    { x: 1860, y: 400,  tilt: -5, scale: 1.0 },
-    { x: 2580, y: 480,  tilt: 7,  scale: 1.05 },
+    // TOP ROW (4 stickers)
+    { x: 380,  y: 420,  tilt: -9, scale: 1.02 },
+    { x: 1120, y: 350,  tilt: 6,  scale: 0.98 },
+    { x: 1880, y: 350,  tilt: -6, scale: 0.98 },
+    { x: 2620, y: 420,  tilt: 8,  scale: 1.02 },
 
-    // MIDDLE FLANKS (2 large stickers left & right)
-    { x: 400,  y: 1500, tilt: 7,  scale: 1.08 },
-    { x: 2600, y: 1500, tilt: -7, scale: 1.08 },
+    // UPPER MIDDLE FLANKS (2 stickers covering middle-top flanks)
+    { x: 420,  y: 1040, tilt: 10, scale: 1.0 },
+    { x: 2580, y: 1040, tilt: -10,scale: 1.0 },
 
-    // BOTTOM ROW (4 large stickers side by side across bottom)
-    { x: 420,  y: 2520, tilt: -6, scale: 1.05 },
-    { x: 1140, y: 2600, tilt: 5,  scale: 1.0 },
-    { x: 1860, y: 2600, tilt: -6, scale: 1.0 },
-    { x: 2580, y: 2520, tilt: 8,  scale: 1.05 },
+    // LOWER MIDDLE FLANKS (2 stickers covering middle-bottom flanks)
+    { x: 380,  y: 1720, tilt: -7, scale: 1.04 },
+    { x: 2620, y: 1720, tilt: 8,  scale: 1.04 },
+
+    // INNER FLANKS / CORNER GAP FILLERS (2 stickers filling empty spaces near center banner)
+    { x: 820,  y: 2060, tilt: 11, scale: 0.95 },
+    { x: 2180, y: 2060, tilt: -9, scale: 0.95 },
+
+    // BOTTOM ROW (4 stickers)
+    { x: 380,  y: 2580, tilt: -8, scale: 1.02 },
+    { x: 1120, y: 2650, tilt: 5,  scale: 0.98 },
+    { x: 1880, y: 2650, tilt: -5, scale: 0.98 },
+    { x: 2620, y: 2580, tilt: 9,  scale: 1.02 },
   ];
 
-  // Select 10 representative stickers from the stickers array
+  // Select 14 representative stickers from the stickers array
   let representativeStickers: any[] = [];
-  if (stickers.length <= 10) {
+  if (stickers.length <= 14) {
     representativeStickers = [...stickers];
   } else {
-    // Evenly sample 10 stickers across the full pack
-    const step = stickers.length / 10;
-    for (let i = 0; i < 10; i++) {
+    // Evenly sample 14 stickers across the full pack
+    const step = stickers.length / 14;
+    for (let i = 0; i < 14; i++) {
       const idx = Math.min(Math.floor(i * step), stickers.length - 1);
       representativeStickers.push(stickers[idx]);
     }

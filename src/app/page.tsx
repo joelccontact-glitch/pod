@@ -4300,32 +4300,13 @@ export default function Home() {
                   <button
                     onClick={() => handleGenerateRealCompositeCover(selectedPackCover, packStickers)}
                     disabled={isBuildingComposite}
-                    className="bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-lg transition-all flex items-center gap-2 border-2 border-teal-300 animate-pulse"
-                    title="실제 함께 생성된 20개 스티커 본품을 100% 그대로 합성하여 100% 일치하는 마스터 표지를 생성합니다"
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-lg transition-all flex items-center gap-2 border border-purple-400"
+                    title="실제 20종 본품 스티커를 100% 반영하여 마스터 표지를 자동 재조합/생성합니다"
                   >
                     {isBuildingComposite ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>20종 실물 표지 합성 중...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>🎨</span>
-                        <span>실제 20종 자동 조합 표지 생성 (100% 실물 일치)</span>
-                      </>
-                    )}
-                  </button>
-
-                  <button
-                    onClick={() => handleRegenerateMasterCover(selectedPackCover)}
-                    disabled={isRegeneratingCover}
-                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-purple-400"
-                    title="마스터 표지만 AI 일러스트로 새로 생성하여 교체합니다"
-                  >
-                    {isRegeneratingCover ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>표지 재생성 중...</span>
+                        <span>마스터 표지 재생성 중...</span>
                       </>
                     ) : (
                       <>
