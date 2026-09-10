@@ -2346,7 +2346,7 @@ export default function Home() {
                 <h4 className="font-extrabold text-sm sm:text-base">데이터베이스 일일 한도(Quota Exceeded) 소진 안내</h4>
                 <p className="text-xs sm:text-sm text-amber-800 mt-0.5">
                   {dbApiError.includes('Quota exceeded') || dbApiError.includes('RESOURCE_EXHAUSTED')
-                    ? 'Firebase 무료 플랜의 하루 읽기/쓰기 한도(5만 회)가 소진되어 잠시 갤러리를 불러오지 못하고 있습니다. 사용자의 생성 이미지 및 삭제함 데이터는 DB에 100% 안전하게 보관되어 있으며, 오늘 오후 4시(PST 리셋) 또는 Blaze 요금제 전환 시 원상 복구됩니다.'
+                    ? 'Firebase 무료 플랜의 하루 읽기/쓰기 한도(5만 회)가 소진되어 잠시 갤러리를 불러오지 못하고 있습니다. 🔒 생성하신 이미지 및 삭제함 데이터는 DB에 100% 안전하게 보관되어 있으며, 매일 오후 4:00 (한국시간 KST / PST 0시 리셋)에 한도가 자동으로 초기화되어 정상 복구됩니다.'
                     : dbApiError}
                 </p>
               </div>
