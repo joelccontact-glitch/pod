@@ -119,6 +119,40 @@ export default function Home() {
   const handleRegenerateMasterCover = async (coverDesign: any) => {
     if (!coverDesign) return;
 
+    // 1. Check if sub-stickers exist for this pack
+    let targetStickers = packStickers;
+    if (!targetStickers || targetStickers.length === 0) {
+      try {
+        const res = await fetch(`/api/designs?limit=1000&type=sticker`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          const pool = data.data;
+          const coverTime = new Date(coverDesign.created_at || 0).getTime();
+          const sub = coverDesign.sticker_sub;
+
+          const matched = pool.filter((d: any) => {
+            if (d.id === coverDesign.id || isCoverDesign(d)) return false;
+            const itemTime = new Date(d.created_at || 0).getTime();
+            const isTimeMatched = Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
+            const isSubMatched = sub && d.sticker_sub === sub;
+            return isTimeMatched || isSubMatched;
+          });
+
+          matched.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+          targetStickers = matched.slice(0, 20);
+        }
+      } catch (e) {
+        console.error('Error finding sub-stickers for master cover:', e);
+      }
+    }
+
+    // 2. If 20 actual sub-stickers exist, automatically generate the Snoopy/Etsy dynamic emblem composite cover
+    if (targetStickers && targetStickers.length > 0) {
+      await handleGenerateRealCompositeCover(coverDesign, targetStickers);
+      return;
+    }
+
+    // 3. Fallback: If no sub-stickers exist yet, prompt user & generate raw AI cover image
     const userFeedback = prompt(
       `[${coverDesign.title || '마스터 표지'}] 단독 재생성\n\n마스터 표지 이미지를 AI로 새로 생성하여 교체합니다.\n필요시 추가 수정/요청사항을 입력해 주세요 (선택사항, 빈칸으로 두면 기본 마스터 표지 지시문 적용):`,
       ''
