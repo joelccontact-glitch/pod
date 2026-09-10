@@ -50,4 +50,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
   - **나무늘보 (Baby Sloth)**: 열대 나뭇잎, 벚꽃 나뭇가지, 베개
   - **아기 고슴도치 (Baby Hedgehog)**: 야생 버섯, 낙엽, 도토리
 
+# 스티커 팩 서브 카테고리 엄격 식별 원칙
+마스터 표지와 개별 스티커 세트를 조합, 조회, 복원, 삭제할 때 생성 시각 유사성 등 애매한 조건으로 판단하지 말고, **반드시 명확한 영문 규격 서브 카테고리 ID (`'terrarium'`, `'vivarium'`, `'saltaquarium'`, `'freshaquarium'`) 및 카테고리 키 식별을 1순위로 하여 100% 엄격하게 격리 매칭**해야 합니다.
+
+
 
