@@ -17,6 +17,37 @@ import {
 import JSZip from 'jszip';
 import { createCompositeMasterCover } from '@/lib/master-cover-builder';
 
+const isCoverDesign = (d: any) => {
+  if (!d) return false;
+  const id = (d.id || '').toLowerCase();
+  const presetId = (d.stickerPresetId || '').toLowerCase();
+  const title = (d.title || d.topic || '').toLowerCase();
+  return id.includes('cover') || presetId.includes('cover') || title.includes('커버 표지') || title.includes('마스터 표지') || title.includes('master cover');
+};
+
+const getDesignCategoryKey = (d: any): 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'other' => {
+  if (!d) return 'other';
+  const sub = (d.sticker_sub || '').toLowerCase();
+  if (sub === 'terrarium') return 'terrarium';
+  if (sub === 'vivarium') return 'vivarium';
+  if (sub === 'saltaquarium' || sub === 'salt-aquarium') return 'saltaquarium';
+  if (sub === 'freshaquarium' || sub === 'fresh-aquarium') return 'freshaquarium';
+
+  const presetId = (d.stickerPresetId || d.id || '').toLowerCase();
+  if (presetId.includes('vivarium')) return 'vivarium';
+  if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium')) return 'saltaquarium';
+  if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium')) return 'freshaquarium';
+  if (presetId.includes('terrarium')) return 'terrarium';
+
+  const title = (d.title || d.topic || '').toLowerCase();
+  if (title.includes('비바리움') || title.includes('vivarium')) return 'vivarium';
+  if (title.includes('해수어항') || title.includes('saltaquarium') || title.includes('salt aquarium')) return 'saltaquarium';
+  if (title.includes('열대어') || title.includes('freshaquarium') || title.includes('fresh aquarium')) return 'freshaquarium';
+  if (title.includes('테라리움') || title.includes('terrarium')) return 'terrarium';
+
+  return 'other';
+};
+
 export default function Home() {
   const { data: session } = useSession();
   const [designs, setDesigns] = useState<any[]>([]);
@@ -121,25 +152,36 @@ export default function Home() {
 
     // 1. Check if sub-stickers exist for this pack
     let targetStickers = packStickers;
-    if (!targetStickers || targetStickers.length === 0) {
+    const coverCategory = getDesignCategoryKey(coverDesign);
+    const coverTime = new Date(coverDesign.created_at || 0).getTime();
+
+    if (!targetStickers || targetStickers.length === 0 || getDesignCategoryKey(targetStickers[0]) !== coverCategory) {
       try {
         const res = await fetch(`/api/designs?limit=1000&type=sticker`);
         const data = await res.json();
         if (data.success && Array.isArray(data.data)) {
           const pool = data.data;
-          const coverTime = new Date(coverDesign.created_at || 0).getTime();
-          const sub = coverDesign.sticker_sub;
 
           const matched = pool.filter((d: any) => {
             if (d.id === coverDesign.id || isCoverDesign(d)) return false;
+            const itemCategory = getDesignCategoryKey(d);
+            if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) {
+              return false; // Mismatched category -> exclude immediately!
+            }
             const itemTime = new Date(d.created_at || 0).getTime();
-            const isTimeMatched = Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
-            const isSubMatched = sub && d.sticker_sub === sub;
-            return isTimeMatched || isSubMatched;
+            const isTimeMatched = coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000;
+            return isTimeMatched || (coverCategory !== 'other' && itemCategory === coverCategory);
           });
 
-          matched.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
-          targetStickers = matched.slice(0, 20);
+          matched.sort((a: any, b: any) => {
+            const timeA = new Date(a.created_at || 0).getTime();
+            const timeB = new Date(b.created_at || 0).getTime();
+            return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
+          });
+
+          const final20 = matched.slice(0, 20);
+          final20.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+          targetStickers = final20;
         }
       } catch (e) {
         console.error('Error finding sub-stickers for master cover:', e);
@@ -256,27 +298,37 @@ export default function Home() {
   const handleGenerateRealCompositeCover = async (coverDesign: any, stickerList?: any[]) => {
     if (!coverDesign) return;
 
+    const coverCategory = getDesignCategoryKey(coverDesign);
+    const coverTime = new Date(coverDesign.created_at || 0).getTime();
     let targetStickers = stickerList && stickerList.length > 0 ? stickerList : packStickers;
 
-    if (targetStickers.length === 0) {
+    if (targetStickers.length === 0 || getDesignCategoryKey(targetStickers[0]) !== coverCategory) {
       try {
         const res = await fetch(`/api/designs?limit=1000&type=sticker`);
         const data = await res.json();
         if (data.success && Array.isArray(data.data)) {
           const pool = data.data;
-          const coverTime = new Date(coverDesign.created_at || 0).getTime();
-          const sub = coverDesign.sticker_sub;
 
           const matched = pool.filter((d: any) => {
             if (d.id === coverDesign.id || isCoverDesign(d)) return false;
+            const itemCategory = getDesignCategoryKey(d);
+            if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) {
+              return false; // Mismatched category -> exclude
+            }
             const itemTime = new Date(d.created_at || 0).getTime();
-            const isTimeMatched = Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
-            const isSubMatched = sub && d.sticker_sub === sub;
-            return isTimeMatched || isSubMatched;
+            const isTimeMatched = coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000;
+            return isTimeMatched || (coverCategory !== 'other' && itemCategory === coverCategory);
           });
 
-          matched.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
-          targetStickers = matched.slice(0, 20);
+          matched.sort((a: any, b: any) => {
+            const timeA = new Date(a.created_at || 0).getTime();
+            const timeB = new Date(b.created_at || 0).getTime();
+            return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
+          });
+
+          const final20 = matched.slice(0, 20);
+          final20.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+          targetStickers = final20;
         }
       } catch (e) {
         console.error('Error loading stickers for composite cover:', e);
@@ -292,7 +344,7 @@ export default function Home() {
     try {
       const compositeDataUrl = await createCompositeMasterCover(targetStickers, {
         title: coverDesign.title,
-        subType: coverDesign.sticker_sub || 'terrarium'
+        subType: coverCategory !== 'other' ? coverCategory : (coverDesign.sticker_sub || 'terrarium')
       });
 
       const updates = {
@@ -351,21 +403,38 @@ export default function Home() {
       if (data.success && Array.isArray(data.data)) {
         const pool = data.data;
         const coverTime = new Date(coverDesign.created_at || 0).getTime();
-        const sub = coverDesign.sticker_sub;
+        const coverCategory = getDesignCategoryKey(coverDesign);
 
         const matched = pool.filter((d: any) => {
           if (d.id === coverDesign.id) return false;
           if (isCoverDesign(d)) return false;
 
-          const itemTime = new Date(d.created_at || 0).getTime();
-          const isTimeMatched = Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
-          const isSubMatched = sub && d.sticker_sub === sub;
+          const itemCategory = getDesignCategoryKey(d);
 
-          return isTimeMatched || isSubMatched;
+          // Strictly filter by category if identified!
+          if (coverCategory !== 'other' && itemCategory !== 'other') {
+            if (coverCategory !== itemCategory) {
+              return false; // Mismatched category -> exclude
+            }
+          }
+
+          const itemTime = new Date(d.created_at || 0).getTime();
+          const isTimeMatched = coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000;
+          return isTimeMatched || (coverCategory !== 'other' && itemCategory === coverCategory);
         });
 
-        matched.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
-        setPackStickers(matched.slice(0, 20));
+        // Sort by closest creation time to cover
+        matched.sort((a: any, b: any) => {
+          const timeA = new Date(a.created_at || 0).getTime();
+          const timeB = new Date(b.created_at || 0).getTime();
+          return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
+        });
+
+        // Take closest 20 and sort by creation time ascending
+        const final20 = matched.slice(0, 20);
+        final20.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+
+        setPackStickers(final20);
       }
     } catch (e) {
       console.error('Error fetching pack stickers:', e);
@@ -481,17 +550,19 @@ export default function Home() {
 
           selectedCovers.forEach((cover: any) => {
             const coverTime = new Date(cover.created_at || 0).getTime();
-            const sub = cover.sticker_sub;
-            const presetId = (cover.stickerPresetId || cover.id || '').toLowerCase();
+            const coverCategory = getDesignCategoryKey(cover);
 
             pool.forEach((d: any) => {
               if (d.id === cover.id || isCoverDesign(d)) return;
-              const itemTime = new Date(d.created_at || 0).getTime();
-              const isTimeMatched = Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
-              const isSubMatched = sub && d.sticker_sub === sub;
-              const isPresetMatched = presetId && d.stickerPresetId && d.stickerPresetId.startsWith(presetId.replace('-cover', ''));
+              const itemCategory = getDesignCategoryKey(d);
 
-              if (isTimeMatched || isSubMatched || isPresetMatched) {
+              if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) {
+                return; // Mismatched category -> skip
+              }
+
+              const itemTime = new Date(d.created_at || 0).getTime();
+              const isTimeMatched = coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000;
+              if (isTimeMatched || (coverCategory !== 'other' && itemCategory === coverCategory)) {
                 childIdsSet.add(d.id);
               }
             });
@@ -553,15 +624,19 @@ export default function Home() {
 
           selectedCovers.forEach((cover: any) => {
             const coverTime = new Date(cover.created_at || 0).getTime();
-            const sub = cover.sticker_sub;
+            const coverCategory = getDesignCategoryKey(cover);
 
             pool.forEach((d: any) => {
               if (d.id === cover.id || isCoverDesign(d)) return;
-              const itemTime = new Date(d.created_at || 0).getTime();
-              const isTimeMatched = Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
-              const isSubMatched = sub && d.sticker_sub === sub;
+              const itemCategory = getDesignCategoryKey(d);
 
-              if (isTimeMatched || isSubMatched) {
+              if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) {
+                return; // Mismatched category -> skip
+              }
+
+              const itemTime = new Date(d.created_at || 0).getTime();
+              const isTimeMatched = coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000;
+              if (isTimeMatched || (coverCategory !== 'other' && itemCategory === coverCategory)) {
                 childIdsSet.add(d.id);
               }
             });
