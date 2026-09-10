@@ -1,9 +1,8 @@
 /**
- * Real 10-Sticker Representative Composite Master Cover Builder
- * Renders 10 large, representative generated stickers around a central title emblem
- * with organic tilting, die-cut white borders, and soft drop shadows.
- * Removes all outer square paper tile frames (종이 틀 제거) and renders pure sticker subjects.
- * Matches top-selling Etsy sticker bundle listings (Snoopy style: full canvas, dense & vibrant).
+ * Real 20-Sticker Full Orbit Composite Master Cover Builder
+ * Renders all 20 generated stickers in a dense 5-row orbit around a central Etsy-style emblem badge.
+ * Leaves NO empty white gaps, framing the central badge snugly on all 4 sides.
+ * Matches top-selling Etsy sticker bundle listings (Snoopy & Daily Life cute sticker sheet style).
  */
 
 export interface MasterCoverBuilderOptions {
@@ -104,39 +103,6 @@ function makeBackgroundTransparent(img: HTMLImageElement): HTMLCanvasElement {
   return c;
 }
 
-function drawOutlinedText(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  x: number,
-  y: number,
-  font: string,
-  fillColor: string,
-  strokeColor: string = '#FFFFFF',
-  strokeWidth: number = 28
-) {
-  ctx.save();
-  ctx.font = font;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-
-  // Heavy white die-cut outline
-  ctx.strokeStyle = strokeColor;
-  ctx.lineWidth = strokeWidth;
-  ctx.lineJoin = 'round';
-  ctx.miterLimit = 2;
-  ctx.strokeText(text, x, y);
-
-  // Soft drop shadow under filled text
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-  ctx.shadowBlur = 12;
-  ctx.shadowOffsetY = 6;
-
-  // Primary text fill
-  ctx.fillStyle = fillColor;
-  ctx.fillText(text, x, y);
-  ctx.restore();
-}
-
 export async function createCompositeMasterCover(
   stickers: any[],
   options: MasterCoverBuilderOptions = {}
@@ -151,67 +117,63 @@ export async function createCompositeMasterCover(
   let primaryColor = '#E11D48'; // Vibrant Rose Pink
   let secondaryColor = '#BE185D'; // Deep Magenta Pink
   let ribbonColor = '#0F766E'; // Dark Teal Ribbon
-  let subColor = '#0284C7'; // Cyan
+  let borderColor = '#F472B6'; // Soft Pink Border
 
   if (subType === 'vivarium') {
     seriesTitle = 'VIVARIUM';
-    primaryColor = '#E11D48'; // Pink
-    secondaryColor = '#9D174D'; 
+    primaryColor = '#059669'; // Emerald Green
+    secondaryColor = '#047857'; 
     ribbonColor = '#0F766E'; // Dark Teal Ribbon
-    subColor = '#0284C7';
+    borderColor = '#34D399'; // Mint Green Border
   } else if (subType === 'saltaquarium') {
     seriesTitle = 'SALTWATER AQUARIUM';
     primaryColor = '#0284C7'; // Cyan
     secondaryColor = '#1E40AF'; // Deep Blue
     ribbonColor = '#E11D48'; // Coral Ribbon
-    subColor = '#0D9488';
+    borderColor = '#38BDF8'; // Sky Blue Border
   } else if (subType === 'freshaquarium') {
     seriesTitle = 'FRESHWATER AQUARIUM';
     primaryColor = '#2563EB'; // Royal Blue
     secondaryColor = '#1D4ED8';
     ribbonColor = '#059669'; // Emerald Ribbon
-    subColor = '#D97706';
+    borderColor = '#60A5FA'; // Soft Blue Border
   }
 
-  // 14 Representative Anchor Slots around center typography to fill all blank spaces (Canvas size: 3000 x 3000)
+  // ALL 20 Anchor Slots orbiting around central emblem for dense 5-row packing (Canvas: 3000 x 3000)
   const ANCHOR_SLOTS = [
-    // TOP ROW (4 stickers)
-    { x: 380,  y: 420,  tilt: -9, scale: 1.02 },
-    { x: 1120, y: 350,  tilt: 6,  scale: 0.98 },
-    { x: 1880, y: 350,  tilt: -6, scale: 0.98 },
-    { x: 2620, y: 420,  tilt: 8,  scale: 1.02 },
+    // ROW 1: TOP EDGE (5 stickers across top edge)
+    { x: 320,  y: 300,  tilt: -7, scale: 1.0 },
+    { x: 860,  y: 240,  tilt: 6,  scale: 1.02 },
+    { x: 1460, y: 220,  tilt: -4, scale: 0.98 },
+    { x: 2060, y: 240,  tilt: 7,  scale: 1.02 },
+    { x: 2600, y: 300,  tilt: -8, scale: 1.0 },
 
-    // UPPER MIDDLE FLANKS (2 stickers covering middle-top flanks)
-    { x: 420,  y: 1040, tilt: 10, scale: 1.0 },
-    { x: 2580, y: 1040, tilt: -10,scale: 1.0 },
+    // ROW 2: UPPER FLANKS (4 stickers surrounding upper badge)
+    { x: 320,  y: 850,  tilt: 9,  scale: 1.0 },
+    { x: 740,  y: 820,  tilt: -8, scale: 1.02 },
+    { x: 2180, y: 820,  tilt: 7,  scale: 1.02 },
+    { x: 2600, y: 850,  tilt: -10,scale: 1.0 },
 
-    // LOWER MIDDLE FLANKS (2 stickers covering middle-bottom flanks)
-    { x: 380,  y: 1720, tilt: -7, scale: 1.04 },
-    { x: 2620, y: 1720, tilt: 8,  scale: 1.04 },
+    // ROW 3: LOWER FLANKS (4 stickers surrounding lower badge)
+    { x: 320,  y: 1450, tilt: -8, scale: 1.04 },
+    { x: 740,  y: 1450, tilt: 7,  scale: 1.02 },
+    { x: 2180, y: 1450, tilt: -6, scale: 1.02 },
+    { x: 2600, y: 1450, tilt: 9,  scale: 1.04 },
 
-    // INNER FLANKS / CORNER GAP FILLERS (2 stickers filling empty spaces near center banner)
-    { x: 820,  y: 2060, tilt: 11, scale: 0.95 },
-    { x: 2180, y: 2060, tilt: -9, scale: 0.95 },
+    // ROW 4: LOWER MID (4 stickers below badge)
+    { x: 360,  y: 2060, tilt: -6, scale: 1.0 },
+    { x: 940,  y: 2020, tilt: 8,  scale: 1.02 },
+    { x: 1980, y: 2020, tilt: -7, scale: 1.02 },
+    { x: 2560, y: 2060, tilt: 8,  scale: 1.0 },
 
-    // BOTTOM ROW (4 stickers)
-    { x: 380,  y: 2580, tilt: -8, scale: 1.02 },
-    { x: 1120, y: 2650, tilt: 5,  scale: 0.98 },
-    { x: 1880, y: 2650, tilt: -5, scale: 0.98 },
-    { x: 2620, y: 2580, tilt: 9,  scale: 1.02 },
+    // ROW 5: BOTTOM EDGE (3 stickers across bottom edge)
+    { x: 600,  y: 2640, tilt: 7,  scale: 1.0 },
+    { x: 1460, y: 2680, tilt: -5, scale: 1.04 },
+    { x: 2320, y: 2640, tilt: 8,  scale: 1.0 },
   ];
 
-  // Select 14 representative stickers from the stickers array
-  let representativeStickers: any[] = [];
-  if (stickers.length <= 14) {
-    representativeStickers = [...stickers];
-  } else {
-    // Evenly sample 14 stickers across the full pack
-    const step = stickers.length / 14;
-    for (let i = 0; i < 14; i++) {
-      const idx = Math.min(Math.floor(i * step), stickers.length - 1);
-      representativeStickers.push(stickers[idx]);
-    }
-  }
+  // Take all 20 stickers (or up to 20)
+  const realStickersToRender = stickers.slice(0, 20);
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -237,8 +199,8 @@ export async function createCompositeMasterCover(
       ctx.lineWidth = 16;
       ctx.strokeRect(8, 8, targetWidth - 16, targetHeight - 16);
 
-      // 2. Load the 10 representative sticker images concurrently
-      const loadPromises = representativeStickers.map((s) => {
+      // 2. Load all 20 sticker images concurrently
+      const loadPromises = realStickersToRender.map((s) => {
         return new Promise<HTMLImageElement | null>((res) => {
           const img = new Image();
           img.crossOrigin = 'anonymous';
@@ -250,14 +212,14 @@ export async function createCompositeMasterCover(
 
       const loadedImages = await Promise.all(loadPromises);
 
-      // 3. Render 10 Large Stickers filling the perimeter around the center emblem
-      const baseMaxDim = 980; // Large 980px size for dense, full-canvas impact
+      // 3. Render ALL 20 Stickers around the central badge
+      const baseMaxDim = 620; // 620px size for 20 stickers to fill every inch of canvas!
 
       for (let i = 0; i < loadedImages.length; i++) {
         const img = loadedImages[i];
         if (!img) continue;
 
-        // Process image to remove any outer white paper card frame (종이 틀 제거)
+        // Transparent PNG background removal (종이 사각 틀 제거)
         const transparentStickerCanvas = makeBackgroundTransparent(img);
 
         const slot = ANCHOR_SLOTS[i % ANCHOR_SLOTS.length];
@@ -278,98 +240,114 @@ export async function createCompositeMasterCover(
 
         // Rich die-cut drop shadow around pure sticker object
         ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
-        ctx.shadowBlur = 40;
+        ctx.shadowBlur = 36;
         ctx.shadowOffsetX = 6;
-        ctx.shadowOffsetY = 16;
+        ctx.shadowOffsetY = 14;
 
         ctx.drawImage(transparentStickerCanvas, -drawW / 2, -drawH / 2, drawW, drawH);
         ctx.restore();
       }
 
-      // 4. Render Central Typography Stack with Thick White Die-Cut Outlines (NO BOXED CARD!)
-      const centerX = targetWidth / 2;
-
-      // Line 1: "20+ CUTE"
-      drawOutlinedText(
-        ctx,
-        '20+ CUTE',
-        centerX,
-        1100,
-        `900 155px 'Arial Black', 'Impact', sans-serif`,
-        primaryColor,
-        '#FFFFFF',
-        36
-      );
-
-      // Line 2: "20+ CUTE [SERIES]" or "[SERIES]"
-      drawOutlinedText(
-        ctx,
-        `20+ CUTE ${seriesTitle}`,
-        centerX,
-        1270,
-        `900 125px 'Impact', 'Comic Sans MS', sans-serif`,
-        secondaryColor,
-        '#FFFFFF',
-        32
-      );
-
-      // Line 3: "STICKER BUNDLE"
-      drawOutlinedText(
-        ctx,
-        'STICKER BUNDLE',
-        centerX,
-        1430,
-        `900 135px 'Arial Black', 'Impact', sans-serif`,
-        primaryColor,
-        '#FFFFFF',
-        32
-      );
-
-      // Line 4: Dark Ribbon Banner ("PNG DIGITAL DOWNLOAD")
-      const ribW = 1460;
-      const ribH = 116;
-      const ribX = centerX - ribW / 2;
-      const ribY = 1570;
+      // 4. Render Central Emblem Badge in exact center (1460, 1300)
+      const badgeW = 1220;
+      const badgeH = 780;
+      const badgeX = (targetWidth - badgeW) / 2;
+      const badgeY = 910;
 
       ctx.save();
-      // Multi-layer drop shadow for ribbon banner
+      // Multi-layer 3D drop shadow for emblem card
       ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
-      ctx.shadowBlur = 24;
-      ctx.shadowOffsetY = 10;
+      ctx.shadowBlur = 48;
+      ctx.shadowOffsetY = 16;
 
-      // Thick white outline behind ribbon
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.roundRect(ribX - 12, ribY - 12, ribW + 24, ribH + 24, 32);
-      ctx.fill();
+      // Badge Fill Card
+      ctx.fillStyle = '#FFFDF8'; // Soft ivory cream white
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 14;
 
-      // Filled ribbon banner shape
-      ctx.fillStyle = ribbonColor;
       ctx.beginPath();
-      ctx.roundRect(ribX, ribY, ribW, ribH, 24);
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 56);
       ctx.fill();
+      ctx.stroke();
       ctx.restore();
 
-      // Text inside ribbon banner
+      // Inner Accent Dashed Line Border
       ctx.save();
-      ctx.font = `900 56px 'Arial Black', sans-serif`;
+      ctx.strokeStyle = secondaryColor;
+      ctx.lineWidth = 4;
+      ctx.setLineDash([16, 12]);
+      ctx.beginPath();
+      ctx.roundRect(badgeX + 16, badgeY + 16, badgeW - 32, badgeH - 32, 44);
+      ctx.stroke();
+      ctx.restore();
+
+      // --- Central Badge Typography & Banner Decoration ---
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillText('PNG DIGITAL DOWNLOAD', centerX, ribY + ribH / 2 + 2);
+      const centerX = targetWidth / 2;
+
+      // Top Tag Pill Badge inside Emblem ("★ 20+ UNIQUE STICKERS ★")
+      const pillW = 560;
+      const pillH = 64;
+      const pillX = (targetWidth - pillW) / 2;
+      const pillY = badgeY + 44;
+
+      ctx.fillStyle = '#FEF08A'; // Soft yellow highlight
+      ctx.beginPath();
+      ctx.roundRect(pillX, pillY, pillW, pillH, 32);
+      ctx.fill();
+
+      ctx.font = `800 32px sans-serif`;
+      ctx.fillStyle = '#854D0E';
+      ctx.fillText(`★ 20+ UNIQUE STICKERS ★`, centerX, pillY + 34);
+
+      // Main Headline 1 ("20+ Cute")
+      const countY = badgeY + 195;
+      ctx.save();
+      ctx.font = `900 115px 'Pacifico', 'Comic Sans MS', sans-serif`;
+      ctx.fillStyle = primaryColor;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetY = 4;
+      ctx.fillText(`20+ Cute`, centerX, countY);
       ctx.restore();
 
-      // Line 5: "INSTANT DOWNLOAD"
-      drawOutlinedText(
-        ctx,
-        'INSTANT DOWNLOAD',
-        centerX,
-        1780,
-        `900 76px 'Arial Black', sans-serif`,
-        subColor,
-        '#FFFFFF',
-        22
-      );
+      // Main Headline 2 ("[SERIES TITLE]")
+      const titleY = badgeY + 325;
+      ctx.font = `900 110px 'Impact', 'Arial Black', sans-serif`;
+      ctx.fillStyle = '#1E293B';
+      ctx.fillText(seriesTitle, centerX, titleY);
+
+      // Main Headline 3 ("Sticker Bundle")
+      const bundleY = badgeY + 445;
+      ctx.font = `900 85px 'Arial Black', sans-serif`;
+      ctx.fillStyle = primaryColor;
+      ctx.fillText(`Sticker Bundle`, centerX, bundleY);
+
+      // Ribbon Banner ("✨ PNG DIGITAL DOWNLOAD ✨")
+      const ribW = 1060;
+      const ribH = 84;
+      const ribX = (targetWidth - ribW) / 2;
+      const ribY = badgeY + 540;
+
+      ctx.save();
+      ctx.fillStyle = ribbonColor;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.16)';
+      ctx.shadowBlur = 16;
+      ctx.shadowOffsetY = 6;
+      ctx.beginPath();
+      ctx.roundRect(ribX, ribY, ribW, ribH, 42);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.font = `800 42px sans-serif`;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText(`✨ PNG DIGITAL DOWNLOAD ✨`, centerX, ribY + 44);
+
+      // Sub-feature text inside emblem
+      ctx.font = `800 28px sans-serif`;
+      ctx.fillStyle = '#475569';
+      ctx.fillText(`INSTANT DOWNLOAD • 300 DPI TRANSPARENT PNG`, centerX, badgeY + 685);
 
       // 5. Bottom Ribbon Bar (Etsy Best-Seller Footer)
       const footerY = 2925;
