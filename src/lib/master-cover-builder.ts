@@ -2,6 +2,7 @@
  * Real 10-Sticker Representative Composite Master Cover Builder
  * Renders 10 large, representative generated stickers around a central title emblem
  * with organic tilting, die-cut white borders, and soft drop shadows.
+ * Removes all outer square paper tile frames (종이 틀 제거) and renders pure sticker subjects.
  * Matches top-selling Etsy sticker bundle listings (Snoopy style: full canvas, dense & vibrant).
  */
 
@@ -10,6 +11,97 @@ export interface MasterCoverBuilderOptions {
   subType?: string; // 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium'
   targetWidth?: number; // default 3000
   targetHeight?: number; // default 3000
+}
+
+function makeBackgroundTransparent(img: HTMLImageElement): HTMLCanvasElement {
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth || img.width || 800;
+  c.height = img.naturalHeight || img.height || 800;
+  const ctx = c.getContext('2d');
+  if (!ctx) return c;
+
+  ctx.drawImage(img, 0, 0, c.width, c.height);
+  const imgData = ctx.getImageData(0, 0, c.width, c.height);
+  const data = imgData.data;
+  const w = c.width;
+  const h = c.height;
+  const total = w * h;
+
+  // Sample background color from 4 corners
+  const corners = [0, (w - 1) * 4, ((h - 1) * w) * 4, ((h - 1) * w + w - 1) * 4];
+  let bgR = 0, bgG = 0, bgB = 0;
+  corners.forEach(idx => {
+    bgR += data[idx];
+    bgG += data[idx + 1];
+    bgB += data[idx + 2];
+  });
+  bgR = Math.round(bgR / 4);
+  bgG = Math.round(bgG / 4);
+  bgB = Math.round(bgB / 4);
+
+  // Helper to test if a pixel is outer paper background tile
+  const isBg = (x: number, y: number) => {
+    const idx = (y * w + x) * 4;
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    const a = data[idx + 3];
+    if (a < 10) return true;
+
+    // Check distance from sampled corner background
+    const dr = Math.abs(r - bgR);
+    const dg = Math.abs(g - bgG);
+    const db = Math.abs(b - bgB);
+    if (dr <= 30 && dg <= 30 && db <= 30) return true;
+
+    // High brightness near-white paper/shadow (r >= 225, g >= 225, b >= 225)
+    if (r >= 225 && g >= 225 && b >= 225) return true;
+
+    return false;
+  };
+
+  const visited = new Uint8Array(total);
+  const queue = new Int32Array(total * 2);
+  let head = 0, tail = 0;
+
+  // Seed 4 outer edges for BFS Flood Fill
+  for (let x = 0; x < w; x++) {
+    if (isBg(x, 0)) { const idx = x; visited[idx] = 1; queue[tail++] = x; queue[tail++] = 0; }
+    if (isBg(x, h - 1)) { const idx = (h - 1) * w + x; visited[idx] = 1; queue[tail++] = x; queue[tail++] = h - 1; }
+  }
+  for (let y = 0; y < h; y++) {
+    if (isBg(0, y)) { const idx = y * w; visited[idx] = 1; queue[tail++] = 0; queue[tail++] = y; }
+    if (isBg(w - 1, y)) { const idx = y * w + w - 1; visited[idx] = 1; queue[tail++] = w - 1; queue[tail++] = y; }
+  }
+
+  // BFS flood-fill to clear outer paper background tile
+  const dx = [1, -1, 0, 0];
+  const dy = [0, 0, 1, -1];
+
+  while (head < tail) {
+    const cx = queue[head++];
+    const cy = queue[head++];
+    const cidx = (cy * w + cx) * 4;
+
+    // Set alpha to 0 for outer paper background pixel
+    data[cidx + 3] = 0;
+
+    for (let i = 0; i < 4; i++) {
+      const nx = cx + dx[i];
+      const ny = cy + dy[i];
+      if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+        const nidx = ny * w + nx;
+        if (!visited[nidx] && isBg(nx, ny)) {
+          visited[nidx] = 1;
+          queue[tail++] = nx;
+          queue[tail++] = ny;
+        }
+      }
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+  return c;
 }
 
 function drawOutlinedText(
@@ -63,7 +155,7 @@ export async function createCompositeMasterCover(
 
   if (subType === 'vivarium') {
     seriesTitle = 'VIVARIUM';
-    primaryColor = '#E11D48'; // Pink (Matching reference vivarium banner)
+    primaryColor = '#E11D48'; // Pink
     secondaryColor = '#9D174D'; 
     ribbonColor = '#0F766E'; // Dark Teal Ribbon
     subColor = '#0284C7';
@@ -158,6 +250,9 @@ export async function createCompositeMasterCover(
         const img = loadedImages[i];
         if (!img) continue;
 
+        // Process image to remove any outer white paper card frame (종이 틀 제거)
+        const transparentStickerCanvas = makeBackgroundTransparent(img);
+
         const slot = ANCHOR_SLOTS[i % ANCHOR_SLOTS.length];
         const targetDim = baseMaxDim * slot.scale;
 
@@ -174,13 +269,13 @@ export async function createCompositeMasterCover(
         ctx.translate(slot.x, slot.y);
         ctx.rotate((slot.tilt * Math.PI) / 180);
 
-        // Rich die-cut drop shadow around each sticker sample
+        // Rich die-cut drop shadow around pure sticker object
         ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
         ctx.shadowBlur = 40;
         ctx.shadowOffsetX = 6;
         ctx.shadowOffsetY = 16;
 
-        ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+        ctx.drawImage(transparentStickerCanvas, -drawW / 2, -drawH / 2, drawW, drawH);
         ctx.restore();
       }
 

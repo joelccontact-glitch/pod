@@ -56,6 +56,8 @@ This version has breaking changes — APIs, conventions, and file structure may 
 # 마스터 썸네일(표지) 생성 원칙
 - **규칙 1 (100% 개별 이미지 기반 조합)**: 마스터 썸네일(표지)은 텍스트 프롬프트로 새로 생성하지 않고, 반드시 이미 생성된 개별 단위 스티커 이미지들(`createCompositeMasterCover`)을 조합하여 제작해야 합니다.
 - **규칙 2 (스누피/Etsy 메가히트 스타일 레이아웃)**: 마스터 썸네일은 박스 카드 테두리 없이 굵은 흰색 테두리(Die-cut) 텍스트 타이포그래피("20+ CUTE [SERIES] STICKER BUNDLE")와 둥근 리본 배너를 중앙에 배치하고, 주변에 대표 스티커 10개를 대형(980px)으로 촘촘히 꽉 차게 겹쳐 밀집 연출(캡처의 왼쪽 비바리움 팩 형태)해야 합니다.
+- **규칙 3 (종이 사각 틀 제거 및 순수 개체 투명 합성)**: 마스터 표지 합성 시 각 스티커 이미지의 사각형 종이 바탕 틀(Paper Card Frame)을 자동 투명 처리(`makeBackgroundTransparent`)하여, 사각형 종이 타일 없이 순수 스티커 개체 및 다이컷 테두리만 표지에 선명하게 그려지도록 해야 합니다.
+
 
 
 
