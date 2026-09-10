@@ -1,8 +1,8 @@
 /**
- * Real 20-Sticker Composite Master Cover Builder
- * Renders 20 actual generated stickers dynamically around a central title emblem
- * with organic tilting, die-cut white borders, and soft drop shadows, matching
- * top-selling Etsy sticker bundle listings (Snoopy & Daily Life cute sticker style).
+ * Real 10-Sticker Representative Composite Master Cover Builder
+ * Renders 10 large, representative generated stickers around a central title emblem
+ * with organic tilting, die-cut white borders, and soft drop shadows.
+ * Matches top-selling Etsy sticker bundle listings (Snoopy style: full canvas, dense & vibrant).
  */
 
 export interface MasterCoverBuilderOptions {
@@ -23,13 +23,13 @@ export async function createCompositeMasterCover(
   } = options;
 
   let seriesTitle = 'TERRARIUM';
-  let primaryColor = '#BE185D'; // Rose Pink
+  let primaryColor = '#E11D48'; // Bright Rose/Pink
   let secondaryColor = '#0D9488'; // Teal
   let borderColor = '#F472B6'; // Soft Pink
 
   if (subType === 'vivarium') {
     seriesTitle = 'VIVARIUM';
-    primaryColor = '#059669'; // Emerald
+    primaryColor = '#059669'; // Emerald Green
     secondaryColor = '#D97706'; // Amber
     borderColor = '#34D399'; // Mint Green
   } else if (subType === 'saltaquarium') {
@@ -44,40 +44,38 @@ export async function createCompositeMasterCover(
     borderColor = '#60A5FA'; // Soft Blue
   }
 
-  // Anchor slots orbiting around the center emblem (Center X: 1500, Center Y: 1500)
+  // 10 Representative Anchor Slots around center badge for full canvas Snoopy style
+  // Canvas size: 3000 x 3000
   const ANCHOR_SLOTS = [
-    // TOP ROW (5 items across top edge)
-    { x: 340,  y: 320,  tilt: -9, scale: 1.0 },
-    { x: 920,  y: 260,  tilt: 7,  scale: 1.04 },
-    { x: 1500, y: 230,  tilt: -4, scale: 0.98 },
-    { x: 2080, y: 260,  tilt: 8,  scale: 1.02 },
-    { x: 2660, y: 320,  tilt: -7, scale: 1.0 },
+    // TOP ROW (4 large stickers)
+    { x: 500,  y: 480,  tilt: -9, scale: 1.05 },
+    { x: 1150, y: 380,  tilt: 5,  scale: 1.0 },
+    { x: 1850, y: 380,  tilt: -6, scale: 1.0 },
+    { x: 2500, y: 480,  tilt: 8,  scale: 1.05 },
 
-    // UPPER FLANKS (2 items near badge top corners)
-    { x: 600,  y: 740,  tilt: 11, scale: 1.0 },
-    { x: 2400, y: 740,  tilt: -10,scale: 1.0 },
+    // MIDDLE FLANKS (2 large stickers left/right)
+    { x: 420,  y: 1500, tilt: 7,  scale: 1.08 },
+    { x: 2580, y: 1500, tilt: -8, scale: 1.08 },
 
-    // LEFT COLUMN FLANK (3 items stacked along left side)
-    { x: 350,  y: 960,  tilt: -6, scale: 1.02 },
-    { x: 320,  y: 1500, tilt: 8,  scale: 1.05 },
-    { x: 350,  y: 2040, tilt: -11,scale: 0.98 },
-
-    // RIGHT COLUMN FLANK (3 items stacked along right side)
-    { x: 2650, y: 960,  tilt: 7,  scale: 1.0 },
-    { x: 2680, y: 1500, tilt: -9, scale: 1.04 },
-    { x: 2650, y: 2040, tilt: 10, scale: 0.98 },
-
-    // LOWER FLANKS (2 items near badge bottom corners)
-    { x: 600,  y: 2260, tilt: -8, scale: 1.0 },
-    { x: 2400, y: 2260, tilt: 6,  scale: 1.0 },
-
-    // BOTTOM ROW (5 items across bottom edge)
-    { x: 340,  y: 2680, tilt: 9,  scale: 0.98 },
-    { x: 920,  y: 2740, tilt: -5, scale: 1.04 },
-    { x: 1500, y: 2770, tilt: 4,  scale: 1.0 },
-    { x: 2080, y: 2740, tilt: -8, scale: 1.02 },
-    { x: 2660, y: 2680, tilt: 11, scale: 0.98 },
+    // BOTTOM ROW (4 large stickers)
+    { x: 500,  y: 2500, tilt: -7, scale: 1.05 },
+    { x: 1150, y: 2620, tilt: 6,  scale: 1.0 },
+    { x: 1850, y: 2620, tilt: -5, scale: 1.0 },
+    { x: 2500, y: 2500, tilt: 9,  scale: 1.05 },
   ];
+
+  // Select 10 representative stickers from the stickers array
+  let representativeStickers: any[] = [];
+  if (stickers.length <= 10) {
+    representativeStickers = [...stickers];
+  } else {
+    // Evenly sample 10 stickers across the full pack
+    const step = stickers.length / 10;
+    for (let i = 0; i < 10; i++) {
+      const idx = Math.min(Math.floor(i * step), stickers.length - 1);
+      representativeStickers.push(stickers[idx]);
+    }
+  }
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -98,13 +96,13 @@ export async function createCompositeMasterCover(
       ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, targetWidth, targetHeight);
 
-      // Subtle warm border frame around the entire cover canvas
+      // Subtle outer boundary stroke
       ctx.strokeStyle = '#F1F5F9';
       ctx.lineWidth = 16;
       ctx.strokeRect(8, 8, targetWidth - 16, targetHeight - 16);
 
-      // 2. Load 20 sticker images concurrently
-      const loadPromises = stickers.slice(0, 20).map((s) => {
+      // 2. Load the 10 representative sticker images concurrently
+      const loadPromises = representativeStickers.map((s) => {
         return new Promise<HTMLImageElement | null>((res) => {
           const img = new Image();
           img.crossOrigin = 'anonymous';
@@ -116,13 +114,14 @@ export async function createCompositeMasterCover(
 
       const loadedImages = await Promise.all(loadPromises);
 
-      // 3. Render 20 Stickers around the perimeter ring with organic tilt & soft shadow
+      // 3. Render 10 Large Stickers filling the perimeter around the center emblem
+      const baseMaxDim = 880; // Large 880px size for bold visual impact!
+
       for (let i = 0; i < loadedImages.length; i++) {
         const img = loadedImages[i];
         if (!img) continue;
 
         const slot = ANCHOR_SLOTS[i % ANCHOR_SLOTS.length];
-        const baseMaxDim = 470;
         const targetDim = baseMaxDim * slot.scale;
 
         const aspect = img.width / img.height;
@@ -138,131 +137,137 @@ export async function createCompositeMasterCover(
         ctx.translate(slot.x, slot.y);
         ctx.rotate((slot.tilt * Math.PI) / 180);
 
-        // Soft die-cut drop shadow around each sticker sample
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.14)';
-        ctx.shadowBlur = 28;
-        ctx.shadowOffsetX = 4;
-        ctx.shadowOffsetY = 12;
+        // Rich die-cut drop shadow around each sticker sample
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.20)';
+        ctx.shadowBlur = 38;
+        ctx.shadowOffsetX = 6;
+        ctx.shadowOffsetY = 16;
 
         ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
         ctx.restore();
       }
 
       // 4. Render Central Emblem Badge in the Exact Center (1500, 1500)
-      const badgeW = 1520;
-      const badgeH = 820;
+      const badgeW = 1680;
+      const badgeH = 1020;
       const badgeX = (targetWidth - badgeW) / 2;
       const badgeY = (targetHeight - badgeH) / 2;
 
       ctx.save();
-      // Multi-layer drop shadow for 3D pop effect
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.16)';
-      ctx.shadowBlur = 48;
-      ctx.shadowOffsetY = 18;
+      // Strong multi-layer drop shadow for 3D emblem pop effect
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.24)';
+      ctx.shadowBlur = 56;
+      ctx.shadowOffsetY = 20;
 
-      // Badge Card Fill
+      // Badge Fill Card
       ctx.fillStyle = '#FFFDF9'; // Soft ivory cream white
       ctx.strokeStyle = borderColor;
-      ctx.lineWidth = 14;
+      ctx.lineWidth = 16;
 
       ctx.beginPath();
-      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 60);
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 64);
       ctx.fill();
       ctx.stroke();
       ctx.restore();
 
-      // Inner Accent Dash Line
+      // Inner Accent Dashed Line Border
       ctx.save();
       ctx.strokeStyle = secondaryColor;
-      ctx.lineWidth = 4;
-      ctx.setLineDash([16, 12]);
+      ctx.lineWidth = 5;
+      ctx.setLineDash([18, 12]);
       ctx.beginPath();
-      ctx.roundRect(badgeX + 16, badgeY + 16, badgeW - 32, badgeH - 32, 48);
+      ctx.roundRect(badgeX + 18, badgeY + 18, badgeW - 36, badgeH - 36, 50);
       ctx.stroke();
       ctx.restore();
 
-      // --- Central Badge Typography & Decoration ---
+      // --- Central Badge Typography & Banner Decoration ---
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      // Top Tag Pill Badge inside Emblem ("★ 20 UNIQUE STICKERS ★")
-      const pillW = 540;
-      const pillH = 68;
+      // Top Tag Pill Badge inside Emblem ("★ 20+ UNIQUE STICKERS ★")
+      const pillW = 620;
+      const pillH = 72;
       const pillX = (targetWidth - pillW) / 2;
-      const pillY = badgeY + 60;
+      const pillY = badgeY + 54;
 
-      ctx.fillStyle = '#FEF08A'; // Soft yellow
+      ctx.fillStyle = '#FEF08A'; // Soft yellow highlight
       ctx.beginPath();
-      ctx.roundRect(pillX, pillY, pillW, pillH, 34);
+      ctx.roundRect(pillX, pillY, pillW, pillH, 36);
       ctx.fill();
 
-      ctx.font = `800 32px sans-serif`;
+      ctx.font = `800 34px sans-serif`;
       ctx.fillStyle = '#854D0E';
-      ctx.fillText(`★ 20 UNIQUE STICKERS ★`, targetWidth / 2, pillY + 36);
+      ctx.fillText(`★ 20+ UNIQUE STICKERS ★`, targetWidth / 2, pillY + 38);
 
-      // Giant Count Number ("20+")
-      const countY = badgeY + 230;
+      // Main Headline 1 ("20+ CUTE")
+      const countY = badgeY + 220;
       ctx.save();
-      ctx.font = `900 160px 'Arial Black', sans-serif`;
+      ctx.font = `900 130px 'Arial Black', sans-serif`;
       ctx.fillStyle = primaryColor;
       ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
       ctx.shadowBlur = 12;
       ctx.shadowOffsetY = 6;
-      ctx.fillText(`20+`, targetWidth / 2, countY);
+      ctx.fillText(`20+ CUTE`, targetWidth / 2, countY);
       ctx.restore();
 
-      // Main Pack Title ("CUTE [SERIES] STICKERS")
-      const titleY = badgeY + 390;
-      ctx.font = `900 90px 'Pacifico', 'Comic Sans MS', sans-serif`;
+      // Main Headline 2 ("[SERIES TITLE]")
+      const titleY = badgeY + 370;
+      ctx.font = `900 105px 'Impact', 'Comic Sans MS', sans-serif`;
       ctx.fillStyle = '#1E293B';
-      ctx.fillText(`CUTE ${seriesTitle}`, targetWidth / 2, titleY);
+      ctx.fillText(seriesTitle, targetWidth / 2, titleY);
 
-      // Ribbon Pill Banner ("✨ DAILY LIFE STICKER BUNDLE ✨")
-      const ribW = 1200;
-      const ribH = 88;
+      // Main Headline 3 ("STICKER BUNDLE")
+      const bundleY = badgeY + 500;
+      ctx.font = `900 95px 'Arial Black', sans-serif`;
+      ctx.fillStyle = primaryColor;
+      ctx.fillText(`STICKER BUNDLE`, targetWidth / 2, bundleY);
+
+      // Ribbon Banner ("✨ PNG DIGITAL DOWNLOAD ✨")
+      const ribW = 1360;
+      const ribH = 96;
       const ribX = (targetWidth - ribW) / 2;
-      const ribY = badgeY + 490;
+      const ribY = badgeY + 620;
 
       ctx.save();
       ctx.fillStyle = primaryColor;
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
-      ctx.shadowBlur = 16;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.16)';
+      ctx.shadowBlur = 20;
       ctx.shadowOffsetY = 6;
       ctx.beginPath();
-      ctx.roundRect(ribX, ribY, ribW, ribH, 44);
+      ctx.roundRect(ribX, ribY, ribW, ribH, 48);
       ctx.fill();
       ctx.restore();
 
-      ctx.font = `800 44px sans-serif`;
+      ctx.font = `800 46px sans-serif`;
       ctx.fillStyle = '#FFFFFF';
-      ctx.fillText(`✨ DAILY LIFE STICKER BUNDLE ✨`, targetWidth / 2, ribY + 46);
+      ctx.fillText(`✨ PNG DIGITAL DOWNLOAD ✨`, targetWidth / 2, ribY + 50);
 
       // Sub-feature text inside emblem
-      ctx.font = `700 30px sans-serif`;
-      ctx.fillStyle = '#64748B';
-      ctx.fillText(`super cute • high resolution • 300 DPI PNG`, targetWidth / 2, badgeY + 655);
+      ctx.font = `800 32px sans-serif`;
+      ctx.fillStyle = '#475569';
+      ctx.fillText(`INSTANT DOWNLOAD • 300 DPI TRANSPARENT PNG`, targetWidth / 2, badgeY + 800);
 
-      // 5. Bottom Ribbon Bar (Etsy Best-Seller Footer)
-      const footerY = 2930;
-      const footerW = 2200;
-      const footerH = 64;
+      // 5. Bottom Footer Bar (Etsy Best-Seller Footer)
+      const footerY = 2925;
+      const footerW = 2300;
+      const footerH = 68;
       const footerX = (targetWidth - footerW) / 2;
 
       ctx.save();
       ctx.fillStyle = '#F8FAFC';
-      ctx.strokeStyle = '#E2E8F0';
+      ctx.strokeStyle = '#CBD5E1';
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.roundRect(footerX, footerY - 32, footerW, footerH, 32);
+      ctx.roundRect(footerX, footerY - 34, footerW, footerH, 34);
       ctx.fill();
       ctx.stroke();
       ctx.restore();
 
-      ctx.font = `700 26px sans-serif`;
-      ctx.fillStyle = '#475569';
-      ctx.fillText(`🌸 for planners  •  GoodNotes  •  crafts  •  300 DPI transparent PNG  🌸`, targetWidth / 2, footerY);
+      ctx.font = `700 28px sans-serif`;
+      ctx.fillStyle = '#334155';
+      ctx.fillText(`🌸 20 UNIQUE HIGH QUALITY STICKERS  •  300 DPI TRANSPARENT PNG  •  INSTANT DOWNLOAD 🌸`, targetWidth / 2, footerY);
 
-      // 6. Export JPEG at quality 0.85 (keeping size ~250KB, well under 1MB limit)
+      // 6. Export JPEG at quality 0.85
       let quality = 0.85;
       let dataUrl = canvas.toDataURL('image/jpeg', quality);
 
