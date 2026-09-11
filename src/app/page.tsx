@@ -11,6 +11,10 @@ import {
   VIVARIUM_20_SERIES,
   SALT_AQUARIUM_20_SERIES,
   FRESH_AQUARIUM_20_SERIES,
+  TERRARIUM_STANDALONE_20_SERIES,
+  VIVARIUM_STANDALONE_20_SERIES,
+  SALT_AQUARIUM_STANDALONE_20_SERIES,
+  FRESH_AQUARIUM_STANDALONE_20_SERIES,
   StickerPreset,
   buildStickerPrompt,
 } from '@/lib/sticker-prompts';
@@ -80,7 +84,16 @@ export default function Home() {
   const [isStickerMode, setIsStickerMode] = useState(true);
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
-  const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<'terrarium20' | 'vivarium20' | 'saltaquarium20' | 'freshaquarium20'>('terrarium20');
+  const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<
+    | 'terrarium20'
+    | 'terrarium20_standalone'
+    | 'vivarium20'
+    | 'vivarium20_standalone'
+    | 'saltaquarium20'
+    | 'saltaquarium20_standalone'
+    | 'freshaquarium20'
+    | 'freshaquarium20_standalone'
+  >('terrarium20');
   const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-20-pack-1');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
   const [isBatchZipModalOpen, setIsBatchZipModalOpen] = useState(false);
@@ -425,11 +438,12 @@ export default function Home() {
     setSelectedStickerSubTab(sub);
     setPage(1);
     if (sub !== 'all') {
-      const seriesMap: Record<string, 'terrarium20' | 'vivarium20' | 'saltaquarium20' | 'freshaquarium20'> = {
-        terrarium: 'terrarium20',
-        vivarium: 'vivarium20',
-        saltaquarium: 'saltaquarium20',
-        freshaquarium: 'freshaquarium20'
+      const isStandalone = selectedStickerSeriesTab.includes('standalone');
+      const seriesMap: Record<string, any> = {
+        terrarium: isStandalone ? 'terrarium20_standalone' : 'terrarium20',
+        vivarium: isStandalone ? 'vivarium20_standalone' : 'vivarium20',
+        saltaquarium: isStandalone ? 'saltaquarium20_standalone' : 'saltaquarium20',
+        freshaquarium: isStandalone ? 'freshaquarium20_standalone' : 'freshaquarium20'
       };
       if (seriesMap[sub]) {
         setSelectedStickerSeriesTab(seriesMap[sub]);
@@ -1848,19 +1862,39 @@ export default function Home() {
     }
   };
 
-  const handleBatchGenerateSeries = async (packType: 'terrarium20' | 'vivarium20' | 'saltaquarium20' | 'freshaquarium20') => {
+  const handleBatchGenerateSeries = async (packType: string) => {
     let targetPresets = TERRARIUM_20_SERIES;
     let packName = '[테라리움 완성 세트 20종 팩]';
+    let subKey = 'terrarium';
 
-    if (packType === 'vivarium20') {
+    if (packType === 'terrarium20_standalone') {
+      targetPresets = TERRARIUM_STANDALONE_20_SERIES;
+      packName = '[테라리움 단일 식물/오브제 20종 팩]';
+      subKey = 'terrarium';
+    } else if (packType === 'vivarium20') {
       targetPresets = VIVARIUM_20_SERIES;
       packName = '[비바리움 완성 세트 20종 팩]';
+      subKey = 'vivarium';
+    } else if (packType === 'vivarium20_standalone') {
+      targetPresets = VIVARIUM_STANDALONE_20_SERIES;
+      packName = '[비바리움 단일 동물 20종 팩]';
+      subKey = 'vivarium';
     } else if (packType === 'saltaquarium20') {
       targetPresets = SALT_AQUARIUM_20_SERIES;
       packName = '[해수어항 완성 세트 20종 팩]';
+      subKey = 'saltaquarium';
+    } else if (packType === 'saltaquarium20_standalone') {
+      targetPresets = SALT_AQUARIUM_STANDALONE_20_SERIES;
+      packName = '[해수어항 단일 해수어 20종 팩]';
+      subKey = 'saltaquarium';
     } else if (packType === 'freshaquarium20') {
       targetPresets = FRESH_AQUARIUM_20_SERIES;
       packName = '[열대어 어항 완성 세트 20종 팩]';
+      subKey = 'freshaquarium';
+    } else if (packType === 'freshaquarium20_standalone') {
+      targetPresets = FRESH_AQUARIUM_STANDALONE_20_SERIES;
+      packName = '[열대어 어항 단일 열대어 20종 팩]';
+      subKey = 'freshaquarium';
     }
 
     const confirmed = confirm(
@@ -1899,7 +1933,6 @@ export default function Home() {
           const data = await res.json();
 
           if (data.success && data.data) {
-            const subKey = packType === 'terrarium20' ? 'terrarium' : packType === 'vivarium20' ? 'vivarium' : packType === 'saltaquarium20' ? 'saltaquarium' : 'freshaquarium';
             const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
             const designToSave = {
               ...data.data,
@@ -2454,12 +2487,20 @@ export default function Home() {
                   <h3 className="text-sm sm:text-base font-bold text-teal-900 flex items-center gap-2">
                     <span>
                       {selectedStickerSeriesTab === 'terrarium20'
-                        ? '🫙 테라리움 완성 20종 스티커 팩 (Etsy 전용)'
+                        ? '🫙 테라리움 어항 세트 완성 20종 스티커 팩'
+                        : selectedStickerSeriesTab === 'terrarium20_standalone'
+                        ? '🪴 테라리움 어항 밖 단일 식물 20종 스티커 팩'
                         : selectedStickerSeriesTab === 'vivarium20'
-                        ? '🦎 비바리움 완성 20종 스티커 팩 (Etsy 전용)'
+                        ? '🦎 비바리움 어항 세트 완성 20종 스티커 팩'
+                        : selectedStickerSeriesTab === 'vivarium20_standalone'
+                        ? '🦎 비바리움 어항 밖 단일 동물 20종 스티커 팩'
                         : selectedStickerSeriesTab === 'saltaquarium20'
-                        ? '🪸 해수어항 완성 20종 스티커 팩 (Etsy 전용)'
-                        : '🐠 열대어 어항 완성 20종 스티커 팩 (Etsy 전용)'}
+                        ? '🪸 해수어항 어항 세트 완성 20종 스티커 팩'
+                        : selectedStickerSeriesTab === 'saltaquarium20_standalone'
+                        ? '🐠 해수어 어항 밖 단일 어류 20종 스티커 팩'
+                        : selectedStickerSeriesTab === 'freshaquarium20'
+                        ? '🐠 열대어 어항 세트 완성 20종 스티커 팩'
+                        : '🐟 열대어 어항 밖 단일 어류 20종 스티커 팩'}
                     </span>
                     <span className="bg-teal-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Etsy Best Niche</span>
                   </h3>
@@ -2494,12 +2535,20 @@ export default function Home() {
                   <span>⚡️</span>
                   <span>
                     {selectedStickerSeriesTab === 'terrarium20'
-                      ? '[테라리움 20종] 일괄 생성'
+                      ? '[테라리움 어항세트 20종] 일괄 생성'
+                      : selectedStickerSeriesTab === 'terrarium20_standalone'
+                      ? '[테라리움 단일식물 20종] 일괄 생성'
                       : selectedStickerSeriesTab === 'vivarium20'
-                      ? '[비바리움 20종] 일괄 생성'
+                      ? '[비바리움 어항세트 20종] 일괄 생성'
+                      : selectedStickerSeriesTab === 'vivarium20_standalone'
+                      ? '[비바리움 단일동물 20종] 일괄 생성'
                       : selectedStickerSeriesTab === 'saltaquarium20'
-                      ? '[해수어항 20종] 일괄 생성'
-                      : '[열대어어항 20종] 일괄 생성'}
+                      ? '[해수어항 어항세트 20종] 일괄 생성'
+                      : selectedStickerSeriesTab === 'saltaquarium20_standalone'
+                      ? '[해수어항 단일해수어 20종] 일괄 생성'
+                      : selectedStickerSeriesTab === 'freshaquarium20'
+                      ? '[열대어어항 어항세트 20종] 일괄 생성'
+                      : '[열대어어항 단일열대어 20종] 일괄 생성'}
                   </span>
                 </button>
 
@@ -2534,43 +2583,83 @@ export default function Home() {
                 <div className="flex flex-wrap items-center gap-1 bg-teal-100/70 p-1 rounded-xl">
                   <button
                     onClick={() => setSelectedStickerSeriesTab('terrarium20')}
-                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'terrarium20'
                         ? 'bg-teal-700 text-white shadow-sm'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🫙 테라리움 (20종)
+                    🫙 테라리움 세트
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('terrarium20_standalone')}
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'terrarium20_standalone'
+                        ? 'bg-teal-800 text-white shadow-sm ring-1 ring-teal-400'
+                        : 'text-teal-900 hover:bg-teal-200/50'
+                    }`}
+                  >
+                    🪴 테라리움 단일 식물
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('vivarium20')}
-                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'vivarium20'
                         ? 'bg-emerald-700 text-white shadow-sm'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🦎 비바리움 (20종)
+                    🦎 비바리움 세트
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('vivarium20_standalone')}
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'vivarium20_standalone'
+                        ? 'bg-emerald-800 text-white shadow-sm ring-1 ring-emerald-400'
+                        : 'text-teal-900 hover:bg-teal-200/50'
+                    }`}
+                  >
+                    🦎 비바리움 단일 동물
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('saltaquarium20')}
-                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'saltaquarium20'
                         ? 'bg-cyan-700 text-white shadow-sm'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🪸 해수어항 (20종)
+                    🪸 해수어항 세트
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('saltaquarium20_standalone')}
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'saltaquarium20_standalone'
+                        ? 'bg-cyan-800 text-white shadow-sm ring-1 ring-cyan-400'
+                        : 'text-teal-900 hover:bg-teal-200/50'
+                    }`}
+                  >
+                    🐠 해수어 단일 어류
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('freshaquarium20')}
-                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'freshaquarium20'
                         ? 'bg-blue-700 text-white shadow-sm'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🐠 열대어어항 (20종)
+                    🐠 열대어어항 세트
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('freshaquarium20_standalone')}
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'freshaquarium20_standalone'
+                        ? 'bg-blue-800 text-white shadow-sm ring-1 ring-blue-400'
+                        : 'text-teal-900 hover:bg-teal-200/50'
+                    }`}
+                  >
+                    🐟 열대어 단일 어류
                   </button>
                 </div>
               </div>
@@ -2594,11 +2683,19 @@ export default function Home() {
                   {(
                     selectedStickerSeriesTab === 'terrarium20'
                       ? TERRARIUM_20_SERIES
+                      : selectedStickerSeriesTab === 'terrarium20_standalone'
+                      ? TERRARIUM_STANDALONE_20_SERIES
                       : selectedStickerSeriesTab === 'vivarium20'
                       ? VIVARIUM_20_SERIES
+                      : selectedStickerSeriesTab === 'vivarium20_standalone'
+                      ? VIVARIUM_STANDALONE_20_SERIES
                       : selectedStickerSeriesTab === 'saltaquarium20'
                       ? SALT_AQUARIUM_20_SERIES
-                      : FRESH_AQUARIUM_20_SERIES
+                      : selectedStickerSeriesTab === 'saltaquarium20_standalone'
+                      ? SALT_AQUARIUM_STANDALONE_20_SERIES
+                      : selectedStickerSeriesTab === 'freshaquarium20'
+                      ? FRESH_AQUARIUM_20_SERIES
+                      : FRESH_AQUARIUM_STANDALONE_20_SERIES
                   ).map((preset) => (
                     <div
                       key={preset.id}

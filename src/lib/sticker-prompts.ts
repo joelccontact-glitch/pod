@@ -417,6 +417,210 @@ export const FRESH_AQUARIUM_20_SERIES: StickerPreset[] = [
   }
 }) as unknown as StickerPreset[]];
 
+export const TERRARIUM_STANDALONE_20_SERIES: StickerPreset[] = [
+  {
+    id: 'terrarium-standalone-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 테라리움 단일 식물 20종 스티커 팩 대표 커버 표지',
+    animal: 'Terrarium Standalone Cover',
+    animalValue: '',
+    affinityObject: 'Terrarium Standalone Cover',
+    theme: 'Terrarium Standalone 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 테라리움 단일 식물/오브제 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE BOTANICAL STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are large individual die-cut sticker samples of potted rosette succulents, red toadstool mushrooms, tillandsia airplants, mini cacti, floral teacups, and amethyst crystal clusters arranged artistically across the white background. STRICT NO GLASS TANKS OR JARS: Absolutely NO glass jars, NO glass globes, NO glass containers, NO land mammals, NO birds. Pure standalone botanical potted plants, succulents, mushrooms, crystal clusters, and fairy ornaments ONLY. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      { name: '다육식물 로제트 화분 단일 스티커', desc: '화분 속 몽글몽글 다육식물 3종과 이끼 낱개 스티커', detail: 'standalone potted mini rosette succulents in a small terracotta pot with plush green moss' },
+      { name: '요정 오두막 집 피규어 단일 스티커', desc: '이끼 언덕 위 빨간 지붕 요정 오두막 집 피규어 낱개 스티커', detail: 'standalone tiny ceramic red-roof fairy cottage house figurine resting on a lush green moss mound' },
+      { name: '일본식 석등(토로) 피규어 단일 스티커', desc: '이끼 밭 위 정갈한 회색 일본식 석등 낱개 스티커', detail: 'standalone miniature grey Japanese stone lantern (toro) resting on a soft green moss bed' },
+      { name: '틸란드시아 에어플랜트 단일 스티커', desc: '분홍 수정 자갈 위 에어플랜트 낱개 스티커', detail: 'standalone cute tillandsia air plant resting on smooth pink quartz pebbles' },
+      { name: 'Welcome 목재 팻말 & 버섯 단일 스티커', desc: 'Welcome 팻말과 빨간 아기 버섯 낱개 스티커', detail: 'standalone rustic miniature wooden Welcome sign with tiny red toadstool mushrooms sprouting at base' },
+      { name: '보라 다육이 로제트 화분 단일 스티커', desc: '화사한 보라빛 다육식물 로제트 화분 낱개 스티커', detail: 'standalone vibrant purple and green rosette succulent plant in a small white ceramic pot' },
+      { name: '빨간 아기 버섯 3형제 단일 스티커', desc: '이끼 위 앙증맞은 빨간 아기 버섯 3형제 낱개 스티커', detail: 'standalone charming cluster of 3 tiny red toadstool mushrooms sprouting from green moss' },
+      { name: '미니 선인장 화분 단일 스티커', desc: '노란 화분 속 귀여운 쌍둥이 선인장 낱개 스티커', detail: 'standalone pair of miniature happy potted cacti in a cute yellow ceramic pot' },
+      { name: '빈티지 찻잔 다육이 정원 단일 스티커', desc: '파스텔 찻잔 속 미니 다육이 정원 낱개 스티커', detail: 'standalone pastel floral teacup filled with miniature succulents and soft green moss' },
+      { name: '미니 다육식물 화분 단일 스티커', desc: '흰 자갈이 깔린 앙증맞은 미니 다육 화분 낱개 스티커', detail: 'standalone miniature potted succulent with white decorative pebbles' },
+      { name: '흰 미니 울타리 & 이끼 정원 단일 스티커', desc: '흰 울타리와 파릇파릇 이끼 정원 낱개 스티커', detail: 'standalone tiny white picket fence ornament set inside a green moss garden patch' },
+      { name: '미니 공원 벤치 피규어 단일 스티커', desc: '이끼 위 작고 아기자기한 공원 벤치 낱개 스티커', detail: 'standalone tiny miniature park bench figure resting on a soft green moss bed' },
+      { name: '보라 자수정 원석 클러스터 단일 스티커', desc: '이끼 위 반짝이는 보라 자수정 원석 낱개 스티커', detail: 'standalone shiny purple amethyst crystal cluster embedded in green moss' },
+      { name: '빨간 미니 우체통 피규어 단일 스티커', desc: '이끼 밭 위 미니 우체통 피규어 낱개 스티커', detail: 'standalone tiny red mailbox figurine standing in a plush moss bed with tiny wildflowers' },
+      { name: '조약돌 징검다리 이끼 패치 단일 스티커', desc: '녹색 이끼 위 디딤돌 징검다리 낱개 스티커', detail: 'standalone tiny stepping stone pathway laid across lush green moss' },
+      { name: '미니 고사리 줄기 단일 스티커', desc: '파릇파릇 미니 고사리 잎 줄기 낱개 스티커', detail: 'standalone delicate miniature fern frond branch with moist green moss' },
+      { name: '솔방울 & 침엽 이끼 단일 스티커', desc: '앙증맞은 솔방울과 녹색 이끼 낱개 스티커', detail: 'standalone tiny pinecone resting on a lush evergreen moss bed' },
+      { name: '파스텔 미니 다육식물 모듬 단일 스티커', desc: '알록달록 미니 다육식물 모듬 낱개 스티커', detail: 'standalone colorful mini succulents cluster with white decorative gravel' },
+      { name: '네덜란드 미니 풍차 피규어 단일 스티커', desc: '이끼 위 미니 풍차 피규어 낱개 스티커', detail: 'standalone tiny cute Dutch windmill figurine on green moss patch' },
+      { name: '무지개 미니 다육이 접시 단일 스티커', desc: '화사한 무지개빛 미니 다육식물 접시 낱개 스티커', detail: 'standalone multi-colored mini succulents cluster arranged in a small terracotta dish' }
+    ][i];
+
+    return {
+      id: `terrarium-standalone-20-pack-${num}`,
+      name: `🪴 [테라리움 단일 ${num}/20] ${items.name}`,
+      animal: 'Terrarium Standalone 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Terrarium Standalone 20 Pack',
+      phrase: '',
+      description: items.desc,
+      prompt: `A cute die-cut sticker design featuring a standalone single botanical object: ${items.detail}. STRICT NO GLASS TANKS OR JARS RULE: NO glass jar, NO glass container, NO background scenery. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    };
+  }) as unknown as StickerPreset[]
+];
+
+export const VIVARIUM_STANDALONE_20_SERIES: StickerPreset[] = [
+  {
+    id: 'vivarium-standalone-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 비바리움 단일 동물 20종 스티커 팩 대표 커버 표지',
+    animal: 'Vivarium Standalone Cover',
+    animalValue: '',
+    affinityObject: 'Vivarium Standalone Cover',
+    theme: 'Vivarium Standalone 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 비바리움 단일 동물 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE REPTILE & AMPHIBIAN STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are large individual die-cut sticker samples of cute green tree frogs perched on leaves, baby chameleons on branches, crested geckos, leopard geckos, spotted salamanders, and fire-bellied toads arranged artistically across the white background. STRICT NO GLASS TANKS: Absolutely NO glass tanks, NO containers, NO submerged animals underwater, NO land mammals, NO birds. ONLY reptiles and amphibians perched in open air on driftwood, moss, or leaves. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      { name: '미니 초록 카멜레온 단일 스티커', desc: '유목 가지 위 나른하게 쉰 미니 카멜레온 낱개 스티커', detail: 'standalone tiny cute baby green chameleon sitting lazily on a natural curved driftwood branch in open air' },
+      { name: '몬스테라 잎 아기 청개구리 단일 스티커', desc: '몬스테라 잎 위 앉은 아기 청개구리 낱개 스티커', detail: 'standalone tiny cute green tree frog perched happily on a monstera leaf in open air' },
+      { name: '속눈썹 게코(크레스티드) 단일 스티커', desc: '유목 뿌리 위 크레스티드 게코 낱개 스티커', detail: 'standalone tiny adorable crested gecko perched gracefully on a mossy driftwood root in open air' },
+      { name: '알록달록 무당개구리 단일 스티커', desc: '바위 위 알록달록 무당개구리 낱개 스티커', detail: 'standalone tiny colorful oriental fire-bellied toad perched on a dry mossy rock in open air' },
+      { name: '아기 점박이 도롱뇽 단일 스티커', desc: '이끼 침대 위 아기 점박이 도롱뇽 낱개 스티커', detail: 'standalone tiny cute spotted salamander resting comfortably on dry green moss in open air' },
+      { name: '열대 넝쿨 카멜레온 단일 스티커', desc: '넝쿨 가지를 매달린 파스텔 카멜레온 낱개 스티커', detail: 'standalone tiny cute pastel green chameleon clinging to a tropical vine branch in open air' },
+      { name: '레오파드 게코 도마뱀 단일 스티커', desc: '꼬인 유목 뿌리 위 아기 레오파드 게코 낱개 스티커', detail: 'standalone tiny baby leopard gecko perched on top of a twisted driftwood root in open air' },
+      { name: '우림 고사리 청개구리 단일 스티커', desc: '고사리 잎 아래 앙증맞은 청개구리 낱개 스티커', detail: 'standalone tiny cute tree frog sheltering under a rainforest fern frond on dry land in open air' },
+      { name: '자연 암석 아기 도롱뇽 단일 스티커', desc: '바위 위 고개 내민 미니 도롱뇽 낱개 스티커', detail: 'standalone tiny cute baby salamander sitting on a natural rock slate in open air' },
+      { name: '몬스테라 넝쿨 미니 게코 단일 스티커', desc: '몬스테라 줄기 타는 미니 게코 낱개 스티커', detail: 'standalone tiny cute gecko climbing up a leafy monstera vine in open air' },
+      { name: '화산석 초록 카멜레온 단일 스티커', desc: '검은 화산석 위 앉은 미니 카멜레온 낱개 스티커', detail: 'standalone tiny green chameleon perched on a black volcanic rock in open air' },
+      { name: '미니 나뭇잎 달팽이 단일 스티커', desc: '나뭇잎 위 기어가는 귀여운 정원 달팽이 낱개 스티커', detail: 'standalone tiny cute garden snail with a spiral shell crawling on a green leaf in open air' },
+      { name: '밀림 정글 아기 도마뱀 단일 스티커', desc: '나무 껍질 위 정글 도마뱀 낱개 스티커', detail: 'standalone tiny cute jungle lizard resting on a mossy tree bark in open air' },
+      { name: '열대 잎 아기 카멜레온 단일 스티커', desc: '나뭇잎 사이로 빼끔 얼굴 낸 카멜레온 낱개 스티커', detail: 'standalone tiny baby chameleon peeking out from green tropical leaves in open air' },
+      { name: '이끼 바위 행복한 청개구리 단일 스티커', desc: '이끼 바위 위 행복한 청개구리 낱개 스티커', detail: 'standalone tiny cute green frog sitting happily on a dry moss-covered boulder in open air' },
+      { name: '유목 아치 쉬는 도롱뇽 단일 스티커', desc: '유목 아치 아래 쉬는 미니 도롱뇽 낱개 스티커', detail: 'standalone tiny sleeping salamander resting under a small arched driftwood branch in open air' },
+      { name: '트로피컬 고사리 미니 게코 단일 스티커', desc: '고사리 잎 위 귀여운 아기 게코 낱개 스티커', detail: 'standalone tiny cute baby gecko perched on a bright green fern in open air' },
+      { name: '이끼 둑 아기 청개구리 단일 스티커', desc: '이끼 둑 위 아기 청개구리 낱개 스티커', detail: 'standalone tiny baby frog perched on a dry mossy pebble bank in open air' },
+      { name: '암석 동굴 미니 게코 단일 스티커', desc: '돌 틈에서 고개 낸 아기 게코 낱개 스티커', detail: 'standalone tiny cute gecko peeking out from a stone crevice in open air' },
+      { name: '나뭇가지 위 아기 청개구리 단일 스티커', desc: '나뭇가지 위 앙증맞은 청개구리 낱개 스티커', detail: 'standalone tiny cute tree frog perched high on a natural wooden branch with leaves in open air' }
+    ][i];
+
+    return {
+      id: `vivarium-standalone-20-pack-${num}`,
+      name: `🦎 [비바리움 단일 ${num}/20] ${items.name}`,
+      animal: 'Vivarium Standalone 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Vivarium Standalone 20 Pack',
+      phrase: '',
+      description: items.desc,
+      prompt: `A cute die-cut sticker design featuring a standalone single animal: ${items.detail}. STRICT BIOLOGICAL SURVIVAL RULE: NO glass tank, NO container, NO underwater submergence. Animal MUST be in open air on dry land/driftwood/leaf, head exposed above water. Crisp white border. ${VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    };
+  }) as unknown as StickerPreset[]
+];
+
+export const SALT_AQUARIUM_STANDALONE_20_SERIES: StickerPreset[] = [
+  {
+    id: 'salt-aquarium-standalone-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 해수어항 단일 해수어 20종 스티커 팩 대표 커버 표지',
+    animal: 'Saltwater Aquarium Standalone Cover',
+    animalValue: '',
+    affinityObject: 'Saltwater Aquarium Standalone Cover',
+    theme: 'Saltwater Aquarium Standalone 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 해수어항 단일 해수어 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE MARINE FISH STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are large individual die-cut sticker samples of orange clownfish, blue tang, yellow seahorses, baby stingrays, yellow pufferfish, pink octopus, and glowing coral reefs arranged artistically across the white background. STRICT NO GLASS TANKS: Absolutely NO glass tanks, NO containers, NO land mammals, NO birds. ONLY standalone vibrant marine ocean fish, seahorses, starfish, and corals. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      { name: '주황 크라운피쉬(니모) 단일 스티커', desc: '주황색 니모 물고기와 분홍 말미잘 낱개 스티커', detail: 'standalone cute orange clownfish swimming near a soft pink sea anemone' },
+      { name: '파란 블루탱(도리) 단일 스티커', desc: '파란색 블루탱(도리) 해수어 낱개 스티커', detail: 'standalone cute vibrant blue tang fish with yellow tail fin' },
+      { name: '노란 아기 해마 단일 스티커', desc: '노란 아기 해마 낱개 스티커', detail: 'standalone cute yellow baby seahorse holding a small sea kelp' },
+      { name: '웃는 아기 가오리 단일 스티커', desc: '웃는 얼굴 귀여운 아기 가오리 낱개 스티커', detail: 'standalone smiling baby stingray with cute big eyes gliding gracefully' },
+      { name: '노란 아기 가시복어 단일 스티커', desc: '동글동글 귀여운 아기 노란 복어 낱개 스티커', detail: 'standalone round chubby cute yellow porcupine pufferfish with tiny fins' },
+      { name: '쌍둥이 노란 나비고기 단일 스티커', desc: '줄무늬 노란 나비고기 듀오 낱개 스티커', detail: 'standalone pair of cute yellow butterflyfish with black stripes' },
+      { name: '아기 크라운피쉬 듀오 단일 스티커', desc: '아기 니모 두 마리 콤보 낱개 스티커', detail: 'standalone two cute baby clownfish swimming together happily' },
+      { name: '화려한 만다린 피쉬 단일 스티커', desc: '무지개빛 만다린 해수어 낱개 스티커', detail: 'standalone vibrant blue and orange patterned mandarin fish' },
+      { name: '분홍 아기 문어 단일 스티커', desc: '파스텔 핑크 아기 문어 낱개 스티커', detail: 'standalone tiny cute pastel pink baby octopus waving tiny tentacles' },
+      { name: '니모 & 도리 콤보 단일 스티커', desc: '크라운피쉬와 블루탱 조화 낱개 스티커', detail: 'standalone cute clownfish and blue tang swimming side by side' },
+      { name: '주황 불가사리 단일 스티커', desc: '웃는 얼굴 주황 불가사리 낱개 스티커', detail: 'standalone friendly chubby orange starfish with happy face' },
+      { name: '몽환 핑크 해파리 단일 스티커', desc: '파스텔 핑크 투명 해파리 낱개 스티커', detail: 'standalone glowing translucent pastel pink jellyfish floating gracefully' },
+      { name: '줄무늬 엔젤피쉬 단일 스티커', desc: '우아한 줄무늬 해수 엔젤피쉬 낱개 스티커', detail: 'standalone cute striped emperor angelfish with flowing fins' },
+      { name: '무지개 패럿피쉬 단일 스티커', desc: '파스텔 무지개 빛 패럿피쉬 낱개 스티커', detail: 'standalone cute colorful rainbow pastel parrotfish' },
+      { name: '화려한 라이언피쉬 단일 스티커', desc: '화려한 지느러미의 미니 라이언피쉬 낱개 스티커', detail: 'standalone cute lionfish with elaborate decorative fan fins' },
+      { name: '가리비 조개 & 진주 단일 스티커', desc: '입 벌린 조개 속 하얀 진주 낱개 스티커', detail: 'standalone open scallop seashell holding a shiny white pearl' },
+      { name: '빨간 줄무늬 청소 새우 단일 스티커', desc: '빨간 줄무늬 청소 새우 낱개 스티커', detail: 'standalone cute red-and-white striped cleaner shrimp' },
+      { name: '형광 산호초 가지 단일 스티커', desc: '반짝이는 핑크/티얼 형광 산호초 낱개 스티커', detail: 'standalone vibrant glowing pink and teal coral reef branch' },
+      { name: '우아한 퀸 엔젤피쉬 단일 스티커', desc: '푸른빛 우아한 퀸 엔젤피쉬 낱개 스티커', detail: 'standalone majestic baby queen angelfish with blue and gold scales' },
+      { name: '파스텔 무지개 해마 단일 스티커', desc: '파스텔 무지개빛 아기 해마 낱개 스티커', detail: 'standalone pastel rainbow colored baby seahorse' }
+    ][i];
+
+    return {
+      id: `salt-aquarium-standalone-20-pack-${num}`,
+      name: `🪸 [해수어 단일 ${num}/20] ${items.name}`,
+      animal: 'Saltwater Aquarium Standalone 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Saltwater Aquarium Standalone 20 Pack',
+      phrase: '',
+      description: items.desc,
+      prompt: `A cute die-cut sticker design featuring a standalone single marine fish: ${items.detail}. STRICT NO GLASS TANK RULE: NO glass tank, NO container, NO background scenery. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    };
+  }) as unknown as StickerPreset[]
+];
+
+export const FRESH_AQUARIUM_STANDALONE_20_SERIES: StickerPreset[] = [
+  {
+    id: 'fresh-aquarium-standalone-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 열대어어항 단일 열대어 20종 스티커 팩 대표 커버 표지',
+    animal: 'Freshwater Aquarium Standalone Cover',
+    animalValue: '',
+    affinityObject: 'Freshwater Aquarium Standalone Cover',
+    theme: 'Freshwater Aquarium Standalone 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 열대어어항 단일 열대어 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE TROPICAL FISH STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are large individual die-cut sticker samples of red veil-tail betta fish, fancy guppies, glowing blue neon tetras, freshwater angelfish, albino corydoras catfish, and yellow apple snails arranged artistically across the white background. STRICT NO GLASS TANKS: Absolutely NO glass tanks, NO containers, NO land mammals, NO birds. ONLY standalone freshwater tropical fish, bettas, guppies, and aquatic plants. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      { name: '붉은 드레스 베일테일 베타 단일 스티커', desc: '붉은 드레스 지느러미 베타 열대어 낱개 스티커', detail: 'standalone gorgeous red veil-tail betta fish with flowing silk fins' },
+      { name: '네온 테트라 삼총사 단일 스티커', desc: '반짝이는 파란 네온 테트라 3마리 낱개 스티커', detail: 'standalone trio of glowing blue and red neon tetra fish swimming together' },
+      { name: '팬시 구피 듀오 단일 스티커', desc: '화려한 꼬리의 팬시 구피 2마리 낱개 스티커', detail: 'standalone pair of colorful fancy guppy fish with vibrant fan tails' },
+      { name: '민물 줄무늬 엔젤피쉬 단일 스티커', desc: '우아한 민물 엔젤피쉬 낱개 스티커', detail: 'standalone cute silver and black striped freshwater angelfish' },
+      { name: '알비노 코리도라스 메기 단일 스티커', desc: '핑크빛 귀여운 코리도라스 낱개 스티커', detail: 'standalone cute chubby pink albino corydoras catfish with tiny whiskers' },
+      { name: '블랙 마블 베타 단일 스티커', desc: '검은색과 사파이어 블루 마블 베타 낱개 스티커', detail: 'standalone stunning black and sapphire blue marble betta fish' },
+      { name: '노란 드레스 꼬리 구피 단일 스티커', desc: '선명한 노란 드레스 구피 낱개 스티커', detail: 'standalone shiny yellow fan-tail fancy guppy fish' },
+      { name: '체리 새우 삼총사 단일 스티커', desc: '앙증맞은 빨간 체리 새우 3마리 낱개 스티커', detail: 'standalone trio of cute tiny bright red cherry shrimps' },
+      { name: '원반 주황 디스커스 단일 스티커', desc: '화려한 원반 모양 주황 디스커스 낱개 스티커', detail: 'standalone majestic round bright orange and blue discus fish' },
+      { name: '노란 골든 알지이더 단일 스티커', desc: '귀여운 노란 이끼먹는 물고기 낱개 스티커', detail: 'standalone cute golden algae eater fish' },
+      { name: '파스텔 핑크 하프문 베타 단일 스티커', desc: '분홍빛 반달 지느러미 하프문 베타 낱개 스티커', detail: 'standalone cute pastel pink halfmoon betta fish with large rounded tail' },
+      { name: '카디날 테트라 단일 스티커', desc: '붉고 푸른 선명한 카디날 테트라 낱개 스티커', detail: 'standalone vibrant cardinal tetras with brilliant red and blue stripes' },
+      { name: '드워프 구라미 단일 스티커', desc: '알록달록 드워프 구라미 낱개 스티커', detail: 'standalone colorful blue and orange striped dwarf gourami fish' },
+      { name: '삼색 팬시 구피 단일 스티커', desc: '파스텔 삼색 화려한 구피 낱개 스티커', detail: 'standalone fancy tri-color pastel guppy fish' },
+      { name: '애플 스네일 달팽이 단일 스티커', desc: '동글동글 노란 애플 스네일 달팽이 낱개 스티커', detail: 'standalone cute yellow mystery apple snail with round shell and cute tentacles' },
+      { name: '미니 오토싱 메기 단일 스티커', desc: '앙증맞은 미니 오토싱 메기 낱개 스티커', detail: 'standalone tiny cute otocinclus catfish' },
+      { name: '푸른 수초 줄기 단일 스티커', desc: '싱그러운 수초 잎 줄기 낱개 스티커', detail: 'standalone lush vibrant green aquatic stem plant with leaves' },
+      { name: '유목 이끼 아치 단일 스티커', desc: '녹색 이끼가 낀 자연 유목 낱개 스티커', detail: 'standalone small piece of natural driftwood with green aquatic moss' },
+      { name: '화이트 다이아몬드 베타 단일 스티커', desc: '순백색 진주 빛 다이아몬드 베타 낱개 스티커', detail: 'standalone pristine pearl white veil-tail betta fish with glowing fins' },
+      { name: '알록달록 미니 열대어 듀오 단일 스티커', desc: '귀여운 미니 열대어 2마리 낱개 스티커', detail: 'standalone pair of colorful cute mini tropical fish' }
+    ][i];
+
+    return {
+      id: `fresh-aquarium-standalone-20-pack-${num}`,
+      name: `🐠 [열대어 단일 ${num}/20] ${items.name}`,
+      animal: 'Freshwater Aquarium Standalone 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Freshwater Aquarium Standalone 20 Pack',
+      phrase: '',
+      description: items.desc,
+      prompt: `A cute die-cut sticker design featuring a standalone single freshwater fish: ${items.detail}. STRICT NO GLASS TANK RULE: NO glass tank, NO container, NO background scenery. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    };
+  }) as unknown as StickerPreset[]
+];
+
 export function buildStickerPrompt(
   animalName: string,
   affinityObject: string,
@@ -427,3 +631,4 @@ export function buildStickerPrompt(
   
   return `A cute die-cut sticker design featuring an adorable ${animalName} associated with ${affinityObject}. ${extraStyleDetails} ${textPart} ${STICKER_RULES_PROMPT_SUFFIX}`;
 }
+
