@@ -393,13 +393,24 @@ export async function createCompositeMasterCover(
       ctx.fillStyle = '#334155';
       ctx.fillText(`🌸 20 UNIQUE HIGH QUALITY STICKERS  •  300 DPI TRANSPARENT PNG  •  INSTANT DOWNLOAD 🌸`, centerX, footerY);
 
-      // 6. Export JPEG at high quality
+      // 6. Export JPEG with strict Firestore byte limit check (< 650,000 bytes)
       let quality = 0.85;
       let dataUrl = canvas.toDataURL('image/jpeg', quality);
 
-      while (dataUrl.length > 800000 && quality > 0.4) {
+      while (dataUrl.length > 650000 && quality > 0.25) {
         quality -= 0.1;
         dataUrl = canvas.toDataURL('image/jpeg', quality);
+      }
+
+      if (dataUrl.length > 650000) {
+        const scaledCanvas = document.createElement('canvas');
+        scaledCanvas.width = 1800;
+        scaledCanvas.height = 1800;
+        const sCtx = scaledCanvas.getContext('2d');
+        if (sCtx) {
+          sCtx.drawImage(canvas, 0, 0, 1800, 1800);
+          dataUrl = scaledCanvas.toDataURL('image/jpeg', 0.75);
+        }
       }
 
       resolve(dataUrl);

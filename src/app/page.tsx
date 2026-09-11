@@ -347,8 +347,10 @@ export default function Home() {
         subType: coverCategory !== 'other' ? coverCategory : (coverDesign.sticker_sub || 'terrarium')
       });
 
+      const compressedUrl = await compressImageForFirestore(compositeDataUrl, 650000);
+
       const updates = {
-        image_url: compositeDataUrl,
+        image_url: compressedUrl,
         updated_at: new Date().toISOString()
       };
 
