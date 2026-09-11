@@ -1862,57 +1862,109 @@ export default function Home() {
     }
   };
 
+  const handleGenerateStandaloneFromTank = async (design: any) => {
+    if (!design || !design.image_url) return;
+    setIsBatchGenerating(true);
+    try {
+      const subKey = getDesignCategoryKey(design);
+      const promptText = `A cute die-cut sticker design featuring ONLY the standalone single main object (plant, animal, reptile, or fish) extracted from this reference image. NO glass jar, NO glass tank, NO container, NO background scenery. Pure solid white background (#FFFFFF). Crisp white die-cut border.`;
+      const titleText = `${design.title || '어항 스티커'} (단일 낱개 1:1 추출)`;
+
+      const res = await fetch('/api/designs/from-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageBase64: design.image_url,
+          prompt: promptText,
+          title: titleText,
+          isPreview: true,
+          styleId: selectedStyleId,
+          catchphrase: '',
+          autoPhrase: false
+        })
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
+        const designToSave = {
+          ...data.data,
+          image_url: compressedUrl,
+          title: titleText,
+          topic: titleText,
+          sticker_sub: subKey !== 'other' ? subKey : 'terrarium',
+          design_type: 'sticker',
+          is_deleted: false
+        };
+
+        await fetch('/api/designs/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: data.data.id,
+            designData: designToSave
+          })
+        });
+
+        alert(`✨ 선택한 어항 이미지에서 1:1 맞춤 화풍의 단일 낱개 스티커 추출/생성이 완료되었습니다!`);
+        await fetchDesigns(1, false);
+      } else {
+        alert('단일 낱개 추출 생성 실패: ' + (data.error || '오류 발생'));
+      }
+    } catch (e: any) {
+      console.error(e);
+      alert('오류가 발생했습니다.');
+    } finally {
+      setIsBatchGenerating(false);
+    }
+  };
+
   const handleBatchGenerateSeries = async (packType: string) => {
     let targetPresets = TERRARIUM_20_SERIES;
+    let targetStandalonePresets = TERRARIUM_STANDALONE_20_SERIES;
+    let isBothMode = packType.endsWith('_both');
+    const baseType = packType.replace('_both', '');
     let packName = '[테라리움 완성 세트 20종 팩]';
     let subKey = 'terrarium';
 
-    if (packType === 'terrarium20_standalone') {
-      targetPresets = TERRARIUM_STANDALONE_20_SERIES;
-      packName = '[테라리움 단일 식물/오브제 20종 팩]';
+    if (baseType.startsWith('terrarium')) {
+      targetPresets = baseType.includes('standalone') ? TERRARIUM_STANDALONE_20_SERIES : TERRARIUM_20_SERIES;
+      targetStandalonePresets = TERRARIUM_STANDALONE_20_SERIES;
+      packName = isBothMode ? '[테라리움 어항세트 + 단일식물 40종 1:1 맞춤 팩]' : (baseType.includes('standalone') ? '[테라리움 단일 식물/오브제 20종 팩]' : '[테라리움 완성 세트 20종 팩]');
       subKey = 'terrarium';
-    } else if (packType === 'vivarium20') {
-      targetPresets = VIVARIUM_20_SERIES;
-      packName = '[비바리움 완성 세트 20종 팩]';
+    } else if (baseType.startsWith('vivarium')) {
+      targetPresets = baseType.includes('standalone') ? VIVARIUM_STANDALONE_20_SERIES : VIVARIUM_20_SERIES;
+      targetStandalonePresets = VIVARIUM_STANDALONE_20_SERIES;
+      packName = isBothMode ? '[비바리움 어항세트 + 단일동물 40종 1:1 맞춤 팩]' : (baseType.includes('standalone') ? '[비바리움 단일 동물 20종 팩]' : '[비바리움 완성 세트 20종 팩]');
       subKey = 'vivarium';
-    } else if (packType === 'vivarium20_standalone') {
-      targetPresets = VIVARIUM_STANDALONE_20_SERIES;
-      packName = '[비바리움 단일 동물 20종 팩]';
-      subKey = 'vivarium';
-    } else if (packType === 'saltaquarium20') {
-      targetPresets = SALT_AQUARIUM_20_SERIES;
-      packName = '[해수어항 완성 세트 20종 팩]';
+    } else if (baseType.startsWith('saltaquarium')) {
+      targetPresets = baseType.includes('standalone') ? SALT_AQUARIUM_STANDALONE_20_SERIES : SALT_AQUARIUM_20_SERIES;
+      targetStandalonePresets = SALT_AQUARIUM_STANDALONE_20_SERIES;
+      packName = isBothMode ? '[해수어항 어항세트 + 단일해수어 40종 1:1 맞춤 팩]' : (baseType.includes('standalone') ? '[해수어항 단일 해수어 20종 팩]' : '[해수어항 완성 세트 20종 팩]');
       subKey = 'saltaquarium';
-    } else if (packType === 'saltaquarium20_standalone') {
-      targetPresets = SALT_AQUARIUM_STANDALONE_20_SERIES;
-      packName = '[해수어항 단일 해수어 20종 팩]';
-      subKey = 'saltaquarium';
-    } else if (packType === 'freshaquarium20') {
-      targetPresets = FRESH_AQUARIUM_20_SERIES;
-      packName = '[열대어 어항 완성 세트 20종 팩]';
-      subKey = 'freshaquarium';
-    } else if (packType === 'freshaquarium20_standalone') {
-      targetPresets = FRESH_AQUARIUM_STANDALONE_20_SERIES;
-      packName = '[열대어 어항 단일 열대어 20종 팩]';
+    } else if (baseType.startsWith('freshaquarium')) {
+      targetPresets = baseType.includes('standalone') ? FRESH_AQUARIUM_STANDALONE_20_SERIES : FRESH_AQUARIUM_20_SERIES;
+      targetStandalonePresets = FRESH_AQUARIUM_STANDALONE_20_SERIES;
+      packName = isBothMode ? '[열대어어항 어항세트 + 단일열대어 40종 1:1 맞춤 팩]' : (baseType.includes('standalone') ? '[열대어 어항 단일 열대어 20종 팩]' : '[열대어 어항 완성 세트 20종 팩]');
       subKey = 'freshaquarium';
     }
 
+    const totalExpectedCount = isBothMode ? 1 + (targetPresets.length - 1) * 2 : targetPresets.length;
+
     const confirmed = confirm(
-      `${packName} 자동 일괄 생성을 시작하시겠습니까?\n\n• 마스터 썸네일 표지 1장 + 스티커 20종 (총 ${targetPresets.length}장)\n\n300DPI 고화질 PNG 이미지가 순차적으로 연속 자동 생성되어 갤러리에 저장됩니다.`
+      `${packName} 자동 일괄 생성을 시작하시겠습니까?\n\n• ${isBothMode ? '마스터 표지 1장 + 어항 스티커 20종 + 1:1 맞춤 단일 낱개 20종 (총 41장 동시 생성)' : `마스터 썸네일 표지 1장 + 스티커 20종 (총 ${targetPresets.length}장)`}\n\n300DPI 고화질 PNG 이미지가 순차적으로 연속 자동 생성되어 갤러리에 저장됩니다.`
     );
     if (!confirmed) return;
 
     setIsBatchGenerating(true);
     let successCount = 0;
-    let coverDesignToSave: any = null;
-    const generatedStickersList: any[] = [];
 
     for (let i = 0; i < targetPresets.length; i++) {
       const preset = targetPresets[i];
-      setBatchProgress({ current: i + 1, total: targetPresets.length, label: preset.name });
+      setBatchProgress({ current: isBothMode ? (i === 0 ? 1 : (i - 1) * 2 + 2) : i + 1, total: totalExpectedCount, label: preset.name });
 
       let attempts = 0;
       let generatedSuccess = false;
+      let createdTankImageBase64 = '';
 
       while (attempts < 2 && !generatedSuccess) {
         attempts++;
@@ -1933,6 +1985,7 @@ export default function Home() {
           const data = await res.json();
 
           if (data.success && data.data) {
+            createdTankImageBase64 = data.data.image_url;
             const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
             const designToSave = {
               ...data.data,
@@ -1945,12 +1998,6 @@ export default function Home() {
               is_deleted: false
             };
 
-            if (i === 0) {
-              coverDesignToSave = { id: data.data.id, ...designToSave };
-            } else {
-              generatedStickersList.push({ id: data.data.id, ...designToSave });
-            }
-
             await fetch('/api/designs/save', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -1962,7 +2009,6 @@ export default function Home() {
             successCount++;
             generatedSuccess = true;
 
-            // Immediately refresh gallery list right after Master Cover (index 0) finishes generating!
             if (i === 0) {
               fetchDesigns(1, false);
             }
@@ -1971,10 +2017,58 @@ export default function Home() {
           console.error(`Batch generation attempt ${attempts} failed for ${preset.name}:`, e);
         }
       }
+
+      // If in simultaneous both mode (i > 0), generate matching standalone sticker from newly created tank image via Vision AI!
+      if (isBothMode && i > 0 && createdTankImageBase64 && targetStandalonePresets[i]) {
+        const standalonePreset = targetStandalonePresets[i];
+        setBatchProgress({ current: (i - 1) * 2 + 3, total: totalExpectedCount, label: `${standalonePreset.name} (Vision 1:1 추출)` });
+
+        try {
+          const res = await fetch('/api/designs/from-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageBase64: createdTankImageBase64,
+              prompt: standalonePreset.prompt,
+              title: standalonePreset.name,
+              isPreview: true,
+              styleId: selectedStyleId,
+              catchphrase: '',
+              autoPhrase: false
+            })
+          });
+          const data = await res.json();
+          if (data.success && data.data) {
+            const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
+            const designToSave = {
+              ...data.data,
+              image_url: compressedUrl,
+              title: standalonePreset.name,
+              topic: standalonePreset.name,
+              stickerPresetId: standalonePreset.id,
+              sticker_sub: subKey,
+              design_type: 'sticker',
+              is_deleted: false
+            };
+
+            await fetch('/api/designs/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: data.data.id,
+                designData: designToSave
+              })
+            });
+            successCount++;
+          }
+        } catch (e) {
+          console.error(`Standalone Vision generation failed for ${standalonePreset.name}:`, e);
+        }
+      }
     }
 
     setIsBatchGenerating(false);
-    alert(`${packName} 일괄 자동 생성이 완료되었습니다! (성공: ${successCount}/${targetPresets.length}장)\n마스터 썸네일 표지 1장 + 개별 스티커 20종이 성공적으로 생성되었습니다.`);
+    alert(`${packName} 일괄 자동 생성이 완료되었습니다! (성공: ${successCount}/${totalExpectedCount}장)\n갤러리에서 새로 생성된 디자인들을 확인하세요.`);
     fetchDesigns(1, false);
   };
 
@@ -2526,6 +2620,16 @@ export default function Home() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center gap-2">
+                    <button
+                      onClick={() => handleBatchGenerateSeries(`${selectedStickerSeriesTab}_both`)}
+                      disabled={isBatchGenerating}
+                      className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-purple-500"
+                      title="어항 세트 20종 생성 후, AI 비전으로 각 어항에서 단일 낱개 스티커 20종을 1:1 자동 추출하여 총 41장 동시 생성합니다"
+                    >
+                      <span>🔥</span>
+                      <span>[어항세트 + 1:1맞춤 낱개 40종] 동시 생성</span>
+                    </button>
+
                     <button
                       onClick={() => handleBatchGenerateSeries(selectedStickerSeriesTab)}
                       disabled={isBatchGenerating}
@@ -4466,29 +4570,43 @@ export default function Home() {
                               </p>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-1.5 pt-1.5 border-t border-gray-100">
-                              <button
-                                onClick={async (e) => {
-                                  e.stopPropagation();
-                                  try {
-                                    const transparentDataUrl = await processTransparentPNG(sticker.image_url, { targetWidth: 3000, targetHeight: 3000 });
-                                    const a = document.createElement('a');
-                                    a.href = transparentDataUrl;
-                                    a.download = `${String(idx + 1).padStart(2, '0')}_sticker_${sticker.id || Date.now()}.png`;
-                                    a.click();
-                                  } catch (err) {
-                                    const a = document.createElement('a');
-                                    a.href = sticker.image_url;
-                                    a.download = `sticker_${sticker.id || Date.now()}.jpg`;
-                                    a.click();
-                                  }
-                                }}
-                                className="w-full bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 font-bold text-[11px] py-1 rounded-lg transition-colors flex items-center justify-center gap-1"
-                                title="300DPI 고화질 PNG 다운로드"
-                              >
-                                <span>📥</span>
-                                <span>PNG</span>
-                              </button>
+                            <div className="pt-1.5 border-t border-gray-100 space-y-1.5">
+                              <div className="grid grid-cols-2 gap-1.5">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleGenerateStandaloneFromTank(sticker);
+                                  }}
+                                  className="w-full bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold text-[10px] py-1 rounded-lg transition-colors flex items-center justify-center gap-0.5"
+                                  title="이 어항 이미지에서 주요 대상만 AI 비전으로 1:1 맞춤 낱개 스티커 추출 생성"
+                                >
+                                  <span>✨</span>
+                                  <span>낱개 추출</span>
+                                </button>
+
+                                <button
+                                  onClick={async (e) => {
+                                    e.stopPropagation();
+                                    try {
+                                      const transparentDataUrl = await processTransparentPNG(sticker.image_url, { targetWidth: 3000, targetHeight: 3000 });
+                                      const a = document.createElement('a');
+                                      a.href = transparentDataUrl;
+                                      a.download = `${String(idx + 1).padStart(2, '0')}_sticker_${sticker.id || Date.now()}.png`;
+                                      a.click();
+                                    } catch (err) {
+                                      const a = document.createElement('a');
+                                      a.href = sticker.image_url;
+                                      a.download = `sticker_${sticker.id || Date.now()}.jpg`;
+                                      a.click();
+                                    }
+                                  }}
+                                  className="w-full bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 font-bold text-[10px] py-1 rounded-lg transition-colors flex items-center justify-center gap-0.5"
+                                  title="300DPI 고화질 PNG 다운로드"
+                                >
+                                  <span>📥</span>
+                                  <span>PNG</span>
+                                </button>
+                              </div>
 
                               <button
                                 onClick={(e) => {
