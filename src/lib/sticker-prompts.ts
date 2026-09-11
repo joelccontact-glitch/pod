@@ -138,7 +138,7 @@ export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
   }
 ];
 
-export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
+export const AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
 2. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
 3. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures, NO labels anywhere in the image. Pure graphic illustration art only.
@@ -147,6 +147,16 @@ export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 6. STRICT WATER-FILLED AQUARIUM RULE: Every aquarium tank MUST be visibly filled with translucent blue aquatic water, featuring a clear rippling water surface line near the top rim.
 7. STRICT BUBBLE POSITION RULE: All water bubbles MUST stay 100% INSIDE the aquatic water inside the aquarium tank. Absolutely NO floating water bubbles outside the glass tank or floating in the air above the rim.
 8. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
+
+export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT;
+
+export const VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
+1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
+2. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
+3. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures, NO labels anywhere in the image. Pure graphic illustration art only.
+4. STRICT NON-REFLECTIVE GLASS RULE: Absolutely NO glass reflections, NO white glare streaks, NO diagonal shine strips across the glass container. The glass tank/jar must be completely clear and transparent without any white reflection lines so stickers can be layered seamlessly inside.
+5. STRICT BIOLOGICAL SURVIVAL & OPEN-AIR RULE FOR VIVARIUM: This is a DRY OR PALUDARIUM TERRESTRIAL LAND VIVARIUM (NOT an underwater fish tank). Air-breathing amphibians and reptiles (frogs, chameleons, geckos, salamanders) MUST be sitting/perched on land, moss, driftwood, or leaves in OPEN AIR ABOVE the water level. Absolutely NEVER submerge air-breathing animals underwater. Water level must be 0% or low bottom stream level (max 10-15%).
+6. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
 
 export const TERRARIUM_SERIES: StickerPreset[] = [
   // --- 1. VIVARIUM SERIES (Reptiles, Amphibians & Ecosystem Tanks) ---
@@ -159,7 +169,7 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     theme: 'Wide Panoramic Vivarium Guide',
     phrase: '',
     description: '가로형 와이드 수조 속에 유목, 이끼, 넝쿨, 미니 카멜레온과 청개구리가 생태적으로 어우러진 비바리움 풀세트 완성본',
-    prompt: `A cute die-cut sticker design featuring a wide horizontal panoramic rectangular glass vivarium tank. Inside the clear glass tank is a lush real-life vivarium ecosystem with natural curved driftwood, green moss layers, climbing vines, river stones, a tiny cute baby green chameleon resting on a branch, and a tiny leaf tree frog. NO glass glare or reflection lines. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `A cute die-cut sticker design featuring a wide horizontal panoramic rectangular glass vivarium tank. Inside the clear glass tank is a dry terrestrial or paludarium vivarium ecosystem (NOT submerged underwater) with natural curved driftwood, green moss layers, climbing vines, river stones, a tiny cute baby green chameleon resting on a branch in open air, and a tiny leaf tree frog sitting above water level on a leaf. NO glass glare or reflection lines. ${VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'vivarium-wide-tank-frame',
@@ -170,7 +180,7 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     theme: 'Wide Tank Frame',
     phrase: '',
     description: '스티커를 안쪽에 자유롭게 채워 넣을 수 있는 가로 파노라마 직사각형 유리 수조 틀 (100% 무반사 투명 유리)',
-    prompt: `A cute die-cut sticker design featuring a clean, wide horizontal rectangular glass vivarium tank frame, completely empty inside with a subtle thin gravel layer at the bottom. The glass walls MUST be 100% clear with NO white diagonal glare strips or glass reflection lines, allowing seamless sticker layering. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `A cute die-cut sticker design featuring a clean, wide horizontal rectangular glass vivarium tank frame, completely empty inside with a subtle thin gravel layer at the bottom. The glass walls MUST be 100% clear with NO white diagonal glare strips or glass reflection lines, allowing seamless sticker layering. ${VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'vivarium-wide-driftwood-moss',
@@ -181,7 +191,7 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     theme: 'Horizontal Terrain Pack',
     phrase: '',
     description: '가로 수조 바닥 비율에 딱 맞춰 깔아주는 자연 유목 뿌리와 이끼 & 조약돌 지형 스티커',
-    prompt: `A cute die-cut sticker design featuring a wide horizontal panorama mound of natural curved driftwood root, smooth river pebbles, and lush green moss bed, perfectly proportioned to fit horizontally inside a vivarium tank. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `A cute die-cut sticker design featuring a wide horizontal panorama mound of natural curved driftwood root, smooth river pebbles, and lush green moss bed, perfectly proportioned to fit horizontally inside a vivarium tank. ${VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'vivarium-vine-flora',
@@ -192,7 +202,7 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     theme: 'Vivarium Flora',
     phrase: '',
     description: '수조 유목이나 유리 벽면에 자라나는 넝쿨 식물과 고사리 세트 스티커',
-    prompt: `A cute die-cut sticker design featuring vibrant green climbing tropical vines and miniature fern branches, small proportion designed to fit inside a vivarium tank. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `A cute die-cut sticker design featuring vibrant green climbing tropical vines and miniature fern branches, small proportion designed to fit inside a vivarium tank. ${VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
   },
   {
     id: 'vivarium-chameleon-frog',
@@ -203,7 +213,7 @@ export const TERRARIUM_SERIES: StickerPreset[] = [
     theme: 'Vivarium Live Creatures',
     phrase: '',
     description: '수조 유목 생태계와 어울리는 앙증맞은 파충류/양서류 (미니 카멜레온 & 작은 나뭇잎 청개구리) 스티커',
-    prompt: `A cute die-cut sticker design featuring a tiny cute baby green chameleon sitting lazily on a vine branch next to a small adorable green tree frog, small scale proportion designed for a vivarium ecosystem. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `A cute die-cut sticker design featuring a tiny cute baby green chameleon sitting lazily on a vine branch next to a small adorable green tree frog perched in open air above ground/water, small scale proportion designed for a vivarium ecosystem. ${VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
   }
 ];
 
@@ -267,31 +277,31 @@ export const VIVARIUM_20_SERIES: StickerPreset[] = [
     theme: 'Vivarium 20 Pack Cover',
     phrase: '',
     description: 'Etsy 판매용 20종 비바리움 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
-    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE VIVARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut vivarium glass tank sticker samples with reptiles, chameleons, and frogs arranged artistically. STRICT NO LAND MAMMALS/BIRDS RULE: Absolutely NO land mammals, NO foxes, NO birds, NO cats, NO dogs inside or around the vivarium tanks. ONLY reptiles, amphibians (chameleons, geckos, frogs), driftwood, moss, and tropical plants. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE VIVARIUM STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are cute die-cut vivarium glass tank sticker samples with reptiles, chameleons, and frogs perched in open air arranged artistically. STRICT NO SUBMERGED ANIMALS & NO LAND MAMMALS/BIRDS RULE: Absolutely NO submerged lung-breathing animals underwater, NO land mammals, NO foxes, NO birds, NO cats, NO dogs inside or around the vivarium tanks. ONLY reptiles and amphibians (chameleons, geckos, frogs) perched in open air above ground/water, driftwood, moss, and tropical plants. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
   },
   ...Array.from({ length: 20 }, (_, i) => {
     const num = i + 1;
   const items = [
-    { name: '미니 카멜레온 수조 비바리움', desc: '가로 수조 유목 위 나른하게 쉰 미니 카멜레온', detail: 'wide horizontal glass vivarium tank with curved driftwood, moss, climbing vines, and a tiny cute baby green chameleon resting on a branch' },
-    { name: '나뭇잎 청개구리 수조 비바리움', desc: '몬스테라 잎 위 아기 청개구리가 앉은 비바리움', detail: 'horizontal glass vivarium tank featuring a tiny cute green tree frog perched on a monstera leaf' },
-    { name: '속눈썹 게코 도마뱀 비바리움', desc: '유목 뿌리 속 눈부신 크레스티드 게코 도마뱀', detail: 'wide vivarium tank with natural driftwood root, ferns, and a tiny adorable crested gecko' },
-    { name: '무당개구리 이끼 비바리움', desc: '작은 바위 위 알록달록 무당개구리가 있는 수조', detail: 'horizontal vivarium tank with smooth river stones, moss, and a tiny colorful oriental fire-bellied toad' },
-    { name: '피그미 도롱뇽 비바리움', desc: '촉촉한 이끼 침대 위 아기 점박이 도롱뇽', detail: 'wide vivarium tank with moist moss terrain, bark, and a tiny cute spotted salamander' },
-    { name: '열대 넝쿨 카멜레온 비바리움', desc: '화려한 수생 넝쿨과 미니 파스텔 카멜레온', detail: 'panoramic vivarium tank filled with lush tropical climbing vines and a tiny cute chameleon' },
-    { name: '유목 뿌리 아기 게코 비바리움', desc: '대형 꼬인 유목 뿌리와 아기 레오파드 게코', detail: 'horizontal vivarium tank with a large twisted driftwood root and a tiny baby leopard gecko' },
-    { name: '우림 고사리 청개구리 비바리움', desc: '우림 고사리 잎 아래 비를 피하는 미니 개구리', detail: 'wide vivarium tank with dense rainforest fern leaves and a tiny cute tree frog sheltering under a leaf' },
-    { name: '자연 바위 도롱뇽 비바리움', desc: '자연 암석 지층 사이의 미니 도롱뇽 비바리움', detail: 'horizontal glass tank featuring layered natural rock slate, moss, and a tiny cute baby salamander' },
-    { name: '몬스테라 넝쿨 게코 비바리움', desc: '싱그러운 몬스테라 줄기 타는 미니 게코', detail: 'wide glass vivarium tank with climbing monstera vines and a tiny cute gecko climbing up' },
-    { name: '화산석 테인 카멜레온 비바리움', desc: '검은 화산석 바위와 카멜레온이 조화로운 수조', detail: 'horizontal vivarium tank with black volcanic rocks, moss mound, and a tiny green chameleon' },
-    { name: '미니 달팽이 이끼 비바리움', desc: '이끼 언덕 위 귀여운 미니 나뭇잎 달팽이', detail: 'wide vivarium tank with plush cushion moss and a tiny cute garden snail with a spiral shell' },
-    { name: '밀림 정글 유목 비바리움', desc: '울창한 정글 수초 유목 생태계 완성 수조', detail: 'panoramic vivarium tank featuring dense jungle foliage, curved driftwood, and smooth stones' },
-    { name: '수생 식물 카멜레온 비바리움', desc: '수생 식물 사이로 삐쭉 고개 내민 미니 카멜레온', detail: 'wide glass tank filled with lush aquatic jungle plants and a tiny baby chameleon peeking out' },
-    { name: '이끼 바위 개구리 비바리움', desc: '이끼 덮인 바위 위 아기 청개구리의 비바리움', detail: 'horizontal vivarium tank with moss-covered boulders and a tiny cute green frog sitting happily' },
-    { name: '유목 아치 도롱뇽 비바리움', desc: '유목 아치 다리 아래 쉬는 미니 도롱뇽 수조', detail: 'wide glass tank with an arched driftwood branch, ferns, and a tiny sleeping salamander' },
-    { name: '트로피컬 고사리 게코 비바리움', desc: '열대 고사리 장식 수조 속 귀여운 아기 게코', detail: 'horizontal vivarium tank featuring lush tropical fern fronds and a tiny cute baby gecko' },
-    { name: '자갈 시냇물 비바리움', desc: '자갈 얕은 수분 물길이 지나는 비바리움 지형', detail: 'wide glass tank with a miniature gravel creekbed, moss banks, and a tiny baby frog' },
-    { name: '바위 동굴 게코 비바리움', desc: '바위 동굴 속에서 고개를 빼끔 내민 미니 게코', detail: 'horizontal vivarium tank with a tiny stone cave shelter and a cute gecko peeking out' },
-    { name: '파노라마 마스터 비바리움', desc: '유목, 고사리, 이끼, 청개구리가 완벽 어우러진 비바리움', detail: 'wide panoramic vivarium glass tank with lush mixed greenery, driftwood root, and a cute tree frog' }
+    { name: '미니 카멜레온 수조 비바리움', desc: '가로 수조 유목 위 나른하게 쉰 미니 카멜레온', detail: 'wide horizontal glass vivarium tank with curved driftwood, moss, climbing vines, and a tiny cute baby green chameleon resting on a branch in open air' },
+    { name: '나뭇잎 청개구리 수조 비바리움', desc: '몬스테라 잎 위 아기 청개구리가 앉은 비바리움', detail: 'horizontal glass vivarium tank featuring a tiny cute green tree frog perched on a monstera leaf in open air' },
+    { name: '속눈썹 게코 도마뱀 비바리움', desc: '유목 뿌리 속 눈부신 크레스티드 게코 도마뱀', detail: 'wide vivarium tank with natural driftwood root, ferns, and a tiny adorable crested gecko perched on driftwood in open air' },
+    { name: '무당개구리 이끼 비바리움', desc: '작은 바위 위 알록달록 무당개구리가 있는 수조', detail: 'horizontal vivarium tank with smooth river stones, moss, and a tiny colorful oriental fire-bellied toad perched on a dry mossy rock in open air' },
+    { name: '피그미 도롱뇽 비바리움', desc: '촉촉한 이끼 침대 위 아기 점박이 도롱뇽', detail: 'wide vivarium tank with moist moss terrain, bark, and a tiny cute spotted salamander resting on dry moss in open air' },
+    { name: '열대 넝쿨 카멜레온 비바리움', desc: '화려한 수생 넝쿨과 미니 파스텔 카멜레온', detail: 'panoramic vivarium tank filled with lush tropical climbing vines and a tiny cute chameleon sitting on a vine branch in open air' },
+    { name: '유목 뿌리 아기 게코 비바리움', desc: '대형 꼬인 유목 뿌리와 아기 레오파드 게코', detail: 'horizontal vivarium tank with a large twisted driftwood root and a tiny baby leopard gecko perched on top in open air' },
+    { name: '우림 고사리 청개구리 비바리움', desc: '우림 고사리 잎 아래 비를 피하는 미니 개구리', detail: 'wide vivarium tank with dense rainforest fern leaves and a tiny cute tree frog sheltering under a leaf on land in open air' },
+    { name: '자연 바위 도롱뇽 비바리움', desc: '자연 암석 지층 사이의 미니 도롱뇽 비바리움', detail: 'horizontal glass tank featuring layered natural rock slate, moss, and a tiny cute baby salamander sitting on a rock in open air' },
+    { name: '몬스테라 넝쿨 게코 비바리움', desc: '싱그러운 몬스테라 줄기 타는 미니 게코', detail: 'wide glass vivarium tank with climbing monstera vines and a tiny cute gecko climbing up in open air' },
+    { name: '화산석 테인 카멜레온 비바리움', desc: '검은 화산석 바위와 카멜레온이 조화로운 수조', detail: 'horizontal vivarium tank with black volcanic rocks, moss mound, and a tiny green chameleon perched on a rock in open air' },
+    { name: '미니 달팽이 이끼 비바리움', desc: '이끼 언덕 위 귀여운 미니 나뭇잎 달팽이', detail: 'wide vivarium tank with plush cushion moss and a tiny cute garden snail with a spiral shell crawling on moss in open air' },
+    { name: '밀림 정글 유목 비바리움', desc: '울창한 정글 수초 유목 생태계 완성 수조', detail: 'panoramic vivarium tank featuring dense jungle foliage, curved driftwood, and smooth stones in a dry terrestrial setup' },
+    { name: '수생 식물 카멜레온 비바리움', desc: '수생 식물 사이로 삐쭉 고개 내민 미니 카멜레온', detail: 'wide glass tank filled with lush terrestrial jungle plants and a tiny baby chameleon peeking out from leaves in open air' },
+    { name: '이끼 바위 개구리 비바리움', desc: '이끼 덮인 바위 위 아기 청개구리의 비바리움', detail: 'horizontal vivarium tank with moss-covered boulders and a tiny cute green frog sitting happily on a dry mossy rock in open air' },
+    { name: '유목 아치 도롱뇽 비바리움', desc: '유목 아치 다리 아래 쉬는 미니 도롱뇽 수조', detail: 'wide glass tank with an arched driftwood branch, ferns, and a tiny sleeping salamander resting on dry ground in open air' },
+    { name: '트로피컬 고사리 게코 비바리움', desc: '열대 고사리 장식 수조 속 귀여운 아기 게코', detail: 'horizontal vivarium tank featuring lush tropical fern fronds and a tiny cute baby gecko perched on a fern in open air' },
+    { name: '자갈 시냇물 비바리움', desc: '자갈 얕은 수분 물길이 지나는 비바리움 지형', detail: 'wide glass tank with a miniature gravel shallow creekbed at bottom, moss banks, and a tiny baby frog perched on a dry mossy bank in open air' },
+    { name: '바위 동굴 게코 비바리움', desc: '바위 동굴 속에서 고개를 빼끔 내민 미니 게코', detail: 'horizontal vivarium tank with a tiny stone cave shelter and a cute gecko peeking out on dry ground in open air' },
+    { name: '파노라마 마스터 비바리움', desc: '유목, 고사리, 이끼, 청개구리가 완벽 어우러진 비바리움', detail: 'wide panoramic vivarium glass tank with lush mixed greenery, driftwood root, and a cute tree frog perched high on a branch in open air' }
   ][i];
 
   return {
@@ -303,7 +313,7 @@ export const VIVARIUM_20_SERIES: StickerPreset[] = [
     theme: 'Vivarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `A cute die-cut sticker design featuring a clean, wide horizontal panoramic rectangular glass vivarium tank. Inside is a lush ${items.detail}. NO glass glare strips. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `A cute die-cut sticker design featuring a clean, wide horizontal panoramic rectangular glass vivarium tank (dry land or low paludarium tank, NOT an underwater fish tank). Inside is a lush ${items.detail}. NO glass glare strips. Crisp white border. ${VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
   }
 }) as unknown as StickerPreset[]];
 
