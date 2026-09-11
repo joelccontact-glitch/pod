@@ -150,46 +150,91 @@ export default function Home() {
   const handleRegenerateMasterCover = async (coverDesign: any) => {
     if (!coverDesign) return;
 
-    // Always route master cover regeneration through the 100% composite cover builder (20 stickers + filler items)
-    let targetStickers = packStickers;
-    const coverCategory = getDesignCategoryKey(coverDesign);
-    const coverTime = new Date(coverDesign.created_at || 0).getTime();
-
+    setIsRegeneratingCover(true);
     try {
-      const res = await fetch(`/api/designs?limit=1000&type=sticker`);
-      const data = await res.json();
-      if (data.success && Array.isArray(data.data)) {
-        const pool = data.data;
+      let basePrompt = coverDesign.prompt || '';
+      const presetId = (coverDesign.stickerPresetId || coverDesign.id || '').toLowerCase();
+      const sub = coverDesign.sticker_sub;
 
-        const matched = pool.filter((d: any) => {
-          if (d.id === coverDesign.id || isCoverDesign(d)) return false;
-          const itemCategory = getDesignCategoryKey(d);
-          if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) {
-            return false; // Mismatched category -> exclude immediately!
-          }
-          const itemTime = new Date(d.created_at || 0).getTime();
-          const isTimeMatched = coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000;
-          return isTimeMatched || (coverCategory !== 'other' && itemCategory === coverCategory);
-        });
-
-        matched.sort((a: any, b: any) => {
-          const timeA = new Date(a.created_at || 0).getTime();
-          const timeB = new Date(b.created_at || 0).getTime();
-          return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
-        });
-
-        const final20 = matched.slice(0, 20);
-        final20.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
-        if (final20.length > 0) {
-          targetStickers = final20;
-        }
+      if (presetId.includes('terrarium') || sub === 'terrarium') {
+        const p = TERRARIUM_20_SERIES.find(s => s.id === 'terrarium-20-pack-cover');
+        if (p) basePrompt = p.prompt;
+      } else if (presetId.includes('vivarium') || sub === 'vivarium') {
+        const p = VIVARIUM_20_SERIES.find(s => s.id === 'vivarium-20-pack-cover');
+        if (p) basePrompt = p.prompt;
+      } else if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium') || sub === 'saltaquarium') {
+        const p = SALT_AQUARIUM_20_SERIES.find(s => s.id === 'salt-aquarium-20-pack-cover');
+        if (p) basePrompt = p.prompt;
+      } else if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium') || sub === 'freshaquarium') {
+        const p = FRESH_AQUARIUM_20_SERIES.find(s => s.id === 'fresh-aquarium-20-pack-cover');
+        if (p) basePrompt = p.prompt;
       }
-    } catch (e) {
-      console.error('Error finding sub-stickers for master cover:', e);
-    }
 
-    // Execute 100% composite master cover generation (20 stickers + 14 filler items)
-    await handleGenerateRealCompositeCover(coverDesign, targetStickers);
+      const res = await fetch('/api/designs/from-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          imageBase64: '',
+          prompt: basePrompt,
+          title: coverDesign.title,
+          isPreview: true,
+          styleId: selectedStyleId,
+          catchphrase: '',
+          autoPhrase: false
+        })
+      });
+
+      const data = await res.json();
+      if (data.success && data.data?.image_url) {
+        const rawImageUrl = data.data.image_url;
+        const compressedUrl = await compressImageForFirestore(rawImageUrl, 800000);
+
+        const updates = {
+          image_url: compressedUrl,
+          prompt: basePrompt,
+          updated_at: new Date().toISOString()
+        };
+
+        const updateRes = await fetch('/api/designs/update', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: coverDesign.id,
+            updates
+          })
+        });
+
+        const updateData = await updateRes.json();
+        if (!updateRes.ok || !updateData.success) {
+          throw new Error(updateData.error || 'Firestore DB 업데이트 실패');
+        }
+
+        const freshTs = updateData.updated_at ? new Date(updateData.updated_at).getTime() : Date.now();
+        const freshImageUrl = `/api/designs/image?id=${coverDesign.id}&v=${freshTs}&_t=${Date.now()}`;
+
+        const freshData = {
+          ...updates,
+          updated_at: updateData.updated_at || updates.updated_at,
+          image_url: freshImageUrl
+        };
+
+        setSelectedPackCover((prev: any) => prev ? { ...prev, ...freshData } : prev);
+        setDesigns(prev => prev.map(d => d.id === coverDesign.id ? { ...d, ...freshData } : d));
+        if (selectedDesign?.id === coverDesign.id) {
+          setSelectedDesign((prev: any) => prev ? { ...prev, ...freshData } : prev);
+        }
+
+        alert('✨ 최고 퀄리티 Etsy 베스트셀러 마스터 표지가 성공적으로 재생성되었습니다!');
+        await fetchDesigns(page, false, undefined, undefined, true);
+      } else {
+        alert('마스터 표지 생성 실패: ' + (data.error || '오류가 발생했습니다.'));
+      }
+    } catch (e: any) {
+      console.error('Error regenerating master cover:', e);
+      alert('마스터 표지 재생성 중 오류가 발생했습니다: ' + (e.message || String(e)));
+    } finally {
+      setIsRegeneratingCover(false);
+    }
   };
 
   const [isBuildingComposite, setIsBuildingComposite] = useState(false);
@@ -1895,16 +1940,8 @@ export default function Home() {
       }
     }
 
-    if (coverDesignToSave && generatedStickersList.length > 0) {
-      try {
-        await handleGenerateRealCompositeCover(coverDesignToSave, generatedStickersList);
-      } catch (err) {
-        console.error('Auto composite master cover failed:', err);
-      }
-    }
-
     setIsBatchGenerating(false);
-    alert(`${packName} 일괄 자동 생성이 완료되었습니다! (성공: ${successCount}/${targetPresets.length}장)\n실제 20종 스티커 100% 실물 일치 마스터 표지가 자동으로 합성되었습니다.`);
+    alert(`${packName} 일괄 자동 생성이 완료되었습니다! (성공: ${successCount}/${targetPresets.length}장)\n마스터 썸네일 표지 1장 + 개별 스티커 20종이 성공적으로 생성되었습니다.`);
     fetchDesigns(1, false);
   };
 
