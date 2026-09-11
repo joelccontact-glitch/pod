@@ -150,147 +150,46 @@ export default function Home() {
   const handleRegenerateMasterCover = async (coverDesign: any) => {
     if (!coverDesign) return;
 
-    // 1. Check if sub-stickers exist for this pack
+    // Always route master cover regeneration through the 100% composite cover builder (20 stickers + filler items)
     let targetStickers = packStickers;
     const coverCategory = getDesignCategoryKey(coverDesign);
     const coverTime = new Date(coverDesign.created_at || 0).getTime();
 
-    if (!targetStickers || targetStickers.length === 0 || getDesignCategoryKey(targetStickers[0]) !== coverCategory) {
-      try {
-        const res = await fetch(`/api/designs?limit=1000&type=sticker`);
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          const pool = data.data;
-
-          const matched = pool.filter((d: any) => {
-            if (d.id === coverDesign.id || isCoverDesign(d)) return false;
-            const itemCategory = getDesignCategoryKey(d);
-            if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) {
-              return false; // Mismatched category -> exclude immediately!
-            }
-            const itemTime = new Date(d.created_at || 0).getTime();
-            const isTimeMatched = coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000;
-            return isTimeMatched || (coverCategory !== 'other' && itemCategory === coverCategory);
-          });
-
-          matched.sort((a: any, b: any) => {
-            const timeA = new Date(a.created_at || 0).getTime();
-            const timeB = new Date(b.created_at || 0).getTime();
-            return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
-          });
-
-          const final20 = matched.slice(0, 20);
-          final20.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
-          targetStickers = final20;
-        }
-      } catch (e) {
-        console.error('Error finding sub-stickers for master cover:', e);
-      }
-    }
-
-    // 2. If 20 actual sub-stickers exist, automatically generate the Snoopy/Etsy dynamic emblem composite cover
-    if (targetStickers && targetStickers.length > 0) {
-      await handleGenerateRealCompositeCover(coverDesign, targetStickers);
-      return;
-    }
-
-    // 3. Fallback: If no sub-stickers exist yet, prompt user & generate raw AI cover image
-    const userFeedback = prompt(
-      `[${coverDesign.title || '마스터 표지'}] 단독 재생성\n\n마스터 표지 이미지를 AI로 새로 생성하여 교체합니다.\n필요시 추가 수정/요청사항을 입력해 주세요 (선택사항, 빈칸으로 두면 기본 마스터 표지 지시문 적용):`,
-      ''
-    );
-
-    if (userFeedback === null) return;
-
-    setIsRegeneratingCover(true);
     try {
-      let basePrompt = coverDesign.prompt || '';
-      const presetId = (coverDesign.stickerPresetId || coverDesign.id || '').toLowerCase();
-      const sub = coverDesign.sticker_sub;
-
-      if (presetId.includes('terrarium') || sub === 'terrarium') {
-        const p = TERRARIUM_20_SERIES.find(s => s.id === 'terrarium-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      } else if (presetId.includes('vivarium') || sub === 'vivarium') {
-        const p = VIVARIUM_20_SERIES.find(s => s.id === 'vivarium-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      } else if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium') || sub === 'saltaquarium') {
-        const p = SALT_AQUARIUM_20_SERIES.find(s => s.id === 'salt-aquarium-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      } else if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium') || sub === 'freshaquarium') {
-        const p = FRESH_AQUARIUM_20_SERIES.find(s => s.id === 'fresh-aquarium-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      }
-
-      const finalPrompt = userFeedback.trim() 
-        ? `${basePrompt}. Additional user request: ${userFeedback.trim()}`
-        : basePrompt;
-
-      const res = await fetch('/api/designs/from-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageBase64: '',
-          prompt: finalPrompt,
-          title: coverDesign.title,
-          isPreview: true,
-          styleId: selectedStyleId,
-          catchphrase: '',
-          autoPhrase: false
-        })
-      });
-
+      const res = await fetch(`/api/designs?limit=1000&type=sticker`);
       const data = await res.json();
-      if (data.success && data.data?.image_url) {
-        const rawImageUrl = data.data.image_url;
-        const compressedUrl = await compressImageForFirestore(rawImageUrl, 800000);
+      if (data.success && Array.isArray(data.data)) {
+        const pool = data.data;
 
-        const updates = {
-          image_url: compressedUrl,
-          prompt: finalPrompt,
-          updated_at: new Date().toISOString()
-        };
-
-        const updateRes = await fetch('/api/designs/update', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: coverDesign.id,
-            updates
-          })
+        const matched = pool.filter((d: any) => {
+          if (d.id === coverDesign.id || isCoverDesign(d)) return false;
+          const itemCategory = getDesignCategoryKey(d);
+          if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) {
+            return false; // Mismatched category -> exclude immediately!
+          }
+          const itemTime = new Date(d.created_at || 0).getTime();
+          const isTimeMatched = coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000;
+          return isTimeMatched || (coverCategory !== 'other' && itemCategory === coverCategory);
         });
 
-        const updateData = await updateRes.json();
-        if (!updateRes.ok || !updateData.success) {
-          throw new Error(updateData.error || 'Firestore DB 업데이트 실패');
+        matched.sort((a: any, b: any) => {
+          const timeA = new Date(a.created_at || 0).getTime();
+          const timeB = new Date(b.created_at || 0).getTime();
+          return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
+        });
+
+        const final20 = matched.slice(0, 20);
+        final20.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+        if (final20.length > 0) {
+          targetStickers = final20;
         }
-
-        const freshTs = updateData.updated_at ? new Date(updateData.updated_at).getTime() : Date.now();
-        const freshImageUrl = `/api/designs/image?id=${coverDesign.id}&v=${freshTs}&_t=${Date.now()}`;
-
-        const freshData = {
-          ...updates,
-          updated_at: updateData.updated_at || updates.updated_at,
-          image_url: freshImageUrl
-        };
-
-        setSelectedPackCover((prev: any) => prev ? { ...prev, ...freshData } : prev);
-        setDesigns(prev => prev.map(d => d.id === coverDesign.id ? { ...d, ...freshData } : d));
-        if (selectedDesign?.id === coverDesign.id) {
-          setSelectedDesign((prev: any) => prev ? { ...prev, ...freshData } : prev);
-        }
-
-        alert('✨ 마스터 표지가 새 이미지로 성공적으로 단독 재생성되었습니다!');
-        await fetchDesigns(page, false, undefined, undefined, true);
-      } else {
-        alert('마스터 표지 생성 실패: ' + (data.error || '오류가 발생했습니다.'));
       }
-    } catch (e: any) {
-      console.error('Error regenerating master cover:', e);
-      alert('마스터 표지 재생성 중 오류가 발생했습니다: ' + (e.message || String(e)));
-    } finally {
-      setIsRegeneratingCover(false);
+    } catch (e) {
+      console.error('Error finding sub-stickers for master cover:', e);
     }
+
+    // Execute 100% composite master cover generation (20 stickers + 14 filler items)
+    await handleGenerateRealCompositeCover(coverDesign, targetStickers);
   };
 
   const [isBuildingComposite, setIsBuildingComposite] = useState(false);
