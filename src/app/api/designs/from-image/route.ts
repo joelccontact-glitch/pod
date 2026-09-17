@@ -23,7 +23,26 @@ export async function POST(req: Request) {
     const base64Data = imageBase64 ? imageBase64.replace(/^data:image\/\w+;base64,/, "") : "";
 
     let newPrompt = sanitizeSpelling(prompt);
-    let productInfo: any = { title: presetTitle || `[MOCK] Image derived T-Shirt`, tags: ["mock", "derived"] };
+    const lowerScan = `${presetTitle || ''} ${prompt || ''}`.toLowerCase();
+    const isSticker = (
+      lowerScan.includes('sticker') ||
+      lowerScan.includes('스티커') ||
+      lowerScan.includes('terrarium') ||
+      lowerScan.includes('테라리움') ||
+      lowerScan.includes('vivarium') ||
+      lowerScan.includes('비바리움') ||
+      lowerScan.includes('saltaquarium') ||
+      lowerScan.includes('해수어항') ||
+      lowerScan.includes('freshaquarium') ||
+      lowerScan.includes('열대어어항') ||
+      lowerScan.includes('master cover') ||
+      lowerScan.includes('마스터 썸네일') ||
+      lowerScan.includes('마스터 표지')
+    );
+    let productInfo: any = { 
+      title: presetTitle || (isSticker ? `[MOCK] Image derived Sticker` : `[MOCK] Image derived T-Shirt`), 
+      tags: isSticker ? ["sticker", "digital download", "die cut", "png"] : ["mock", "derived"] 
+    };
     let styleData: any = null;
 
     if (process.env.GEMINI_API_KEY) {
@@ -100,9 +119,13 @@ export async function POST(req: Request) {
       if (presetTitle) {
         productInfo.title = presetTitle;
       } else {
+        const seoPrompt = isSticker
+          ? `Please create an Etsy digital sticker / die-cut vinyl decal product title and 13 SEO tags for a design described as: '${newPrompt}'. STRICT NEGATIVE RULES: Absolutely NO t-shirt, shirt, tee, clothing, hoodie, apparel, or wearable words anywhere in the title or tags. Use sticker, decal, die-cut, vinyl, digital png, clipart words ONLY. Format as JSON with keys 'title' and 'tags'.`
+          : `Please create an Etsy t-shirt product title and 13 SEO tags for a design described as: '${newPrompt}'. Format as JSON with keys 'title' and 'tags'.`;
+
         const textResponse = await ai.models.generateContent({
           model: 'gemini-2.5-flash',
-          contents: `Please create an Etsy t-shirt product title and 13 SEO tags for a design described as: '${newPrompt}'. Format as JSON with keys 'title' and 'tags'.`,
+          contents: seoPrompt,
           config: { responseMimeType: 'application/json' }
         });
         const productInfoText = textResponse.text;
@@ -111,22 +134,6 @@ export async function POST(req: Request) {
     }
 
     const finalTitle = presetTitle || productInfo.title;
-    const lowerScan = `${finalTitle} ${presetTitle || ''} ${prompt || ''}`.toLowerCase();
-    const isSticker = (
-      lowerScan.includes('sticker pack') ||
-      lowerScan.includes('스티커') ||
-      lowerScan.includes('terrarium') ||
-      lowerScan.includes('테라리움') ||
-      lowerScan.includes('vivarium') ||
-      lowerScan.includes('비바리움') ||
-      lowerScan.includes('saltaquarium') ||
-      lowerScan.includes('해수어항') ||
-      lowerScan.includes('freshaquarium') ||
-      lowerScan.includes('열대어어항') ||
-      lowerScan.includes('master cover') ||
-      lowerScan.includes('마스터 썸네일') ||
-      lowerScan.includes('마스터 표지')
-    );
 
     newPrompt = buildEnforced2DVectorPrompt(newPrompt, spellingInstruction, isSticker);
 

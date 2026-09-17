@@ -8,7 +8,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { originalId, feedback: rawFeedback, topic, originalPrompt, isPreview, catchphrase: rawCatchphrase, autoPhrase } = await req.json();
+    const { originalId, originalTitle, feedback: rawFeedback, topic, originalPrompt, isPreview, catchphrase: rawCatchphrase, autoPhrase } = await req.json();
 
     if ((!rawFeedback && !rawCatchphrase && !autoPhrase) || !topic) {
       return NextResponse.json({ success: false, error: 'Feedback or catchphrase is required' }, { status: 400 });
@@ -18,45 +18,77 @@ export async function POST(req: Request) {
     const catchphrase = rawCatchphrase ? sanitizeSpelling(rawCatchphrase) : null;
     const spellingInstruction = getStrictSpellingInstruction(catchphrase || undefined, autoPhrase);
 
+    // 1. Detect whether the design is a sticker
+    const scanStr = `${topic || ''} ${originalTitle || ''} ${originalPrompt || ''} ${feedback || ''}`.toLowerCase();
+    const isSticker = (
+      scanStr.includes('sticker') ||
+      scanStr.includes('스티커') ||
+      scanStr.includes('terrarium') ||
+      scanStr.includes('테라리움') ||
+      scanStr.includes('vivarium') ||
+      scanStr.includes('비바리움') ||
+      scanStr.includes('saltaquarium') ||
+      scanStr.includes('해수어항') ||
+      scanStr.includes('freshaquarium') ||
+      scanStr.includes('열대어어항') ||
+      scanStr.includes('master cover') ||
+      scanStr.includes('마스터 썸네일') ||
+      scanStr.includes('마스터 표지')
+    );
+
     let newPrompt = sanitizeSpelling(originalPrompt);
-    let productInfo = { title: `[MOCK Modified] ${topic} T-Shirt`, tags: ["mock", "modified"] };
+    let productInfo = { 
+      title: originalTitle || (isSticker ? `[MOCK Modified] ${topic} Sticker` : `[MOCK Modified] ${topic} T-Shirt`), 
+      tags: isSticker ? ["sticker", "digital download", "die cut", "png"] : ["mock", "modified"] 
+    };
 
     if (process.env.GEMINI_API_KEY) {
       const { likedDesigns, likedPromptSummary } = await fetchLikedDesignsSummary(db, 3);
       const likedInstruction = likedDesigns.length > 0 ? `\nCRITICAL #1 MASTER BENCHMARK: The user LIKED (HEARTED) these favorite designs. Ensure the modified prompt maintains their favorite aesthetic:\n${likedPromptSummary}\n` : '';
 
-      // 1. Generate new prompt based on feedback
+      // 2. Generate new prompt based on feedback
+      const promptConcept = isSticker ? 'a cute die-cut sticker design concept' : 'a graphic design concept';
       const promptResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `I have a t-shirt design concept with the original prompt: "${originalPrompt}". ${feedback ? `The user provided the following feedback to modify it: "${feedback}". ` : ''}${spellingInstruction}${likedInstruction} Generate a new, modified prompt for an image generator (vector art, graphic illustration, pure solid white background (#FFFFFF), NO scenery). CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple t-shirts. NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
+        contents: `I have ${promptConcept} with the original prompt: "${originalPrompt}". ${feedback ? `The user provided the following feedback to modify it: "${feedback}". ` : ''}${spellingInstruction}${likedInstruction} Generate a new, modified prompt for an image generator (vector art, graphic illustration, pure solid white background (#FFFFFF), NO scenery). CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST be a SINGLE isolated graphic illustration centered on a pure solid white background (#FFFFFF). NEVER draw actual t-shirt garments, clothing mockups, grid layouts, or multiple items. NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
       });
       newPrompt = sanitizeSpelling(promptResponse.text?.trim() || originalPrompt);
 
-
-      // 2. Generate new SEO Content
-      const textResponse = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: `Please create an Etsy t-shirt product title and 13 SEO tags for the theme '${topic}' considering this modification: '${feedback}'. Format as JSON with keys 'title' and 'tags'.`,
-        config: { responseMimeType: 'application/json' }
-      });
-      const productInfoText = textResponse.text;
-      productInfo = productInfoText ? JSON.parse(productInfoText) : productInfo;
-      const scanStr = `${topic || ''} ${originalPrompt || ''} ${feedback || ''}`.toLowerCase();
-      const isSticker = (
-        scanStr.includes('sticker pack') ||
-        scanStr.includes('스티커') ||
-        scanStr.includes('terrarium') ||
-        scanStr.includes('테라리움') ||
-        scanStr.includes('vivarium') ||
-        scanStr.includes('비바리움') ||
-        scanStr.includes('saltaquarium') ||
-        scanStr.includes('해수어항') ||
-        scanStr.includes('freshaquarium') ||
-        scanStr.includes('열대어어항') ||
-        scanStr.includes('master cover') ||
-        scanStr.includes('마스터 썸네일') ||
-        scanStr.includes('마스터 표지')
+      // 3. Generate new SEO Content
+      // Check if originalTitle is a standardized preset sticker title (e.g. starts with emoji / bracket like [비바리움 단일 ...] etc.)
+      const isPresetTitle = originalTitle && (
+        originalTitle.includes('[비바리움') ||
+        originalTitle.includes('[테라리움') ||
+        originalTitle.includes('[해수어') ||
+        originalTitle.includes('[열대어') ||
+        originalTitle.includes('단일') ||
+        originalTitle.includes('마스터') ||
+        originalTitle.startsWith('🦎') ||
+        originalTitle.startsWith('🪴') ||
+        originalTitle.startsWith('🪸') ||
+        originalTitle.startsWith('🐠') ||
+        originalTitle.startsWith('🖼️')
       );
+
+      if (isPresetTitle) {
+        // Retain original preset title for sticker consistency
+        productInfo.title = originalTitle;
+      } else {
+        const seoPrompt = isSticker
+          ? `Please create an Etsy digital sticker / die-cut vinyl decal product title and 13 SEO tags for the theme '${topic}' considering this modification: '${feedback}'. STRICT NEGATIVE RULES: Absolutely NO t-shirt, shirt, tee, clothing, hoodie, apparel, or wearable words anywhere in the title or tags. Use sticker, decal, die-cut, vinyl, digital png, clipart words ONLY. Format as JSON with keys 'title' and 'tags'.`
+          : `Please create an Etsy t-shirt product title and 13 SEO tags for the theme '${topic}' considering this modification: '${feedback}'. Format as JSON with keys 'title' and 'tags'.`;
+
+        const textResponse = await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: seoPrompt,
+          config: { responseMimeType: 'application/json' }
+        });
+        const productInfoText = textResponse.text;
+        if (productInfoText) {
+          productInfo = JSON.parse(productInfoText);
+        }
+      }
+
       newPrompt = buildEnforced2DVectorPrompt(newPrompt, spellingInstruction, isSticker);
     }
 

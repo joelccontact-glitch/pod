@@ -2353,6 +2353,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           originalId: selectedDesign.id,
+          originalTitle: baseDesign.title || selectedDesign.title || '',
           feedback: feedback.trim(),
           topic: baseDesign.topic,
           originalPrompt: baseDesign.prompt,
