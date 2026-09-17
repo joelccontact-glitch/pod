@@ -501,7 +501,7 @@ export const VIVARIUM_STANDALONE_20_SERIES: StickerPreset[] = [
       { name: '유목 아치 쉬는 도롱뇽 단일 스티커', desc: '유목 아치 아래 쉬는 미니 도롱뇽 낱개 스티커', detail: 'standalone tiny sleeping salamander resting under a small arched driftwood branch in open air' },
       { name: '트로피컬 고사리 미니 게코 단일 스티커', desc: '고사리 잎 위 귀여운 아기 게코 낱개 스티커', detail: 'standalone tiny cute baby gecko perched on a bright green fern in open air' },
       { name: '이끼 둑 아기 청개구리 단일 스티커', desc: '이끼 둑 위 아기 청개구리 낱개 스티커', detail: 'standalone tiny baby frog perched on a dry mossy pebble bank in open air' },
-      { name: '암석 동굴 미니 게코 단일 스티커', desc: '돌 틈에서 고개 낸 아기 게코 낱개 스티커', detail: 'standalone tiny cute gecko peeking out from a stone crevice in open air' },
+      { name: '자연 조약돌 위 미니 게코 단일 스티커', desc: '이끼 조약돌 위 엎드린 아기 게코 낱개 스티커', detail: 'standalone tiny cute gecko resting peacefully on a small single mossy pebble stone in open air' },
       { name: '나뭇가지 위 아기 청개구리 단일 스티커', desc: '나뭇가지 위 앙증맞은 청개구리 낱개 스티커', detail: 'standalone tiny cute tree frog perched high on a natural wooden branch with leaves in open air' }
     ][i];
 
@@ -514,7 +514,7 @@ export const VIVARIUM_STANDALONE_20_SERIES: StickerPreset[] = [
       theme: 'Vivarium Standalone 20 Pack',
       phrase: '',
       description: items.desc,
-      prompt: `A cute die-cut sticker design featuring a standalone single animal: ${items.detail}. STRICT BIOLOGICAL SURVIVAL RULE: NO glass tank, NO container, NO underwater submergence. Animal MUST be in open air on dry land/driftwood/leaf, head exposed above water. Crisp white border. ${VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
+      prompt: `A cute die-cut sticker design featuring an isolated standalone single animal: ${items.detail}. STRICT BIOLOGICAL SURVIVAL RULE: NO glass tank, NO container, NO underwater submergence. Animal MUST be in open air on dry land/driftwood/leaf, head exposed above water. Crisp white die-cut border. PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background rock walls, NO full scenery. ${VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
     };
   }) as unknown as StickerPreset[]
 ];
