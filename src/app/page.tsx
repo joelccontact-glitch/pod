@@ -2792,9 +2792,12 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <span className="text-[11px] font-semibold text-rose-800 bg-white/90 border border-rose-200 px-3 py-1 rounded-full shadow-2xs shrink-0">
-                💡 40종 팩(수조 20 + 낱개 20) + A4 2장 인쇄용 시트 원클릭 동시 생성
-              </span>
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-[11px] font-extrabold text-rose-900 bg-white/95 border border-rose-200 px-3 py-1 rounded-full shadow-2xs flex items-center gap-1.5">
+                  <span>🖨️</span>
+                  <span>A4 300DPI 2장 분할 시트 지원</span>
+                </span>
+              </div>
             </div>
 
             {/* 3대 시즌 추천 카드 그리드 */}
@@ -2835,7 +2838,18 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-gray-100 space-y-1.5">
+                  <div className="pt-2 border-t border-gray-100 space-y-2">
+                    {/* 40종 패키지 구성 안내 바 (버튼 바로 위 배치) */}
+                    <div className="bg-purple-50/90 border border-purple-200/80 rounded-xl px-2.5 py-1.5 text-[11px] flex items-center justify-between gap-1">
+                      <span className="font-bold text-purple-950 flex items-center gap-1">
+                        <span>🎁</span>
+                        <span><strong>40종 세트</strong>: 메인 20종 + 단독 낱개 20종</span>
+                      </span>
+                      <span className="text-[10px] font-extrabold text-purple-700 bg-white px-1.5 py-0.5 rounded border border-purple-200 shrink-0">
+                        A4 2장 시트
+                      </span>
+                    </div>
+
                     <button
                       onClick={() => handleBatchGenerateSeries(`${season.seasonId}20_both`)}
                       disabled={isBatchGenerating}
@@ -2905,7 +2919,7 @@ export default function Home() {
                       onClick={() => handleBatchGenerateSeries(`${selectedStickerSeriesTab}_both`)}
                       disabled={isBatchGenerating}
                       className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-purple-500"
-                      title="어항/스노우볼 세트 20종 생성 후, AI 비전으로 각 이미지에서 단일 낱개 스티커 20종을 1:1 자동 추출하여 총 41장 및 A4 2장 시트를 동시 생성합니다"
+                      title="메인 테마 세트 20종 생성 후, AI 비전으로 각 이미지에서 단일 낱개 스티커 20종을 1:1 자동 추출하여 총 41장 및 A4 2장 시트를 동시 생성합니다"
                     >
                       <span>🔥</span>
                       <span>[세트 + 1:1맞춤 낱개 40종] 동시 생성</span>
@@ -4790,7 +4804,7 @@ export default function Home() {
                     onClick={() => handleGenerateAndOpenA4Sheet(packStickers, 'transparent')}
                     disabled={a4SheetLoading || packStickers.length === 0}
                     className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-indigo-500 cursor-pointer"
-                    title={packStickers.length > 20 ? "40종 스티커를 A4 규격 2장(메인수조 20종 + 개별객체 20종)으로 자동 분할 정렬한 고화질 인쇄용 시트를 생성합니다" : "20종 스티커를 A4 규격 1장에 4x5로 자동 정렬한 고화질(300 DPI) 인쇄용 시트를 생성합니다"}
+                    title={packStickers.length > 20 ? "40종 스티커를 A4 규격 2장(메인 테마 20종 + 단독 낱개 20종)으로 자동 분할 정렬한 고화질 인쇄용 시트를 생성합니다" : "20종 스티커를 A4 규격 1장에 4x5로 자동 정렬한 고화질(300 DPI) 인쇄용 시트를 생성합니다"}
                   >
                     <span>🖨️</span>
                     <span>A4 인쇄용 시트 ({packStickers.length > 20 ? '2장 세트' : '1장'})</span>
@@ -5078,9 +5092,9 @@ export default function Home() {
                               : 'bg-white text-indigo-900 hover:bg-indigo-100 border border-indigo-200'
                           }`}
                         >
-                          <span>{idx === 0 ? '🐠' : '🌿'}</span>
+                          <span>{idx === 0 ? '🎨' : '✨'}</span>
                           <span>
-                            {idx === 0 ? 'Sheet 1: 메인 수조 20종' : (idx === 1 ? 'Sheet 2: 단독 개별 객체 20종' : `Sheet ${idx + 1}`)}
+                            {idx === 0 ? 'Sheet 1: 메인 테마 세트 20종' : (idx === 1 ? 'Sheet 2: 단독 낱개 오브젝트 20종' : `Sheet ${idx + 1}`)}
                           </span>
                         </button>
                       ))}
@@ -5088,7 +5102,7 @@ export default function Home() {
                   </div>
 
                   <span className="text-[11px] font-semibold text-indigo-700 bg-white px-2.5 py-1 rounded-lg border border-indigo-200">
-                    💡 40종 패키지: 각 장당 20개씩 완벽한 황금 비율 크기로 분할 인쇄
+                    💡 40종 패키지: 메인 세트와 단독 오브젝트 각 20개씩 완벽한 황금 비율 크기로 분할 인쇄
                   </span>
                 </div>
               )}
@@ -5120,7 +5134,7 @@ export default function Home() {
                       <span>📄</span>
                       <span>
                         {a4SheetPages.length > 1
-                          ? (currentA4PageIndex === 0 ? 'Sheet 1: 메인 수조 세트 (20종)' : 'Sheet 2: 단독 개별 객체 (20종)')
+                          ? (currentA4PageIndex === 0 ? 'Sheet 1: 메인 테마 세트 (20종)' : 'Sheet 2: 단독 낱개 오브젝트 (20종)')
                           : 'A4 인쇄용 시트 (20종)'}
                       </span>
                     </div>
