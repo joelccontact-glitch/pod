@@ -1498,7 +1498,8 @@ export default function Home() {
         const url = offCanvas.toDataURL('image/jpeg', 0.95);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `etsy_mockup_2.5K_${Date.now()}.jpg`;
+        const designTheme = getCleanEnglishThemeName(selectedDesign?.sticker_sub, undefined, selectedDesign?.topic || selectedDesign?.title);
+        a.download = `Etsy_Mockup_${designTheme}_2.5K.jpg`;
         a.click();
       };
     };
@@ -1519,7 +1520,8 @@ export default function Home() {
 
       const a = document.createElement('a');
       a.href = transparentDataUrl;
-      a.download = `pod_print_4K_300dpi_${Date.now()}.png`;
+      const designTheme = getCleanEnglishThemeName(selectedDesign?.sticker_sub, undefined, selectedDesign?.topic || selectedDesign?.title);
+      a.download = `POD_Print_${designTheme}_4K_300DPI.png`;
       a.click();
     } catch (err) {
       console.error('PNG processing failed', err);
@@ -1709,7 +1711,8 @@ export default function Home() {
     if (!url) return;
     const a = document.createElement('a');
     a.href = url;
-    a.download = `edited_${Date.now()}.jpg`;
+    const designTheme = getCleanEnglishThemeName(selectedDesign?.sticker_sub, undefined, selectedDesign?.topic || selectedDesign?.title);
+    a.download = `Edited_${designTheme}_${Date.now()}.jpg`;
     a.click();
   };
 
@@ -1880,8 +1883,14 @@ export default function Home() {
         return aTime - bTime;
       });
 
+      const themeName = getCleanEnglishThemeName(
+        targetDesigns[0]?.sticker_sub,
+        selectedStickerSeriesTab,
+        sessionName || targetDesigns[0]?.topic
+      );
+      const cleanSessionName = `${themeName}_Sticker_Bundle`;
       const zip = new JSZip();
-      const folder = zip.folder(sessionName);
+      const folder = zip.folder(cleanSessionName);
 
       let stickerCounter = 1;
       for (let i = 0; i < targetDesigns.length; i++) {
@@ -1904,17 +1913,11 @@ export default function Home() {
           }
 
           const isCover = i === 0 || isCoverDesign(d);
-          const itemTitle = (d.title || d.prompt || `sticker_${i + 1}`)
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '_')
-            .replace(/_+/g, '_')
-            .slice(0, 30);
-
           let fileName = '';
           if (isCover && i === 0) {
-            fileName = `00_Master_Sticker_Pack_Cover.png`;
+            fileName = `00_Master_Cover_${themeName}_300DPI.png`;
           } else {
-            fileName = `${String(stickerCounter).padStart(2, '0')}_${itemTitle}_300dpi.png`;
+            fileName = `${String(stickerCounter).padStart(2, '0')}_${themeName}_Sticker_300DPI.png`;
             stickerCounter++;
           }
 
@@ -1936,7 +1939,7 @@ export default function Home() {
             for (let b = 0; b < a4Binary.length; b++) {
               a4Bytes[b] = a4Binary.charCodeAt(b);
             }
-            folder?.file(`00_A4_Printable_Sticker_Sheet_300dpi.png`, a4Bytes.buffer);
+            folder?.file(`00_A4_${themeName}_Stickers_300DPI.png`, a4Bytes.buffer);
           } else {
             for (let p = 0; p < a4Pages.length; p++) {
               const a4Base64 = a4Pages[p].split(',')[1];
@@ -1945,8 +1948,7 @@ export default function Home() {
               for (let b = 0; b < a4Binary.length; b++) {
                 a4Bytes[b] = a4Binary.charCodeAt(b);
               }
-              const pageSuffix = p === 0 ? 'Sheet1_Main_Theme' : (p === 1 ? 'Sheet2_Standalone_Objects' : `Sheet${p + 1}`);
-              folder?.file(`00_A4_Printable_${pageSuffix}_300DPI.png`, a4Bytes.buffer);
+              folder?.file(`00_A4_${themeName}_Stickers_Sheet${p + 1}_300DPI.png`, a4Bytes.buffer);
             }
           }
         } catch (a4Err) {
@@ -1958,7 +1960,7 @@ export default function Home() {
       const url = window.URL.createObjectURL(zipBlob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${sessionName}_${Date.now()}.zip`;
+      a.download = `${cleanSessionName}_300DPI.zip`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -5113,12 +5115,14 @@ export default function Home() {
                         const transparentDataUrl = await processTransparentPNG(selectedPackCover.image_url, { targetWidth: 3000, targetHeight: 3000 });
                         const a = document.createElement('a');
                         a.href = transparentDataUrl;
-                        a.download = `00_Master_Cover_${selectedPackCover.id || Date.now()}.png`;
+                        const coverTheme = getCleanEnglishThemeName(selectedPackCover.sticker_sub, selectedStickerSeriesTab, selectedPackCover.topic || selectedPackCover.title);
+                        a.download = `00_Master_Cover_${coverTheme}_300DPI.png`;
                         a.click();
                       } catch (e) {
                         const a = document.createElement('a');
                         a.href = selectedPackCover.image_url;
-                        a.download = `00_Master_Cover_${selectedPackCover.id || Date.now()}.jpg`;
+                        const coverTheme = getCleanEnglishThemeName(selectedPackCover.sticker_sub, selectedStickerSeriesTab, selectedPackCover.topic || selectedPackCover.title);
+                        a.download = `00_Master_Cover_${coverTheme}_300DPI.jpg`;
                         a.click();
                       }
                     }}
@@ -5230,13 +5234,15 @@ export default function Home() {
                                       const transparentDataUrl = await processTransparentPNG(sticker.image_url, { targetWidth: 3000, targetHeight: 3000 });
                                       const a = document.createElement('a');
                                       a.href = transparentDataUrl;
-                                      a.download = `${String(idx + 1).padStart(2, '0')}_sticker_${sticker.id || Date.now()}.png`;
-                                      a.click();
-                                    } catch (err) {
-                                      const a = document.createElement('a');
-                                      a.href = sticker.image_url;
-                                      a.download = `sticker_${sticker.id || Date.now()}.jpg`;
-                                      a.click();
+                                       const stickerTheme = getCleanEnglishThemeName(sticker.sticker_sub, selectedStickerSeriesTab, sticker.topic || sticker.title);
+                                       a.download = `${String(idx + 1).padStart(2, '0')}_${stickerTheme}_Sticker_300DPI.png`;
+                                       a.click();
+                                     } catch (err) {
+                                       const a = document.createElement('a');
+                                       a.href = sticker.image_url;
+                                       const stickerTheme = getCleanEnglishThemeName(sticker.sticker_sub, selectedStickerSeriesTab, sticker.topic || sticker.title);
+                                       a.download = `${String(idx + 1).padStart(2, '0')}_${stickerTheme}_Sticker.jpg`;
+                                       a.click();
                                     }
                                   }}
                                   className="w-full bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 font-bold text-[10px] py-1 rounded-lg transition-colors flex items-center justify-center gap-0.5"
