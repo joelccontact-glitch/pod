@@ -687,6 +687,16 @@ export function getSeasonalPackPresets(seasonId: string): { vesselSeries: Sticke
   }
 }
 
+export interface PricingStrategy {
+  suggestedPrice: string; // e.g. "$3.80"
+  originalPrice: string;  // e.g. "$7.60 (50% 런칭 세일 권장)"
+  bundleOffer: string;    // e.g. "홀리데이 3팩 묶음 $9.90"
+  targetAudience: string; // 타겟 구매자 틈새
+  salesTactics: string[]; // Etsy 실전 판매 전략 3가지
+  etsyTags: string[];     // 검색 상위 노출용 추천 13태그
+  highlightTip: string;  // 골든타임 마케팅 핵심 팁
+}
+
 export interface SeasonalRecommendation {
   seasonId: string;
   title: string;
@@ -697,8 +707,161 @@ export interface SeasonalRecommendation {
   timingText: string;
   keySearchTerms: string[];
   bestSellerReason: string;
+  pricingStrategy: PricingStrategy;
   vesselSeries: StickerPreset[];
   standaloneSeries: StickerPreset[];
+}
+
+/**
+ * Get tailored pricing, marketing tactics, and SEO tags for each seasonal sticker holiday.
+ */
+export function getSeasonalPricingStrategy(holidayId: string, koreanName: string): PricingStrategy {
+  switch (holidayId) {
+    case 'christmas':
+      return {
+        suggestedPrice: '$3.80',
+        originalPrice: '$7.60 (50% 런칭 세일 권장)',
+        bundleOffer: '홀리데이 3팩 묶음 $9.90',
+        targetAudience: '연말 다이어리 꾸미기, 크리스마스 선물 라벨, 크리컷 컷팅 유저',
+        salesTactics: [
+          '정가 $7.60에 50% 세일($3.80)을 적용해 Etsy 검색 결과에서 "Sale" 빨간 뱃지를 획득하세요.',
+          '마스터 표지 외에 [iPad 굿노트 서식 적용샷]과 [A4 인쇄 실물 다이컷 컷팅 사진] 목업을 반드시 썸네일에 포함하세요.',
+          '크리스마스 2~3주 전에는 "Instant Download / Last Minute Gift" 키워드를 제목 앞에 배치하세요.'
+        ],
+        etsyTags: [
+          'Christmas Stickers', 'Winter Snowglobe', 'Digital Planner PNG', 'Printable Sticker Sheet',
+          'Cricut Cut Files', 'Holiday Clipart', 'Cozy Christmas', 'GoodNotes Stickers',
+          'Gift Tag Printable', 'Spooky Free Christmas', 'Xmas Scrapbooking', 'A4 Sticker Sheet', 'Cute Xmas Decals'
+        ],
+        highlightTip: '10~11월에 등록하여 조기 리뷰를 쌓아두면 12월 1~2주 차 연말 폭풍 구매 기간에 일매출 1위를 달성합니다.'
+      };
+    case 'thanksgiving':
+      return {
+        suggestedPrice: '$3.40',
+        originalPrice: '$6.80 (50% 런칭 세일 권장)',
+        bundleOffer: '어텀 하베스트 2팩 묶음 $5.90',
+        targetAudience: '가을 코지 다꾸러, 추수감사절 디너 메뉴판 및 파티 라벨러',
+        salesTactics: [
+          '정가 $6.80에 50% 할인($3.40) 세팅으로 가을 신규 리스팅 전환율 상승.',
+          '펌킨 스파이스 라떼, 빈티지 다이어리, 낙엽과 함께 따뜻한 브라운 톤의 플랫레이(Flatlay) 목업 연출 필수.',
+          '감사 일기(Gratitude Journal) 작성자를 타겟팅하여 "Gratitude Planner" 태그 조합.'
+        ],
+        etsyTags: [
+          'Thanksgiving Stickers', 'Fall Harvest Clipart', 'Cozy Autumn Planner', 'Printable Sticker Sheet',
+          'Pumpkin Clipart', 'Gratitude Journal', 'Autumn Scrapbook', 'Cricut Fall Stickers',
+          'Digital Planner PNG', 'Cozy Season Decals', 'Harvest Jar PNG', 'GoodNotes Autumn', 'Cute Turkey Clipart'
+        ],
+        highlightTip: '미국인들의 라이프스타일 키워드인 "Cozy Autumn"을 제목과 태그 첫머리에 배치하면 노출이 200% 증가합니다.'
+      };
+    case 'halloween':
+      return {
+        suggestedPrice: '$3.50',
+        originalPrice: '$7.00 (50% 런칭 세일 권장)',
+        bundleOffer: '스푸키 파스텔 3팩 묶음 $8.90',
+        targetAudience: '미국 10~30대 여성 다꾸러, 할로윈 캔디 백 및 구디백 포장 라벨러',
+        salesTactics: [
+          '무서운 고어풍 대신 Etsy 대세인 "Spooky Cute(귀여운 유령/파스텔 호박)" 룩앤필 강조.',
+          '어린이집/학교 캔디 구디백(Goodie Bag) 원형 라벨 스티커 실물 부착 목업 필수.',
+          '10월 첫째 주부터 가격을 유지하면서 "2개 구매 시 추가 20% 할인" 쿠폰 발행.'
+        ],
+        etsyTags: [
+          'Pastel Halloween', 'Spooky Cute Stickers', 'Ghost Clipart PNG', 'Halloween Printable',
+          'Goodie Bag Labels', 'Digital Planner PNG', 'Cricut Halloween', 'Cute Pumpkin Decals',
+          'Trick or Treat', 'Kawaii Spooky', 'GoodNotes Stickers', 'A4 Halloween Sheet', 'Boba Ghost Sticker'
+        ],
+        highlightTip: '9월 중순부터 10월 첫째 주까지 학교 및 홈파티 구디백 라벨용 대량 인쇄 수요가 최고조에 달합니다.'
+      };
+    case 'valentines':
+      return {
+        suggestedPrice: '$3.60',
+        originalPrice: '$7.20 (50% 런칭 세일 권장)',
+        bundleOffer: '발렌타인 러브 3팩 묶음 $8.90',
+        targetAudience: '커플 다이어리 꾸미기, 발렌타인데이 초콜릿/쿠키 선물 포장 라벨러',
+        salesTactics: [
+          '정가 $7.20에 50% 세일($3.60)로 연인/친구 선물 준비 시즌 조기 선점.',
+          '핑크빛 선물 상자, 리본, 초콜릿 패키지와 함께 찍힌 실물 스티커 라벨 목업 연출.',
+          '친구끼리 교환하는 Galentine 트렌드를 겨냥해 "Galentines Gift" 키워드 포함.'
+        ],
+        etsyTags: [
+          'Valentine Stickers', 'Cute Couple Clipart', 'Love Potion PNG', 'Valentine Printable',
+          'Pink Aesthetic Decal', 'Galentines Gift', 'Cricut Valentine', 'Digital Planner PNG',
+          'Heart Clipart', 'GoodNotes Stickers', 'Romantic Scrapbook', 'A4 Valentine Sheet', 'Sweetheart Stickers'
+        ],
+        highlightTip: '1월 둘째 주부터 초콜릿/쿠키 베이킹 선물 라벨 및 굿노트 다이어리 데코용으로 검색량이 급증합니다.'
+      };
+    case 'stpatrick':
+      return {
+        suggestedPrice: '$3.20',
+        originalPrice: '$6.40 (50% 런칭 세일 권장)',
+        bundleOffer: '럭키 그린 2팩 묶음 $5.50',
+        targetAudience: '초등학교/유치원 교실 활동지 꾸미기 교사, 녹색 축제 다꾸러',
+        salesTactics: [
+          '미국 학교 교사들을 타겟으로 "Teacher Reward / Classroom Stickers" 어필.',
+          '초록색 모자와 황금 동전 단지 실물 인쇄 컷팅 다이컷 목업 구성.',
+          '단기 시즌이므로 2월 중순 즉시 런칭 후 반짝 집중 할인 진행.'
+        ],
+        etsyTags: [
+          'St Patricks Day', 'Lucky Clover PNG', 'Irish Festival Decal', 'Printable Sticker Sheet',
+          'Pot of Gold Clipart', 'Teacher Stickers', 'Classroom Rewards', 'GoodNotes St Patrick',
+          'Cricut Lucky Cut', 'Green Aesthetic', 'March Planner PNG', 'A4 Irish Sheet', 'Leprechaun Stickers'
+        ],
+        highlightTip: '미국 학교 교사들의 교실 행사 스티커 수요가 높으므로 "Classroom Printable" 키워드를 공략하세요.'
+      };
+    case 'easter':
+      return {
+        suggestedPrice: '$3.50',
+        originalPrice: '$7.00 (50% 런칭 세일 권장)',
+        bundleOffer: '부활절 & 스프링 파스텔 3팩 묶음 $8.90',
+        targetAudience: '부활절 에그 헌팅 바구니 라벨링, 키즈 워크시트, 봄맞이 플래너 유저',
+        salesTactics: [
+          '파스텔 옐로우/핑크/민트 컬러의 화사한 봄 분위기 플랫레이 목업 연출.',
+          '부활절 달걀 바구니(Easter Basket Tag) 라벨 부착 사진을 썸네일 2번에 배치.',
+          '봄 신학기 다이어리용 파스텔 테마 번들로 확장 판매 유도.'
+        ],
+        etsyTags: [
+          'Easter Stickers', 'Spring Bunny Clipart', 'Easter Basket Tag', 'Pastel Easter Eggs',
+          'Printable Sticker Sheet', 'Digital Planner PNG', 'Spring Garden Decals', 'Cricut Easter Cut',
+          'GoodNotes Easter', 'Cute Bunny Stickers', 'Floral Terrarium', 'A4 Easter Sheet', 'Kids Easter Printable'
+        ],
+        highlightTip: '부활절 바구니 선물 태그 및 유아 놀이용 스티커로 인쇄 수요가 매우 높아 A4 시트 강조가 핵심입니다.'
+      };
+    case 'mothersday':
+      return {
+        suggestedPrice: '$3.60',
+        originalPrice: '$7.20 (50% 런칭 세일 권장)',
+        bundleOffer: '마더스데이 & 감사 선물 2팩 묶음 $6.20',
+        targetAudience: '어머니 감사 카드 제작자, 꽃다발 및 홈베이킹 선물 패키징 크리에이터',
+        salesTactics: [
+          '빈티지 플로럴 찻잔과 장미의 우아함을 부각한 고급스러운 썸네일 구성.',
+          '수제 감사 카드(Greeting Card) 및 카네이션 꽃다발 포장 리본에 부착된 실물 컷팅 목업 필수.',
+          '"Gift for Mom", "Mothers Day Craft" 롱테일 키워드로 공략.'
+        ],
+        etsyTags: [
+          'Mothers Day Stickers', 'Floral Teacup PNG', 'Gift Tag Printable', 'Mom Card Clipart',
+          'Vintage Rose Decal', 'Handmade Card Decor', 'Printable Sticker Sheet', 'Digital Planner PNG',
+          'Cricut Floral Cut', 'GoodNotes Mothers Day', 'Elegant Floral PNG', 'A4 Flower Sheet', 'Thank You Mom Tag'
+        ],
+        highlightTip: '5월 첫째 주 선물 준비 직전인 4월 중순에 감사 카드 제작용 다운로드가 폭발하므로 3월 말 등록 권장.'
+      };
+    default:
+      return {
+        suggestedPrice: '$3.50',
+        originalPrice: '$7.00 (50% 런칭 세일 권장)',
+        bundleOffer: '3팩 번들 $8.90 업셀링',
+        targetAudience: `${koreanName} 시즌 선물 포장 및 굿노트/다이어리 꾸미기 유저`,
+        salesTactics: [
+          '정가 $7.00에 런칭 기념 50% 세일($3.50)로 Etsy 노출 알고리즘 우대 획득.',
+          'A4 인쇄용 시트 2장과 굿노트 디지털 플래너 적용 컷을 썸네일 2~3번에 필수 배치.',
+          '시즌 개막 4~6주 전 등록하여 사전 인덱싱 및 구매자 찜(Favorite) 확보.'
+        ],
+        etsyTags: [
+          `${koreanName} Stickers`, 'Digital Planner PNG', 'Printable Sticker Sheet', 'Cricut Cut Files',
+          'GoodNotes Stickers', 'Cute Clipart Pack', 'A4 Printable Sheet', 'Seasonal Decals',
+          'Aesthetic Planner', 'Scrapbooking PNG', 'Instant Download', 'Sticker Bundle', 'Planner Accessories'
+        ],
+        highlightTip: `${koreanName} 시즌 검색 트렌드가 시작되기 전 미리 리스팅하여 리뷰를 축적하세요.`
+      };
+  }
 }
 
 /**
@@ -739,6 +902,7 @@ export function getDynamicSeasonalStickerRecommendations(referenceDate: Date = n
     }
 
     const { vesselSeries, standaloneSeries } = getSeasonalPackPresets(id);
+    const pricingStrategy = getSeasonalPricingStrategy(id, seasonInfo.holiday.koreanName);
 
     // Contextual timing text
     const timingText = `Etsy 알고리즘 인덱싱(4~6주)에 맞춰 ${currentMonth}월인 지금 등록해야 ${targetMonth}월 ${seasonInfo.holiday.koreanName} 시즌에 검색 1위를 선점합니다.`;
@@ -788,6 +952,7 @@ export function getDynamicSeasonalStickerRecommendations(referenceDate: Date = n
       timingText,
       keySearchTerms: seasonInfo.holiday.trendingMotifs.slice(0, 5),
       bestSellerReason,
+      pricingStrategy,
       vesselSeries,
       standaloneSeries
     };

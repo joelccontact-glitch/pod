@@ -154,6 +154,8 @@ export default function Home() {
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(true);
   const [isSeasonalRadarExpanded, setIsSeasonalRadarExpanded] = useState(true); // Expanded by default
+  const [expandedStrategySeasonIds, setExpandedStrategySeasonIds] = useState<string[]>([]);
+  const [copiedTagsSeasonId, setCopiedTagsSeasonId] = useState<string | null>(null);
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<
@@ -2847,6 +2849,110 @@ export default function Home() {
                             </span>
                           ))}
                         </div>
+
+                        {/* 💰 적정 가격 & 판매 전략 가이드 영역 */}
+                        {season.pricingStrategy && (
+                          <div className="bg-amber-50/70 border border-amber-200/80 rounded-xl p-2.5 space-y-1.5">
+                            <div className="flex items-center justify-between gap-1 flex-wrap">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs">💰</span>
+                                <span className="text-[11px] font-bold text-amber-900">
+                                  권장 판매가:
+                                </span>
+                                <span className="text-xs font-black text-rose-600">
+                                  {season.pricingStrategy.suggestedPrice}
+                                </span>
+                                <span className="text-[10px] text-gray-400 line-through">
+                                  {season.pricingStrategy.originalPrice.split(' ')[0]}
+                                </span>
+                              </div>
+                              <span className="text-[10px] font-bold text-amber-800 bg-white px-1.5 py-0.5 rounded border border-amber-300/80 shadow-2xs">
+                                {season.pricingStrategy.bundleOffer}
+                              </span>
+                            </div>
+
+                            <p className="text-[11px] text-amber-950 leading-tight">
+                              🎯 <strong>타겟:</strong> {season.pricingStrategy.targetAudience}
+                            </p>
+
+                            {/* 전략 토글 버튼 */}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setExpandedStrategySeasonIds(prev =>
+                                  prev.includes(season.seasonId)
+                                    ? prev.filter(id => id !== season.seasonId)
+                                    : [...prev, season.seasonId]
+                                );
+                              }}
+                              className="w-full mt-1 pt-1.5 border-t border-amber-200/70 text-[11px] font-bold text-amber-800 hover:text-amber-950 flex items-center justify-between cursor-pointer transition-colors"
+                            >
+                              <span className="flex items-center gap-1">
+                                <span>📈</span>
+                                <span>실전 판매 전략 & Etsy 13태그</span>
+                              </span>
+                              <span className="text-[10px] bg-amber-200/70 px-1.5 py-0.5 rounded text-amber-900 font-extrabold">
+                                {expandedStrategySeasonIds.includes(season.seasonId) ? '▲ 닫기' : '▼ 가이드 보기'}
+                              </span>
+                            </button>
+
+                            {/* 확장된 판매 전략 & Etsy 태그 영역 */}
+                            {expandedStrategySeasonIds.includes(season.seasonId) && (
+                              <div className="mt-2 pt-2 border-t border-amber-200 space-y-2 text-[11px] text-gray-700 bg-white/90 p-2.5 rounded-lg shadow-2xs">
+                                <div>
+                                  <span className="font-extrabold text-gray-900 flex items-center gap-1 text-[11px]">
+                                    <span>💡</span>
+                                    <span>핵심 판매 노하우:</span>
+                                  </span>
+                                  <ul className="list-disc list-inside space-y-1 mt-1 text-gray-600 pl-0.5 leading-relaxed">
+                                    {season.pricingStrategy.salesTactics.map((tactic, idx) => (
+                                      <li key={idx} className="leading-snug">{tactic}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+
+                                <div className="bg-rose-50 border border-rose-200/80 rounded-md p-1.5 text-rose-950 text-[10.5px]">
+                                  <span className="font-bold">⚡ 골든타임 팁: </span>
+                                  <span>{season.pricingStrategy.highlightTip}</span>
+                                </div>
+
+                                <div>
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="font-extrabold text-gray-900 text-[11px] flex items-center gap-1">
+                                      <span>🏷️</span>
+                                      <span>Etsy 추천 13태그:</span>
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        const tagsText = season.pricingStrategy.etsyTags.join(', ');
+                                        if (navigator.clipboard) {
+                                          navigator.clipboard.writeText(tagsText);
+                                        }
+                                        setCopiedTagsSeasonId(season.seasonId);
+                                        setTimeout(() => setCopiedTagsSeasonId(null), 2000);
+                                      }}
+                                      className="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded border border-indigo-200 transition-colors flex items-center gap-1 cursor-pointer"
+                                    >
+                                      <span>{copiedTagsSeasonId === season.seasonId ? '✓ 복사완료!' : '📋 태그 일괄 복사'}</span>
+                                    </button>
+                                  </div>
+                                  <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
+                                    {season.pricingStrategy.etsyTags.map((tag, tagIdx) => (
+                                      <span
+                                        key={tagIdx}
+                                        className="text-[10px] bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded border border-gray-200 font-medium"
+                                      >
+                                        #{tag}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       <div className="pt-2 border-t border-gray-100 space-y-2">
