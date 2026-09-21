@@ -2162,7 +2162,7 @@ export default function Home() {
     const totalExpectedCount = isBothMode ? 1 + (targetPresets.length - 1) * 2 : targetPresets.length;
 
     const confirmed = confirm(
-      `${packName} 자동 일괄 생성을 시작하시겠습니까?\n\n• ${isBothMode ? '마스터 표지 1장 + 어항 스티커 20종 + 1:1 맞춤 단일 낱개 20종 (총 41장 동시 생성)' : `마스터 썸네일 표지 1장 + 스티커 20종 (총 ${targetPresets.length}장)`}\n\n300DPI 고화질 PNG 이미지가 순차적으로 연속 자동 생성되어 갤러리에 저장됩니다.`
+      `${packName} 자동 일괄 생성을 시작하시겠습니까?\n\n• ${isBothMode ? '마스터 표지 1장 + 메인 테마 세트 20종 + 1:1 맞춤 단독 낱개 20종 (총 41장 동시 생성)' : `마스터 썸네일 표지 1장 + 스티커 20종 (총 ${targetPresets.length}장)`}\n\n300DPI 고화질 PNG 이미지가 순차적으로 연속 자동 생성되어 갤러리에 저장됩니다.`
     );
     if (!confirmed) return;
 
