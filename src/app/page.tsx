@@ -20,6 +20,7 @@ import {
 } from '@/lib/sticker-prompts';
 import JSZip from 'jszip';
 import { createCompositeMasterCover } from '@/lib/master-cover-builder';
+import { generateA4StickerSheet } from '@/lib/sticker-sheet-builder';
 
 const isCoverDesign = (d: any) => {
   if (!d) return false;
@@ -109,6 +110,55 @@ export default function Home() {
   const [packStickers, setPackStickers] = useState<any[]>([]);
   const [loadingPackStickers, setLoadingPackStickers] = useState(false);
   const [isRegeneratingCover, setIsRegeneratingCover] = useState(false);
+
+  // A4 Printable Sticker Sheet Modal & States
+  const [isA4SheetModalOpen, setIsA4SheetModalOpen] = useState(false);
+  const [a4SheetDataUrl, setA4SheetDataUrl] = useState<string | null>(null);
+  const [a4SheetLoading, setA4SheetLoading] = useState(false);
+  const [a4SheetProgress, setA4SheetProgress] = useState<{ current: number; total: number; label: string }>({ current: 0, total: 0, label: '' });
+  const [a4SheetBg, setA4SheetBg] = useState<'transparent' | 'white'>('transparent');
+
+  const handleGenerateAndOpenA4Sheet = async (stickersToUse?: any[], bg: 'transparent' | 'white' = 'transparent') => {
+    const list = (stickersToUse && stickersToUse.length > 0) ? stickersToUse : packStickers;
+    if (!list || list.length === 0) {
+      alert('정렬할 스티커가 없습니다.');
+      return;
+    }
+
+    setIsA4SheetModalOpen(true);
+    setA4SheetLoading(true);
+    setA4SheetBg(bg);
+    setA4SheetDataUrl(null);
+    setA4SheetProgress({ current: 0, total: list.length, label: 'A4 시트 생성 준비 중...' });
+
+    try {
+      const dataUrl = await generateA4StickerSheet(list, {
+        background: bg,
+        onProgress: (current, total, label) => {
+          setA4SheetProgress({ current, total, label });
+        },
+      });
+      setA4SheetDataUrl(dataUrl);
+    } catch (err: any) {
+      console.error('Error generating A4 sheet:', err);
+      alert('A4 스티커 시트 생성 중 오류가 발생했습니다: ' + (err?.message || err));
+    } finally {
+      setA4SheetLoading(false);
+    }
+  };
+
+  const handleDownloadA4Sheet = () => {
+    if (!a4SheetDataUrl) return;
+    const a = document.createElement('a');
+    a.href = a4SheetDataUrl;
+    const packName = (selectedPackCover?.topic || selectedStickerSeriesTab || 'Sticker_Pack')
+      .replace(/[^a-zA-Z0-9가-힣_]/g, '_');
+    const bgName = a4SheetBg === 'transparent' ? 'Transparent' : 'White';
+    a.download = `A4_Printable_Sticker_Sheet_${packName}_${bgName}_300DPI.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
 
   const compressImageForFirestore = (dataUrl: string, maxBytes: number = 800000): Promise<string> => {
     return new Promise((resolve) => {
@@ -1717,6 +1767,23 @@ export default function Home() {
           folder?.file(fileName, bytes.buffer);
         } catch (err) {
           console.error(`Error processing image index ${i} for ZIP:`, err);
+        }
+      }
+
+      // Also generate and package the A4 Printable Sticker Sheet into the ZIP bundle
+      const nonCoverStickers = targetDesigns.filter(d => !isCoverDesign(d));
+      if (nonCoverStickers.length > 0) {
+        try {
+          const a4DataUrl = await generateA4StickerSheet(nonCoverStickers, { background: 'transparent' });
+          const a4Base64 = a4DataUrl.split(',')[1];
+          const a4Binary = atob(a4Base64);
+          const a4Bytes = new Uint8Array(a4Binary.length);
+          for (let b = 0; b < a4Binary.length; b++) {
+            a4Bytes[b] = a4Binary.charCodeAt(b);
+          }
+          folder?.file(`00_A4_Printable_Sticker_Sheet_300dpi.png`, a4Bytes.buffer);
+        } catch (a4Err) {
+          console.error('Error generating A4 sheet for ZIP bundle:', a4Err);
         }
       }
 
@@ -4462,6 +4529,16 @@ export default function Home() {
                   </button>
 
                   <button
+                    onClick={() => handleGenerateAndOpenA4Sheet(packStickers, 'transparent')}
+                    disabled={a4SheetLoading || packStickers.length === 0}
+                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-indigo-500 cursor-pointer"
+                    title="20종 스티커를 A4 규격 1장에 4x5로 자동 정렬한 고화질(300 DPI) 인쇄용 시트를 생성 및 다운로드합니다"
+                  >
+                    <span>🖨️</span>
+                    <span>A4 인쇄용 시트 (1장)</span>
+                  </button>
+
+                  <button
                     onClick={() => downloadBatchSession([selectedPackCover, ...packStickers], `${selectedPackCover.topic || 'Sticker_Pack'}_Bundle`)}
                     className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-emerald-500"
                   >
@@ -4628,6 +4705,145 @@ export default function Home() {
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 🖨️ A4 Printable Sticker Sheet Modal */}
+        {isA4SheetModalOpen && (
+          <div className="fixed inset-0 bg-black/75 z-[80] flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-indigo-100">
+              {/* Modal Header */}
+              <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-md shrink-0">
+                    🖨️
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-extrabold text-gray-900 flex items-center gap-2">
+                      <span>A4 규격 인쇄용 스티커 시트 (Printable Sheet)</span>
+                      <span className="text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-bold">300 DPI</span>
+                    </h3>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      A4 규격 (2480 × 3508 px)에 20종 스티커를 4×5 그리드로 완벽 정렬 배치한 인쇄 전용 시트입니다.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsA4SheetModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-gray-900 flex items-center justify-center text-lg font-bold shadow-xs transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Controls Bar */}
+              <div className="px-4 sm:px-6 py-3 bg-stone-50 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
+                {/* Background selector */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-gray-700">배경 선택:</span>
+                  <div className="flex bg-gray-200 p-0.5 rounded-xl text-xs font-semibold">
+                    <button
+                      onClick={() => {
+                        if (a4SheetBg !== 'transparent') {
+                          handleGenerateAndOpenA4Sheet(packStickers, 'transparent');
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-lg transition-all ${
+                        a4SheetBg === 'transparent'
+                          ? 'bg-white text-indigo-700 shadow-xs font-bold'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      🏁 투명 배경 (크리컷/디지털용)
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (a4SheetBg !== 'white') {
+                          handleGenerateAndOpenA4Sheet(packStickers, 'white');
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-lg transition-all ${
+                        a4SheetBg === 'white'
+                          ? 'bg-white text-indigo-700 shadow-xs font-bold'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      ⬜ 화이트 배경 (일반 프린터용)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Download Button */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleDownloadA4Sheet}
+                    disabled={a4SheetLoading || !a4SheetDataUrl}
+                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>💾</span>
+                    <span>A4 고화질 시트 PNG 다운로드</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Preview Body */}
+              <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-neutral-900/5 flex items-center justify-center min-h-[350px]">
+                {a4SheetLoading ? (
+                  <div className="text-center py-12 space-y-4 max-w-sm w-full">
+                    <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto"></div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-800">{a4SheetProgress.label}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        고화질 300 DPI 캔버스에 스티커들을 오차 없이 정렬 합성하고 있습니다.
+                      </p>
+                    </div>
+                    {a4SheetProgress.total > 0 && (
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div
+                          className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.round((a4SheetProgress.current / a4SheetProgress.total) * 100)}%` }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                ) : a4SheetDataUrl ? (
+                  <div className="max-w-md w-full shadow-2xl rounded-2xl overflow-hidden border border-gray-300 transition-all">
+                    <div
+                      className={`w-full p-2 flex items-center justify-center ${
+                        a4SheetBg === 'transparent'
+                          ? 'bg-[linear-gradient(45deg,#f0f0f0_25%,transparent_25%),linear-gradient(-45deg,#f0f0f0_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#f0f0f0_75%),linear-gradient(-45deg,transparent_75%,#f0f0f0_75%)] bg-[size:16px_16px] bg-[position:0_0,0_8px,8px_-8px,-8px_0px] bg-white'
+                          : 'bg-white'
+                      }`}
+                    >
+                      <img
+                        src={a4SheetDataUrl}
+                        alt="A4 Printable Sticker Sheet Preview"
+                        className="w-full h-auto object-contain rounded shadow-xs max-h-[65vh]"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-400 py-12">
+                    <p className="text-sm font-medium">생성된 시트가 없습니다.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer Note */}
+              <div className="px-5 py-3 bg-stone-100 border-t border-gray-200 text-xs text-gray-600 flex flex-wrap items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <span>💡</span>
+                  <span>Etsy 고객은 이 파일을 A4 스티커 라벨지에 바로 인쇄하거나, 크리컷(Cricut)에서 자동 칼선 컷팅하여 사용할 수 있습니다.</span>
+                </span>
+                <button
+                  onClick={() => setIsA4SheetModalOpen(false)}
+                  className="text-xs text-gray-600 hover:text-gray-900 font-bold px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  닫기
+                </button>
               </div>
             </div>
           </div>
