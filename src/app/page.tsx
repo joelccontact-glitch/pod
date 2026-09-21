@@ -237,6 +237,42 @@ export default function Home() {
     }
   };
 
+  const getCleanEnglishThemeName = (subKey?: string, tabKey?: string, topic?: string): string => {
+    const raw = (subKey || tabKey || '').toLowerCase();
+    
+    if (raw.includes('halloween')) return 'Halloween';
+    if (raw.includes('christmas')) return 'Christmas';
+    if (raw.includes('thanksgiving')) return 'Thanksgiving';
+    if (raw.includes('valentine')) return 'Valentine';
+    if (raw.includes('stpatrick') || raw.includes('patrick')) return 'StPatricks';
+    if (raw.includes('easter')) return 'Easter';
+    if (raw.includes('mother')) return 'MothersDay';
+    if (raw.includes('terrarium')) return 'Terrarium';
+    if (raw.includes('vivarium')) return 'Vivarium';
+    if (raw.includes('saltaquarium') || raw.includes('salt_aquarium')) return 'SaltAquarium';
+    if (raw.includes('freshaquarium') || raw.includes('fresh_aquarium')) return 'FreshAquarium';
+
+    const topicLower = (topic || '').toLowerCase();
+    if (topicLower.includes('halloween') || topicLower.includes('할로윈')) return 'Halloween';
+    if (topicLower.includes('christmas') || topicLower.includes('크리스마스')) return 'Christmas';
+    if (topicLower.includes('thanksgiving') || topicLower.includes('추수감사절')) return 'Thanksgiving';
+    if (topicLower.includes('valentine') || topicLower.includes('발렌타인') || topicLower.includes('밸런타인')) return 'Valentine';
+    if (topicLower.includes('patrick') || topicLower.includes('패트릭')) return 'StPatricks';
+    if (topicLower.includes('easter') || topicLower.includes('부활절')) return 'Easter';
+    if (topicLower.includes('mother') || topicLower.includes('어버이날') || topicLower.includes('마더스')) return 'MothersDay';
+    if (topicLower.includes('terrarium') || topicLower.includes('테라리움')) return 'Terrarium';
+    if (topicLower.includes('vivarium') || topicLower.includes('비바리움')) return 'Vivarium';
+    if (topicLower.includes('해수어')) return 'SaltAquarium';
+    if (topicLower.includes('열대어') || topicLower.includes('담수')) return 'FreshAquarium';
+
+    const clean = (topic || tabKey || '')
+      .replace(/[^a-zA-Z0-9\s_-]/g, '')
+      .trim()
+      .replace(/[\s_-]+/g, '_');
+
+    return clean || 'Sticker_Pack';
+  };
+
   const handleDownloadA4Sheet = (pageIdx?: number) => {
     const targetIdx = typeof pageIdx === 'number' ? pageIdx : currentA4PageIndex;
     const dataUrl = a4SheetPages[targetIdx];
@@ -244,13 +280,16 @@ export default function Home() {
 
     const a = document.createElement('a');
     a.href = dataUrl;
-    const packName = (selectedPackCover?.topic || selectedStickerSeriesTab || 'Sticker_Pack')
-      .replace(/[^a-zA-Z0-9가-힣_]/g, '_');
+    const englishTheme = getCleanEnglishThemeName(
+      selectedPackCover?.sticker_sub,
+      selectedStickerSeriesTab,
+      selectedPackCover?.topic || selectedPackCover?.title
+    );
     const bgName = a4SheetBg === 'transparent' ? 'Transparent' : 'White';
-    const pageLabel = a4SheetPages.length > 1
-      ? (targetIdx === 0 ? '_Sheet1_Main_Tanks' : (targetIdx === 1 ? '_Sheet2_Standalone_Objects' : `_Sheet${targetIdx + 1}`))
-      : '';
-    a.download = `A4_Printable_Sticker_Sheet_${packName}${pageLabel}_${bgName}_300DPI.png`;
+    const sheetNum = targetIdx + 1;
+    a.download = a4SheetPages.length > 1
+      ? `A4_${englishTheme}_Stickers_Sheet${sheetNum}_${bgName}_300DPI.png`
+      : `A4_${englishTheme}_Stickers_${bgName}_300DPI.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -1906,8 +1945,8 @@ export default function Home() {
               for (let b = 0; b < a4Binary.length; b++) {
                 a4Bytes[b] = a4Binary.charCodeAt(b);
               }
-              const pageSuffix = p === 0 ? 'Sheet1_Main_Tanks' : (p === 1 ? 'Sheet2_Standalone_Objects' : `Sheet${p + 1}`);
-              folder?.file(`00_A4_Printable_${pageSuffix}_300dpi.png`, a4Bytes.buffer);
+              const pageSuffix = p === 0 ? 'Sheet1_Main_Theme' : (p === 1 ? 'Sheet2_Standalone_Objects' : `Sheet${p + 1}`);
+              folder?.file(`00_A4_Printable_${pageSuffix}_300DPI.png`, a4Bytes.buffer);
             }
           }
         } catch (a4Err) {
