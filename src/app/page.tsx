@@ -20,7 +20,7 @@ import {
 } from '@/lib/sticker-prompts';
 import JSZip from 'jszip';
 import { createCompositeMasterCover } from '@/lib/master-cover-builder';
-import { generateA4StickerSheet } from '@/lib/sticker-sheet-builder';
+import { generateA4StickerSheet, generateA4StickerSheets } from '@/lib/sticker-sheet-builder';
 
 const isCoverDesign = (d: any) => {
   if (!d) return false;
@@ -111,9 +111,10 @@ export default function Home() {
   const [loadingPackStickers, setLoadingPackStickers] = useState(false);
   const [isRegeneratingCover, setIsRegeneratingCover] = useState(false);
 
-  // A4 Printable Sticker Sheet Modal & States
+  // A4 Printable Sticker Sheet Modal & States (Supports Multi-Page e.g. 40 items = 2 Sheets)
   const [isA4SheetModalOpen, setIsA4SheetModalOpen] = useState(false);
-  const [a4SheetDataUrl, setA4SheetDataUrl] = useState<string | null>(null);
+  const [a4SheetPages, setA4SheetPages] = useState<string[]>([]);
+  const [currentA4PageIndex, setCurrentA4PageIndex] = useState<number>(0);
   const [a4SheetLoading, setA4SheetLoading] = useState(false);
   const [a4SheetProgress, setA4SheetProgress] = useState<{ current: number; total: number; label: string }>({ current: 0, total: 0, label: '' });
   const [a4SheetBg, setA4SheetBg] = useState<'transparent' | 'white'>('transparent');
@@ -128,36 +129,54 @@ export default function Home() {
     setIsA4SheetModalOpen(true);
     setA4SheetLoading(true);
     setA4SheetBg(bg);
-    setA4SheetDataUrl(null);
+    setA4SheetPages([]);
+    setCurrentA4PageIndex(0);
     setA4SheetProgress({ current: 0, total: list.length, label: 'A4 시트 생성 준비 중...' });
 
     try {
-      const dataUrl = await generateA4StickerSheet(list, {
+      const pages = await generateA4StickerSheets(list, {
         background: bg,
+        pageSize: 20,
         onProgress: (current, total, label) => {
           setA4SheetProgress({ current, total, label });
         },
       });
-      setA4SheetDataUrl(dataUrl);
+      setA4SheetPages(pages);
+      setCurrentA4PageIndex(0);
     } catch (err: any) {
-      console.error('Error generating A4 sheet:', err);
+      console.error('Error generating A4 sheets:', err);
       alert('A4 스티커 시트 생성 중 오류가 발생했습니다: ' + (err?.message || err));
     } finally {
       setA4SheetLoading(false);
     }
   };
 
-  const handleDownloadA4Sheet = () => {
-    if (!a4SheetDataUrl) return;
+  const handleDownloadA4Sheet = (pageIdx?: number) => {
+    const targetIdx = typeof pageIdx === 'number' ? pageIdx : currentA4PageIndex;
+    const dataUrl = a4SheetPages[targetIdx];
+    if (!dataUrl) return;
+
     const a = document.createElement('a');
-    a.href = a4SheetDataUrl;
+    a.href = dataUrl;
     const packName = (selectedPackCover?.topic || selectedStickerSeriesTab || 'Sticker_Pack')
       .replace(/[^a-zA-Z0-9가-힣_]/g, '_');
     const bgName = a4SheetBg === 'transparent' ? 'Transparent' : 'White';
-    a.download = `A4_Printable_Sticker_Sheet_${packName}_${bgName}_300DPI.png`;
+    const pageLabel = a4SheetPages.length > 1
+      ? (targetIdx === 0 ? '_Sheet1_Main_Tanks' : (targetIdx === 1 ? '_Sheet2_Standalone_Objects' : `_Sheet${targetIdx + 1}`))
+      : '';
+    a.download = `A4_Printable_Sticker_Sheet_${packName}${pageLabel}_${bgName}_300DPI.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();
+  };
+
+  const handleDownloadAllA4Sheets = () => {
+    if (a4SheetPages.length === 0) return;
+    a4SheetPages.forEach((_, idx) => {
+      setTimeout(() => {
+        handleDownloadA4Sheet(idx);
+      }, idx * 500);
+    });
   };
 
   const compressImageForFirestore = (dataUrl: string, maxBytes: number = 800000): Promise<string> => {
@@ -439,11 +458,29 @@ export default function Home() {
           return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
         });
 
-        // Take closest 20 and sort by creation time ascending
-        const final20 = matched.slice(0, 20);
-        final20.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+        // Support up to 40 stickers if available in this pack
+        const coverTitle = (coverDesign.title || coverDesign.topic || '').toLowerCase();
+        const is40Pack = coverTitle.includes('40종') || coverTitle.includes('40') || matched.length >= 35;
+        const maxItems = is40Pack ? 40 : 20;
 
-        setPackStickers(final20);
+        const finalStickers = matched.slice(0, maxItems);
+
+        // Sort so that Main Tanks (Sheet 1) come first, and Standalone Objects (Sheet 2) come next
+        finalStickers.sort((a: any, b: any) => {
+          const aTitle = (a.title || a.prompt || '').toLowerCase();
+          const bTitle = (b.title || b.prompt || '').toLowerCase();
+          const aPreset = (a.stickerPresetId || '').toLowerCase();
+          const bPreset = (b.stickerPresetId || '').toLowerCase();
+
+          const isAStandalone = aTitle.includes('단일') || aTitle.includes('단독') || aPreset.includes('standalone');
+          const isBStandalone = bTitle.includes('단일') || bTitle.includes('단독') || bPreset.includes('standalone');
+
+          if (!isAStandalone && isBStandalone) return -1;
+          if (isAStandalone && !isBStandalone) return 1;
+          return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+        });
+
+        setPackStickers(finalStickers);
       }
     } catch (e) {
       console.error('Error fetching pack stickers:', e);
@@ -1770,20 +1807,33 @@ export default function Home() {
         }
       }
 
-      // Also generate and package the A4 Printable Sticker Sheet into the ZIP bundle
+      // Also generate and package the A4 Printable Sticker Sheets into the ZIP bundle
       const nonCoverStickers = targetDesigns.filter(d => !isCoverDesign(d));
       if (nonCoverStickers.length > 0) {
         try {
-          const a4DataUrl = await generateA4StickerSheet(nonCoverStickers, { background: 'transparent' });
-          const a4Base64 = a4DataUrl.split(',')[1];
-          const a4Binary = atob(a4Base64);
-          const a4Bytes = new Uint8Array(a4Binary.length);
-          for (let b = 0; b < a4Binary.length; b++) {
-            a4Bytes[b] = a4Binary.charCodeAt(b);
+          const a4Pages = await generateA4StickerSheets(nonCoverStickers, { background: 'transparent', pageSize: 20 });
+          if (a4Pages.length === 1) {
+            const a4Base64 = a4Pages[0].split(',')[1];
+            const a4Binary = atob(a4Base64);
+            const a4Bytes = new Uint8Array(a4Binary.length);
+            for (let b = 0; b < a4Binary.length; b++) {
+              a4Bytes[b] = a4Binary.charCodeAt(b);
+            }
+            folder?.file(`00_A4_Printable_Sticker_Sheet_300dpi.png`, a4Bytes.buffer);
+          } else {
+            for (let p = 0; p < a4Pages.length; p++) {
+              const a4Base64 = a4Pages[p].split(',')[1];
+              const a4Binary = atob(a4Base64);
+              const a4Bytes = new Uint8Array(a4Binary.length);
+              for (let b = 0; b < a4Binary.length; b++) {
+                a4Bytes[b] = a4Binary.charCodeAt(b);
+              }
+              const pageSuffix = p === 0 ? 'Sheet1_Main_Tanks' : (p === 1 ? 'Sheet2_Standalone_Objects' : `Sheet${p + 1}`);
+              folder?.file(`00_A4_Printable_${pageSuffix}_300dpi.png`, a4Bytes.buffer);
+            }
           }
-          folder?.file(`00_A4_Printable_Sticker_Sheet_300dpi.png`, a4Bytes.buffer);
         } catch (a4Err) {
-          console.error('Error generating A4 sheet for ZIP bundle:', a4Err);
+          console.error('Error generating A4 sheets for ZIP bundle:', a4Err);
         }
       }
 
@@ -4532,10 +4582,10 @@ export default function Home() {
                     onClick={() => handleGenerateAndOpenA4Sheet(packStickers, 'transparent')}
                     disabled={a4SheetLoading || packStickers.length === 0}
                     className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-indigo-500 cursor-pointer"
-                    title="20종 스티커를 A4 규격 1장에 4x5로 자동 정렬한 고화질(300 DPI) 인쇄용 시트를 생성 및 다운로드합니다"
+                    title={packStickers.length > 20 ? "40종 스티커를 A4 규격 2장(메인수조 20종 + 개별객체 20종)으로 자동 분할 정렬한 고화질 인쇄용 시트를 생성합니다" : "20종 스티커를 A4 규격 1장에 4x5로 자동 정렬한 고화질(300 DPI) 인쇄용 시트를 생성합니다"}
                   >
                     <span>🖨️</span>
-                    <span>A4 인쇄용 시트 (1장)</span>
+                    <span>A4 인쇄용 시트 ({packStickers.length > 20 ? '2장 세트' : '1장'})</span>
                   </button>
 
                   <button
@@ -4776,18 +4826,64 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Download Button */}
-                <div className="flex items-center gap-2">
+                {/* Download Buttons */}
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
-                    onClick={handleDownloadA4Sheet}
-                    disabled={a4SheetLoading || !a4SheetDataUrl}
-                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md transition-colors flex items-center gap-1.5 cursor-pointer"
+                    onClick={() => handleDownloadA4Sheet(currentA4PageIndex)}
+                    disabled={a4SheetLoading || a4SheetPages.length === 0}
+                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <span>💾</span>
-                    <span>A4 고화질 시트 PNG 다운로드</span>
+                    <span>{a4SheetPages.length > 1 ? `현재 Sheet ${currentA4PageIndex + 1} PNG 다운로드` : 'A4 고화질 시트 PNG 다운로드'}</span>
                   </button>
+
+                  {a4SheetPages.length > 1 && (
+                    <button
+                      onClick={handleDownloadAllA4Sheets}
+                      disabled={a4SheetLoading || a4SheetPages.length === 0}
+                      className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 cursor-pointer"
+                      title="생성된 2장의 A4 시트를 모두 다운로드합니다"
+                    >
+                      <span>📦</span>
+                      <span>전체 {a4SheetPages.length}장 모두 다운로드</span>
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {/* Multi-Page Tabs Bar (When 40 items = 2 Sheets) */}
+              {a4SheetPages.length > 1 && (
+                <div className="px-4 sm:px-6 py-2 bg-indigo-50/70 border-b border-indigo-100 flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-extrabold text-indigo-950 flex items-center gap-1">
+                      <span>📑</span>
+                      <span>시트 선택:</span>
+                    </span>
+                    <div className="flex gap-1.5">
+                      {a4SheetPages.map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCurrentA4PageIndex(idx)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                            currentA4PageIndex === idx
+                              ? 'bg-indigo-600 text-white shadow-xs ring-2 ring-indigo-300'
+                              : 'bg-white text-indigo-900 hover:bg-indigo-100 border border-indigo-200'
+                          }`}
+                        >
+                          <span>{idx === 0 ? '🐠' : '🌿'}</span>
+                          <span>
+                            {idx === 0 ? 'Sheet 1: 메인 수조 20종' : (idx === 1 ? 'Sheet 2: 단독 개별 객체 20종' : `Sheet ${idx + 1}`)}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <span className="text-[11px] font-semibold text-indigo-700 bg-white px-2.5 py-1 rounded-lg border border-indigo-200">
+                    💡 40종 패키지: 각 장당 20개씩 완벽한 황금 비율 크기로 분할 인쇄
+                  </span>
+                </div>
+              )}
 
               {/* Preview Body */}
               <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-neutral-900/5 flex items-center justify-center min-h-[350px]">
@@ -4809,8 +4905,18 @@ export default function Home() {
                       </div>
                     )}
                   </div>
-                ) : a4SheetDataUrl ? (
-                  <div className="max-w-md w-full shadow-2xl rounded-2xl overflow-hidden border border-gray-300 transition-all">
+                ) : a4SheetPages.length > 0 && a4SheetPages[currentA4PageIndex] ? (
+                  <div className="max-w-md w-full shadow-2xl rounded-2xl overflow-hidden border border-gray-300 transition-all relative">
+                    {/* Floating Page Badge */}
+                    <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-md z-10 flex items-center gap-1.5">
+                      <span>📄</span>
+                      <span>
+                        {a4SheetPages.length > 1
+                          ? (currentA4PageIndex === 0 ? 'Sheet 1: 메인 수조 세트 (20종)' : 'Sheet 2: 단독 개별 객체 (20종)')
+                          : 'A4 인쇄용 시트 (20종)'}
+                      </span>
+                    </div>
+
                     <div
                       className={`w-full p-2 flex items-center justify-center ${
                         a4SheetBg === 'transparent'
@@ -4819,9 +4925,9 @@ export default function Home() {
                       }`}
                     >
                       <img
-                        src={a4SheetDataUrl}
-                        alt="A4 Printable Sticker Sheet Preview"
-                        className="w-full h-auto object-contain rounded shadow-xs max-h-[65vh]"
+                        src={a4SheetPages[currentA4PageIndex]}
+                        alt={`A4 Printable Sticker Sheet Preview Page ${currentA4PageIndex + 1}`}
+                        className="w-full h-auto object-contain rounded shadow-xs max-h-[62vh]"
                       />
                     </div>
                   </div>

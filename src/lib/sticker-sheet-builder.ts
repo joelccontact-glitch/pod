@@ -1,8 +1,9 @@
 /**
  * A4 Printable Sticker Sheet Generator (300 DPI)
  * Standard A4 print dimensions: 2480 x 3508 pixels
- * Neatly arranges up to 20 transparent sticker designs into a 4x5 grid,
+ * Neatly arranges stickers into 4x5 grids (max 20 per page),
  * with comfortable margins, uniform scaling, and auto-trimmed bounding boxes.
+ * Automatically supports multi-page sheets (e.g. 40 items -> Page 1 [Main Tanks 20] & Page 2 [Standalone Objects 20]).
  * Perfect for Etsy printable sticker sheets (for scissors or Cricut/Silhouette cutting machines).
  */
 
@@ -11,6 +12,8 @@ import { processTransparentPNG } from './image-processor';
 export interface StickerSheetOptions {
   background?: 'transparent' | 'white';
   format?: 'a4' | 'us_letter';
+  pageSize?: number; // default 20
+  pageIndex?: number;
   onProgress?: (current: number, total: number, message: string) => void;
 }
 
@@ -76,7 +79,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /**
- * Generates an A4 Printable Sticker Sheet data URL (PNG format, 300 DPI).
+ * Generates a single A4 Printable Sticker Sheet data URL (PNG format, 300 DPI, max 20 items in 4x5).
  */
 export async function generateA4StickerSheet(
   stickers: any[],
@@ -110,11 +113,10 @@ export async function generateA4StickerSheet(
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
   }
 
-  // Determine grid dimensions
-  // Target: 20 items => 4 columns x 5 rows
-  const count = Math.min(stickers.length, 24);
+  // Standard 4x5 grid (up to 20 items per sheet)
+  const count = Math.min(stickers.length, 20);
   const cols = 4;
-  const rows = Math.ceil(count / cols) || 5;
+  const rows = 5;
 
   // Layout parameters (safe margins for home printers)
   const marginX = 140; // 140px left and right margin
@@ -196,8 +198,43 @@ export async function generateA4StickerSheet(
   }
 
   if (onProgress) {
-    onProgress(total, total, 'A4 시트 고화질 렌더링 완료!');
+    onProgress(total, total, 'A4 시트 렌더링 완료');
   }
 
   return canvas.toDataURL('image/png');
+}
+
+/**
+ * Generates multiple A4 Printable Sticker Sheets (e.g. 40 stickers -> 2 pages: Sheet 1 & Sheet 2).
+ * Each sheet holds up to pageSize (default 20) stickers in a 4x5 grid.
+ */
+export async function generateA4StickerSheets(
+  stickers: any[],
+  options: StickerSheetOptions = {}
+): Promise<string[]> {
+  const { onProgress } = options;
+  const pageSize = options.pageSize || 20;
+  const totalPages = Math.ceil(stickers.length / pageSize) || 1;
+  const pages: string[] = [];
+
+  for (let p = 0; p < totalPages; p++) {
+    const start = p * pageSize;
+    const end = Math.min(start + pageSize, stickers.length);
+    const chunk = stickers.slice(start, end);
+
+    const pageProgress = (curr: number, tot: number, msg: string) => {
+      if (onProgress) {
+        const overallCurrent = p * pageSize + curr;
+        onProgress(overallCurrent, stickers.length, `[시트 ${p + 1}/${totalPages}장] ${msg}`);
+      }
+    };
+
+    const dataUrl = await generateA4StickerSheet(chunk, {
+      ...options,
+      onProgress: pageProgress,
+    });
+    pages.push(dataUrl);
+  }
+
+  return pages;
 }
