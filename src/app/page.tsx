@@ -15,6 +15,13 @@ import {
   VIVARIUM_STANDALONE_20_SERIES,
   SALT_AQUARIUM_STANDALONE_20_SERIES,
   FRESH_AQUARIUM_STANDALONE_20_SERIES,
+  CHRISTMAS_20_SERIES,
+  CHRISTMAS_STANDALONE_20_SERIES,
+  HALLOWEEN_20_SERIES,
+  HALLOWEEN_STANDALONE_20_SERIES,
+  THANKSGIVING_20_SERIES,
+  THANKSGIVING_STANDALONE_20_SERIES,
+  SEASONAL_RECOMMENDATIONS,
   StickerPreset,
   buildStickerPrompt,
 } from '@/lib/sticker-prompts';
@@ -30,27 +37,74 @@ const isCoverDesign = (d: any) => {
   return id.includes('cover') || presetId.includes('cover') || title.includes('커버 표지') || title.includes('마스터 표지') || title.includes('master cover');
 };
 
-const getDesignCategoryKey = (d: any): 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'other' => {
+const getDesignCategoryKey = (d: any): 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'christmas' | 'halloween' | 'thanksgiving' | 'other' => {
   if (!d) return 'other';
   const sub = (d.sticker_sub || '').toLowerCase();
-  if (sub === 'terrarium') return 'terrarium';
-  if (sub === 'vivarium') return 'vivarium';
-  if (sub === 'saltaquarium' || sub === 'salt-aquarium') return 'saltaquarium';
-  if (sub === 'freshaquarium' || sub === 'fresh-aquarium') return 'freshaquarium';
+  if (['terrarium', 'vivarium', 'saltaquarium', 'freshaquarium', 'christmas', 'halloween', 'thanksgiving'].includes(sub)) {
+    return sub as any;
+  }
+  if (sub === 'salt-aquarium') return 'saltaquarium';
+  if (sub === 'fresh-aquarium') return 'freshaquarium';
 
   const presetId = (d.stickerPresetId || d.id || '').toLowerCase();
+  if (presetId.includes('christmas')) return 'christmas';
+  if (presetId.includes('halloween')) return 'halloween';
+  if (presetId.includes('thanksgiving')) return 'thanksgiving';
   if (presetId.includes('vivarium')) return 'vivarium';
   if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium')) return 'saltaquarium';
   if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium')) return 'freshaquarium';
   if (presetId.includes('terrarium')) return 'terrarium';
 
   const title = (d.title || d.topic || '').toLowerCase();
+  if (title.includes('크리스마스') || title.includes('스노우볼') || title.includes('christmas')) return 'christmas';
+  if (title.includes('할로윈') || title.includes('halloween') || title.includes('스푸키')) return 'halloween';
+  if (title.includes('추수감사절') || title.includes('thanksgiving') || title.includes('가을 수확') || title.includes('하베스트')) return 'thanksgiving';
   if (title.includes('비바리움') || title.includes('vivarium')) return 'vivarium';
   if (title.includes('해수어항') || title.includes('saltaquarium') || title.includes('salt aquarium')) return 'saltaquarium';
   if (title.includes('열대어') || title.includes('freshaquarium') || title.includes('fresh aquarium')) return 'freshaquarium';
   if (title.includes('테라리움') || title.includes('terrarium')) return 'terrarium';
 
   return 'other';
+};
+
+const getStickerSeriesTitle = (tab: string) => {
+  switch (tab) {
+    case 'terrarium20': return '🫙 테라리움 세트 완성 20종 스티커 팩';
+    case 'terrarium20_standalone': return '🪴 테라리움 단일 식물 20종 스티커 팩';
+    case 'vivarium20': return '🦎 비바리움 세트 완성 20종 스티커 팩';
+    case 'vivarium20_standalone': return '🦎 비바리움 단일 동물 20종 스티커 팩';
+    case 'saltaquarium20': return '🪸 해수어항 세트 완성 20종 스티커 팩';
+    case 'saltaquarium20_standalone': return '🐠 해수어 단일 어류 20종 스티커 팩';
+    case 'freshaquarium20': return '🐠 열대어어항 세트 완성 20종 스티커 팩';
+    case 'freshaquarium20_standalone': return '🐟 열대어 단일 어류 20종 스티커 팩';
+    case 'christmas20': return '🎄 크리스마스 윈터 스노우볼 20종 스티커 팩';
+    case 'christmas20_standalone': return '🎄 크리스마스 단일 오브젝트 20종 스티커 팩';
+    case 'halloween20': return '🎃 할로윈 스푸키 큐트 20종 스티커 팩';
+    case 'halloween20_standalone': return '🎃 할로윈 단일 오브젝트 20종 스티커 팩';
+    case 'thanksgiving20': return '🦃 추수감사절 코지 어텀 20종 스티커 팩';
+    case 'thanksgiving20_standalone': return '🦃 추수감사절 단일 오브젝트 20종 스티커 팩';
+    default: return '📦 스티커 20종 스티커 팩';
+  }
+};
+
+const getPresetSeriesList = (tab: string) => {
+  switch (tab) {
+    case 'terrarium20': return TERRARIUM_20_SERIES;
+    case 'terrarium20_standalone': return TERRARIUM_STANDALONE_20_SERIES;
+    case 'vivarium20': return VIVARIUM_20_SERIES;
+    case 'vivarium20_standalone': return VIVARIUM_STANDALONE_20_SERIES;
+    case 'saltaquarium20': return SALT_AQUARIUM_20_SERIES;
+    case 'saltaquarium20_standalone': return SALT_AQUARIUM_STANDALONE_20_SERIES;
+    case 'freshaquarium20': return FRESH_AQUARIUM_20_SERIES;
+    case 'freshaquarium20_standalone': return FRESH_AQUARIUM_STANDALONE_20_SERIES;
+    case 'christmas20': return CHRISTMAS_20_SERIES;
+    case 'christmas20_standalone': return CHRISTMAS_STANDALONE_20_SERIES;
+    case 'halloween20': return HALLOWEEN_20_SERIES;
+    case 'halloween20_standalone': return HALLOWEEN_STANDALONE_20_SERIES;
+    case 'thanksgiving20': return THANKSGIVING_20_SERIES;
+    case 'thanksgiving20_standalone': return THANKSGIVING_STANDALONE_20_SERIES;
+    default: return TERRARIUM_20_SERIES;
+  }
 };
 
 export default function Home() {
@@ -71,14 +125,17 @@ export default function Home() {
   const [podCount, setPodCount] = useState<number>(0);
   const [stickerCount, setStickerCount] = useState<number>(0);
 
-  // Sticker Sub-Category Filter State ('all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium')
-  const [selectedStickerSubTab, setSelectedStickerSubTab] = useState<'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium'>('all');
-  const [stickerSubCounts, setStickerSubCounts] = useState<{ all: number; terrarium: number; vivarium: number; saltaquarium: number; freshaquarium: number }>({
+  // Sticker Sub-Category Filter State ('all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'christmas' | 'halloween' | 'thanksgiving')
+  const [selectedStickerSubTab, setSelectedStickerSubTab] = useState<'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'christmas' | 'halloween' | 'thanksgiving'>('all');
+  const [stickerSubCounts, setStickerSubCounts] = useState<{ all: number; terrarium: number; vivarium: number; saltaquarium: number; freshaquarium: number; christmas?: number; halloween?: number; thanksgiving?: number }>({
     all: 0,
     terrarium: 0,
     vivarium: 0,
     saltaquarium: 0,
-    freshaquarium: 0
+    freshaquarium: 0,
+    christmas: 0,
+    halloween: 0,
+    thanksgiving: 0
   });
 
   // Sticker & Digital PNG Pack States
@@ -94,6 +151,12 @@ export default function Home() {
     | 'saltaquarium20_standalone'
     | 'freshaquarium20'
     | 'freshaquarium20_standalone'
+    | 'christmas20'
+    | 'christmas20_standalone'
+    | 'halloween20'
+    | 'halloween20_standalone'
+    | 'thanksgiving20'
+    | 'thanksgiving20_standalone'
   >('terrarium20');
   const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-20-pack-1');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
@@ -521,7 +584,7 @@ export default function Home() {
     }
   };
 
-  const handleSelectStickerSubTab = (sub: 'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium') => {
+  const handleSelectStickerSubTab = (sub: 'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'christmas' | 'halloween' | 'thanksgiving') => {
     setSelectedStickerSubTab(sub);
     setPage(1);
     if (sub !== 'all') {
@@ -530,7 +593,10 @@ export default function Home() {
         terrarium: isStandalone ? 'terrarium20_standalone' : 'terrarium20',
         vivarium: isStandalone ? 'vivarium20_standalone' : 'vivarium20',
         saltaquarium: isStandalone ? 'saltaquarium20_standalone' : 'saltaquarium20',
-        freshaquarium: isStandalone ? 'freshaquarium20_standalone' : 'freshaquarium20'
+        freshaquarium: isStandalone ? 'freshaquarium20_standalone' : 'freshaquarium20',
+        christmas: isStandalone ? 'christmas20_standalone' : 'christmas20',
+        halloween: isStandalone ? 'halloween20_standalone' : 'halloween20',
+        thanksgiving: isStandalone ? 'thanksgiving20_standalone' : 'thanksgiving20',
       };
       if (seriesMap[sub]) {
         setSelectedStickerSeriesTab(seriesMap[sub]);
@@ -2063,6 +2129,21 @@ export default function Home() {
       targetStandalonePresets = FRESH_AQUARIUM_STANDALONE_20_SERIES;
       packName = isBothMode ? '[열대어어항 어항세트 + 단일열대어 40종 1:1 맞춤 팩]' : (baseType.includes('standalone') ? '[열대어 어항 단일 열대어 20종 팩]' : '[열대어 어항 완성 세트 20종 팩]');
       subKey = 'freshaquarium';
+    } else if (baseType.startsWith('christmas')) {
+      targetPresets = baseType.includes('standalone') ? CHRISTMAS_STANDALONE_20_SERIES : CHRISTMAS_20_SERIES;
+      targetStandalonePresets = CHRISTMAS_STANDALONE_20_SERIES;
+      packName = isBothMode ? '[크리스마스 스노우볼 + 단일오브젝트 40종 1:1 맞춤 팩]' : (baseType.includes('standalone') ? '[크리스마스 단일 오브젝트 20종 팩]' : '[크리스마스 스노우볼 완성 세트 20종 팩]');
+      subKey = 'christmas';
+    } else if (baseType.startsWith('halloween')) {
+      targetPresets = baseType.includes('standalone') ? HALLOWEEN_STANDALONE_20_SERIES : HALLOWEEN_20_SERIES;
+      targetStandalonePresets = HALLOWEEN_STANDALONE_20_SERIES;
+      packName = isBothMode ? '[할로윈 스푸키큐트 + 단일오브젝트 40종 1:1 맞춤 팩]' : (baseType.includes('standalone') ? '[할로윈 단일 오브젝트 20종 팩]' : '[할로윈 스푸키큐트 완성 세트 20종 팩]');
+      subKey = 'halloween';
+    } else if (baseType.startsWith('thanksgiving')) {
+      targetPresets = baseType.includes('standalone') ? THANKSGIVING_STANDALONE_20_SERIES : THANKSGIVING_20_SERIES;
+      targetStandalonePresets = THANKSGIVING_STANDALONE_20_SERIES;
+      packName = isBothMode ? '[추수감사절 코지어텀 + 단일오브젝트 40종 1:1 맞춤 팩]' : (baseType.includes('standalone') ? '[추수감사절 단일 오브젝트 20종 팩]' : '[추수감사절 코지어텀 완성 세트 20종 팩]');
+      subKey = 'thanksgiving';
     }
 
     const totalExpectedCount = isBothMode ? 1 + (targetPresets.length - 1) * 2 : targetPresets.length;
@@ -2685,6 +2766,94 @@ export default function Home() {
           </div>
         )}
 
+        {/* 🎯 시즌 선점 트렌드 레이더 (Seasonal Radar) */}
+        {isStickerMode && (
+          <div className="mb-4 bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 border-2 border-rose-300 rounded-2xl shadow-md p-3.5 sm:p-5 space-y-3.5">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-rose-200/70 pb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl sm:text-3xl">🎯</span>
+                <div>
+                  <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2">
+                    <span>Etsy 2~3개월 전 선점: 시즌 추천 스티커 테마 레이더</span>
+                    <span className="bg-rose-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">AI Surge Radar</span>
+                  </h3>
+                  <p className="text-xs text-gray-600 mt-0.5">
+                    Etsy 알고리즘 인덱싱(4~6주)에 맞춰 지금 즉시 등록해야 시즌 검색 1위를 독점할 수 있는 황금 테마입니다.
+                  </p>
+                </div>
+              </div>
+              <span className="text-[11px] font-semibold text-rose-800 bg-white/90 border border-rose-200 px-3 py-1 rounded-full shadow-2xs shrink-0">
+                💡 40종 팩(수조 20 + 낱개 20) + A4 2장 인쇄용 시트 원클릭 동시 생성
+              </span>
+            </div>
+
+            {/* 3대 시즌 추천 카드 그리드 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              {SEASONAL_RECOMMENDATIONS.map((season) => (
+                <div
+                  key={season.seasonId}
+                  className="bg-white/95 hover:bg-white border border-rose-200/80 rounded-2xl p-3.5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-3 relative group"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-2xl">{season.icon}</span>
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-2xs ${season.badgeColor}`}>
+                        {season.badge}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-extrabold text-gray-900 line-clamp-1">
+                        {season.title}
+                      </h4>
+                      <p className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">
+                        {season.subtitle}
+                      </p>
+                    </div>
+
+                    <div className="bg-stone-50 border border-gray-100 rounded-xl p-2 text-[11px] text-gray-600 leading-snug">
+                      <span className="font-bold text-gray-800">⏱️ 선점 타이밍: </span>
+                      {season.timingText}
+                    </div>
+
+                    <div className="flex flex-wrap gap-1">
+                      {season.keySearchTerms.slice(0, 3).map((term, tIdx) => (
+                        <span key={tIdx} className="text-[10px] bg-stone-100 text-stone-700 px-1.5 py-0.5 rounded-md font-medium">
+                          #{term}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-gray-100 space-y-1.5">
+                    <button
+                      onClick={() => handleBatchGenerateSeries(`${season.seasonId}20_both`)}
+                      disabled={isBatchGenerating}
+                      className="w-full bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                      title={`${season.title} (메인 20종 + 단독 20종 = 총 41장 및 A4 2장 시트) 일괄 자동 생성을 시작합니다`}
+                    >
+                      <span>⚡️</span>
+                      <span>이 시즌 40종 팩 원클릭 동시 생성</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setSelectedStickerSeriesTab(`${season.seasonId}20` as any);
+                        setIsStickerBannerExpanded(true);
+                        setIsPresetGridExpanded(true);
+                      }}
+                      className="w-full bg-white hover:bg-stone-50 text-gray-700 border border-gray-200 text-[11px] font-bold py-1.5 px-2 rounded-xl transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <span>👀</span>
+                      <span>20종 템플릿 둘러보기</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Sticker Mode & Pygmy Pumpkin & Friends Banner */}
         {isStickerMode && (
           <div className="mb-4 bg-gradient-to-r from-teal-50 via-emerald-50 to-cyan-50 border-2 border-teal-300 rounded-2xl shadow-md overflow-hidden transition-all">
@@ -2697,23 +2866,7 @@ export default function Home() {
                 <span className="text-2xl sm:text-3xl">📦</span>
                 <div>
                   <h3 className="text-sm sm:text-base font-bold text-teal-900 flex items-center gap-2">
-                    <span>
-                      {selectedStickerSeriesTab === 'terrarium20'
-                        ? '🫙 테라리움 어항 세트 완성 20종 스티커 팩'
-                        : selectedStickerSeriesTab === 'terrarium20_standalone'
-                        ? '🪴 테라리움 어항 밖 단일 식물 20종 스티커 팩'
-                        : selectedStickerSeriesTab === 'vivarium20'
-                        ? '🦎 비바리움 어항 세트 완성 20종 스티커 팩'
-                        : selectedStickerSeriesTab === 'vivarium20_standalone'
-                        ? '🦎 비바리움 어항 밖 단일 동물 20종 스티커 팩'
-                        : selectedStickerSeriesTab === 'saltaquarium20'
-                        ? '🪸 해수어항 어항 세트 완성 20종 스티커 팩'
-                        : selectedStickerSeriesTab === 'saltaquarium20_standalone'
-                        ? '🐠 해수어 어항 밖 단일 어류 20종 스티커 팩'
-                        : selectedStickerSeriesTab === 'freshaquarium20'
-                        ? '🐠 열대어 어항 세트 완성 20종 스티커 팩'
-                        : '🐟 열대어 어항 밖 단일 어류 20종 스티커 팩'}
-                    </span>
+                    <span>{getStickerSeriesTitle(selectedStickerSeriesTab)}</span>
                     <span className="bg-teal-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Etsy Best Niche</span>
                   </h3>
                   <p className="text-xs text-teal-700 font-medium hidden sm:block">
@@ -2742,10 +2895,10 @@ export default function Home() {
                       onClick={() => handleBatchGenerateSeries(`${selectedStickerSeriesTab}_both`)}
                       disabled={isBatchGenerating}
                       className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-purple-500"
-                      title="어항 세트 20종 생성 후, AI 비전으로 각 어항에서 단일 낱개 스티커 20종을 1:1 자동 추출하여 총 41장 동시 생성합니다"
+                      title="어항/스노우볼 세트 20종 생성 후, AI 비전으로 각 이미지에서 단일 낱개 스티커 20종을 1:1 자동 추출하여 총 41장 및 A4 2장 시트를 동시 생성합니다"
                     >
                       <span>🔥</span>
-                      <span>[어항세트 + 1:1맞춤 낱개 40종] 동시 생성</span>
+                      <span>[세트 + 1:1맞춤 낱개 40종] 동시 생성</span>
                     </button>
 
                     <button
@@ -2754,28 +2907,12 @@ export default function Home() {
                       className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600"
                       title="선택된 팩 20종 자동 일괄 연속 생성"
                     >
-                  <span>⚡️</span>
-                  <span>
-                    {selectedStickerSeriesTab === 'terrarium20'
-                      ? '[테라리움 어항세트 20종] 일괄 생성'
-                      : selectedStickerSeriesTab === 'terrarium20_standalone'
-                      ? '[테라리움 단일식물 20종] 일괄 생성'
-                      : selectedStickerSeriesTab === 'vivarium20'
-                      ? '[비바리움 어항세트 20종] 일괄 생성'
-                      : selectedStickerSeriesTab === 'vivarium20_standalone'
-                      ? '[비바리움 단일동물 20종] 일괄 생성'
-                      : selectedStickerSeriesTab === 'saltaquarium20'
-                      ? '[해수어항 어항세트 20종] 일괄 생성'
-                      : selectedStickerSeriesTab === 'saltaquarium20_standalone'
-                      ? '[해수어항 단일해수어 20종] 일괄 생성'
-                      : selectedStickerSeriesTab === 'freshaquarium20'
-                      ? '[열대어어항 어항세트 20종] 일괄 생성'
-                      : '[열대어어항 단일열대어 20종] 일괄 생성'}
-                  </span>
-                </button>
+                      <span>⚡️</span>
+                      <span>[{getStickerSeriesTitle(selectedStickerSeriesTab).split(' ')[1] || '20종 팩'}] 일괄 생성</span>
+                    </button>
 
-                <button
-                  onClick={handleExportZIPBundle}
+                    <button
+                      onClick={handleExportZIPBundle}
                   disabled={isExportingBundle || designs.length === 0}
                   className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition-colors flex items-center justify-center gap-1.5 shrink-0"
                 >
@@ -2883,6 +3020,66 @@ export default function Home() {
                   >
                     🐟 열대어 단일 어류
                   </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('christmas20')}
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'christmas20'
+                        ? 'bg-rose-700 text-white shadow-sm ring-1 ring-rose-400'
+                        : 'text-rose-900 hover:bg-rose-200/50'
+                    }`}
+                  >
+                    🎄 크리스마스 세트
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('christmas20_standalone')}
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'christmas20_standalone'
+                        ? 'bg-rose-800 text-white shadow-sm ring-1 ring-rose-400'
+                        : 'text-rose-900 hover:bg-rose-200/50'
+                    }`}
+                  >
+                    🎁 크리스마스 단일
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('halloween20')}
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'halloween20'
+                        ? 'bg-orange-700 text-white shadow-sm ring-1 ring-orange-400'
+                        : 'text-orange-950 hover:bg-orange-200/50'
+                    }`}
+                  >
+                    🎃 할로윈 세트
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('halloween20_standalone')}
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'halloween20_standalone'
+                        ? 'bg-orange-800 text-white shadow-sm ring-1 ring-orange-400'
+                        : 'text-orange-950 hover:bg-orange-200/50'
+                    }`}
+                  >
+                    👻 할로윈 단일
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('thanksgiving20')}
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'thanksgiving20'
+                        ? 'bg-amber-700 text-white shadow-sm ring-1 ring-amber-400'
+                        : 'text-amber-950 hover:bg-amber-200/50'
+                    }`}
+                  >
+                    🦃 추수감사절 세트
+                  </button>
+                  <button
+                    onClick={() => setSelectedStickerSeriesTab('thanksgiving20_standalone')}
+                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'thanksgiving20_standalone'
+                        ? 'bg-amber-800 text-white shadow-sm ring-1 ring-amber-400'
+                        : 'text-amber-950 hover:bg-amber-200/50'
+                    }`}
+                  >
+                    🍂 추수감사절 단일
+                  </button>
                 </div>
               </div>
 
@@ -2895,30 +3092,14 @@ export default function Home() {
                   <span>
                     {isPresetGridExpanded
                       ? '▲ 개별 20종 템플릿 카드 목록 접기'
-                      : '▼ 개별 20종 템플릿 카드 목록 보기 (21개 항목)'}
+                      : `▼ 개별 20종 템플릿 카드 목록 보기 (${getPresetSeriesList(selectedStickerSeriesTab).length}개 항목)`}
                   </span>
                 </button>
               </div>
 
               {isPresetGridExpanded && (
                 <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 max-h-96 overflow-y-auto pr-1">
-                  {(
-                    selectedStickerSeriesTab === 'terrarium20'
-                      ? TERRARIUM_20_SERIES
-                      : selectedStickerSeriesTab === 'terrarium20_standalone'
-                      ? TERRARIUM_STANDALONE_20_SERIES
-                      : selectedStickerSeriesTab === 'vivarium20'
-                      ? VIVARIUM_20_SERIES
-                      : selectedStickerSeriesTab === 'vivarium20_standalone'
-                      ? VIVARIUM_STANDALONE_20_SERIES
-                      : selectedStickerSeriesTab === 'saltaquarium20'
-                      ? SALT_AQUARIUM_20_SERIES
-                      : selectedStickerSeriesTab === 'saltaquarium20_standalone'
-                      ? SALT_AQUARIUM_STANDALONE_20_SERIES
-                      : selectedStickerSeriesTab === 'freshaquarium20'
-                      ? FRESH_AQUARIUM_20_SERIES
-                      : FRESH_AQUARIUM_STANDALONE_20_SERIES
-                  ).map((preset) => (
+                  {getPresetSeriesList(selectedStickerSeriesTab).map((preset) => (
                     <div
                       key={preset.id}
                       onClick={() => {
@@ -3137,6 +3318,48 @@ export default function Home() {
                 <span>🐠 열대어어항</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'freshaquarium' ? 'bg-blue-900 text-blue-100' : 'bg-blue-100 text-blue-800'}`}>
                   {stickerSubCounts.freshaquarium || 0}
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSelectStickerSubTab('christmas')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                  selectedStickerSubTab === 'christmas'
+                    ? 'bg-rose-700 text-white shadow-xs ring-1 ring-rose-400'
+                    : 'bg-white text-rose-950 hover:bg-rose-100 border border-rose-200'
+                }`}
+              >
+                <span>🎄 크리스마스</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'christmas' ? 'bg-rose-900 text-rose-100' : 'bg-rose-100 text-rose-800'}`}>
+                  {stickerSubCounts.christmas || 0}
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSelectStickerSubTab('halloween')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                  selectedStickerSubTab === 'halloween'
+                    ? 'bg-orange-700 text-white shadow-xs ring-1 ring-orange-400'
+                    : 'bg-white text-orange-950 hover:bg-orange-100 border border-orange-200'
+                }`}
+              >
+                <span>🎃 할로윈</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'halloween' ? 'bg-orange-900 text-orange-100' : 'bg-orange-100 text-orange-800'}`}>
+                  {stickerSubCounts.halloween || 0}
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSelectStickerSubTab('thanksgiving')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                  selectedStickerSubTab === 'thanksgiving'
+                    ? 'bg-amber-700 text-white shadow-xs ring-1 ring-amber-400'
+                    : 'bg-white text-amber-950 hover:bg-amber-100 border border-amber-200'
+                }`}
+              >
+                <span>🦃 추수감사절</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'thanksgiving' ? 'bg-amber-900 text-amber-100' : 'bg-amber-100 text-amber-800'}`}>
+                  {stickerSubCounts.thanksgiving || 0}
                 </span>
               </button>
             </div>

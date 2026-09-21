@@ -74,6 +74,9 @@ export async function GET(request: Request) {
     let vivariumCount = 0;
     let saltaquariumCount = 0;
     let freshaquariumCount = 0;
+    let christmasCount = 0;
+    let halloweenCount = 0;
+    let thanksgivingCount = 0;
 
     const allDesigns = (cachedSnapshotDocs || [])
       .map(({ id: docId, data }: any) => {
@@ -115,7 +118,7 @@ export async function GET(request: Request) {
           resolvedType = 'pod';
         }
 
-        let stickerSub: 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'other' = 'other';
+        let stickerSub: 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'christmas' | 'halloween' | 'thanksgiving' | 'other' = 'other';
 
         if (resolvedType === 'sticker') {
           stickerCount++;
@@ -128,11 +131,17 @@ export async function GET(request: Request) {
           const text = `${title} ${topic} ${prompt} ${theme}`;
 
           // Priority 0: Explicit sticker_sub saved in Firestore DB
-          if (explicitSub && ['terrarium', 'vivarium', 'saltaquarium', 'freshaquarium'].includes(explicitSub)) {
+          if (explicitSub && ['terrarium', 'vivarium', 'saltaquarium', 'freshaquarium', 'christmas', 'halloween', 'thanksgiving'].includes(explicitSub)) {
             stickerSub = explicitSub;
           }
           // Priority 1: Explicit presetId prefix matching
-          else if (presetId.startsWith('fresh-aquarium') || presetId.startsWith('freshaquarium')) {
+          else if (presetId.startsWith('christmas')) {
+            stickerSub = 'christmas';
+          } else if (presetId.startsWith('halloween')) {
+            stickerSub = 'halloween';
+          } else if (presetId.startsWith('thanksgiving')) {
+            stickerSub = 'thanksgiving';
+          } else if (presetId.startsWith('fresh-aquarium') || presetId.startsWith('freshaquarium')) {
             stickerSub = 'freshaquarium';
           } else if (presetId.startsWith('salt-aquarium') || presetId.startsWith('saltaquarium')) {
             stickerSub = 'saltaquarium';
@@ -143,6 +152,21 @@ export async function GET(request: Request) {
           } 
           // Priority 2: Explicit Title & Topic Matching (HIGHEST DETERMINISTIC INTENT)
           else if (
+            title.includes('크리스마스') || title.includes('christmas') || title.includes('스노우볼') ||
+            topic.includes('크리스마스') || topic.includes('christmas')
+          ) {
+            stickerSub = 'christmas';
+          } else if (
+            title.includes('할로윈') || title.includes('halloween') || title.includes('스푸키') ||
+            topic.includes('할로윈') || topic.includes('halloween') || topic.includes('스푸키')
+          ) {
+            stickerSub = 'halloween';
+          } else if (
+            title.includes('추수감사절') || title.includes('thanksgiving') || title.includes('가을 수확') || title.includes('하베스트') ||
+            topic.includes('추수감사절') || topic.includes('thanksgiving') || topic.includes('하베스트')
+          ) {
+            stickerSub = 'thanksgiving';
+          } else if (
             title.includes('열대어어항') || title.includes('열대어 어항') || title.includes('freshwater aquarium') || title.includes('fresh aquarium') ||
             topic.includes('열대어어항') || topic.includes('열대어 어항') || topic.includes('freshwater aquarium')
           ) {
@@ -165,6 +189,18 @@ export async function GET(request: Request) {
           }
           // Priority 3: Keyword / Prompt text matching (Fallback when title has no explicit series tag)
           else if (
+            text.includes('christmas') || text.includes('크리스마스') || text.includes('snowglobe') || text.includes('스노우볼') || text.includes('gingerbread')
+          ) {
+            stickerSub = 'christmas';
+          } else if (
+            text.includes('halloween') || text.includes('할로윈') || text.includes('spooky') || text.includes('cute ghost') || text.includes('호박')
+          ) {
+            stickerSub = 'halloween';
+          } else if (
+            text.includes('thanksgiving') || text.includes('추수감사절') || text.includes('harvest') || text.includes('하베스트') || text.includes('acorn')
+          ) {
+            stickerSub = 'thanksgiving';
+          } else if (
             text.includes('terrarium') || text.includes('테라리움') || text.includes('succulent') || text.includes('다육식물') || text.includes('teacup succulent') || text.includes('moss jar')
           ) {
             stickerSub = 'terrarium';
@@ -188,6 +224,9 @@ export async function GET(request: Request) {
           else if (stickerSub === 'vivarium') vivariumCount++;
           else if (stickerSub === 'saltaquarium') saltaquariumCount++;
           else if (stickerSub === 'freshaquarium') freshaquariumCount++;
+          else if (stickerSub === 'christmas') christmasCount++;
+          else if (stickerSub === 'halloween') halloweenCount++;
+          else if (stickerSub === 'thanksgiving') thanksgivingCount++;
         } else {
           podCount++;
         }
@@ -235,6 +274,9 @@ export async function GET(request: Request) {
               scanStr.includes('vivarium-20-pack-cover') ||
               scanStr.includes('saltaquarium-20-pack-cover') ||
               scanStr.includes('freshaquarium-20-pack-cover') ||
+              scanStr.includes('christmas-20-pack-cover') ||
+              scanStr.includes('halloween-20-pack-cover') ||
+              scanStr.includes('thanksgiving-20-pack-cover') ||
               scanStr.includes('마스터 썸네일') ||
               scanStr.includes('마스터 표지') ||
               scanStr.includes('대표 커버') ||
@@ -266,7 +308,10 @@ export async function GET(request: Request) {
         terrarium: terrariumCount,
         vivarium: vivariumCount,
         saltaquarium: saltaquariumCount,
-        freshaquarium: freshaquariumCount
+        freshaquarium: freshaquariumCount,
+        christmas: christmasCount,
+        halloween: halloweenCount,
+        thanksgiving: thanksgivingCount
       },
       page,
       totalPages: Math.ceil(total / limitNum)

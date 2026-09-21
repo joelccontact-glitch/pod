@@ -632,3 +632,5 @@ export function buildStickerPrompt(
   return `A cute die-cut sticker design featuring an adorable ${animalName} associated with ${affinityObject}. ${extraStyleDetails} ${textPart} ${STICKER_RULES_PROMPT_SUFFIX}`;
 }
 
+export * from './seasonal-sticker-prompts';
+
