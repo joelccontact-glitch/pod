@@ -153,6 +153,7 @@ export default function Home() {
 
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(true);
+  const [isSeasonalRadarExpanded, setIsSeasonalRadarExpanded] = useState(true); // Expanded by default
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<
@@ -2778,103 +2779,115 @@ export default function Home() {
 
         {/* 🎯 시즌 선점 트렌드 레이더 (Seasonal Radar) */}
         {isStickerMode && (
-          <div className="mb-4 bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 border-2 border-rose-300 rounded-2xl shadow-md p-3.5 sm:p-5 space-y-3.5">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-rose-200/70 pb-3">
+          <div className="mb-4 bg-gradient-to-r from-rose-50 via-amber-50 to-purple-50 border-2 border-rose-300 rounded-2xl shadow-md overflow-hidden transition-all">
+            {/* Collapsible Header Bar */}
+            <div 
+              onClick={() => setIsSeasonalRadarExpanded(!isSeasonalRadarExpanded)}
+              className="p-3.5 sm:p-4 cursor-pointer hover:bg-rose-100/50 transition-colors flex items-center justify-between gap-3 select-none"
+            >
               <div className="flex items-center gap-2.5">
                 <span className="text-2xl sm:text-3xl">🎯</span>
                 <div>
-                  <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2">
+                  <h3 className="text-sm sm:text-base font-extrabold text-gray-900 flex items-center gap-2 flex-wrap">
                     <span>Etsy 2~3개월 전 선점: 시즌 추천 스티커 테마 레이더</span>
                     <span className="bg-rose-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">AI Surge Radar</span>
                   </h3>
-                  <p className="text-xs text-gray-600 mt-0.5">
+                  <p className="text-xs text-gray-600 mt-0.5 hidden sm:block">
                     Etsy 알고리즘 인덱싱(4~6주)에 맞춰 지금 즉시 등록해야 시즌 검색 1위를 독점할 수 있는 황금 테마입니다.
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[11px] font-extrabold text-rose-900 bg-white/95 border border-rose-200 px-3 py-1 rounded-full shadow-2xs flex items-center gap-1.5">
+                <span className="text-[11px] font-extrabold text-rose-900 bg-white/95 border border-rose-200 px-3 py-1 rounded-full shadow-2xs hidden md:flex items-center gap-1.5">
                   <span>🖨️</span>
                   <span>A4 300DPI 2장 분할 시트 지원</span>
+                </span>
+                <span className="text-xs font-bold text-rose-900 bg-white/90 border border-rose-300 px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-1">
+                  <span>{isSeasonalRadarExpanded ? '▲ 레이더 접기' : '▼ 시즌 레이더 펼치기'}</span>
                 </span>
               </div>
             </div>
 
-            {/* 3대 시즌 추천 카드 그리드 */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {(dynamicSeasonalRecommendations.length > 0 ? dynamicSeasonalRecommendations : SEASONAL_RECOMMENDATIONS).map((season) => (
-                <div
-                  key={season.seasonId}
-                  className="bg-white/95 hover:bg-white border border-rose-200/80 rounded-2xl p-3.5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-3 relative group"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-2xl">{season.icon}</span>
-                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-2xs ${season.badgeColor}`}>
-                        {season.badge}
-                      </span>
-                    </div>
-
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-extrabold text-gray-900 line-clamp-1">
-                        {season.title}
-                      </h4>
-                      <p className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">
-                        {season.subtitle}
-                      </p>
-                    </div>
-
-                    <div className="bg-stone-50 border border-gray-100 rounded-xl p-2 text-[11px] text-gray-600 leading-snug">
-                      <span className="font-bold text-gray-800">⏱️ 선점 타이밍: </span>
-                      {season.timingText}
-                    </div>
-
-                    <div className="flex flex-wrap gap-1">
-                      {season.keySearchTerms.slice(0, 3).map((term, tIdx) => (
-                        <span key={tIdx} className="text-[10px] bg-stone-100 text-stone-700 px-1.5 py-0.5 rounded-md font-medium">
-                          #{term}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-gray-100 space-y-2">
-                    {/* 40종 패키지 구성 안내 바 (버튼 바로 위 배치) */}
-                    <div className="bg-purple-50/90 border border-purple-200/80 rounded-xl px-2.5 py-1.5 text-[11px] flex items-center justify-between gap-1">
-                      <span className="font-bold text-purple-950 flex items-center gap-1">
-                        <span>🎁</span>
-                        <span><strong>40종 세트</strong>: 메인 20종 + 단독 낱개 20종</span>
-                      </span>
-                      <span className="text-[10px] font-extrabold text-purple-700 bg-white px-1.5 py-0.5 rounded border border-purple-200 shrink-0">
-                        A4 2장 시트
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => handleBatchGenerateSeries(`${season.seasonId}20_both`)}
-                      disabled={isBatchGenerating}
-                      className="w-full bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                      title={`${season.title} (메인 20종 + 단독 20종 = 총 41장 및 A4 2장 시트) 일괄 자동 생성을 시작합니다`}
+            {/* Collapsible Content Section */}
+            {isSeasonalRadarExpanded && (
+              <div className="p-3.5 sm:p-5 border-t border-rose-200/80">
+                {/* 3대 시즌 추천 카드 그리드 */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {(dynamicSeasonalRecommendations.length > 0 ? dynamicSeasonalRecommendations : SEASONAL_RECOMMENDATIONS).map((season) => (
+                    <div
+                      key={season.seasonId}
+                      className="bg-white/95 hover:bg-white border border-rose-200/80 rounded-2xl p-3.5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-3 relative group"
                     >
-                      <span>⚡️</span>
-                      <span>이 시즌 40종 팩 원클릭 동시 생성</span>
-                    </button>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-2xl">{season.icon}</span>
+                          <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-2xs ${season.badgeColor}`}>
+                            {season.badge}
+                          </span>
+                        </div>
 
-                    <button
-                      onClick={() => {
-                        setSelectedStickerSeriesTab(`${season.seasonId}20` as any);
-                        setIsStickerBannerExpanded(true);
-                        setIsPresetGridExpanded(true);
-                      }}
-                      className="w-full bg-white hover:bg-stone-50 text-gray-700 border border-gray-200 text-[11px] font-bold py-1.5 px-2 rounded-xl transition-colors flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <span>👀</span>
-                      <span>20종 템플릿 둘러보기</span>
-                    </button>
-                  </div>
+                        <div>
+                          <h4 className="text-xs sm:text-sm font-extrabold text-gray-900 line-clamp-1">
+                            {season.title}
+                          </h4>
+                          <p className="text-[11px] text-gray-500 line-clamp-1 mt-0.5">
+                            {season.subtitle}
+                          </p>
+                        </div>
+
+                        <div className="bg-stone-50 border border-gray-100 rounded-xl p-2 text-[11px] text-gray-600 leading-snug">
+                          <span className="font-bold text-gray-800">⏱️ 선점 타이밍: </span>
+                          {season.timingText}
+                        </div>
+
+                        <div className="flex flex-wrap gap-1">
+                          {season.keySearchTerms.slice(0, 3).map((term, tIdx) => (
+                            <span key={tIdx} className="text-[10px] bg-stone-100 text-stone-700 px-1.5 py-0.5 rounded-md font-medium">
+                              #{term}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-gray-100 space-y-2">
+                        {/* 40종 패키지 구성 안내 바 (버튼 바로 위 배치) */}
+                        <div className="bg-purple-50/90 border border-purple-200/80 rounded-xl px-2.5 py-1.5 text-[11px] flex items-center justify-between gap-1">
+                          <span className="font-bold text-purple-950 flex items-center gap-1">
+                            <span>🎁</span>
+                            <span><strong>40종 세트</strong>: 메인 20종 + 단독 낱개 20종</span>
+                          </span>
+                          <span className="text-[10px] font-extrabold text-purple-700 bg-white px-1.5 py-0.5 rounded border border-purple-200 shrink-0">
+                            A4 2장 시트
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={() => handleBatchGenerateSeries(`${season.seasonId}20_both`)}
+                          disabled={isBatchGenerating}
+                          className="w-full bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                          title={`${season.title} (메인 20종 + 단독 20종 = 총 41장 및 A4 2장 시트) 일괄 자동 생성을 시작합니다`}
+                        >
+                          <span>⚡️</span>
+                          <span>이 시즌 40종 팩 원클릭 동시 생성</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setSelectedStickerSeriesTab(`${season.seasonId}20` as any);
+                            setIsStickerBannerExpanded(true);
+                            setIsPresetGridExpanded(true);
+                          }}
+                          className="w-full bg-white hover:bg-stone-50 text-gray-700 border border-gray-200 text-[11px] font-bold py-1.5 px-2 rounded-xl transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <span>👀</span>
+                          <span>20종 템플릿 둘러보기</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
