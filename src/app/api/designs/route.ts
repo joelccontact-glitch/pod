@@ -70,13 +70,24 @@ export async function GET(request: Request) {
       
     let podCount = 0;
     let stickerCount = 0;
-    let terrariumCount = 0;
-    let vivariumCount = 0;
-    let saltaquariumCount = 0;
-    let freshaquariumCount = 0;
-    let christmasCount = 0;
-    let halloweenCount = 0;
-    let thanksgivingCount = 0;
+    const dynamicSubCounts: Record<string, number> = {
+      all: 0,
+      terrarium: 0,
+      vivarium: 0,
+      saltaquarium: 0,
+      freshaquarium: 0,
+      christmas: 0,
+      halloween: 0,
+      thanksgiving: 0,
+      valentines: 0,
+      stpatrick: 0,
+      easter: 0,
+      mothersday: 0,
+      fathersday: 0,
+      july4th: 0,
+      backtoschool: 0,
+      newyear: 0
+    };
 
     const allDesigns = (cachedSnapshotDocs || [])
       .map(({ id: docId, data }: any) => {
@@ -118,7 +129,7 @@ export async function GET(request: Request) {
           resolvedType = 'pod';
         }
 
-        let stickerSub: 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'christmas' | 'halloween' | 'thanksgiving' | 'other' = 'other';
+        let stickerSub: string = 'other';
 
         if (resolvedType === 'sticker') {
           stickerCount++;
@@ -131,7 +142,7 @@ export async function GET(request: Request) {
           const text = `${title} ${topic} ${prompt} ${theme}`;
 
           // Priority 0: Explicit sticker_sub saved in Firestore DB
-          if (explicitSub && ['terrarium', 'vivarium', 'saltaquarium', 'freshaquarium', 'christmas', 'halloween', 'thanksgiving'].includes(explicitSub)) {
+          if (explicitSub && explicitSub !== 'other') {
             stickerSub = explicitSub;
           }
           // Priority 1: Explicit presetId prefix matching
@@ -141,6 +152,22 @@ export async function GET(request: Request) {
             stickerSub = 'halloween';
           } else if (presetId.startsWith('thanksgiving')) {
             stickerSub = 'thanksgiving';
+          } else if (presetId.startsWith('valentines') || presetId.startsWith('valentine')) {
+            stickerSub = 'valentines';
+          } else if (presetId.startsWith('stpatrick')) {
+            stickerSub = 'stpatrick';
+          } else if (presetId.startsWith('easter')) {
+            stickerSub = 'easter';
+          } else if (presetId.startsWith('mothersday')) {
+            stickerSub = 'mothersday';
+          } else if (presetId.startsWith('fathersday')) {
+            stickerSub = 'fathersday';
+          } else if (presetId.startsWith('july4th')) {
+            stickerSub = 'july4th';
+          } else if (presetId.startsWith('backtoschool')) {
+            stickerSub = 'backtoschool';
+          } else if (presetId.startsWith('newyear')) {
+            stickerSub = 'newyear';
           } else if (presetId.startsWith('fresh-aquarium') || presetId.startsWith('freshaquarium')) {
             stickerSub = 'freshaquarium';
           } else if (presetId.startsWith('salt-aquarium') || presetId.startsWith('saltaquarium')) {
@@ -220,13 +247,7 @@ export async function GET(request: Request) {
             stickerSub = 'other';
           }
 
-          if (stickerSub === 'terrarium') terrariumCount++;
-          else if (stickerSub === 'vivarium') vivariumCount++;
-          else if (stickerSub === 'saltaquarium') saltaquariumCount++;
-          else if (stickerSub === 'freshaquarium') freshaquariumCount++;
-          else if (stickerSub === 'christmas') christmasCount++;
-          else if (stickerSub === 'halloween') halloweenCount++;
-          else if (stickerSub === 'thanksgiving') thanksgivingCount++;
+          dynamicSubCounts[stickerSub] = (dynamicSubCounts[stickerSub] || 0) + 1;
         } else {
           podCount++;
         }
@@ -258,25 +279,17 @@ export async function GET(request: Request) {
           if (!searchableText.includes(searchQuery)) return false;
         }
 
-        // 2. Type & SubType filter
-        if (filterType === 'pod') return item.design_type === 'pod';
+        // 2. Category tab filter ('all' | 'pod' | 'sticker')
+        if (filterType === 'pod' && item.design_type !== 'pod') return false;
         if (filterType === 'sticker') {
           if (item.design_type !== 'sticker') return false;
-          if (subType === 'terrarium' && item.sticker_sub !== 'terrarium') return false;
-          if (subType === 'vivarium' && item.sticker_sub !== 'vivarium') return false;
-          if (subType === 'saltaquarium' && item.sticker_sub !== 'saltaquarium') return false;
-          if (subType === 'freshaquarium' && item.sticker_sub !== 'freshaquarium') return false;
+          if (subType && subType !== 'all' && item.sticker_sub !== subType) return false;
           
           if (onlyCovers) {
             const scanStr = `${item.title || ''} ${item.topic || ''} ${item.prompt || ''} ${item.stickerPresetId || ''} ${item.id || ''}`.toLowerCase();
             const isExplicitCover = (
-              scanStr.includes('terrarium-20-pack-cover') ||
-              scanStr.includes('vivarium-20-pack-cover') ||
-              scanStr.includes('saltaquarium-20-pack-cover') ||
-              scanStr.includes('freshaquarium-20-pack-cover') ||
-              scanStr.includes('christmas-20-pack-cover') ||
-              scanStr.includes('halloween-20-pack-cover') ||
-              scanStr.includes('thanksgiving-20-pack-cover') ||
+              scanStr.includes('-20-pack-cover') ||
+              scanStr.includes('-standalone-20-pack-cover') ||
               scanStr.includes('마스터 썸네일') ||
               scanStr.includes('마스터 표지') ||
               scanStr.includes('대표 커버') ||
@@ -296,6 +309,7 @@ export async function GET(request: Request) {
 
     const total = allDesigns.length;
     const paginatedDesigns = allDesigns.slice(offsetNum, offsetNum + limitNum);
+    dynamicSubCounts.all = stickerCount;
 
     return NextResponse.json({ 
       success: true, 
@@ -303,16 +317,7 @@ export async function GET(request: Request) {
       total,
       podCount,
       stickerCount,
-      stickerSubCounts: {
-        all: stickerCount,
-        terrarium: terrariumCount,
-        vivarium: vivariumCount,
-        saltaquarium: saltaquariumCount,
-        freshaquarium: freshaquariumCount,
-        christmas: christmasCount,
-        halloween: halloweenCount,
-        thanksgiving: thanksgivingCount
-      },
+      stickerSubCounts: dynamicSubCounts,
       page,
       totalPages: Math.ceil(total / limitNum)
     });

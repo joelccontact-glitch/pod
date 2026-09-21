@@ -90,6 +90,18 @@ export const SEASONAL_HOLIDAYS: SeasonalHoliday[] = [
     styleKeywords: ['Vivid Mint & Emerald Vector', 'Celtic Retro Script', 'Cute Irish Folk Illustration']
   },
   {
+    id: 'easter',
+    name: 'Easter & Spring Blossom',
+    koreanName: '부활절 & 봄맞이 플라워',
+    month: 4,
+    day: 12, // mid-April approx
+    icon: '🌸',
+    trendingMotifs: ['easter egg', 'spring tulip', 'bunny ears', 'daffodil', 'pastel butterfly', 'baby chick'],
+    seasonalProps: ['painted easter egg', 'blooming daisy stem', 'woven spring basket'],
+    catchphrases: ['Hoppy Spring', 'Cute & Blooming', 'Some Bunny Loves You', 'Sweet Spring Bestie', 'Spring in Bloom'],
+    styleKeywords: ['Pastel Spring Watercolor', 'Chibi Easter Bunny Kawaii', 'Cottagecore Botanical Floral Line Art']
+  },
+  {
     id: 'mothersday',
     name: "Mother's Day",
     koreanName: '어버이의 날 (마더스데이)',
@@ -185,12 +197,11 @@ function getNthDayOfWeekInMonth(year: number, monthIndex: number, dayOfWeek: num
 }
 
 /**
- * Returns all seasonal holidays that fall within the 3-month (90 days) lead-time window.
- * Rule 1.1: 유행 시즌 도래 3달 전(90일)부터 도래일까지 집중적으로 생성
+ * Returns all upcoming holidays within the next 365 days, sorted by days remaining.
  */
-export function getActiveUpcomingSeasons(referenceDate: Date = new Date()): ActiveSeasonInfo[] {
+export function getAllUpcomingSeasons(referenceDate: Date = new Date()): ActiveSeasonInfo[] {
   const currentYear = referenceDate.getFullYear();
-  const activeList: ActiveSeasonInfo[] = [];
+  const list: ActiveSeasonInfo[] = [];
 
   for (const holiday of SEASONAL_HOLIDAYS) {
     let targetDate = getExactHolidayDate(holiday, currentYear);
@@ -206,20 +217,25 @@ export function getActiveUpcomingSeasons(referenceDate: Date = new Date()): Acti
     const finalDiffMs = targetDate.getTime() - referenceDate.getTime();
     const finalDiffDays = Math.ceil(finalDiffMs / (1000 * 60 * 60 * 24));
 
-    // Lead-time window check: 0 to 90 days (3 months)
-    if (finalDiffDays >= 0 && finalDiffDays <= 90) {
-      activeList.push({
-        holiday,
-        targetDate,
-        daysRemaining: finalDiffDays,
-        isUrgent: finalDiffDays <= 30
-      });
-    }
+    list.push({
+      holiday,
+      targetDate,
+      daysRemaining: finalDiffDays,
+      isUrgent: finalDiffDays <= 30
+    });
   }
 
-  // Sort by closest holiday first
-  activeList.sort((a, b) => a.daysRemaining - b.daysRemaining);
-  return activeList;
+  list.sort((a, b) => a.daysRemaining - b.daysRemaining);
+  return list;
+}
+
+/**
+ * Returns all seasonal holidays that fall within the 3-month (90 days) lead-time window.
+ * Rule 1.1: 유행 시즌 도래 3달 전(90일)부터 도래일까지 집중적으로 생성
+ */
+export function getActiveUpcomingSeasons(referenceDate: Date = new Date()): ActiveSeasonInfo[] {
+  const all = getAllUpcomingSeasons(referenceDate);
+  return all.filter(s => s.daysRemaining >= 0 && s.daysRemaining <= 95);
 }
 
 /**

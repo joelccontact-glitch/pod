@@ -1,13 +1,14 @@
 /**
- * Seasonal Trend Sticker Presets (Christmas, Halloween, Thanksgiving)
- * Designed for Etsy 2-3 month lead-time surge sales.
+ * 365-Day Dynamic Seasonal Trend Sticker Presets & Lead-Time Radar Engine
+ * Covers all 11 major Etsy shopping seasons across the entire year!
  * Each seasonal theme includes:
- * 1. 20-Pack Themed Vessels/Globes/Jars (Sheet 1)
+ * 1. 20-Pack Themed Vessels/Globes/Jars/Cups (Sheet 1)
  * 2. 20-Pack Standalone Cute Deco Objects (Sheet 2)
  * Total 40 stickers per seasonal pack!
  */
 
 import { StickerPreset } from './sticker-prompts';
+import { getAllUpcomingSeasons, SeasonalHoliday } from './seasonal-trends';
 
 export const SEASONAL_RULES_NO_TEXT = `CRITICAL STICKER RULES:
 1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
@@ -15,6 +16,86 @@ export const SEASONAL_RULES_NO_TEXT = `CRITICAL STICKER RULES:
 3. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures anywhere in the image. Pure graphic illustration art only.
 4. Vector sticker aesthetic, vibrant kawaii illustration, high contrast, clean contours.`;
 
+// Helper function to build 20 vessel stickers + 1 master cover
+function createSeasonalVesselSeries(
+  seasonId: string,
+  seasonNameKo: string,
+  bundleTitle: string,
+  coverDesc: string,
+  coverPrompt: string,
+  items: Array<{ name: string; desc: string; detail: string }>
+): StickerPreset[] {
+  const coverPreset: StickerPreset = {
+    id: `${seasonId}-20-pack-cover`,
+    name: `🖼️ [마스터 썸네일] ${seasonNameKo} 20종 스티커 팩 대표 커버 표지`,
+    animal: `${bundleTitle} Cover`,
+    animalValue: '',
+    affinityObject: bundleTitle,
+    theme: `${bundleTitle} 20 Pack Cover`,
+    phrase: '',
+    description: coverDesc,
+    prompt: coverPrompt
+  };
+
+  const itemPresets: StickerPreset[] = items.map((item, idx) => {
+    const num = idx + 1;
+    return {
+      id: `${seasonId}-20-pack-${num}`,
+      name: `✨ [${seasonNameKo} ${num}/20] ${item.name}`,
+      animal: `${seasonNameKo} 20 Pack`,
+      animalValue: '',
+      affinityObject: item.name,
+      theme: `${seasonNameKo} 20 Pack`,
+      phrase: '',
+      description: item.desc,
+      prompt: `A cute die-cut sticker design featuring: ${item.detail}. Clear transparent glass container, vibrant festive aesthetic, thick white die-cut sticker outline. ${SEASONAL_RULES_NO_TEXT}`
+    };
+  });
+
+  return [coverPreset, ...itemPresets];
+}
+
+// Helper function to build 20 standalone deco objects + 1 master cover
+function createSeasonalStandaloneSeries(
+  seasonId: string,
+  seasonNameKo: string,
+  bundleTitle: string,
+  coverDesc: string,
+  coverPrompt: string,
+  items: Array<{ name: string; desc: string; detail: string }>
+): StickerPreset[] {
+  const coverPreset: StickerPreset = {
+    id: `${seasonId}-standalone-20-pack-cover`,
+    name: `🖼️ [마스터 썸네일] ${seasonNameKo} 단독 오브젝트 20종 스티커 팩 대표 커버 표지`,
+    animal: `${bundleTitle} Standalone Cover`,
+    animalValue: '',
+    affinityObject: `${bundleTitle} Clipart`,
+    theme: `${bundleTitle} Standalone 20 Pack Cover`,
+    phrase: '',
+    description: coverDesc,
+    prompt: coverPrompt
+  };
+
+  const itemPresets: StickerPreset[] = items.map((item, idx) => {
+    const num = idx + 1;
+    return {
+      id: `${seasonId}-standalone-20-pack-${num}`,
+      name: `✨ [${seasonNameKo} 단독 ${num}/20] ${item.name}`,
+      animal: `${seasonNameKo} Standalone 20 Pack`,
+      animalValue: '',
+      affinityObject: item.name,
+      theme: `${seasonNameKo} Standalone 20 Pack`,
+      phrase: '',
+      description: item.desc,
+      prompt: `A cute die-cut sticker design featuring: ${item.detail}. STRICT NO GLASS JARS OR CONTAINERS: Pure standalone die-cut aesthetic object only. Thick white die-cut sticker outline. ${SEASONAL_RULES_NO_TEXT}`
+    };
+  });
+
+  return [coverPreset, ...itemPresets];
+}
+
+// ==========================================
+// Existing Handcrafted Fall & Winter Series (Christmas, Halloween, Thanksgiving)
 // ==========================================
 // 1. 🎄 CHRISTMAS & WINTER WONDERLAND SERIES
 // ==========================================
@@ -330,11 +411,284 @@ export const THANKSGIVING_STANDALONE_20_SERIES: StickerPreset[] = [
   }) as unknown as StickerPreset[]
 ];
 
-/**
- * Seasonal metadata and radar recommendation configs
- */
+
+// ==========================================
+// 4. 💖 VALENTINE'S DAY & PINK LOVE SERIES (Feb 14)
+// ==========================================
+export const VALENTINES_20_SERIES: StickerPreset[] = createSeasonalVesselSeries(
+  'valentines',
+  '발렌타인',
+  'Valentine Pink Love Jars',
+  'Etsy 판매용 20종 발렌타인데이 핑크 하트 유리병 스티커 팩 마스터 대표 썸네일 커버',
+  'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE VALENTINE STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large cute die-cut sticker samples of glass heart jars, pink potion bottles, rose bell jars with baby kittens, chocolate fondue glasses, and strawberries arranged artistically across white background. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
+  [
+    { name: '하트 솜사탕 메이슨저 속 아기 고양이', desc: '분홍빛 솜사탕 구름과 아기 고양이가 든 하트 메이슨저', detail: 'spherical glass jar filled with pastel pink cotton candy clouds and an adorable fluffy baby kitten wearing a pink heart collar' },
+    { name: '핑크 러브 포션 마법 물약병', desc: '영롱한 핑크빛 액체와 장미 꽃잎이 든 빈티지 물약병', detail: 'vintage apothecary potion glass bottle filled with shimmering pastel pink potion, floating rose petals, and a cork stopper' },
+    { name: '붉은 장미 벨자 속 아기 토끼', desc: '활짝 핀 핑크 장미 덤불 아래 웅크린 아기 토끼', detail: 'clear glass bell jar dome enclosing a miniature blooming pink rose bush with a baby bunny snuggled under soft petals' },
+    { name: '딸기 보바 밀크티 유리잔 속 햄스터', desc: '딸기 보바와 핑크 빨대를 잡고 있는 햄스터', detail: 'tall glass tumbler filled with strawberry boba milk tea, tapioca pearls, and a tiny dwarf hamster holding a striped straw' },
+    { name: '큐피드 날개 벨자 속 아기 사슴', desc: '작은 황금 날개를 달고 구름 위에 앉은 아기 사슴', detail: 'curved glass cloche containing a baby fawn with miniature golden cupid wings resting on fluffy white cloud bedding' },
+    { name: '러브레터 실링 미니 보틀', desc: '빨간 리본으로 묶인 작은 사랑의 편지가 든 유리병', detail: 'corked apothecary bottle containing miniature rolled love notes tied with delicate red ribbon and gold wax seal' },
+    { name: '초콜릿 퐁듀 잔 속 아기 펭귄', desc: '달콤한 초콜릿 퐁듀 잔에 딸기를 찍는 아기 펭귄', detail: 'stemmed glass bowl filled with rich melted milk chocolate fondue and a baby penguin dipping a fresh strawberry' },
+    { name: '하트 크리스탈 스노우볼', desc: '하트 글리터와 별빛이 소용돌이치는 스노우볼', detail: 'faceted crystal snowglobe with swirling holographic pink heart confetti and glowing golden sparkles' },
+    { name: '핑크 튤립 화병 속 아기 오리', desc: '생화 튤립 꽃송이 모자를 쓴 아기 오리 화병', detail: 'clear bulbous glass vase with fresh blooming pink tulips and an adorable baby duckling wearing a tulip petal hat' },
+    { name: '벚꽃 테라리움 속 레서판다', desc: '연분홍 벚꽃 가지를 안고 있는 아기 레서판다', detail: 'wide glass bowl terrarium with miniature cherry blossom branches and baby red panda holding a pink heart macaron' },
+    { name: '하트 롤리팝 사탕 단지', desc: '알록달록 파스텔 하트 막대사탕이 가득 찬 사탕병', detail: 'vintage glass candy jar stacked with swirled pastel pink, red, and white heart lollipops' },
+    { name: '핑크 글리터 메이슨저 속 골든 강아지', desc: '폭신한 빨간 하트 쿠션을 안고 있는 강아지', detail: 'sparkling glass mason jar with a baby golden retriever puppy hugging a plush red velvet heart pillow' },
+    { name: '딸기 쇼트케이크 디저트 돔', desc: '생크림과 딸기가 얹힌 미니 조각 케이크 돔', detail: 'cake stand glass dome enclosing a cute miniature slice of strawberry shortcake with whipped cream and cherries' },
+    { name: '로맨틱 캔들 램프 저', desc: '장미꽃잎과 함께 따뜻한 촛불이 켜진 캔들 홀더', detail: 'decorative glass lantern jar with a soft glowing pink votive candle surrounded by dried rosebuds and lavender' },
+    { name: '하트 자물쇠와 열쇠 앤틱병', desc: '황금빛 빈티지 하트 자물쇠가 보관된 앤틱 유리병', detail: 'antique apothecary glass bottle enclosing a vintage ornate brass heart padlock and delicate matching key' },
+    { name: '핑크 오로라 스노우볼 속 북극곰', desc: '핑크빛 오로라 하늘 아래 아기 북극곰 스노우볼', detail: 'crystal snowglobe featuring a baby polar bear looking up at a shimmering pastel pink and violet aurora sky' },
+    { name: '마카롱 타워 디스플레이 돔', desc: '파스텔톤 마카롱이 층층이 쌓인 미니 디저트 돔', detail: 'glass display dome containing a miniature pastel rainbow macaron tower decorated with edible sugar pearls' },
+    { name: '장미꽃잎 온천 볼 속 카피바라', desc: '따뜻한 장미 꽃잎 물에 몸을 담근 카피바라', detail: 'shallow glass bowl terrarium with warm rosewater bath and a relaxed baby capybara with a pink rose on its head' },
+    { name: '큐피드 하프와 음표 보틀', desc: '황금 하프와 핑크빛 음표가 둥둥 떠 있는 유리병', detail: 'slender glass bottle with a miniature golden harp and floating pink glowing musical notes' },
+    { name: '꿀단지 속 아기 흑곰', desc: '하트 모양 벌집 꿀을 맛있게 안고 있는 아기 곰', detail: 'clear glass honey pot filled with golden sweet honey and a fluffy baby bear holding a heart-shaped honeycomb' }
+  ]
+);
+
+export const VALENTINES_STANDALONE_20_SERIES: StickerPreset[] = createSeasonalStandaloneSeries(
+  'valentines',
+  '발렌타인',
+  'Valentine Clipart Objects',
+  'Etsy 판매용 20종 발렌타인데이 단독 데코 오브젝트 스티커 팩 마스터 대표 썸네일 커버',
+  'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE VALENTINE CLIPART BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large standalone die-cut sticker samples of pink heart balloons, chocolate gift boxes, cupid bows, dipped strawberries, love letters, and rose bouquets arranged artistically. STRICT NO GLASS TANKS: Pure standalone die-cut festive objects only. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
+  [
+    { name: '핑크 하트 풍선 다발', desc: '반짝이는 유광 핑크와 레드 하트 풍선 묶음', detail: 'bundle of glossy metallic pastel pink and crimson heart-shaped balloons tied with curled silk ribbons' },
+    { name: '리본 묶인 하트 상자 초콜릿', desc: '고급스러운 초콜릿 트러플이 담긴 하트 선물 상자', detail: 'luxury heart-shaped red velvet chocolate gift box filled with assorted truffles and tied with a gold satin bow' },
+    { name: '큐피드의 황금 활과 하트 화살', desc: '핑크 보석 촉이 달린 큐피드의 황금빛 활과 화살', detail: 'ornate golden cupid bow and arrow with a glowing pink crystal heart tip' },
+    { name: '초콜릿 퐁듀 딸기 꼬치', desc: '다크 초콜릿에 퐁당 담근 싱싱한 딸기 꼬치', detail: 'fresh juicy red strawberry half-dipped in rich dark chocolate with white chocolate drizzle on a skewer' },
+    { name: '실링 왁스 빈티지 러브레터', desc: '빨간 하트 왁스로 봉인된 빈티지 연애 편지 봉투', detail: 'vintage cream envelope sealed with a red wax stamp imprinted with a romantic heart symbol' },
+    { name: '사랑스러운 핑크 실크 리본', desc: '부드럽게 늘어뜨려진 파스텔 핑크 실크 리본 보우', detail: 'large elegant pastel pink silk ribbon bow with flowing curly ribbon tails' },
+    { name: '황금 하트 자물쇠와 열쇠', desc: '사랑을 맹세하는 클래식 빈티지 하트 자물쇠', detail: 'antique golden heart-shaped padlock with an ornate vintage matching skeleton key' },
+    { name: '딸기 크림 컵케이크와 하트 픽', desc: '딸기 프로스팅과 하트 사탕이 꽂힌 컵케이크', detail: 'fluffy vanilla cupcake with a swirl of pink strawberry frosting and a red sugar heart topper' },
+    { name: '핑크 튤립 꽃다발', desc: '크래프트 종이에 감싸인 싱그러운 분홍 튤립 다발', detail: 'fresh bouquet of blooming soft pink and white tulips wrapped in brown kraft paper with twine bow' },
+    { name: '하트 라떼 아트 머그잔', desc: '핑크 머그잔 위 사랑스러운 하트 우유 거품 아트', detail: 'pastel pink ceramic mug viewed from top with delicate heart-shaped latte foam art' },
+    { name: '스위트하트 파스텔 캔디 세트', desc: '달콤한 사랑 문구가 새겨진 캔디 하트 삼총사', detail: 'trio of pastel pink, mint, and yellow candy conversation hearts stamped with sweet lettering' },
+    { name: '딸기 프렌치 마카롱 듀오', desc: '딸기 버터크림이 샌드된 바삭한 마카롱 두 개', detail: 'pair of French pastel pink macarons filled with luscious strawberry cream and edible gold flakes' },
+    { name: '붉은 장미 한 송이와 이슬방울', desc: '벨벳 질감의 붉은 장미 꽃송이와 영롱한 물방울', detail: 'single velvety red rose blossom with green leaves and delicate sparkling dew drops on petals' },
+    { name: '하트 와플과 휘핑크림', desc: '딸기와 블루베리가 곁들여진 하트 모양 와플', detail: 'crispy golden heart-shaped waffle topped with whipped cream, fresh raspberries, and maple drizzle' },
+    { name: '사랑의 묘약 핑크 향수병', desc: '하트 펜던트가 달린 클래식 앤틱 향수 분무기', detail: 'vintage ornate glass perfume atomizer bottle with pink squeeze bulb and heart pendant' },
+    { name: '날개 달린 하트 크리스탈', desc: '하얀 천사 날개가 달린 투명한 핑크 하트 보석', detail: 'faceted pastel pink gemstone heart with delicate feathered white angel wings' },
+    { name: '딸기 글레이즈 도넛', desc: '달콤한 딸기 아이싱과 무지개 스프링클 도넛', detail: 'soft baked donut dipped in shiny strawberry pink glaze with colorful rainbow sprinkles' },
+    { name: '하트 솜사탕 콘', desc: '사랑스러운 하트 모양으로 빚어진 솜사탕', detail: 'fluffy cloud of pastel pink and blue spun sugar cotton candy shaped like a heart on a striped paper cone' },
+    { name: '핑크 진주 조개 목걸이', desc: '입을 벌린 조개 속 영롱한 핑크 진주와 하트 참', detail: 'open pastel sea shell revealing a luminous pink pearl and tiny gold heart charm' },
+    { name: '큐피드 별빛 요술봉', desc: '핑크 하트 보석과 리본이 묶인 마법 요술봉', detail: 'magical golden wand topped with a glowing pink crystal heart and sparkling star ribbons' }
+  ]
+);
+
+// ==========================================
+// 5. ☘️ ST. PATRICK'S DAY & LUCKY CLOVER SERIES (Mar 17)
+// ==========================================
+export const STPATRICK_20_SERIES: StickerPreset[] = createSeasonalVesselSeries(
+  'stpatrick',
+  '성패트릭',
+  'St. Patrick Lucky Clover Jars',
+  'Etsy 판매용 20종 성 패트릭의 날 에메랄드 클로버 테라리움 스티커 팩 마스터 대표 썸네일 커버',
+  'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold emerald script typography reading "20+ CUTE ST. PATRICK STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large cute die-cut sticker samples of clover terrariums, leprechaun cauldrons of gold, corgis in moss domes, rainbow bottles, and emerald fairies arranged artistically. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
+  [
+    { name: '황금 가마솥 속 레프러콘 고양이', desc: '황금 동전이 넘쳐흐르는 솥 속 모자 쓴 고양이', detail: 'black cast iron cauldron overflowing with shiny golden coins and a cute ginger kitten wearing an emerald green leprechaun hat' },
+    { name: '네잎클로버 메이슨저 속 아기 오리', desc: '싱싱한 클로버와 초록 리본을 맨 아기 오리', detail: 'vintage mason jar packed with fresh four-leaf clovers and a baby duckling wearing an emerald green bow tie' },
+    { name: '에메랄드 이끼 벨자 속 웰시코기', desc: '초록빛 요정 숲 이끼 돔 속 귀여운 웰시코기', detail: 'clear glass bell jar dome containing lush Irish emerald moss and a happy corgi puppy holding a sparkling shamrock' },
+    { name: '무지개 끝 황금 보틀', desc: '병 속으로 무지개가 이어지는 마법의 황금 보틀', detail: 'corked apothecary glass bottle with a miniature vibrant rainbow arching down into a pile of golden nuggets' },
+    { name: '아일랜드 요정 연못 테라리움', desc: '돌다리와 작은 수련이 있는 숲속 요정 테라리움', detail: 'wide glass bowl terrarium with emerald moss, tiny stone bridge, gentle stream, and a lucky four-leaf clover patch' },
+    { name: '클로버 화환 속 아기 토끼 유리 돔', desc: '클로버 꽃목걸이를 두른 뽀송한 흰 토끼', detail: 'glass display dome enclosing a sweet white baby bunny wearing a braided clover and daisy flower wreath' },
+    { name: '초록 요정 날개 메이슨저', desc: '빛나는 초록 요정과 반딧불이가 든 마법 유리병', detail: 'mason jar containing a tiny glowing green woodland fairy with translucent wings surrounded by fireflies' },
+    { name: '황금 말굽과 클로버 유리 화병', desc: '행운의 황금 말굽과 네잎클로버가 꽂힌 화병', detail: 'clear cylindrical glass vase featuring an antique golden lucky horseshoe nestled in four-leaf clovers' },
+    { name: '에메랄드 크리스탈 스노우볼', desc: '반짝이는 에메랄드 보석 눈꽃이 날리는 스노우볼', detail: 'crystal snowglobe with a miniature Irish thatched cottage surrounded by swirling green and gold glitter' },
+    { name: '초록 모자 화분 속 다육이 테라리움', desc: '레프러콘 모자 모양 화분에 심긴 통통한 다육식물', detail: 'green top-hat-shaped glass planter terrarium filled with plump succulent rosettes and gold coins' },
+    { name: '아일랜드 하프 미니 벨자', desc: '황금 하프와 음악 요정이 든 섬세한 유리 돔', detail: 'small bell jar enclosing an ornate miniature golden Irish Celtic harp resting on soft clover velvet' },
+    { name: '기네스잔 거품 속 햄스터', desc: '포근한 크림 거품 잔 위에 올라앉은 꼬마 햄스터', detail: 'stout glass goblet with creamy frothy foam and a tiny hamster peeking out holding a four-leaf clover' },
+    { name: '초록 리본 묶인 보물상자 유리병', desc: '금화와 에메랄드가 가득 찬 미니 보물상자 병', detail: 'wide corked jar containing an open miniature treasure chest filled with gold coins and sparkling emeralds' },
+    { name: '레인보우 드롭스 메이슨저', desc: '무지개 빛깔 사탕과 클로버 젤리가 든 캔디저', detail: 'vintage glass jar packed with rainbow swirled rock candy drops and clover-shaped sugar jellies' },
+    { name: '초록 버섯 숲 테라리움 속 개구리', desc: '이끼 낀 바위 위에서 쉬고 있는 아기 청개구리', detail: 'spherical glass terrarium with miniature emerald toadstools, mossy bark, and a cute green tree frog on a leaf' },
+    { name: '행운의 동전 분수 스노우볼', desc: '금빛 분수가 솟아오르는 신비로운 스노우볼', detail: 'snowglobe featuring a miniature stone wishing well with golden coins tossing up in shimmering green water' },
+    { name: '성 패트릭 깃발 픽업트럭 돔', desc: '클로버 화분을 가득 실은 초록 빈티지 트럭 돔', detail: 'glass dome display with a miniature vintage emerald green pickup truck carrying pots of four-leaf clovers' },
+    { name: '클로버 차 티포트 속 아기 쥐', desc: '향긋한 허브티 주전자 뚜껑을 빼꼼 연 꼬마 쥐', detail: 'transparent glass teapot filled with green mint tea and an adorable baby mouse sitting on the lid' },
+    { name: '초록 맥주잔과 프레첼 테라리움', desc: '축제 분위기의 맥주잔과 미니어처 프레첼 테라리움', detail: 'glass beer stein terrarium featuring miniature salted pretzels and festive green holiday streamers' },
+    { name: '황금 무지개 성 스노우볼', desc: '구름 위 황금 성과 찬란한 무지개가 뜬 스노우볼', detail: 'crystal snowglobe with a glowing fairytale castle on clouds crowned by a brilliant rainbow arc' }
+  ]
+);
+
+export const STPATRICK_STANDALONE_20_SERIES: StickerPreset[] = createSeasonalStandaloneSeries(
+  'stpatrick',
+  '성패트릭',
+  'St. Patrick Clipart Objects',
+  'Etsy 판매용 20종 성 패트릭의 날 단독 데코 오브젝트 스티커 팩 마스터 대표 썸네일 커버',
+  'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold emerald script typography reading "20+ CUTE ST. PATRICK CLIPART BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large standalone die-cut sticker samples of four-leaf clovers, pots of gold coins, leprechaun hats with buckles, rainbow clouds, lucky horseshoes, and Celtic harps. STRICT NO GLASS TANKS: Pure standalone die-cut festive objects only. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
+  [
+    { name: '반짝이는 네잎클로버 가지', desc: '이슬 맺힌 싱그러운 에메랄드 네잎클로버', detail: 'standalone fresh emerald green four-leaf clover stem with delicate dew drops and golden sparkles' },
+    { name: '황금 가마솥과 금화 더미', desc: '금화가 가득 흘러넘치는 주물 가마솥', detail: 'standalone black iron leprechaun cauldron overflowing with sparkling minted golden coins' },
+    { name: '레프러콘 초록 신사 모자', desc: '황금 버클과 검은 띠가 둘러진 초록 모자', detail: 'standalone vibrant green Irish top hat with a black leather band and shining gold buckle' },
+    { name: '무지개와 몽실몽실 구름', desc: '양 끝에 보드라운 구름이 달린 알록달록 무지개', detail: 'standalone bright curved rainbow arch with fluffy white clouds on both ends' },
+    { name: '행운의 황금 말굽과 리본', desc: '네잎클로버와 초록 리본이 장식된 황금 말굽', detail: 'standalone lucky shiny golden horseshoe decorated with green clover sprigs and satin ribbon' },
+    { name: '아일랜드 황금 하프', desc: '우아한 켈틱 문양이 새겨진 황금빛 아일랜드 하프', detail: 'standalone ornate golden Celtic harp with delicate musical strings and shamrock engravings' },
+    { name: '클로버 무늬 초록 맥주잔', desc: '부드러운 하얀 거품이 오른 시원한 초록 맥주잔', detail: 'standalone glass beer mug filled with green holiday ale and thick creamy white foam' },
+    { name: '초록 나비넥타이', desc: '클로버 패턴이 들어간 단정한 초록 리본 타이', detail: 'standalone dapper emerald green bowtie patterned with tiny golden four-leaf clovers' },
+    { name: '행운의 황금 주화 코인', desc: '양면에 클로버가 양각된 반짝이는 금화', detail: 'standalone gleaming gold coin embossed with a raised four-leaf clover crest' },
+    { name: '성 패트릭 컵케이크', desc: '초록색 크림과 금가루가 뿌려진 디저트 컵케이크', detail: 'standalone cupcake with swirled mint green frosting, edible gold glitter, and a shamrock candy pick' },
+    { name: '초록 레프러콘 구두와 버클', desc: '앞코가 뾰족하게 올라간 클래식 가죽 구두', detail: 'standalone pair of vintage green leprechaun boots with large golden square buckles' },
+    { name: '무지개 롤리팝 사탕', desc: '빙글빙글 무지개 색상이 회오리치는 막대사탕', detail: 'standalone large swirled rainbow lollipop on a wooden stick with a green ribbon bow' },
+    { name: '초록 네잎클로버 도넛', desc: '초록 글레이즈와 클로버 스프링클이 뿌려진 도넛', detail: 'standalone baked donut coated in glossy matcha green glaze and gold sugar sprinkles' },
+    { name: '아일랜드 국기 하트 배지', desc: '초록-하양-주황 3색으로 채워진 하트 배지', detail: 'standalone cute heart-shaped flag badge with green, white, and orange tricolor stripes' },
+    { name: '초록 앤틱 파이프 담뱃대', desc: '클로버 연기가 피어오르는 할아버지 파이프', detail: 'standalone whimsical carved briar pipe puffing out a tiny smoke cloud shaped like a clover' },
+    { name: '클로버 화환 머리띠', desc: '싱그러운 풀잎과 꽃으로 엮은 봄맞이 머리띠', detail: 'standalone braided flower crown made of fresh shamrocks, white daisies, and green leaves' },
+    { name: '황금 요정 마법 지팡이', desc: '별 모양 클로버가 달린 반짝이는 마법봉', detail: 'standalone magical gold wand topped with a glowing emerald four-leaf clover and floating stars' },
+    { name: '에메랄드 보석 반지', desc: '하트 컷팅된 영롱한 초록빛 에메랄드 반지', detail: 'standalone sparkling heart-cut green emerald gemstone set in an ornate golden ring band' },
+    { name: '갓 구운 프레첼과 치즈 소스', desc: '노릇노릇 바삭하게 구워진 하트 모양 프레첼', detail: 'standalone warm salted pretzel twisted into a heart shape served with mustard dipping sauce' },
+    { name: '행운의 부적 깃발 배너', desc: 'Lucky 문구가 적힌 축제 삼각 깃발 가랜드', detail: 'standalone festive green pennant bunting banner strung with tiny golden bells' }
+  ]
+);
+
+// ==========================================
+// 6. 🌸 EASTER & SPRING BLOSSOM SERIES (Mid-April)
+// ==========================================
+export const EASTER_20_SERIES: StickerPreset[] = createSeasonalVesselSeries(
+  'easter',
+  '부활절',
+  'Easter Pastel Spring Terrariums',
+  'Etsy 판매용 20종 부활절 & 파스텔 스프링 테라리움 스티커 팩 마스터 대표 썸네일 커버',
+  'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pastel lavender script typography reading "20+ CUTE EASTER STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large cute die-cut sticker samples of pastel egg terrariums, glass greenhouses with bunnies, lavender jars with lambs, chick flowerpots, and spring tulips. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
+  [
+    { name: '달걀 모양 테라리움 속 아기 토끼', desc: '투명한 유리 달걀 속 봄 데이지와 아기 토끼', detail: 'egg-shaped clear glass terrarium with pastel moss, blooming daisies, and a fluffy baby bunny curled up asleep' },
+    { name: '스프링 온실 속 노란 병아리와 튤립', desc: '작은 온실 속에 활짝 핀 튤립과 아기 병아리', detail: 'miniature glass greenhouse with pink and yellow blooming tulips and a cute fluffy yellow baby chick' },
+    { name: '라벤더 메이슨저 속 아기 양', desc: '향긋한 보랏빛 라벤더 꽃밭 속 뽀송한 아기 양', detail: 'vintage mason jar filled with aromatic purple lavender sprigs and a cuddly baby lamb with a floral wreath' },
+    { name: '파스텔 에그 바구니 벨자 돔', desc: '무늬 달걀과 꽃이 담긴 봄 소풍 바구니 돔', detail: 'glass display dome enclosing a woven pastel wicker basket overflowing with painted Easter eggs and spring flowers' },
+    { name: '당근 텃밭 테라리움 속 다람쥐', desc: '주황빛 미니 당근을 쏙 뽑아든 아기 다람쥐', detail: 'spherical glass bowl terrarium with rich potting soil, tiny sprouting carrots, and a baby squirrel with a carrot' },
+    { name: '체리 블라썸 스노우볼 속 아기 사슴', desc: '봄바람에 벚꽃잎이 흩날리는 핑크 스노우볼', detail: 'crystal snowglobe with swirling pink cherry blossom petals around a sweet baby fawn resting on spring grass' },
+    { name: '나비 정원 유리 돔 속 아기 고양이', desc: '파스텔 나비를 호기심 가득 바라보는 고양이', detail: 'bell jar dome containing a mini wildflower meadow with fluttering pastel butterflies and an inquisitive kitten' },
+    { name: '수선화와 물조리개 테라리움', desc: '노란 수선화와 파스텔 민트색 물조리개', detail: 'wide glass jar terrarium with blooming yellow daffodils and a miniature vintage mint-green watering can' },
+    { name: '핑크 제라늄 화병 속 아기 햄스터', desc: '생화 화병 가장자리에 매달린 귀여운 햄스터', detail: 'clear glass vase filled with blooming pink geraniums and a round dwarf hamster peeking over the rim' },
+    { name: '버드나무 가지와 새둥지 유리병', desc: '파란 알 세 개가 든 따뜻한 새둥지 유리병', detail: 'tall corked glass bottle containing pussy willow branches and a cozy twig nest with three pastel blue eggs' },
+    { name: '프리지아 꽃다발 메이슨저', desc: '향기로운 노란 프리지아가 풍성한 유리병', detail: 'vintage mason jar filled with fresh vibrant yellow freesia blossoms tied with a yellow gingham ribbon' },
+    { name: '봄비와 무지개 테라리움', desc: '유리벽에 물방울이 맺히고 무지개가 뜬 테라리움', detail: 'glass bowl terrarium with soft mist droplets on glass, lush green moss, and a tiny rainbow arched over an egg' },
+    { name: '달콤한 젤리빈 캔디 머신 돔', desc: '파스텔톤 젤리빈이 가득 찬 미니 캔디 자', detail: 'retro glass candy jar filled with pastel pink, lemon, and lavender jellybeans topped with bunny ears' },
+    { name: '아기 오리와 연꽃잎 유리수반', desc: '얕은 물가 연꽃잎 위에서 발장구치는 아기 오리', detail: 'shallow glass bowl with clear water, floating pink lotus blossoms, and a cheerful fluffy duckling' },
+    { name: '초콜릿 에그 래핑 디스플레이 돔', desc: '반짝이는 금박으로 감싼 초콜릿 달걀 돔', detail: 'glass cloche dome showcasing an elegant chocolate Easter egg wrapped in pastel foil with silk ribbons' },
+    { name: '팬지꽃 화분 테라리움 속 고슴도치', desc: '알록달록 팬지 꽃밭 속 아기 고슴도치', detail: 'spherical glass terrarium filled with purple pansies, tiny mossy rocks, and a smiling baby hedgehog' },
+    { name: '딸기 모종 온실 속 흰둥이 강아지', desc: '새빨간 딸기 열매를 바라보는 흰 강아지', detail: 'glass garden dome with a miniature fruiting strawberry plant and a happy white puppy wearing a flower band' },
+    { name: '봄 소풍 티파티 찻잔 속 아기 쥐', desc: '꽃잎 찻잔 속에 딸기 케이크를 둔 작은 생쥐', detail: 'fine porcelain teacup under glass with strawberry herbal tea, mini cupcake, and a cute field mouse' },
+    { name: '민들레 홀씨 스노우볼', desc: '하얀 민들레 홀씨가 둥실둥실 떠오르는 스노우볼', detail: 'glass snowglobe with a blooming yellow dandelion and floating ethereal white seed parachutes in breeze' },
+    { name: '스프링 버니 빌리지 테라리움', desc: '버섯 집과 나무 그네가 있는 토끼 마을 테라리움', detail: 'wide cylindrical glass terrarium featuring miniature mushroom houses, wooden tire swing, and mossy paths' }
+  ]
+);
+
+export const EASTER_STANDALONE_20_SERIES: StickerPreset[] = createSeasonalStandaloneSeries(
+  'easter',
+  '부활절',
+  'Easter Clipart Objects',
+  'Etsy 판매용 20종 부활절 & 봄맞이 단독 데코 오브젝트 스티커 팩 마스터 대표 썸네일 커버',
+  'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pastel script typography reading "20+ CUTE EASTER CLIPART BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large standalone die-cut sticker samples of decorated pastel eggs, bunny ear headbands, fluffy yellow chicks, spring tulips, carrot bunches, and flower baskets. STRICT NO GLASS TANKS: Pure standalone die-cut festive objects only. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
+  [
+    { name: '파스텔 스트라이프 부활절 달걀', desc: '분홍, 하늘색 줄무늬와 금박이 칠해진 달걀', detail: 'standalone decorated Easter egg with pastel pink, mint, and lilac stripes with delicate gold leaf stars' },
+    { name: '토끼 귀 벨벳 머리띠', desc: '분홍빛 귓속이 사랑스러운 뽀송한 토끼 귀 머리띠', detail: 'standalone cute white fluffy plush bunny ear headband with soft pink inner ears and a daisy accent' },
+    { name: '노란 아기 병아리와 꽃모자', desc: '데이지 꽃을 머리에 얹은 포근한 털병아리', detail: 'standalone fluffy yellow baby chick wearing a tiny white daisy flower crown on its head' },
+    { name: '스프링 핑크 튤립 꽃송이', desc: '이슬 맺힌 우아한 연분홍 튤립 한 송이', detail: 'standalone single elegant blooming pastel pink tulip blossom with slender green leaves' },
+    { name: '리본 묶인 주황 당근 다발', desc: '초록 잎이 싱싱한 달콤한 미니 당근 묶음', detail: 'standalone bunch of 3 sweet bright orange carrots with feathery green tops tied with a jute twine bow' },
+    { name: '꽃과 달걀이 담긴 피크닉 바구니', desc: '파스텔 달걀과 들꽃이 풍성한 라탄 바구니', detail: 'standalone woven wicker basket overflowing with colorful painted Easter eggs and wild spring flowers' },
+    { name: '초콜릿 토끼 피규어와 리본', desc: '빨간 리본을 맨 밀크 초콜릿 이스터 버니', detail: 'standalone hollow milk chocolate Easter bunny figurine wearing a red silk ribbon with gold bell' },
+    { name: '스프링 버터플라이(나비) 페어', desc: '영롱한 파스텔 날개를 펄럭이는 나비 한 쌍', detail: 'standalone pair of fluttering pastel watercolor butterflies in shades of soft peach and sky blue' },
+    { name: '부활절 당근 컵케이크', desc: '크림치즈 프로스팅과 미니 설탕 당근 컵케이크', detail: 'standalone spiced carrot cupcake topped with cream cheese frosting swirl and an edible orange sugar carrot' },
+    { name: '노란 수선화 꽃송이', desc: '봄을 알리는 화사하고 밝은 노란 수선화', detail: 'standalone cheerful bright yellow daffodil bloom with delicate ruffled trumpet center and green stem' },
+    { name: '젤리빈 캔디 더미', desc: '알록달록 파스텔 빛깔의 콩 모양 젤리빈들', detail: 'standalone cheerful scattered pile of glossy pastel rainbow jellybean candies' },
+    { name: '토끼 엉덩이 폼폼 꼬리', desc: '뒤돌아 앉은 토끼의 복슬복슬 하얀 꼬리와 발바닥', detail: 'standalone cute fluffy white bunny bum with pink paw pads and round pom-pom cotton tail' },
+    { name: '파스텔 민트색 물조리개와 꽃', desc: '꽃가지가 꽂힌 빈티지 미니 철제 물조리개', detail: 'standalone vintage mint green metal watering can stuffed with fresh pink cherry blossoms' },
+    { name: '봄맞이 꽃 리스 화환', desc: '데이지와 라벤더, 작은 달걀이 엮인 화관', detail: 'standalone circular spring wreath woven with white daisies, lavender sprigs, and miniature pastel eggs' },
+    { name: '스프링 프레시 허니 팟', desc: '꿀봉에서 꿀이 뚝뚝 떨어지는 귀여운 꿀단지', detail: 'standalone ceramic honey pot with wooden dipper drizzling golden honey and a flying bumblebee' },
+    { name: '부활절 설탕 쿠키 세트', desc: '토끼와 당근 모양으로 아이싱된 버터 쿠키', detail: 'standalone duo of sugar cookies iced like a cute bunny face and an orange carrot with green top' },
+    { name: '데이지 꽃송이 트리오', desc: '하얀 꽃잎과 노란 꽃술이 싱그러운 데이지 세 송이', detail: 'standalone cluster of 3 cheerful white daisy blossoms with sunny yellow centers' },
+    { name: '파스텔 버니 도넛', desc: '토끼 귀 초콜릿이 꽂힌 딸기 도넛', detail: 'standalone baked ring donut with strawberry glaze, rainbow pearls, and white chocolate bunny ears' },
+    { name: '달걀 껍질 속 아기 새', desc: '알을 깨고 고개를 쏙 내민 솜털 보송한 아기 새', detail: 'standalone hatched pastel blue eggshell with an adorable baby songbird peeking out curiously' },
+    { name: '봄바람 풍차 핀휠', desc: '파스텔 무지개 빛깔의 바람개비', detail: 'standalone colorful pastel pinwheel windmill toy on a striped stick with a yellow ribbon' }
+  ]
+);
+
+// ==========================================
+// 7. 💐 MOTHER'S DAY & FLORAL TEACUPS (May)
+// ==========================================
+export const MOTHERSDAY_20_SERIES: StickerPreset[] = createSeasonalVesselSeries(
+  'mothersday',
+  '마더스데이',
+  'Mother Floral Teacup Jars',
+  'Etsy 판매용 20종 마더스데이 플로럴 티컵 & 글라스 스티커 팩 마스터 대표 썸네일 커버',
+  'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold rose gold script typography reading "20+ CUTE MOTHER DAY STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large cute die-cut sticker samples of vintage floral teacups with mama and baby bears, carnation glass jars, peony bell jars, and teapots. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
+  [
+    { name: '장미 티컵 속 아기 곰과 엄마 곰', desc: '앤틱 포슬린 티컵 속 서로 꼭 껴안은 곰 모자', detail: 'vintage porcelain teacup with pink rose gilding, containing warm floral tea and mama bear hugging her baby cub' },
+    { name: '분홍 카네이션 메이슨저 속 아기 고양이', desc: '카네이션 꽃다발 사이로 미소 짓는 아기 고양이', detail: 'clear mason jar brimming with soft pink and cream carnations and an adorable kitten with a satin bow' },
+    { name: '작약 꽃봉오리 벨자 속 아기 사슴', desc: '활짝 핀 분홍 작약 잎사귀 속 곤히 잠든 아기 사슴', detail: 'glass bell jar cloche containing large blooming pink peonies and a sweet spotted baby fawn asleep on moss' },
+    { name: '허브 티포트 속 호기심 많은 햄스터', desc: '투명 유리 티포트 주구로 고개를 내민 햄스터', detail: 'clear glass teapot filled with pale rose tea, mint leaves, and a tiny hamster peeking curiously from the lid' },
+    { name: '라벤더 보석함 유리병 속 파랑새', desc: '보랏빛 라벤더와 반짝이는 보석이 든 앤틱병', detail: 'ornate faceted glass bottle filled with dried French lavender, crystals, and a miniature singing bluebird' },
+    { name: '딸기 쇼트케이크 돔 속 아기 토끼', desc: '달콤한 케이크 옆에서 포크를 든 아기 토끼', detail: 'pedestal cake stand glass dome with a slice of fresh berry shortcake and a fluffy baby bunny' },
+    { name: '카모마일 꿀물 잔 속 아기 오리', desc: '달콤한 꿀과 카모마일 꽃잎이 뜬 유리잔 속 오리', detail: 'stemmed glass goblet with golden chamomile tea, floating daisy-like blooms, and a cheerful duckling' },
+    { name: '튤립 부케 화병 속 강아지', desc: '파스텔 튤립 화병에 기댄 사랑스러운 푸들 강아지', detail: 'bulbous fluted glass vase filled with pastel peach tulips and an adorable fluffy toy poodle puppy' },
+    { name: '엄마 펭귄과 아기 펭귄 스노우볼', desc: '따뜻한 눈꽃 아래 서로의 날개를 맞댄 펭귄 가족', detail: 'crystal snowglobe with gentle floating golden sparkles enclosing a mama penguin shielding her fluffy baby' },
+    { name: '빈티지 향수병 테라리움 속 나비', desc: '장미 정원과 레이스 리본이 감긴 향수병 테라리움', detail: 'antique glass perfume atomizer bottle transformed into a miniature terrarium with pink climbing roses' },
+    { name: '유칼립투스 미니 저 속 아기 코알라', desc: '상쾌한 유칼립투스 가지를 꼭 쥔 아기 코알라', detail: 'clear cylinder glass jar filled with silver dollar eucalyptus stems and an adorable baby koala' },
+    { name: '수국 플라워 볼 테라리움', desc: '파스텔 블루와 핑크 수국 꽃잎이 가득 찬 유리구', detail: 'spherical glass globe terrarium packed with fluffy pastel hydrangea petals and a tiny hummingbird' },
+    { name: '하트 찻잔 속 카푸치노 고양이', desc: '하트 모양 찻잔 위 폭신한 거품을 얹은 고양이', detail: 'heart-shaped ceramic and glass cup with cinnamon latte foam and a sleeping calico kitten' },
+    { name: '장미꽃 잼 단지 속 다람쥐', desc: '향긋한 장미 잼 단지 뚜껑을 열고 기뻐하는 다람쥐', detail: 'vintage canning glass jar filled with glistening pink rose petal jam and an excited baby squirrel' },
+    { name: '마더스데이 선물 상자 벨자', desc: '리본 선물과 보석 브로치가 보관된 유리 돔', detail: 'bell jar display enclosing miniature pastel gift boxes tied with ribbons and a sparkling pearl brooch' },
+    { name: '들꽃 메이슨저 속 아기 고슴도치', desc: '노란 버터컵과 들꽃 숲속에 누운 아기 고슴도치', detail: 'rustic mason jar with a wild meadow bouquet of buttercups and daisies with a smiling baby hedgehog' },
+    { name: '모녀 백조 호수 스노우볼', desc: '우아한 엄마 백조와 솜털 아기 백조 스노우볼', detail: 'snowglobe featuring a serene mirror lake with an elegant mama swan swimming alongside her cygnet' },
+    { name: '핑크 마카롱 돔 속 레서판다', desc: '딸기 마카롱을 두 손으로 꼬옥 쥔 아기 레서판다', detail: 'glass dome on wooden base with a miniature pink macaron stack and an adorable baby red panda' },
+    { name: '엄마 품속 아기 수달 유리수반', desc: '배영하는 엄마 수달 배 위에 폭 안긴 아기 수달', detail: 'shallow crystal water bowl with calm ripples and a mama otter floating on back holding her pup' },
+    { name: '감사의 편지 롤 보틀', desc: '사랑의 손편지와 장미꽃 한 송이가 담긴 유리병', detail: 'slender glass bottle containing a rolled thank-you parchment tied with satin cord and a single pink rose' }
+  ]
+);
+
+export const MOTHERSDAY_STANDALONE_20_SERIES: StickerPreset[] = createSeasonalStandaloneSeries(
+  'mothersday',
+  '마더스데이',
+  'Mother Clipart Objects',
+  'Etsy 판매용 20종 마더스데이 단독 데코 오브젝트 스티커 팩 마스터 대표 썸네일 커버',
+  'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold script typography reading "20+ CUTE MOTHER DAY CLIPART BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large standalone die-cut sticker samples of carnation bouquets, peony blossoms, floral teacups with saucers, gift boxes with ribbons, and love pendants. STRICT NO GLASS TANKS: Pure standalone die-cut festive objects only. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
+  [
+    { name: '분홍 카네이션 꽃다발', desc: '크래프트 종이에 감싸인 부드러운 핑크 카네이션 다발', detail: 'standalone bouquet of soft pink ruffled carnation flowers wrapped in rustic kraft paper with silk ribbon' },
+    { name: '활짝 핀 핑크 작약 꽃송이', desc: '풍성하고 우아한 겹겹의 연분홍 작약 꽃송이', detail: 'standalone single large blooming blush pink peony blossom with delicate velvety layered petals' },
+    { name: '앤틱 로즈 포슬린 찻잔과 받침', desc: '장미 문양과 금장 테두리가 우아한 찻잔 세트', detail: 'standalone vintage porcelain teacup and saucer set with floral rose motifs and gilded gold rim' },
+    { name: '리본 묶인 마더스데이 선물 상자', desc: '연보라색 포장지와 분홍 리본으로 장식된 상자', detail: 'standalone luxury gift box wrapped in pastel lavender paper with a large lush pink satin bow' },
+    { name: '엄마 사랑 하트 로켓 펜던트', desc: '섬세한 장미 조각이 들어간 황금 하트 목걸이', detail: 'standalone vintage engraved golden heart locket necklace charm suspended from a delicate chain' },
+    { name: '핑크 장미 부케 꽃다발', desc: '이슬 맺힌 탐스러운 핑크빛 장미 꽃다발', detail: 'standalone romantic bouquet of fresh pink roses tied with trailing cream lace ribbon' },
+    { name: '티백이 담긴 티포트', desc: '향긋한 허브티가 우러나는 파스텔 세라믹 주전자', detail: 'standalone pastel pink ceramic teapot with floral illustrations and a hanging tea tag' },
+    { name: '진주 장미 브로치', desc: '은은한 천연 진주와 핑크 에나멜 장미 핀', detail: 'standalone elegant vintage pearl and pink enamel rose brooch pin with gold leaf accents' },
+    { name: '하트 모양 라떼 아트 컵', desc: '사랑을 담은 카푸치노 하트 라떼 아트', detail: 'standalone ceramic coffee cup viewed from top with creamy heart-shaped milk foam latte art' },
+    { name: '딸기 생크림 조각 케이크', desc: '신선한 딸기와 부드러운 생크림이 겹쳐진 케이크', detail: 'standalone delicious slice of layered strawberry vanilla shortcake with a glazed berry on top' },
+    { name: '플로럴 에이프런(앞치마)', desc: '화사한 꽃무늬가 프린팅된 사랑스러운 앞치마', detail: 'standalone cute cottagecore kitchen apron patterned with vintage botanical floral blooms' },
+    { name: '스위트 피(Sweet Pea) 꽃가지', desc: '나비처럼 하늘거리는 파스텔 스위트피 꽃송이', detail: 'standalone delicate sprig of blooming pastel lilac and pink sweet pea blossoms' },
+    { name: '장미 향수 스프레이 보틀', desc: '핑크빛 유리와 로즈골드 캡이 달린 고급 향수병', detail: 'standalone faceted glass perfume bottle with rose gold cap and pink ribbon accent' },
+    { name: '하트 모양 초콜릿 박스', desc: '달콤한 딸기 트러플이 든 하트 초콜릿 상자', detail: 'standalone open heart-shaped box displaying a neat arrangement of pink strawberry truffles' },
+    { name: '엄마 최고(Best Mom) 트로피 배지', desc: '월계수 잎과 하트가 새겨진 귀여운 리본 배지', detail: 'standalone cute pastel ribbon rosette award badge embossed with a shining golden heart' },
+    { name: '프렌치 마카롱 탑 3개', desc: '바닐라, 로즈, 피스타치오 마카롱 스택', detail: 'standalone neat vertical stack of 3 French macarons in shades of pastel pink, cream, and mint' },
+    { name: '레이스 손수건과 꽃자수', desc: '가장자리에 장미꽃 자수가 놓인 하얀 면 손수건', detail: 'standalone folded white linen handkerchief with delicate lace scalloped edges and embroidered rose' },
+    { name: '플로럴 슬리퍼 룸슈즈', desc: '포근하고 따뜻한 분홍빛 털실 슬리퍼', detail: 'standalone pair of cozy plush pink bedroom slippers with soft fleece lining and bow accents' },
+    { name: '향기로운 라벤더 캔들', desc: '말린 꽃잎이 얹힌 소이 왁스 글라스 캔들', detail: 'standalone warm glowing scented soy candle in a clear glass tumbler with dried botanical petals' },
+    { name: '감사 축하 카드와 봉투', desc: '꽃봉오리 스티커가 붙은 편지 봉투와 카드', detail: 'standalone elegant pastel greeting card slipping out of an envelope with floral wax seal' }
+  ]
+);
+
+// Helper function to pick pack presets
+export function getSeasonalPackPresets(seasonId: string): { vesselSeries: StickerPreset[]; standaloneSeries: StickerPreset[] } {
+  switch (seasonId) {
+    case 'christmas':
+      return { vesselSeries: CHRISTMAS_20_SERIES, standaloneSeries: CHRISTMAS_STANDALONE_20_SERIES };
+    case 'halloween':
+      return { vesselSeries: HALLOWEEN_20_SERIES, standaloneSeries: HALLOWEEN_STANDALONE_20_SERIES };
+    case 'thanksgiving':
+      return { vesselSeries: THANKSGIVING_20_SERIES, standaloneSeries: THANKSGIVING_STANDALONE_20_SERIES };
+    case 'valentines':
+      return { vesselSeries: VALENTINES_20_SERIES, standaloneSeries: VALENTINES_STANDALONE_20_SERIES };
+    case 'stpatrick':
+      return { vesselSeries: STPATRICK_20_SERIES, standaloneSeries: STPATRICK_STANDALONE_20_SERIES };
+    case 'easter':
+      return { vesselSeries: EASTER_20_SERIES, standaloneSeries: EASTER_STANDALONE_20_SERIES };
+    case 'mothersday':
+      return { vesselSeries: MOTHERSDAY_20_SERIES, standaloneSeries: MOTHERSDAY_STANDALONE_20_SERIES };
+    default:
+      // Fallback to Christmas or Thanksgiving
+      return { vesselSeries: CHRISTMAS_20_SERIES, standaloneSeries: CHRISTMAS_STANDALONE_20_SERIES };
+  }
+}
+
 export interface SeasonalRecommendation {
-  seasonId: 'christmas' | 'halloween' | 'thanksgiving';
+  seasonId: string;
   title: string;
   subtitle: string;
   icon: string;
@@ -347,44 +701,100 @@ export interface SeasonalRecommendation {
   standaloneSeries: StickerPreset[];
 }
 
-export const SEASONAL_RECOMMENDATIONS: SeasonalRecommendation[] = [
-  {
-    seasonId: 'christmas',
-    title: '🎄 크리스마스 & 윈터 스노우볼 40종 팩',
-    subtitle: '연중 최대 성수기! 지금 등록하면 11월~12월 검색 1위 독점',
-    icon: '🎄',
-    badge: 'D-95 선점 골든타임',
-    badgeColor: 'bg-rose-600 text-white',
-    timingText: 'Etsy 검색 알고리즘 상위 노출에 4~6주 소요되므로, 9월 말~10월 초에 올려야 12월 쇼핑 대목에 폭발적 매출이 발생합니다.',
-    keySearchTerms: ['Christmas Snowglobe', 'Gingerbread House', 'Winter Cozy Clipart', 'Hot Cocoa Mug', 'Christmas Tree Stickers'],
-    bestSellerReason: '연말 다이어리 꾸미기, 크리스마스 선물 포장 라벨, 크리컷 인쇄용으로 전 세계에서 가장 많이 팔리는 1위 테마',
-    vesselSeries: CHRISTMAS_20_SERIES,
-    standaloneSeries: CHRISTMAS_STANDALONE_20_SERIES,
-  },
-  {
-    seasonId: 'thanksgiving',
-    title: '🦃 추수감사절 & 코지 어텀 하베스트 40종 팩',
-    subtitle: '가을 시즌 최대 명절! 펌킨 스파이스 & 포근한 가을 감성',
-    icon: '🦃',
-    badge: 'D-65 본격 상승기',
-    badgeColor: 'bg-amber-600 text-white',
-    timingText: '미국 11월 추수감사절은 가족 모임과 가을 감사 다이어리 수요가 집중되는 시기로, 지금이 가장 완벽한 리스팅 타이밍입니다.',
-    keySearchTerms: ['Pumpkin Spice Latte', 'Fall Harvest Stickers', 'Pecan Pie Clipart', 'Cozy Sweater Weather', 'Maple Leaf Acorns'],
-    bestSellerReason: '미국인들이 가장 사랑하는 "Cozy Autumn" 라이프스타일과 결합되어 가을 내내 높은 전환율을 기록하는 테마',
-    vesselSeries: THANKSGIVING_20_SERIES,
-    standaloneSeries: THANKSGIVING_STANDALONE_20_SERIES,
-  },
-  {
-    seasonId: 'halloween',
-    title: '🎃 스푸키 큐트 고스트 & 할로윈 40종 팩',
-    subtitle: '파스텔톤 귀여운 유령 & 호박 테라리움! 지금 최종 막차 탑승',
-    icon: '🎃',
-    badge: 'D-40 최종 막차',
-    badgeColor: 'bg-purple-600 text-white',
-    timingText: '10월 할로윈 검색량이 이미 수직 상승 중입니다. 등록 즉시 가을 매출을 빠르게 흡수할 수 있는 긴급 선점 테마입니다.',
-    keySearchTerms: ['Spooky Cute Ghost', 'Iced PSL Ghost', 'Pastel Halloween Clipart', 'Jack-o-lantern Jar', 'Witchy Stickers'],
-    bestSellerReason: '미국 20~30대 여성 다꾸러들이 가장 열광하는 "아이스 라떼 든 아기 유령"과 파스텔톤 호박의 압도적 검색량',
-    vesselSeries: HALLOWEEN_20_SERIES,
-    standaloneSeries: HALLOWEEN_STANDALONE_20_SERIES,
+/**
+ * 365-Day Dynamic Seasonal Sticker Radar Engine
+ * Calculates exact D-Days for upcoming shopping holidays from referenceDate.
+ * Selects the top 3 best lead-time seasons (D-20 to D-110).
+ */
+export function getDynamicSeasonalStickerRecommendations(referenceDate: Date = new Date()): SeasonalRecommendation[] {
+  const allUpcoming = getAllUpcomingSeasons(referenceDate);
+
+  // Filter for seasons within the optimal Etsy pre-season window (15 to 115 days)
+  // If fewer than 3, take the earliest upcoming ones
+  let eligible = allUpcoming.filter(s => s.daysRemaining >= 15 && s.daysRemaining <= 115);
+  if (eligible.length < 3) {
+    eligible = allUpcoming.filter(s => s.daysRemaining >= 10).slice(0, 3);
+  } else {
+    eligible = eligible.slice(0, 3);
   }
-];
+
+  const recommendations: SeasonalRecommendation[] = eligible.map((seasonInfo) => {
+    const id = seasonInfo.holiday.id;
+    const days = seasonInfo.daysRemaining;
+    const currentMonth = referenceDate.getMonth() + 1;
+    const targetMonth = seasonInfo.holiday.month;
+
+    let badge = `D-${days} 선점 골든타임`;
+    let badgeColor = 'bg-rose-600 text-white';
+
+    if (days <= 35) {
+      badge = `D-${days} 최종 긴급 선점!`;
+      badgeColor = 'bg-purple-600 text-white animate-pulse';
+    } else if (days <= 70) {
+      badge = `D-${days} 본격 검색 상승기`;
+      badgeColor = 'bg-amber-600 text-white';
+    } else {
+      badge = `D-${days} 2~3개월 선점 타임`;
+      badgeColor = 'bg-rose-600 text-white';
+    }
+
+    const { vesselSeries, standaloneSeries } = getSeasonalPackPresets(id);
+
+    // Contextual timing text
+    const timingText = `Etsy 알고리즘 인덱싱(4~6주)에 맞춰 ${currentMonth}월인 지금 등록해야 ${targetMonth}월 ${seasonInfo.holiday.koreanName} 시즌에 검색 1위를 선점합니다.`;
+
+    // Titles & reasons tailored per holiday
+    let title = `${seasonInfo.holiday.icon} ${seasonInfo.holiday.koreanName} 40종 스티커 팩`;
+    let subtitle = `${seasonInfo.holiday.name} 시즌 틈새 40종 팩 (완성 20종 + 단일 20종 + A4 2장 시트)`;
+    let bestSellerReason = `${seasonInfo.holiday.koreanName} 시즌에 다이어리, 선물 라벨, 크리컷 인쇄용으로 검색량이 폭발하는 테마`;
+
+    if (id === 'christmas') {
+      title = '🎄 크리스마스 & 윈터 스노우볼 40종 팩';
+      subtitle = '연중 최대 성수기! 지금 등록하면 11월~12월 검색 1위 독점';
+      bestSellerReason = '연말 다이어리 꾸미기, 크리스마스 선물 포장 라벨, 크리컷 인쇄용으로 전 세계에서 가장 많이 팔리는 1위 테마';
+    } else if (id === 'thanksgiving') {
+      title = '🦃 추수감사절 & 코지 어텀 하베스트 40종 팩';
+      subtitle = '가을 시즌 최대 명절! 펌킨 스파이스 & 포근한 가을 감성';
+      bestSellerReason = '미국인들이 가장 사랑하는 "Cozy Autumn" 라이프스타일과 결합되어 가을 내내 높은 전환율을 기록하는 테마';
+    } else if (id === 'halloween') {
+      title = '🎃 스푸키 큐트 고스트 & 할로윈 40종 팩';
+      subtitle = '파스텔톤 귀여운 유령 & 호박 테라리움! 지금 최종 막차 탑승';
+      bestSellerReason = '미국 20~30대 여성 다꾸러들이 가장 열광하는 "아이스 라떼 든 아기 유령"과 파스텔톤 호박의 압도적 검색량';
+    } else if (id === 'valentines') {
+      title = '💖 발렌타인데이 핑크 러브 40종 팩';
+      subtitle = '상반기 최대 선물 시즌! 핑크 하트 유리병 & 귀여운 동물 커플';
+      bestSellerReason = '연인과 친구를 위한 다이어리 스티커, 선물 포장 스티커로 1~2월 폭발적 매출을 기록하는 테마';
+    } else if (id === 'stpatrick') {
+      title = '☘️ 성 패트릭의 날 럭키 클로버 40종 팩';
+      subtitle = '행운의 네잎클로버 & 황금 단지! 3월 미국 전역 축제 테마';
+      bestSellerReason = '초록색 굿즈를 입지 않으면 안 되는 아일랜드 축제 문화로 인해 교실/다이어리 스티커 수요 급증';
+    } else if (id === 'easter') {
+      title = '🌸 부활절 & 파스텔 스프링 가든 40종 팩';
+      subtitle = '봄 시즌 최대 쇼핑 대목! 파스텔 달걀 테라리움 & 아기 토끼';
+      bestSellerReason = '부활절 달걀 찾기 행사, 봄맞이 다이어리 꾸미기용으로 파스텔 일러스트의 전 세계적 베스트셀러';
+    } else if (id === 'mothersday') {
+      title = '💐 마더스데이 플로럴 티컵 40종 팩';
+      subtitle = '어버이날 감사 선물! 빈티지 장미 찻잔 & 카네이션 꽃다발';
+      bestSellerReason = '엄마를 향한 감사 카드, 선물 패키징 라벨로 4~5월 Etsy 검색어 상위권을 휩쓰는 감성 테마';
+    }
+
+    return {
+      seasonId: id,
+      title,
+      subtitle,
+      icon: seasonInfo.holiday.icon,
+      badge,
+      badgeColor,
+      timingText,
+      keySearchTerms: seasonInfo.holiday.trendingMotifs.slice(0, 5),
+      bestSellerReason,
+      vesselSeries,
+      standaloneSeries
+    };
+  });
+
+  return recommendations;
+}
+
+// Backward-compatible static export
+export const SEASONAL_RECOMMENDATIONS: SeasonalRecommendation[] = getDynamicSeasonalStickerRecommendations();

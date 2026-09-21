@@ -22,6 +22,9 @@ import {
   THANKSGIVING_20_SERIES,
   THANKSGIVING_STANDALONE_20_SERIES,
   SEASONAL_RECOMMENDATIONS,
+  getDynamicSeasonalStickerRecommendations,
+  getSeasonalPackPresets,
+  SeasonalRecommendation,
   StickerPreset,
   buildStickerPrompt,
 } from '@/lib/sticker-prompts';
@@ -37,19 +40,23 @@ const isCoverDesign = (d: any) => {
   return id.includes('cover') || presetId.includes('cover') || title.includes('커버 표지') || title.includes('마스터 표지') || title.includes('master cover');
 };
 
-const getDesignCategoryKey = (d: any): 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'christmas' | 'halloween' | 'thanksgiving' | 'other' => {
+const getDesignCategoryKey = (d: any): string => {
   if (!d) return 'other';
   const sub = (d.sticker_sub || '').toLowerCase();
-  if (['terrarium', 'vivarium', 'saltaquarium', 'freshaquarium', 'christmas', 'halloween', 'thanksgiving'].includes(sub)) {
-    return sub as any;
-  }
-  if (sub === 'salt-aquarium') return 'saltaquarium';
-  if (sub === 'fresh-aquarium') return 'freshaquarium';
+  if (sub && sub !== 'other') return sub;
 
   const presetId = (d.stickerPresetId || d.id || '').toLowerCase();
   if (presetId.includes('christmas')) return 'christmas';
   if (presetId.includes('halloween')) return 'halloween';
   if (presetId.includes('thanksgiving')) return 'thanksgiving';
+  if (presetId.includes('valentines') || presetId.includes('valentine')) return 'valentines';
+  if (presetId.includes('stpatrick')) return 'stpatrick';
+  if (presetId.includes('easter')) return 'easter';
+  if (presetId.includes('mothersday')) return 'mothersday';
+  if (presetId.includes('fathersday')) return 'fathersday';
+  if (presetId.includes('july4th')) return 'july4th';
+  if (presetId.includes('backtoschool')) return 'backtoschool';
+  if (presetId.includes('newyear')) return 'newyear';
   if (presetId.includes('vivarium')) return 'vivarium';
   if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium')) return 'saltaquarium';
   if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium')) return 'freshaquarium';
@@ -59,6 +66,10 @@ const getDesignCategoryKey = (d: any): 'terrarium' | 'vivarium' | 'saltaquarium'
   if (title.includes('크리스마스') || title.includes('스노우볼') || title.includes('christmas')) return 'christmas';
   if (title.includes('할로윈') || title.includes('halloween') || title.includes('스푸키')) return 'halloween';
   if (title.includes('추수감사절') || title.includes('thanksgiving') || title.includes('가을 수확') || title.includes('하베스트')) return 'thanksgiving';
+  if (title.includes('발렌타인') || title.includes('valentine')) return 'valentines';
+  if (title.includes('성 패트릭') || title.includes('st. patrick') || title.includes('stpatrick')) return 'stpatrick';
+  if (title.includes('부활절') || title.includes('easter')) return 'easter';
+  if (title.includes('마더스데이') || title.includes('mothersday') || title.includes('어버이')) return 'mothersday';
   if (title.includes('비바리움') || title.includes('vivarium')) return 'vivarium';
   if (title.includes('해수어항') || title.includes('saltaquarium') || title.includes('salt aquarium')) return 'saltaquarium';
   if (title.includes('열대어') || title.includes('freshaquarium') || title.includes('fresh aquarium')) return 'freshaquarium';
@@ -68,43 +79,39 @@ const getDesignCategoryKey = (d: any): 'terrarium' | 'vivarium' | 'saltaquarium'
 };
 
 const getStickerSeriesTitle = (tab: string) => {
-  switch (tab) {
-    case 'terrarium20': return '🫙 테라리움 세트 완성 20종 스티커 팩';
-    case 'terrarium20_standalone': return '🪴 테라리움 단일 식물 20종 스티커 팩';
-    case 'vivarium20': return '🦎 비바리움 세트 완성 20종 스티커 팩';
-    case 'vivarium20_standalone': return '🦎 비바리움 단일 동물 20종 스티커 팩';
-    case 'saltaquarium20': return '🪸 해수어항 세트 완성 20종 스티커 팩';
-    case 'saltaquarium20_standalone': return '🐠 해수어 단일 어류 20종 스티커 팩';
-    case 'freshaquarium20': return '🐠 열대어어항 세트 완성 20종 스티커 팩';
-    case 'freshaquarium20_standalone': return '🐟 열대어 단일 어류 20종 스티커 팩';
-    case 'christmas20': return '🎄 크리스마스 윈터 스노우볼 20종 스티커 팩';
-    case 'christmas20_standalone': return '🎄 크리스마스 단일 오브젝트 20종 스티커 팩';
-    case 'halloween20': return '🎃 할로윈 스푸키 큐트 20종 스티커 팩';
-    case 'halloween20_standalone': return '🎃 할로윈 단일 오브젝트 20종 스티커 팩';
-    case 'thanksgiving20': return '🦃 추수감사절 코지 어텀 20종 스티커 팩';
-    case 'thanksgiving20_standalone': return '🦃 추수감사절 단일 오브젝트 20종 스티커 팩';
-    default: return '📦 스티커 20종 스티커 팩';
-  }
+  if (tab.startsWith('terrarium20')) return tab.includes('standalone') ? '🪴 테라리움 단일 식물 20종 스티커 팩' : '🫙 테라리움 세트 완성 20종 스티커 팩';
+  if (tab.startsWith('vivarium20')) return tab.includes('standalone') ? '🦎 비바리움 단일 동물 20종 스티커 팩' : '🦎 비바리움 세트 완성 20종 스티커 팩';
+  if (tab.startsWith('saltaquarium20')) return tab.includes('standalone') ? '🐠 해수어 단일 어류 20종 스티커 팩' : '🪸 해수어항 세트 완성 20종 스티커 팩';
+  if (tab.startsWith('freshaquarium20')) return tab.includes('standalone') ? '🐟 열대어 단일 어류 20종 스티커 팩' : '🐠 열대어어항 세트 완성 20종 스티커 팩';
+  if (tab.startsWith('christmas20')) return tab.includes('standalone') ? '🎄 크리스마스 단일 오브젝트 20종 스티커 팩' : '🎄 크리스마스 윈터 스노우볼 20종 스티커 팩';
+  if (tab.startsWith('halloween20')) return tab.includes('standalone') ? '🎃 할로윈 단일 오브젝트 20종 스티커 팩' : '🎃 할로윈 스푸키 큐트 20종 스티커 팩';
+  if (tab.startsWith('thanksgiving20')) return tab.includes('standalone') ? '🦃 추수감사절 단일 오브젝트 20종 스티커 팩' : '🦃 추수감사절 코지 어텀 20종 스티커 팩';
+  if (tab.startsWith('valentines20')) return tab.includes('standalone') ? '💖 발렌타인 단일 오브젝트 20종 스티커 팩' : '💖 발렌타인데이 핑크 러브 20종 스티커 팩';
+  if (tab.startsWith('stpatrick20')) return tab.includes('standalone') ? '☘️ 성 패트릭 단일 오브젝트 20종 스티커 팩' : '☘️ 성 패트릭 럭키 클로버 20종 스티커 팩';
+  if (tab.startsWith('easter20')) return tab.includes('standalone') ? '🌸 부활절 단일 오브젝트 20종 스티커 팩' : '🌸 부활절 파스텔 스프링 20종 스티커 팩';
+  if (tab.startsWith('mothersday20')) return tab.includes('standalone') ? '💐 마더스데이 단일 오브젝트 20종 스티커 팩' : '💐 마더스데이 플로럴 티컵 20종 스티커 팩';
+  return '📦 스티커 20종 스티커 팩';
 };
 
-const getPresetSeriesList = (tab: string) => {
-  switch (tab) {
-    case 'terrarium20': return TERRARIUM_20_SERIES;
-    case 'terrarium20_standalone': return TERRARIUM_STANDALONE_20_SERIES;
-    case 'vivarium20': return VIVARIUM_20_SERIES;
-    case 'vivarium20_standalone': return VIVARIUM_STANDALONE_20_SERIES;
-    case 'saltaquarium20': return SALT_AQUARIUM_20_SERIES;
-    case 'saltaquarium20_standalone': return SALT_AQUARIUM_STANDALONE_20_SERIES;
-    case 'freshaquarium20': return FRESH_AQUARIUM_20_SERIES;
-    case 'freshaquarium20_standalone': return FRESH_AQUARIUM_STANDALONE_20_SERIES;
-    case 'christmas20': return CHRISTMAS_20_SERIES;
-    case 'christmas20_standalone': return CHRISTMAS_STANDALONE_20_SERIES;
-    case 'halloween20': return HALLOWEEN_20_SERIES;
-    case 'halloween20_standalone': return HALLOWEEN_STANDALONE_20_SERIES;
-    case 'thanksgiving20': return THANKSGIVING_20_SERIES;
-    case 'thanksgiving20_standalone': return THANKSGIVING_STANDALONE_20_SERIES;
-    default: return TERRARIUM_20_SERIES;
-  }
+const getPresetSeriesList = (tab: string): StickerPreset[] => {
+  if (tab === 'terrarium20') return TERRARIUM_20_SERIES;
+  if (tab === 'terrarium20_standalone') return TERRARIUM_STANDALONE_20_SERIES;
+  if (tab === 'vivarium20') return VIVARIUM_20_SERIES;
+  if (tab === 'vivarium20_standalone') return VIVARIUM_STANDALONE_20_SERIES;
+  if (tab === 'saltaquarium20') return SALT_AQUARIUM_20_SERIES;
+  if (tab === 'saltaquarium20_standalone') return SALT_AQUARIUM_STANDALONE_20_SERIES;
+  if (tab === 'freshaquarium20') return FRESH_AQUARIUM_20_SERIES;
+  if (tab === 'freshaquarium20_standalone') return FRESH_AQUARIUM_STANDALONE_20_SERIES;
+  if (tab === 'christmas20') return CHRISTMAS_20_SERIES;
+  if (tab === 'christmas20_standalone') return CHRISTMAS_STANDALONE_20_SERIES;
+  if (tab === 'halloween20') return HALLOWEEN_20_SERIES;
+  if (tab === 'halloween20_standalone') return HALLOWEEN_STANDALONE_20_SERIES;
+  if (tab === 'thanksgiving20') return THANKSGIVING_20_SERIES;
+  if (tab === 'thanksgiving20_standalone') return THANKSGIVING_STANDALONE_20_SERIES;
+
+  const baseSeasonId = tab.replace('20_standalone', '').replace('20', '');
+  const pack = getSeasonalPackPresets(baseSeasonId);
+  return tab.includes('standalone') ? pack.standaloneSeries : pack.vesselSeries;
 };
 
 export default function Home() {
@@ -125,9 +132,9 @@ export default function Home() {
   const [podCount, setPodCount] = useState<number>(0);
   const [stickerCount, setStickerCount] = useState<number>(0);
 
-  // Sticker Sub-Category Filter State ('all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'christmas' | 'halloween' | 'thanksgiving')
-  const [selectedStickerSubTab, setSelectedStickerSubTab] = useState<'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'christmas' | 'halloween' | 'thanksgiving'>('all');
-  const [stickerSubCounts, setStickerSubCounts] = useState<{ all: number; terrarium: number; vivarium: number; saltaquarium: number; freshaquarium: number; christmas?: number; halloween?: number; thanksgiving?: number }>({
+  // Sticker Sub-Category Filter State
+  const [selectedStickerSubTab, setSelectedStickerSubTab] = useState<string>('all');
+  const [stickerSubCounts, setStickerSubCounts] = useState<Record<string, number>>({
     all: 0,
     terrarium: 0,
     vivarium: 0,
@@ -137,6 +144,12 @@ export default function Home() {
     halloween: 0,
     thanksgiving: 0
   });
+
+  const [dynamicSeasonalRecommendations, setDynamicSeasonalRecommendations] = useState<SeasonalRecommendation[]>([]);
+
+  useEffect(() => {
+    setDynamicSeasonalRecommendations(getDynamicSeasonalStickerRecommendations());
+  }, []);
 
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(true);
@@ -584,23 +597,12 @@ export default function Home() {
     }
   };
 
-  const handleSelectStickerSubTab = (sub: 'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'christmas' | 'halloween' | 'thanksgiving') => {
+  const handleSelectStickerSubTab = (sub: string) => {
     setSelectedStickerSubTab(sub);
     setPage(1);
     if (sub !== 'all') {
       const isStandalone = selectedStickerSeriesTab.includes('standalone');
-      const seriesMap: Record<string, any> = {
-        terrarium: isStandalone ? 'terrarium20_standalone' : 'terrarium20',
-        vivarium: isStandalone ? 'vivarium20_standalone' : 'vivarium20',
-        saltaquarium: isStandalone ? 'saltaquarium20_standalone' : 'saltaquarium20',
-        freshaquarium: isStandalone ? 'freshaquarium20_standalone' : 'freshaquarium20',
-        christmas: isStandalone ? 'christmas20_standalone' : 'christmas20',
-        halloween: isStandalone ? 'halloween20_standalone' : 'halloween20',
-        thanksgiving: isStandalone ? 'thanksgiving20_standalone' : 'thanksgiving20',
-      };
-      if (seriesMap[sub]) {
-        setSelectedStickerSeriesTab(seriesMap[sub]);
-      }
+      setSelectedStickerSeriesTab(isStandalone ? `${sub}20_standalone` as any : `${sub}20` as any);
     }
   };
 
@@ -2144,6 +2146,14 @@ export default function Home() {
       targetStandalonePresets = THANKSGIVING_STANDALONE_20_SERIES;
       packName = isBothMode ? '[추수감사절 코지어텀 + 단일오브젝트 40종 1:1 맞춤 팩]' : (baseType.includes('standalone') ? '[추수감사절 단일 오브젝트 20종 팩]' : '[추수감사절 코지어텀 완성 세트 20종 팩]');
       subKey = 'thanksgiving';
+    } else {
+      const cleanSeasonId = baseType.replace('20_standalone', '').replace('20', '');
+      const seasonalPack = getSeasonalPackPresets(cleanSeasonId);
+      targetPresets = baseType.includes('standalone') ? seasonalPack.standaloneSeries : seasonalPack.vesselSeries;
+      targetStandalonePresets = seasonalPack.standaloneSeries;
+      const titleKo = getStickerSeriesTitle(baseType).split(' ')[1] || cleanSeasonId;
+      packName = isBothMode ? `[${titleKo} 완성세트 + 낱개 40종 1:1 맞춤 팩]` : (baseType.includes('standalone') ? `[${titleKo} 단일 오브젝트 20종 팩]` : `[${titleKo} 완성 세트 20종 팩]`);
+      subKey = cleanSeasonId;
     }
 
     const totalExpectedCount = isBothMode ? 1 + (targetPresets.length - 1) * 2 : targetPresets.length;
@@ -2789,7 +2799,7 @@ export default function Home() {
 
             {/* 3대 시즌 추천 카드 그리드 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {SEASONAL_RECOMMENDATIONS.map((season) => (
+              {(dynamicSeasonalRecommendations.length > 0 ? dynamicSeasonalRecommendations : SEASONAL_RECOMMENDATIONS).map((season) => (
                 <div
                   key={season.seasonId}
                   className="bg-white/95 hover:bg-white border border-rose-200/80 rounded-2xl p-3.5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-3 relative group"
@@ -3321,47 +3331,22 @@ export default function Home() {
                 </span>
               </button>
 
-              <button
-                onClick={() => handleSelectStickerSubTab('christmas')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-                  selectedStickerSubTab === 'christmas'
-                    ? 'bg-rose-700 text-white shadow-xs ring-1 ring-rose-400'
-                    : 'bg-white text-rose-950 hover:bg-rose-100 border border-rose-200'
-                }`}
-              >
-                <span>🎄 크리스마스</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'christmas' ? 'bg-rose-900 text-rose-100' : 'bg-rose-100 text-rose-800'}`}>
-                  {stickerSubCounts.christmas || 0}
-                </span>
-              </button>
-
-              <button
-                onClick={() => handleSelectStickerSubTab('halloween')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-                  selectedStickerSubTab === 'halloween'
-                    ? 'bg-orange-700 text-white shadow-xs ring-1 ring-orange-400'
-                    : 'bg-white text-orange-950 hover:bg-orange-100 border border-orange-200'
-                }`}
-              >
-                <span>🎃 할로윈</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'halloween' ? 'bg-orange-900 text-orange-100' : 'bg-orange-100 text-orange-800'}`}>
-                  {stickerSubCounts.halloween || 0}
-                </span>
-              </button>
-
-              <button
-                onClick={() => handleSelectStickerSubTab('thanksgiving')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-                  selectedStickerSubTab === 'thanksgiving'
-                    ? 'bg-amber-700 text-white shadow-xs ring-1 ring-amber-400'
-                    : 'bg-white text-amber-950 hover:bg-amber-100 border border-amber-200'
-                }`}
-              >
-                <span>🦃 추수감사절</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'thanksgiving' ? 'bg-amber-900 text-amber-100' : 'bg-amber-100 text-amber-800'}`}>
-                  {stickerSubCounts.thanksgiving || 0}
-                </span>
-              </button>
+              {(dynamicSeasonalRecommendations.length > 0 ? dynamicSeasonalRecommendations : SEASONAL_RECOMMENDATIONS).map((season) => (
+                <button
+                  key={season.seasonId}
+                  onClick={() => handleSelectStickerSubTab(season.seasonId)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                    selectedStickerSubTab === season.seasonId
+                      ? 'bg-rose-700 text-white shadow-xs ring-1 ring-rose-400'
+                      : 'bg-white text-rose-950 hover:bg-rose-100 border border-rose-200'
+                  }`}
+                >
+                  <span>{season.icon} {season.title.split(' ')[1] || season.seasonId}</span>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === season.seasonId ? 'bg-rose-900 text-rose-100' : 'bg-rose-100 text-rose-800'}`}>
+                    {stickerSubCounts[season.seasonId] || 0}
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
         )}
