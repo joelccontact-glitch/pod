@@ -180,7 +180,14 @@ export default function Home() {
   const [batchZipSessions, setBatchZipSessions] = useState<any[]>([]);
   const [allZipPool, setAllZipPool] = useState<any[]>([]);
   const [isBatchGenerating, setIsBatchGenerating] = useState(false);
-  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; label: string }>({ current: 0, total: 0, label: '' });
+  const [activeBatchPackId, setActiveBatchPackId] = useState<string | null>(null);
+  const [batchProgress, setBatchProgress] = useState<{ current: number; total: number; label: string; packTitle?: string }>({ current: 0, total: 0, label: '', packTitle: '' });
+  const [batchCompletionNotice, setBatchCompletionNotice] = useState<{
+    packId: string;
+    packName: string;
+    successCount: number;
+    totalExpectedCount: number;
+  } | null>(null);
   const [isMigrating, setIsMigrating] = useState(false);
 
   // Sticker Pack 20-Pack Bundle Detail View Modal States
@@ -2167,11 +2174,18 @@ export default function Home() {
     if (!confirmed) return;
 
     setIsBatchGenerating(true);
+    setActiveBatchPackId(packType);
+    setBatchCompletionNotice(null);
     let successCount = 0;
 
     for (let i = 0; i < targetPresets.length; i++) {
       const preset = targetPresets[i];
-      setBatchProgress({ current: isBothMode ? (i === 0 ? 1 : (i - 1) * 2 + 2) : i + 1, total: totalExpectedCount, label: preset.name });
+      setBatchProgress({
+        current: isBothMode ? (i === 0 ? 1 : (i - 1) * 2 + 2) : i + 1,
+        total: totalExpectedCount,
+        label: preset.name,
+        packTitle: packName
+      });
 
       let attempts = 0;
       let generatedSuccess = false;
@@ -2232,7 +2246,12 @@ export default function Home() {
       // If in simultaneous both mode (i > 0), generate matching standalone sticker from newly created tank image via Vision AI!
       if (isBothMode && i > 0 && createdTankImageBase64 && targetStandalonePresets[i]) {
         const standalonePreset = targetStandalonePresets[i];
-        setBatchProgress({ current: (i - 1) * 2 + 3, total: totalExpectedCount, label: `${standalonePreset.name} (Vision 1:1 추출)` });
+        setBatchProgress({
+          current: (i - 1) * 2 + 3,
+          total: totalExpectedCount,
+          label: `${standalonePreset.name} (Vision 1:1 추출)`,
+          packTitle: packName
+        });
 
         try {
           const res = await fetch('/api/designs/from-image', {
@@ -2279,7 +2298,13 @@ export default function Home() {
     }
 
     setIsBatchGenerating(false);
-    alert(`${packName} 일괄 자동 생성이 완료되었습니다! (성공: ${successCount}/${totalExpectedCount}장)\n갤러리에서 새로 생성된 디자인들을 확인하세요.`);
+    setActiveBatchPackId(null);
+    setBatchCompletionNotice({
+      packId: subKey,
+      packName,
+      successCount,
+      totalExpectedCount
+    });
     fetchDesigns(1, false);
   };
 
@@ -2812,7 +2837,77 @@ export default function Home() {
 
             {/* Collapsible Content Section */}
             {isSeasonalRadarExpanded && (
-              <div className="p-3.5 sm:p-5 border-t border-rose-200/80">
+              <div className="p-3.5 sm:p-5 border-t border-rose-200/80 space-y-4">
+                {/* 실시간 40종 일괄 생성 진행 상태 배너 */}
+                {isBatchGenerating && (
+                  <div className="bg-gradient-to-r from-purple-950 via-indigo-900 to-slate-900 text-white p-4 rounded-2xl shadow-xl border-2 border-purple-400 space-y-2.5 animate-pulse-subtle">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-5 h-5 border-3 border-purple-300 border-t-amber-400 rounded-full animate-spin shrink-0" />
+                        <div>
+                          <h4 className="font-extrabold text-xs sm:text-sm text-amber-300 flex items-center gap-1.5">
+                            <span>⚡️</span>
+                            <span>{batchProgress.packTitle || '40종 스티커 팩'} 자동 일괄 생성 진행 중...</span>
+                          </h4>
+                          <p className="text-[11px] text-purple-200 mt-0.5">
+                            현재 생성 항목: <strong className="text-white underline">{batchProgress.label}</strong>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 self-end sm:self-center">
+                        <span className="bg-white/20 border border-white/30 px-3 py-1 rounded-full font-mono text-xs sm:text-sm font-black text-amber-300">
+                          {batchProgress.current} / {batchProgress.total}장 ({Math.round((batchProgress.current / Math.max(batchProgress.total, 1)) * 100)}%)
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* 프로그레스 게이지 바 */}
+                    <div className="w-full bg-black/50 rounded-full h-3 overflow-hidden p-0.5 border border-purple-500/50">
+                      <div
+                        className="bg-gradient-to-r from-amber-400 via-rose-400 to-emerald-400 h-full rounded-full transition-all duration-300 shadow-sm"
+                        style={{ width: `${Math.max(5, Math.round((batchProgress.current / Math.max(batchProgress.total, 1)) * 100))}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 최근 생성 완료 알림 배너 */}
+                {batchCompletionNotice && (
+                  <div className="bg-emerald-600 text-white p-3.5 sm:p-4 rounded-2xl shadow-lg border-2 border-emerald-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fade-in">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-2xl">🎉</span>
+                      <div>
+                        <h4 className="font-extrabold text-xs sm:text-sm">
+                          {batchCompletionNotice.packName} 생성이 성공적으로 완료되었습니다!
+                        </h4>
+                        <p className="text-[11px] text-emerald-100 mt-0.5">
+                          성공: {batchCompletionNotice.successCount} / {batchCompletionNotice.totalExpectedCount}장 모두 300 DPI 투명 PNG로 저장되었으며, A4 2장 인쇄용 시트가 준비되었습니다.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedStickerSubTab(batchCompletionNotice.packId);
+                          const el = document.getElementById('gallery-section');
+                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="text-xs bg-white text-emerald-900 font-extrabold px-3 py-1.5 rounded-xl transition-colors hover:bg-emerald-50 cursor-pointer shadow-xs"
+                      >
+                        생성된 갤러리 확인 →
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setBatchCompletionNotice(null)}
+                        className="text-xs bg-emerald-700/80 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-xl cursor-pointer"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* 3대 시즌 추천 카드 그리드 */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {(dynamicSeasonalRecommendations.length > 0 ? dynamicSeasonalRecommendations : SEASONAL_RECOMMENDATIONS).map((season) => (
@@ -2967,15 +3062,51 @@ export default function Home() {
                           </span>
                         </div>
 
-                        <button
-                          onClick={() => handleBatchGenerateSeries(`${season.seasonId}20_both`)}
-                          disabled={isBatchGenerating}
-                          className="w-full bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                          title={`${season.title} (메인 20종 + 단독 20종 = 총 41장 및 A4 2장 시트) 일괄 자동 생성을 시작합니다`}
-                        >
-                          <span>⚡️</span>
-                          <span>이 시즌 40종 팩 원클릭 동시 생성</span>
-                        </button>
+                        {/* 동적 상태 버튼: 생성 중 / 대기 중 / 기본 */}
+                        {isBatchGenerating && activeBatchPackId === `${season.seasonId}20_both` ? (
+                          <div className="w-full bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl shadow-md flex items-center justify-center gap-2 border border-purple-400 animate-pulse">
+                            <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin shrink-0" />
+                            <span>생성 진행 중 ({batchProgress.current} / {batchProgress.total}장)</span>
+                          </div>
+                        ) : isBatchGenerating ? (
+                          <button
+                            disabled
+                            className="w-full bg-gray-200 text-gray-500 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60"
+                          >
+                            <span>⏳ 다른 팩 생성 진행 중...</span>
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleBatchGenerateSeries(`${season.seasonId}20_both`)}
+                            disabled={isBatchGenerating}
+                            className="w-full bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-700 hover:to-purple-700 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                            title={`${season.title} (메인 20종 + 단독 20종 = 총 41장 및 A4 2장 시트) 일괄 자동 생성을 시작합니다`}
+                          >
+                            <span>⚡️</span>
+                            <span>이 시즌 40종 팩 원클릭 동시 생성</span>
+                          </button>
+                        )}
+
+                        {/* 해당 시즌 팩 최근 생성 완료 안내 태그 */}
+                        {batchCompletionNotice && batchCompletionNotice.packId === season.seasonId && (
+                          <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-2 text-xs font-bold text-emerald-950 flex items-center justify-between gap-1 shadow-2xs animate-fade-in">
+                            <span className="flex items-center gap-1 text-emerald-800 text-[11px]">
+                              <span>🎉</span>
+                              <span>생성 완료! ({batchCompletionNotice.successCount}장)</span>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedStickerSubTab(season.seasonId);
+                                const el = document.getElementById('gallery-section');
+                                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                              }}
+                              className="text-[10px] bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-0.5 rounded font-extrabold transition-colors cursor-pointer shrink-0"
+                            >
+                              갤러리 보기 →
+                            </button>
+                          </div>
+                        )}
 
                         <button
                           onClick={() => {
@@ -3314,7 +3445,7 @@ export default function Home() {
         )}
 
         {/* Main Category Filter Tabs (POD vs Sticker Pack & Keyword Search) */}
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-2xl border border-gray-200 shadow-xs">
+        <div id="gallery-section" className="mb-5 flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 sm:p-3 rounded-2xl border border-gray-200 shadow-xs">
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap flex-1 min-w-0">
             <button
               onClick={() => handleSelectCategoryTab('sticker')}
@@ -5363,6 +5494,64 @@ export default function Home() {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* 화면 하단 플로팅 실시간 진행상황 도크 (스크롤 시에도 100% 명확히 인지 가능) */}
+        {isBatchGenerating && (
+          <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-slate-950/95 backdrop-blur-md text-white border-2 border-amber-400 p-3.5 rounded-2xl shadow-2xl flex items-center gap-3.5 max-w-sm sm:max-w-md w-[calc(100vw-2rem)] sm:w-auto animate-bounce-subtle">
+            <div className="w-5 h-5 border-3 border-amber-400/40 border-t-amber-400 rounded-full animate-spin shrink-0" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-black text-amber-300 truncate">
+                  ⚡ {batchProgress.packTitle || '40종 스티커 팩'} 생성 중
+                </span>
+                <span className="text-[11px] font-mono font-bold text-amber-200 shrink-0">
+                  {batchProgress.current}/{batchProgress.total}장 ({Math.round((batchProgress.current / Math.max(batchProgress.total, 1)) * 100)}%)
+                </span>
+              </div>
+              <p className="text-[10.5px] text-gray-300 truncate mt-0.5">
+                {batchProgress.label}
+              </p>
+              <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden mt-1.5">
+                <div
+                  className="bg-gradient-to-r from-amber-400 to-emerald-400 h-full rounded-full transition-all duration-300"
+                  style={{ width: `${Math.max(5, Math.round((batchProgress.current / Math.max(batchProgress.total, 1)) * 100))}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 화면 하단 플로팅 완료 알림 토스트 (생성 완료 후 스크롤 상태에서도 즉시 인지) */}
+        {batchCompletionNotice && !isBatchGenerating && (
+          <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-emerald-950/95 backdrop-blur-md text-white border-2 border-emerald-400 p-3.5 rounded-2xl shadow-2xl flex items-center gap-3 max-w-sm sm:max-w-md w-[calc(100vw-2rem)] sm:w-auto animate-fade-in">
+            <span className="text-2xl shrink-0">🎉</span>
+            <div className="min-w-0 flex-1">
+              <span className="text-xs font-black text-emerald-300 block truncate">
+                {batchCompletionNotice.packName} 생성 완료!
+              </span>
+              <p className="text-[11px] text-emerald-100 truncate">
+                총 {batchCompletionNotice.successCount}장 생성 완료 & A4 2장 시트 준비됨
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setSelectedStickerSubTab(batchCompletionNotice.packId);
+                const el = document.getElementById('gallery-section');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="text-[11px] bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold px-2.5 py-1.5 rounded-xl shrink-0 cursor-pointer shadow-xs"
+            >
+              갤러리 보기
+            </button>
+            <button
+              onClick={() => setBatchCompletionNotice(null)}
+              className="text-emerald-300 hover:text-white text-xs px-1 cursor-pointer shrink-0"
+              title="닫기"
+            >
+              ✕
+            </button>
           </div>
         )}
       </div>
