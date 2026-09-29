@@ -31,6 +31,7 @@ import {
 import JSZip from 'jszip';
 import { createCompositeMasterCover } from '@/lib/master-cover-builder';
 import { generateA4StickerSheet, generateA4StickerSheets } from '@/lib/sticker-sheet-builder';
+import { generateCreativeFabricaTags, formatCFTagsForClipboard } from '@/lib/creative-fabrica-tags';
 
 const isCoverDesign = (d: any) => {
   if (!d) return false;
@@ -156,6 +157,9 @@ export default function Home() {
   const [isSeasonalRadarExpanded, setIsSeasonalRadarExpanded] = useState(true); // Expanded by default
   const [expandedStrategySeasonIds, setExpandedStrategySeasonIds] = useState<string[]>([]);
   const [copiedTagsSeasonId, setCopiedTagsSeasonId] = useState<string | null>(null);
+  const [copiedCFSeasonId, setCopiedCFSeasonId] = useState<string | null>(null);
+  const [copiedCFTagsNotice, setCopiedCFTagsNotice] = useState(false);
+  const [copiedCFTabNotice, setCopiedCFTabNotice] = useState(false);
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<
@@ -3059,20 +3063,42 @@ export default function Home() {
                                       <span>🏷️</span>
                                       <span>Etsy 추천 13태그:</span>
                                     </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        const tagsText = season.pricingStrategy.etsyTags.join(', ');
-                                        if (navigator.clipboard) {
-                                          navigator.clipboard.writeText(tagsText);
-                                        }
-                                        setCopiedTagsSeasonId(season.seasonId);
-                                        setTimeout(() => setCopiedTagsSeasonId(null), 2000);
-                                      }}
-                                      className="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded border border-indigo-200 transition-colors flex items-center gap-1 cursor-pointer"
-                                    >
-                                      <span>{copiedTagsSeasonId === season.seasonId ? '✓ 복사완료!' : '📋 태그 일괄 복사'}</span>
-                                    </button>
+                                    <div className="flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const tagsText = season.pricingStrategy.etsyTags.join(', ');
+                                          if (navigator.clipboard) {
+                                            navigator.clipboard.writeText(tagsText);
+                                          }
+                                          setCopiedTagsSeasonId(season.seasonId);
+                                          setTimeout(() => setCopiedTagsSeasonId(null), 2000);
+                                        }}
+                                        className="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded border border-indigo-200 transition-colors flex items-center gap-1 cursor-pointer"
+                                      >
+                                        <span>{copiedTagsSeasonId === season.seasonId ? '✓ Etsy완료' : '📋 Etsy 13태그'}</span>
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const cfTags = generateCreativeFabricaTags({
+                                            title: season.title,
+                                            topic: season.bestSellerReason,
+                                            tags: season.pricingStrategy.etsyTags,
+                                            categoryOrSub: season.seasonId,
+                                            maxTags: 45
+                                          });
+                                          if (navigator.clipboard) {
+                                            navigator.clipboard.writeText(formatCFTagsForClipboard(cfTags));
+                                          }
+                                          setCopiedCFSeasonId(season.seasonId);
+                                          setTimeout(() => setCopiedCFSeasonId(null), 2000);
+                                        }}
+                                        className="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded border border-emerald-300 transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                                      >
+                                        <span>{copiedCFSeasonId === season.seasonId ? '✓ CF완료' : '🎨 CF Tags(45개)'}</span>
+                                      </button>
+                                    </div>
                                   </div>
                                   <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
                                     {season.pricingStrategy.etsyTags.map((tag, tagIdx) => (
@@ -3653,6 +3679,43 @@ export default function Home() {
                 </button>
               ))}
             </div>
+
+            {/* Creative Fabrica Bundle Designer Tags Quick Bar */}
+            {isStickerMode && selectedStickerSubTab !== 'all' && (
+              <div className="mt-3 pt-2.5 border-t border-teal-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 bg-white/70 p-2.5 rounded-xl border border-teal-200/50 shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <span className="text-base sm:text-lg">🎨</span>
+                  <div>
+                    <h4 className="text-xs font-extrabold text-teal-950 flex items-center gap-1.5 flex-wrap">
+                      <span>Creative Fabrica 상품 등록 지원</span>
+                      <span className="bg-emerald-600 text-white text-[9.5px] px-2 py-0.2 rounded-full font-bold">CF Designer Tags</span>
+                    </h4>
+                    <p className="text-[11px] text-teal-800 mt-0.5">
+                      현재 선택된 <strong className="underline font-bold text-teal-950">{selectedStickerSubTab}</strong> 번들 팩 전용 40~45개 Designer Tags를 원클릭으로 복사합니다.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cfTags = generateCreativeFabricaTags({
+                      title: `${selectedStickerSubTab} sticker pack bundle`,
+                      categoryOrSub: selectedStickerSubTab,
+                      maxTags: 45
+                    });
+                    if (navigator.clipboard) {
+                      navigator.clipboard.writeText(formatCFTagsForClipboard(cfTags));
+                    }
+                    setCopiedCFTabNotice(true);
+                    setTimeout(() => setCopiedCFTabNotice(false), 2000);
+                  }}
+                  className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-3 py-1.5 rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+                >
+                  <span>📋</span>
+                  <span>{copiedCFTabNotice ? '✓ CF 태그 복사완료!' : `이 팩의 CF 태그 일괄 복사 (45개)`}</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -3898,86 +3961,149 @@ export default function Home() {
                 </div>
 
                 <div className="p-5 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
-                  {activeTab === 'info' && (
-                    <>
-                      {isCoverDesign(selectedDesign) && (
-                        <div className="mb-3.5 p-3 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl shadow-xs flex items-center gap-2.5">
-                          <span className="text-xl shrink-0">🌟</span>
+                  {activeTab === 'info' && (() => {
+                    const currentActiveDesign = previewDesign || selectedDesign;
+                    const cfDetailTags = currentActiveDesign ? generateCreativeFabricaTags({
+                      title: currentActiveDesign.title,
+                      topic: currentActiveDesign.topic,
+                      tags: currentActiveDesign.tags,
+                      categoryOrSub: currentActiveDesign.sticker_sub || currentActiveDesign.design_type,
+                      maxTags: 45
+                    }) : [];
+
+                    return (
+                      <>
+                        {isCoverDesign(currentActiveDesign) && (
+                          <div className="mb-3.5 p-3 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl shadow-xs flex items-center gap-2.5">
+                            <span className="text-xl shrink-0">🌟</span>
+                            <div>
+                              <h4 className="text-xs sm:text-sm font-extrabold text-amber-950 flex items-center gap-1.5">
+                                <span>Etsy 스티커 팩 대표 마스터 썸네일 커버 표지</span>
+                                <span className="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">Master Cover</span>
+                              </h4>
+                              <p className="text-[11px] sm:text-xs text-amber-900 mt-0.5 font-medium">
+                                Etsy 판매 등록 시 <span className="font-bold underline text-amber-950">1번 메인 대표 썸네일 표지</span>로 노출하는 그래픽입니다.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{currentActiveDesign?.title}</h2>
+                        <div className="flex flex-wrap gap-2 mb-6">
+                          <button onClick={() => handleCopy(currentActiveDesign?.title)} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-3.5 py-1.5 rounded-full font-medium transition-colors cursor-pointer">제목 복사</button>
+                          <button onClick={() => handleCopy(currentActiveDesign?.tags?.join(', '))} className="text-xs sm:text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3.5 py-1.5 rounded-full font-medium transition-colors cursor-pointer">Etsy 13태그 복사</button>
+                          <button 
+                            onClick={() => {
+                              handleCopy(formatCFTagsForClipboard(cfDetailTags));
+                              setCopiedCFTagsNotice(true);
+                              setTimeout(() => setCopiedCFTagsNotice(false), 2000);
+                            }} 
+                            className="text-xs sm:text-sm bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 px-3.5 py-1.5 rounded-full font-bold transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
+                          >
+                            <span>🎨</span>
+                            <span>{copiedCFTagsNotice ? '✓ CF Designer Tags 복사완료!' : `CF Designer Tags (${cfDetailTags.length}개) 복사`}</span>
+                          </button>
+                        </div>
+
+                        <div className="space-y-6">
                           <div>
-                            <h4 className="text-xs sm:text-sm font-extrabold text-amber-950 flex items-center gap-1.5">
-                              <span>Etsy 스티커 팩 대표 마스터 썸네일 커버 표지</span>
-                              <span className="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">Master Cover</span>
-                            </h4>
-                            <p className="text-[11px] sm:text-xs text-amber-900 mt-0.5 font-medium">
-                              Etsy 판매 등록 시 <span className="font-bold underline text-amber-950">1번 메인 대표 썸네일 표지</span>로 노출하는 그래픽입니다.
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Topic</h4>
+                            <p className="text-gray-700 bg-gray-50 px-4 py-3 rounded-xl text-sm border border-gray-100">{currentActiveDesign?.topic}</p>
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Art Style (바탕 화풍)</h4>
+                            <p className="text-purple-700 bg-purple-50/80 px-4 py-3 rounded-xl text-sm border border-purple-100 font-semibold flex items-center gap-2">
+                              <span className="text-base">🎨</span>
+                              <span>{getStyleDisplayName(currentActiveDesign)}</span>
                             </p>
                           </div>
-                        </div>
-                      )}
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Etsy SEO Tags (13개)</h4>
+                              <span className="text-[10px] text-gray-400">Etsy 입점용 핵심 태그</span>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {currentActiveDesign?.tags?.map((tag: string, i: number) => (
+                                <span key={i} className="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-100">{tag}</span>
+                              ))}
+                            </div>
+                          </div>
 
-                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{previewDesign ? previewDesign.title : selectedDesign.title}</h2>
-                  <div className="flex gap-2 mb-6">
-                    <button onClick={() => handleCopy(previewDesign ? previewDesign.title : selectedDesign.title)} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-medium transition-colors">제목 복사</button>
-                    <button onClick={() => handleCopy((previewDesign ? previewDesign.tags : selectedDesign.tags)?.join(', '))} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full font-medium transition-colors">태그 복사</button>
-                  </div>
+                          {/* 🎨 Creative Fabrica Designer Tags Section */}
+                          <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl space-y-2.5">
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                              <div className="flex items-center gap-2">
+                                <span className="text-base">🎨</span>
+                                <h4 className="text-xs font-extrabold text-emerald-950 uppercase tracking-wider">
+                                  Creative Fabrica Designer Tags ({cfDetailTags.length}개)
+                                </h4>
+                                <span className="text-[9.5px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">CF 추천 태그</span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleCopy(formatCFTagsForClipboard(cfDetailTags));
+                                  setCopiedCFTagsNotice(true);
+                                  setTimeout(() => setCopiedCFTagsNotice(false), 2000);
+                                }}
+                                className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-3 py-1.5 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
+                              >
+                                <span>📋</span>
+                                <span>{copiedCFTagsNotice ? '✓ 복사완료!' : 'CF 태그 일괄 복사'}</span>
+                              </button>
+                            </div>
+                            <p className="text-[11px] text-emerald-800/90 leading-relaxed">
+                              Creative Fabrica 상품 등록 시 <strong>Designer tags</strong> 입력창에 쉼표(,) 구분으로 그대로 붙여넣을 수 있는 대량 롱테일 키워드입니다.
+                            </p>
+                            <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scrollbar pt-1">
+                              {cfDetailTags.map((tag: string, i: number) => (
+                                <span 
+                                  key={i} 
+                                  className="text-[11px] bg-white text-emerald-900 border border-emerald-300 hover:border-emerald-500 px-2 py-0.5 rounded-lg font-medium shadow-2xs transition-colors"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
 
-                  <div className="space-y-6">
-                      <div>
-                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Topic</h4>
-                        <p className="text-gray-700 bg-gray-50 px-4 py-3 rounded-xl text-sm border border-gray-100">{previewDesign ? previewDesign.topic : selectedDesign.topic}</p>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Art Style (바탕 화풍)</h4>
-                        <p className="text-purple-700 bg-purple-50/80 px-4 py-3 rounded-xl text-sm border border-purple-100 font-semibold flex items-center gap-2">
-                          <span className="text-base">🎨</span>
-                          <span>{getStyleDisplayName(previewDesign || selectedDesign)}</span>
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">SEO Tags</h4>
-                        <div className="flex flex-wrap gap-2">
-                          {(previewDesign ? previewDesign.tags : selectedDesign.tags)?.map((tag: string, i: number) => (
-                            <span key={i} className="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-100">{tag}</span>
-                          ))}
-                        </div>
-                      </div>
+                          <div className="pt-4 border-t border-gray-100 space-y-3">
+                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">고해상도 다운로드 옵션</h4>
+                            <div className="flex flex-col sm:flex-row gap-2.5">
+                              <button 
+                                onClick={downloadPODPrintPNG}
+                                disabled={isProcessingPNG}
+                                className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
+                              >
+                                {isProcessingPNG ? (
+                                  <>
+                                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span>4K 변환 중...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                    <span>🖨️ 4K 투명 PNG</span>
+                                  </>
+                                )}
+                              </button>
 
-                      <div className="pt-4 border-t border-gray-100 space-y-3">
-                        <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">고해상도 다운로드 옵션</h4>
-                        <div className="flex flex-col sm:flex-row gap-2.5">
-                          <button 
-                            onClick={downloadPODPrintPNG}
-                            disabled={isProcessingPNG}
-                            className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
-                          >
-                            {isProcessingPNG ? (
-                              <>
-                                <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>4K 변환 중...</span>
-                              </>
-                            ) : (
-                              <>
+                              <button 
+                                onClick={downloadMockup}
+                                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
+                              >
                                 <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                <span>🖨️ 4K 투명 PNG</span>
-                              </>
-                            )}
-                          </button>
-
-                          <button 
-                            onClick={downloadMockup}
-                            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all shadow-sm flex items-center justify-center gap-2 whitespace-nowrap"
-                          >
-                            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            <span>{isStickerMode ? '📦 스티커 디스플레이 다운' : '👕 2.5K 목업'}</span>
-                          </button>
+                                <span>{isStickerMode ? '📦 스티커 디스플레이 다운' : '👕 2.5K 목업'}</span>
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </>
-                  )}
+                      </>
+                    );
+                  })()}
                   {activeTab === 'mockup' && (
                     <div className="flex flex-col items-center h-full min-h-[400px]">
                       {isStickerMode && (
