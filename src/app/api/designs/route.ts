@@ -290,6 +290,7 @@ export async function GET(request: Request) {
             const isExplicitCover = (
               scanStr.includes('-20-pack-cover') ||
               scanStr.includes('-standalone-20-pack-cover') ||
+              scanStr.includes('-pack-cover') ||
               scanStr.includes('마스터 썸네일') ||
               scanStr.includes('마스터 표지') ||
               scanStr.includes('대표 커버') ||
@@ -297,7 +298,10 @@ export async function GET(request: Request) {
               scanStr.includes('bundle cover') ||
               scanStr.includes('pack cover') ||
               scanStr.includes('20+ cute') ||
+              scanStr.includes('40+ cute') ||
               scanStr.includes('20+ sticker') ||
+              scanStr.includes('40+ sticker') ||
+              scanStr.includes('sticker bundle') ||
               scanStr.includes('etsy digital sticker bundle')
             );
             if (!isExplicitCover) return false;

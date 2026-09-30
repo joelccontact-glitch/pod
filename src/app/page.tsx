@@ -27,6 +27,8 @@ import {
   SeasonalRecommendation,
   StickerPreset,
   buildStickerPrompt,
+  formatCoverTitleWithCount,
+  formatCoverPromptWithCount,
 } from '@/lib/sticker-prompts';
 import JSZip from 'jszip';
 import { createCompositeMasterCover } from '@/lib/master-cover-builder';
@@ -38,7 +40,18 @@ const isCoverDesign = (d: any) => {
   const id = (d.id || '').toLowerCase();
   const presetId = (d.stickerPresetId || '').toLowerCase();
   const title = (d.title || d.topic || '').toLowerCase();
-  return id.includes('cover') || presetId.includes('cover') || title.includes('커버 표지') || title.includes('마스터 표지') || title.includes('master cover');
+  const prompt = (d.prompt || '').toLowerCase();
+  return (
+    id.includes('cover') ||
+    presetId.includes('cover') ||
+    title.includes('커버 표지') ||
+    title.includes('마스터 표지') ||
+    title.includes('master cover') ||
+    title.includes('bundle cover') ||
+    prompt.includes('bundle master cover') ||
+    prompt.includes('40+ cute') ||
+    prompt.includes('20+ cute')
+  );
 };
 
 const getDesignCategoryKey = (d: any): string => {
@@ -358,11 +371,36 @@ export default function Home() {
     });
   };
 
-  const handleRegenerateMasterCover = async (coverDesign: any) => {
+  const handleRegenerateMasterCover = async (coverDesign: any, count?: number) => {
     if (!coverDesign) return;
 
     setIsRegeneratingCover(true);
     try {
+      // 1. Calculate actual sticker count in this pack
+      let targetCount = count && count > 0 ? count : 0;
+      if (!targetCount) {
+        if (packStickers && packStickers.length > 0) {
+          targetCount = packStickers.length;
+        } else {
+          const title = (coverDesign.title || coverDesign.topic || '').toLowerCase();
+          if (title.includes('40종') || title.includes('40')) {
+            targetCount = 40;
+          } else {
+            const coverCategory = getDesignCategoryKey(coverDesign);
+            const coverTime = new Date(coverDesign.created_at || 0).getTime();
+            const matched = designs.filter((d: any) => {
+              if (d.id === coverDesign.id || isCoverDesign(d)) return false;
+              const itemCategory = getDesignCategoryKey(d);
+              if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) return false;
+              const itemTime = new Date(d.created_at || 0).getTime();
+              return Math.abs(itemTime - coverTime) <= 120 * 60 * 1000;
+            });
+            targetCount = matched.length > 25 ? 40 : (matched.length > 0 ? matched.length : 20);
+          }
+        }
+      }
+      if (!targetCount) targetCount = 20;
+
       let basePrompt = coverDesign.prompt || '';
       const presetId = (coverDesign.stickerPresetId || coverDesign.id || '').toLowerCase();
       const sub = coverDesign.sticker_sub;
@@ -379,15 +417,28 @@ export default function Home() {
       } else if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium') || sub === 'freshaquarium') {
         const p = FRESH_AQUARIUM_20_SERIES.find(s => s.id === 'fresh-aquarium-20-pack-cover');
         if (p) basePrompt = p.prompt;
+      } else if (sub) {
+        try {
+          const seasonalPack = getSeasonalPackPresets(sub);
+          if (seasonalPack && seasonalPack.vesselSeries && seasonalPack.vesselSeries[0]) {
+            basePrompt = seasonalPack.vesselSeries[0].prompt;
+          }
+        } catch (e) {
+          // ignore
+        }
       }
+
+      // Format prompt and title with real count!
+      const adjustedPrompt = formatCoverPromptWithCount(basePrompt, targetCount);
+      const adjustedTitle = formatCoverTitleWithCount(coverDesign.title || coverDesign.topic || '스티커 팩 대표 커버 표지', targetCount);
 
       const res = await fetch('/api/designs/from-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           imageBase64: '',
-          prompt: basePrompt,
-          title: coverDesign.title,
+          prompt: adjustedPrompt,
+          title: adjustedTitle,
           isPreview: true,
           styleId: selectedStyleId,
           catchphrase: '',
@@ -402,7 +453,9 @@ export default function Home() {
 
         const updates = {
           image_url: compressedUrl,
-          prompt: basePrompt,
+          prompt: adjustedPrompt,
+          title: adjustedTitle,
+          topic: adjustedTitle,
           updated_at: new Date().toISOString()
         };
 
@@ -435,7 +488,7 @@ export default function Home() {
           setSelectedDesign((prev: any) => prev ? { ...prev, ...freshData } : prev);
         }
 
-        alert('✨ 최고 퀄리티 Etsy 베스트셀러 마스터 표지가 성공적으로 재생성되었습니다!');
+        alert(`✨ ${targetCount}종 최신 AI 마스터 표지가 성공적으로 재생성되었습니다!`);
         await fetchDesigns(page, false, undefined, undefined, true);
       } else {
         alert('마스터 표지 생성 실패: ' + (data.error || '오류가 발생했습니다.'));
@@ -481,9 +534,10 @@ export default function Home() {
             return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
           });
 
-          const final20 = matched.slice(0, 20);
-          final20.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
-          targetStickers = final20;
+          const maxItems = (coverDesign.title || '').includes('40종') || matched.length >= 35 ? 40 : 20;
+          const finalItems = matched.slice(0, maxItems);
+          finalItems.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+          targetStickers = finalItems;
         }
       } catch (e) {
         console.error('Error loading stickers for composite cover:', e);
@@ -491,21 +545,26 @@ export default function Home() {
     }
 
     if (targetStickers.length === 0) {
-      alert('실제 스티커 항목이 없습니다. 먼저 20종 일괄 생성을 진행해 주세요.');
+      alert('실제 스티커 항목이 없습니다. 먼저 스티커 일괄 생성을 진행해 주세요.');
       return;
     }
 
     setIsBuildingComposite(true);
     try {
+      const targetCount = targetStickers.length;
+      const adjustedTitle = formatCoverTitleWithCount(coverDesign.title || coverDesign.topic, targetCount);
       const compositeDataUrl = await createCompositeMasterCover(targetStickers, {
-        title: coverDesign.title,
-        subType: coverCategory !== 'other' ? coverCategory : (coverDesign.sticker_sub || 'terrarium')
+        title: adjustedTitle,
+        subType: coverCategory !== 'other' ? coverCategory : (coverDesign.sticker_sub || 'terrarium'),
+        stickerCount: targetCount
       });
 
       const compressedUrl = await compressImageForFirestore(compositeDataUrl, 650000);
 
       const updates = {
         image_url: compressedUrl,
+        title: adjustedTitle,
+        topic: adjustedTitle,
         updated_at: new Date().toISOString()
       };
 
@@ -538,7 +597,7 @@ export default function Home() {
         setSelectedDesign((prev: any) => prev ? { ...prev, ...freshData } : prev);
       }
 
-      alert(`✨ 실제 20종 스티커 100% 실물 일치 마스터 표지 합성이 완료되었습니다!\n(총 ${targetStickers.length}종 스티커가 표지에 자동 배치되었습니다)`);
+      alert(`✨ 실제 ${targetCount}종 스티커 100% 실물 일치 마스터 표지 합성이 완료되었습니다!\n(총 ${targetCount}종 스티커가 표지에 자동 배치되었습니다)`);
       await fetchDesigns(page, false, undefined, undefined, true);
     } catch (e: any) {
       console.error('Error creating composite master cover:', e);
@@ -588,10 +647,7 @@ export default function Home() {
         });
 
         // Support up to 40 stickers if available in this pack
-        const coverTitle = (coverDesign.title || coverDesign.topic || '').toLowerCase();
-        const is40Pack = coverTitle.includes('40종') || coverTitle.includes('40') || matched.length >= 35;
-        const maxItems = is40Pack ? 40 : 20;
-
+        const maxItems = matched.length > 20 ? 40 : 20;
         const finalStickers = matched.slice(0, maxItems);
 
         // Sort so that Main Tanks (Sheet 1) come first, and Standalone Objects (Sheet 2) come next
@@ -610,6 +666,25 @@ export default function Home() {
         });
 
         setPackStickers(finalStickers);
+
+        // Auto-synchronize master cover title to reflect the real count!
+        if (finalStickers.length > 0) {
+          const currentTitle = coverDesign.title || coverDesign.topic || '';
+          const correctedTitle = formatCoverTitleWithCount(currentTitle, finalStickers.length);
+          if (correctedTitle && correctedTitle !== currentTitle) {
+            setSelectedPackCover((prev: any) => prev ? { ...prev, title: correctedTitle, topic: correctedTitle } : prev);
+            setDesigns(prev => prev.map(d => d.id === coverDesign.id ? { ...d, title: correctedTitle, topic: correctedTitle } : d));
+            
+            fetch('/api/designs/update', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: coverDesign.id,
+                updates: { title: correctedTitle, topic: correctedTitle }
+              })
+            }).catch(e => console.error('Failed to update cover title:', e));
+          }
+        }
       }
     } catch (e) {
       console.error('Error fetching pack stickers:', e);
@@ -993,8 +1068,10 @@ export default function Home() {
     if (!d) return false;
     const scanStr = `${d.title || ''} ${d.topic || ''} ${d.prompt || ''} ${d.feedback_applied || ''} ${d.stickerPresetId || ''} ${d.id || ''}`.toLowerCase();
     
-    // Explicit preset IDs for 20-pack master covers
+    // Explicit preset IDs for 20-pack and 40-pack master covers
     const explicitCoverIds = [
+      '-pack-cover',
+      '-cover',
       'terrarium-20-pack-cover',
       'vivarium-20-pack-cover',
       'saltaquarium-20-pack-cover',
@@ -1012,7 +1089,10 @@ export default function Home() {
       scanStr.includes('cover graphic') ||
       scanStr.includes('sticker bundle master') ||
       scanStr.includes('20+ cute') ||
+      scanStr.includes('40+ cute') ||
       scanStr.includes('20+ sticker') ||
+      scanStr.includes('40+ sticker') ||
+      scanStr.includes('sticker bundle') ||
       scanStr.includes('etsy digital sticker bundle')
     );
   };
@@ -2212,6 +2292,7 @@ export default function Home() {
     }
 
     const totalExpectedCount = isBothMode ? 1 + (targetPresets.length - 1) * 2 : targetPresets.length;
+    const totalStickerItems = isBothMode ? (targetPresets.length - 1) * 2 : targetPresets.length - 1;
 
     const confirmed = confirm(
       `${packName} 자동 일괄 생성을 시작하시겠습니까?\n\n• ${isBothMode ? '마스터 표지 1장 + 메인 테마 세트 20종 + 1:1 맞춤 단독 낱개 20종 (총 41장 동시 생성)' : `마스터 썸네일 표지 1장 + 스티커 20종 (총 ${targetPresets.length}장)`}\n\n300DPI 고화질 PNG 이미지가 순차적으로 연속 자동 생성되어 갤러리에 저장됩니다.`
@@ -2225,10 +2306,14 @@ export default function Home() {
 
     for (let i = 0; i < targetPresets.length; i++) {
       const preset = targetPresets[i];
+      const isCover = i === 0;
+      const itemName = isCover ? formatCoverTitleWithCount(preset.name, totalStickerItems) : preset.name;
+      const itemPrompt = isCover ? formatCoverPromptWithCount(preset.prompt, totalStickerItems) : preset.prompt;
+
       setBatchProgress({
         current: isBothMode ? (i === 0 ? 1 : (i - 1) * 2 + 2) : i + 1,
         total: totalExpectedCount,
-        label: preset.name,
+        label: itemName,
         packTitle: packName
       });
 
@@ -2244,8 +2329,8 @@ export default function Home() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               imageBase64: '',
-              prompt: preset.prompt,
-              title: preset.name,
+              prompt: itemPrompt,
+              title: itemName,
               isPreview: true,
               styleId: selectedStyleId,
               catchphrase: '',
@@ -2260,8 +2345,8 @@ export default function Home() {
             const designToSave = {
               ...data.data,
               image_url: compressedUrl,
-              title: preset.name,
-              topic: preset.name,
+              title: itemName,
+              topic: itemName,
               stickerPresetId: preset.id,
               sticker_sub: subKey,
               design_type: 'sticker',
@@ -5155,7 +5240,7 @@ export default function Home() {
                       </span>
                     </div>
                     <h3 className="text-base sm:text-xl font-bold text-white truncate">
-                      {selectedPackCover.title || selectedPackCover.topic || 'Etsy 20종 스티커 마스터 팩'}
+                      {formatCoverTitleWithCount(selectedPackCover.title || selectedPackCover.topic || 'Etsy 스티커 마스터 팩', packStickers.length)}
                     </h3>
                     <p className="text-xs text-teal-200 mt-0.5 font-medium flex items-center gap-2">
                       <span>📅 생성일: {new Date(selectedPackCover.created_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
@@ -5185,12 +5270,12 @@ export default function Home() {
 
                 <div className="flex flex-wrap items-center gap-2">
                   <button
-                    onClick={() => handleGenerateRealCompositeCover(selectedPackCover, packStickers)}
-                    disabled={isBuildingComposite}
-                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-lg transition-all flex items-center gap-2 border border-purple-400"
-                    title="실제 20종 본품 스티커를 100% 반영하여 마스터 표지를 자동 재조합/생성합니다"
+                    onClick={() => handleRegenerateMasterCover(selectedPackCover, packStickers.length)}
+                    disabled={isRegeneratingCover}
+                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-lg transition-all flex items-center gap-2 border border-purple-400 cursor-pointer"
+                    title={`실제 ${packStickers.length || 20}종 본품 스티커 구성을 반영하여 AI 마스터 표지를 새로 생성합니다`}
                   >
-                    {isBuildingComposite ? (
+                    {isRegeneratingCover ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                         <span>마스터 표지 재생성 중...</span>
@@ -5198,7 +5283,7 @@ export default function Home() {
                     ) : (
                       <>
                         <span>🔄</span>
-                        <span>마스터 표지 단독 재생성</span>
+                        <span>마스터 표지 단독 재생성 ({packStickers.length > 0 ? `${packStickers.length}종` : '20종'} 반영)</span>
                       </>
                     )}
                   </button>
@@ -5261,7 +5346,7 @@ export default function Home() {
                   <button
                     onClick={async () => {
                       const allIds = [selectedPackCover.id, ...packStickers.map(s => s.id)];
-                      if (confirm(`이 마스터 팩 및 포함된 20개 스티커 전체 (${allIds.length}개 항목)를 삭제함으로 이동하시겠습니까?`)) {
+                      if (confirm(`이 마스터 팩 및 포함된 스티커 전체 (총 ${allIds.length}개 항목)를 삭제함으로 이동하시겠습니까?`)) {
                         await handleMoveToTrash(allIds);
                         setIsPackDetailModalOpen(false);
                       }
@@ -5279,7 +5364,7 @@ export default function Home() {
                 {loadingPackStickers ? (
                   <div className="py-24 text-center text-teal-800 font-medium space-y-3">
                     <div className="w-10 h-10 border-4 border-teal-300 border-t-teal-700 rounded-full animate-spin mx-auto"></div>
-                    <p className="text-sm">팩에 포함된 20종 스티커 목록을 불러오는 중입니다...</p>
+                    <p className="text-sm">팩에 포함된 스티커 목록을 불러오는 중입니다...</p>
                   </div>
                 ) : packStickers.length === 0 ? (
                   <div className="py-20 text-center text-gray-500 font-medium space-y-2">

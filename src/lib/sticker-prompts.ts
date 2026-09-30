@@ -25,6 +25,54 @@ export const STICKER_RULES_PROMPT_SUFFIX = `CRITICAL STICKER RULES:
 3. Any brand or catchphrase text MUST be drawn in an elegant, cute, hand-drawn script font with colors matching the design palette.
 4. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
 
+/**
+ * Formats a master cover title so that the count (e.g. 20종, 40종) dynamically reflects
+ * the actual number of stickers generated in the pack.
+ */
+export function formatCoverTitleWithCount(title: string, count: number): string {
+  if (!title || !count || count <= 0) return title || '';
+  
+  // If title has "20종" or any "N종", replace it with "${count}종"
+  if (/(\d+)\s*종/.test(title)) {
+    return title.replace(/(\d+)\s*종/g, `${count}종`);
+  }
+  
+  // If title has "20-pack" or "40-pack", replace it
+  if (/(\d+)-pack/i.test(title)) {
+    return title.replace(/(\d+)-pack/gi, `${count}-pack`);
+  }
+
+  // If title contains "스티커 팩", insert count
+  if (title.includes('스티커 팩')) {
+    return title.replace(/스티커\s*팩/g, `${count}종 스티커 팩`);
+  }
+
+  return `${title} (${count}종)`;
+}
+
+/**
+ * Formats a master cover prompt so that the headline typography number (e.g. "20+ CUTE", "40+ CUTE")
+ * dynamically reflects the actual number of stickers generated in the pack.
+ */
+export function formatCoverPromptWithCount(prompt: string, count: number): string {
+  if (!prompt || !count || count <= 0) return prompt || '';
+
+  let updated = prompt;
+
+  // Replace typography instruction: reading "20+ CUTE ..." -> reading "${count}+ CUTE ..."
+  updated = updated.replace(/reading\s*(["'])\s*(\d+)\+?\s*/gi, `reading $1${count}+ `);
+
+  // Replace any "20+ CUTE", "20+ SALTWATER", "20+ FRESHWATER", "20+ UNIQUE", etc.
+  updated = updated.replace(/\b(\d+)\+\s*([A-Za-z]+)/g, `${count}+ $2`);
+
+  // Replace any standalone "20+" or "20 stickers"
+  updated = updated.replace(/\b(\d+)\+\b/g, `${count}+`);
+  updated = updated.replace(/\b(\d+)\s+cute stickers\b/gi, `${count} cute stickers`);
+  updated = updated.replace(/\b(\d+)\s+stickers\b/gi, `${count} stickers`);
+
+  return updated;
+}
+
 export const PYGMY_PUMPKIN_SERIES: StickerPreset[] = [
   {
     id: 'pygmy-hippo-latte',

@@ -10,6 +10,7 @@ export interface MasterCoverBuilderOptions {
   subType?: string; // 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium'
   targetWidth?: number; // default 3000
   targetHeight?: number; // default 3000
+  stickerCount?: number;
 }
 
 function makeBackgroundTransparent(img: HTMLImageElement): HTMLCanvasElement {
@@ -366,8 +367,11 @@ export async function createCompositeMasterCover(
   const {
     subType = 'terrarium',
     targetWidth = 3000,
-    targetHeight = 3000
+    targetHeight = 3000,
+    stickerCount
   } = options;
+
+  const count = stickerCount || (stickers.length > 0 ? stickers.length : 20);
 
   let seriesTitle = 'TERRARIUM';
   let primaryColor = '#E11D48'; // Vibrant Rose Pink
@@ -601,10 +605,10 @@ export async function createCompositeMasterCover(
 
       ctx.font = `800 36px sans-serif`;
       ctx.fillStyle = '#854D0E';
-      ctx.fillText(`★ 20+ UNIQUE STICKERS ★`, centerX, pillY + 38);
+      ctx.fillText(`★ ${count}+ UNIQUE STICKERS ★`, centerX, pillY + 38);
 
-      // 2. Main Headline 1 ("20+ Cute")
-      drawPopText(`20+ Cute`, centerX, centerY - 180, `900 135px 'Pacifico', 'Comic Sans MS', sans-serif`, primaryColor, 26);
+      // 2. Main Headline 1 ("20+ Cute" or "40+ Cute")
+      drawPopText(`${count}+ Cute`, centerX, centerY - 180, `900 135px 'Pacifico', 'Comic Sans MS', sans-serif`, primaryColor, 26);
 
       // 3. Main Headline 2 ("[SERIES TITLE]")
       drawPopText(seriesTitle, centerX, centerY - 40, `900 130px 'Impact', 'Arial Black', sans-serif`, '#1E293B', 28);
@@ -658,7 +662,7 @@ export async function createCompositeMasterCover(
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillStyle = '#334155';
-      ctx.fillText(`🌸 20 UNIQUE HIGH QUALITY STICKERS  •  300 DPI TRANSPARENT PNG  •  INSTANT DOWNLOAD 🌸`, centerX, footerY);
+      ctx.fillText(`🌸 ${count} UNIQUE HIGH QUALITY STICKERS  •  300 DPI TRANSPARENT PNG  •  INSTANT DOWNLOAD 🌸`, centerX, footerY);
 
       // 7. Export JPEG with strict Firestore byte limit check (< 650,000 bytes)
       let quality = 0.85;
