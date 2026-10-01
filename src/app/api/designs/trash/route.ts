@@ -1,12 +1,21 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET(req: Request) {
   try {
     if (process.env.FIREBASE_PROJECT_ID) {
+      // Fetch ONLY lightweight metadata to prevent downloading hundreds of MB of base64 images
       const snapshot = await db
         .collection('designs')
         .where('is_deleted', '==', true)
+        .select(
+          'title', 'topic', 'tags', 'stickerPresetId', 'theme',
+          'sticker_sub', 'design_type', 'is_sticker', 'is_deleted',
+          'created_at', 'updated_at', 'deleted_at', 'catchphrase', 'season_name'
+        )
         .get();
 
       const now = Date.now();
@@ -25,19 +34,29 @@ export async function GET(req: Request) {
           expiredDocRefs.push(doc.ref);
         } else {
           const daysLeft = Math.max(0, 15 - Math.floor(diffMs / (24 * 60 * 60 * 1000)));
+          const versionTs = data.updated_at
+            ? new Date(data.updated_at).getTime()
+            : (data.created_at ? new Date(data.created_at).getTime() : now);
+
           activeTrashItems.push({
             id: doc.id,
             ...data,
+            // Stream image on demand instead of embedding heavy base64 strings
+            image_url: `/api/designs/image?id=${doc.id}&v=${versionTs}`,
             daysLeft
           });
         }
       });
 
-      // Execute auto cleanup for expired docs (>15 days)
+      // Execute auto cleanup for expired docs (>15 days) in safe chunks (<= 400 per batch)
       if (expiredDocRefs.length > 0) {
-        const batch = db.batch();
-        expiredDocRefs.forEach((ref: any) => batch.delete(ref));
-        await batch.commit();
+        const CHUNK_SIZE = 400;
+        for (let i = 0; i < expiredDocRefs.length; i += CHUNK_SIZE) {
+          const chunk = expiredDocRefs.slice(i, i + CHUNK_SIZE);
+          const batch = db.batch();
+          chunk.forEach((ref: any) => batch.delete(ref));
+          await batch.commit();
+        }
         console.log(`Auto-cleaned ${expiredDocRefs.length} expired trash items (>15 days).`);
       }
 
