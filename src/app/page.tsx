@@ -3330,11 +3330,11 @@ export default function Home() {
                     <button
                       onClick={() => handleBatchGenerateSeries(selectedStickerSeriesTab)}
                       disabled={isBatchGenerating}
-                      className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600"
-                      title="선택된 팩 20종 자동 일괄 연속 생성"
+                      className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600 whitespace-nowrap"
+                      title="선택된 팩 20종(표지 1장 + 스티커 20종 = 총 21장) 자동 일괄 연속 생성"
                     >
                       <span>⚡️</span>
-                      <span>[{getStickerSeriesTitle(selectedStickerSeriesTab).split(' ')[1] || '20종 팩'}] 일괄 생성</span>
+                      <span>[{getStickerSeriesTitle(selectedStickerSeriesTab).split(' ')[1] || '스티커'}] (20종) 일괄 생성</span>
                     </button>
 
                     <button
