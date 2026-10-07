@@ -5288,38 +5288,7 @@ export default function Home() {
                     )}
                   </button>
 
-                  <button
-                    onClick={() => {
-                      setSelectedDesign(selectedPackCover);
-                      if (selectedPackCover.recommended_mockup) {
-                        setSelectedMockupId(selectedPackCover.recommended_mockup);
-                      }
-                    }}
-                    className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
-                    title="마스터 표지를 상세보기 모달에서 지우개/텍스트/AI수정합니다"
-                  >
-                    <span>🛠️</span>
-                    <span>표지 상세 편집·AI수정</span>
-                  </button>
-
-                  <button
-                    onClick={() => handleGenerateAndOpenA4Sheet(packStickers, 'transparent')}
-                    disabled={a4SheetLoading || packStickers.length === 0}
-                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-indigo-500 cursor-pointer"
-                    title={packStickers.length > 20 ? "40종 스티커를 A4 규격 2장(메인 테마 20종 + 단독 낱개 20종)으로 자동 분할 정렬한 고화질 인쇄용 시트를 생성합니다" : "20종 스티커를 A4 규격 1장에 4x5로 자동 정렬한 고화질(300 DPI) 인쇄용 시트를 생성합니다"}
-                  >
-                    <span>🖨️</span>
-                    <span>A4 인쇄용 시트 ({packStickers.length > 20 ? '2장 세트' : '1장'})</span>
-                  </button>
-
-                  <button
-                    onClick={() => downloadBatchSession([selectedPackCover, ...packStickers], `${selectedPackCover.topic || 'Sticker_Pack'}_Bundle`)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-emerald-500"
-                  >
-                    <span>📦</span>
-                    <span>이 팩 전체 {packStickers.length}종 ZIP 일괄 다운로드</span>
-                  </button>
-
+                  {/* 1단계: 마스터 표지 다운로드 (Etsy 대표 사진 1번용) */}
                   <button
                     onClick={async () => {
                       try {
@@ -5337,10 +5306,50 @@ export default function Home() {
                         a.click();
                       }
                     }}
-                    className="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
+                    className="bg-teal-700 hover:bg-teal-800 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-teal-600 cursor-pointer"
+                    title="[1단계] Etsy 상품 등록 시 '1번 대표 사진'으로 올릴 고화질 마스터 표지를 다운로드합니다."
                   >
+                    <span className="bg-teal-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-teal-200">1단계</span>
                     <span>🖼️</span>
                     <span>마스터 표지 다운로드</span>
+                  </button>
+
+                  {/* 2단계: A4 인쇄용 시트 (Etsy 추가 사진 2~3번용 목업) */}
+                  <button
+                    onClick={() => handleGenerateAndOpenA4Sheet(packStickers, 'transparent')}
+                    disabled={a4SheetLoading || packStickers.length === 0}
+                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-indigo-500 cursor-pointer"
+                    title="[2단계] Etsy 상품 등록 시 '추가 사진(2~3번)'으로 올려 구매자에게 A4 출력 구성을 보여주는 인쇄용 시트를 다운로드합니다."
+                  >
+                    <span className="bg-indigo-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-indigo-200">2단계</span>
+                    <span>🖨️</span>
+                    <span>A4 인쇄용 시트 ({packStickers.length > 20 ? '2장 세트' : '1장'})</span>
+                  </button>
+
+                  {/* 3단계: 전체 ZIP 파일 일괄 다운로드 (Etsy Digital files 구매자 다운로드용) */}
+                  <button
+                    onClick={() => downloadBatchSession([selectedPackCover, ...packStickers], `${selectedPackCover.topic || 'Sticker_Pack'}_Bundle`)}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-emerald-500 cursor-pointer"
+                    title="[3단계] Etsy 상품 등록 시 'Digital files'에 올릴 40종 전체 + A4 시트 포함 정식 압축팩을 다운로드합니다."
+                  >
+                    <span className="bg-emerald-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-emerald-200">3단계</span>
+                    <span>📦</span>
+                    <span>이 팩 전체 {packStickers.length}종 ZIP 일괄 다운로드</span>
+                  </button>
+
+                  {/* 부가 도구: 표지 편집 및 삭제 */}
+                  <button
+                    onClick={() => {
+                      setSelectedDesign(selectedPackCover);
+                      if (selectedPackCover.recommended_mockup) {
+                        setSelectedMockupId(selectedPackCover.recommended_mockup);
+                      }
+                    }}
+                    className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
+                    title="마스터 표지를 상세보기 모달에서 지우개/텍스트/AI수정합니다"
+                  >
+                    <span>🛠️</span>
+                    <span>표지 편집</span>
                   </button>
 
                   <button
@@ -5351,11 +5360,24 @@ export default function Home() {
                         setIsPackDetailModalOpen(false);
                       }
                     }}
-                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-sm transition-colors flex items-center gap-1.5"
+                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
                   >
                     <span>🗑️</span>
-                    <span>팩 전체 삭제</span>
+                    <span>팩 삭제</span>
                   </button>
+                </div>
+
+                {/* 하단 친절한 Etsy 등록 3단계 안내 가이드 배너 */}
+                <div className="mt-3 bg-amber-50/90 border border-amber-200 text-amber-900 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-2xs">
+                  <div className="flex items-start sm:items-center gap-2 text-xs font-semibold leading-relaxed">
+                    <span className="text-base shrink-0">💡</span>
+                    <span>
+                      <strong className="text-amber-950 font-black">Etsy 간편 등록 3단계:</strong>{' '}
+                      <span className="inline-block bg-amber-200/80 text-amber-900 px-1.5 py-0.5 rounded font-black mr-1">1단계</span> <strong>마스터 표지</strong>를 받아 <strong>대표 사진</strong> 등록 ➔{' '}
+                      <span className="inline-block bg-indigo-100 text-indigo-900 px-1.5 py-0.5 rounded font-black mr-1">2단계</span> <strong>A4 시트</strong>를 받아 <strong>추가 사진</strong> 등록 ➔{' '}
+                      <span className="inline-block bg-emerald-100 text-emerald-900 px-1.5 py-0.5 rounded font-black mr-1">3단계</span> <strong>전체 ZIP</strong>(A4 시트 자동포함됨)을 받아 <strong>Digital files</strong>에 업로드하면 끝!
+                    </span>
+                  </div>
                 </div>
               </div>
 
