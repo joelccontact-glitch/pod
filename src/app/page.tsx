@@ -35,6 +35,7 @@ import { createCompositeMasterCover } from '@/lib/master-cover-builder';
 import { generateA4StickerSheet, generateA4StickerSheets } from '@/lib/sticker-sheet-builder';
 import { generateCreativeFabricaTags, formatCFTagsForClipboard } from '@/lib/creative-fabrica-tags';
 import { extractStandaloneStickerFromTank } from '@/lib/standalone-extractor';
+import { createVesselStickerFromStandalone } from '@/lib/vessel-housing-builder';
 
 const isCoverDesign = (d: any) => {
   if (!d) return false;
@@ -720,6 +721,110 @@ export default function Home() {
     } finally {
       setIsExtractingStandalone(false);
       setExtractProgress(null);
+    }
+  };
+
+  const [isBuildingVessels, setIsBuildingVessels] = useState(false);
+  const [vesselProgress, setVesselProgress] = useState<{ current: number; total: number; label: string } | null>(null);
+
+  const handleBuildAllVesselsFromStandalone = async () => {
+    if (!selectedPackCover || packStickers.length === 0) return;
+
+    const standaloneStickers = packStickers.filter((s: any) => {
+      const title = (s.title || s.prompt || '').toLowerCase();
+      const preset = (s.stickerPresetId || '').toLowerCase();
+      return title.includes('단일') || title.includes('단독') || preset.includes('standalone');
+    });
+
+    if (standaloneStickers.length === 0) {
+      alert('독립 스티커를 찾을 수 없습니다.');
+      return;
+    }
+
+    if (!confirm(`현재 독립 스티커 ${standaloneStickers.length}종 원본을 테마별 크리스털 유리 돔/병 안에 쏙 넣어, 100% 동일한 어항/유리병 스티커로 합성·교체하시겠습니까?`)) {
+      return;
+    }
+
+    setIsBuildingVessels(true);
+    let successCount = 0;
+
+    try {
+      const coverCategory = getDesignCategoryKey(selectedPackCover);
+      const seasonalPresets = getSeasonalPackPresets(coverCategory);
+      const vesselSeries = seasonalPresets?.vesselSeries || [];
+
+      for (let idx = 0; idx < standaloneStickers.length; idx++) {
+        const standalone = standaloneStickers[idx];
+        const defaultName = vesselSeries[idx + 1]?.name || `${standalone.title ? standalone.title.replace(/ 단일| 단독| 스티커/gi, '') : '아이템'} 유리 돔 스티커`;
+        setVesselProgress({
+          current: idx + 1,
+          total: standaloneStickers.length,
+          label: `${defaultName} (100% 실물 어항 결합 중...)`
+        });
+
+        try {
+          const vesselUrl = await createVesselStickerFromStandalone(
+            standalone.image_url,
+            {
+              theme: coverCategory,
+              characterIndex: idx
+            }
+          );
+
+          const existingVessel = packStickers.find((s: any) => {
+            const title = (s.title || '').toLowerCase();
+            const preset = (s.stickerPresetId || '').toLowerCase();
+            const isStand = title.includes('단일') || title.includes('단독') || preset.includes('standalone');
+            return !isStand && (s.stickerPresetId === vesselSeries[idx + 1]?.id || title.includes(defaultName) || title.includes(standalone.title));
+          });
+
+          const compressedUrl = await compressImageForFirestore(vesselUrl, 800000);
+          const designData = {
+            image_url: compressedUrl,
+            title: defaultName,
+            topic: defaultName,
+            prompt: `100% Real Standalone Housed in Glass Vessel: ${defaultName} on pure solid white background (#FFFFFF)`,
+            stickerPresetId: vesselSeries[idx + 1]?.id || `vessel-${standalone.id}`,
+            sticker_sub: coverCategory,
+            design_type: 'sticker',
+            is_deleted: false,
+            updated_at: new Date().toISOString()
+          };
+
+          if (existingVessel) {
+            await fetch('/api/designs/update', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: existingVessel.id,
+                updates: designData
+              })
+            });
+          } else {
+            await fetch('/api/designs/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: `${designData.stickerPresetId}-${Date.now()}`,
+                designData: { ...designData, created_at: new Date().toISOString() }
+              })
+            });
+          }
+          successCount++;
+        } catch (e) {
+          console.error(`Failed to build vessel for standalone ${standalone.id}:`, e);
+        }
+      }
+
+      alert(`✨ 독립 스티커 ${successCount}종에서 100% 실물 일치 어항/유리병 스티커 합성이 완료되었습니다!`);
+      await handleOpenPackDetail(selectedPackCover);
+      await fetchDesigns(page, false, undefined, undefined, true);
+    } catch (e: any) {
+      console.error('Error in handleBuildAllVesselsFromStandalone:', e);
+      alert('어항 스티커 합성 중 오류가 발생했습니다: ' + (e.message || String(e)));
+    } finally {
+      setIsBuildingVessels(false);
+      setVesselProgress(null);
     }
   };
 
@@ -5425,22 +5530,22 @@ export default function Home() {
                     )}
                   </button>
 
-                  {/* ✂️ 독립 스티커 100% 실물 추출 버튼 */}
+                  {/* 🏺 대안 B: 독립 스티커 ➔ 어항/유리병 스티커 100% 실물 결합 버튼 */}
                   <button
-                    onClick={handleExtractAllStandaloneFromTanks}
-                    disabled={isExtractingStandalone || packStickers.length === 0}
-                    className="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 hover:from-amber-700 hover:to-rose-700 disabled:opacity-50 text-white font-black text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-amber-400 cursor-pointer"
-                    title="어항/유리병 본품 스티커 내부의 주인공 캐릭터를 100% 오차 없이 직접 추출하여 일치하는 독립 스티커 세트로 변환합니다"
+                    onClick={handleBuildAllVesselsFromStandalone}
+                    disabled={isBuildingVessels || packStickers.length === 0}
+                    className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 disabled:opacity-50 text-white font-black text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-emerald-400 cursor-pointer"
+                    title="현재 세트의 독립 스티커 원본을 테마별 크리스털 유리 돔/병 안에 쏙 넣어, 100% 오차 없는 어항/유리병 스티커 20종으로 합성 완성합니다"
                   >
-                    {isExtractingStandalone ? (
+                    {isBuildingVessels ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>{extractProgress ? `${extractProgress.current}/${extractProgress.total} 실물 추출 중...` : '실물 추출 중...'}</span>
+                        <span>{vesselProgress ? `${vesselProgress.current}/${vesselProgress.total} 어항 결합 중...` : '어항 결합 중...'}</span>
                       </>
                     ) : (
                       <>
-                        <span className="text-base">✂️</span>
-                        <span>독립 스티커 100% 실물 추출</span>
+                        <span className="text-base">🏺</span>
+                        <span>독립 ➔ 어항 스티커 100% 실물 결합</span>
                       </>
                     )}
                   </button>
