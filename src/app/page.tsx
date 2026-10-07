@@ -2590,28 +2590,26 @@ export default function Home() {
       }
 
       // For i > 0 (Main stickers):
-      // SOLUTION B: Generate clean standalone character first, then house into 100% identical glass vessel!
-      const standalonePreset = isBothMode ? (targetStandalonePresets[i] || targetPresets[i]) : targetPresets[i];
+      // GOLDEN COMPROMISE: Generate glorious original AI vessels + clean standalone theme stickers!
       const vesselPreset = targetPresets[i];
+      const standalonePreset = targetStandalonePresets[i] || targetPresets[i];
 
+      // 1. Generate Glorious Original AI Vessel/Tank Sticker
       setBatchProgress({
         current: isBothMode ? (i - 1) * 2 + 2 : i + 1,
         total: totalExpectedCount,
-        label: `${standalonePreset.name} (순수 단독 스티커 AI 생성)`,
+        label: `${vesselPreset.name} (화려한 어항 본품 AI 생성)`,
         packTitle: packName
       });
 
-      let createdStandaloneUrl = '';
-
-      // 1. Generate clean standalone character via AI (No glass, no container, pure full body)
       try {
         const res = await fetch('/api/designs/from-image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             imageBase64: '',
-            prompt: standalonePreset.prompt,
-            title: standalonePreset.name,
+            prompt: vesselPreset.prompt,
+            title: vesselPreset.name,
             isPreview: true,
             styleId: selectedStyleId,
             catchphrase: '',
@@ -2620,8 +2618,7 @@ export default function Home() {
         });
         const data = await res.json();
         if (data.success && data.data?.image_url) {
-          createdStandaloneUrl = data.data.image_url;
-          const compressedUrl = await compressImageForFirestore(createdStandaloneUrl, 800000);
+          const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
           await fetch('/api/designs/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2630,9 +2627,9 @@ export default function Home() {
               designData: {
                 ...data.data,
                 image_url: compressedUrl,
-                title: standalonePreset.name,
-                topic: standalonePreset.name,
-                stickerPresetId: standalonePreset.id,
+                title: vesselPreset.name,
+                topic: vesselPreset.name,
+                stickerPresetId: vesselPreset.id,
                 sticker_sub: subKey,
                 design_type: 'sticker',
                 is_deleted: false
@@ -2642,51 +2639,56 @@ export default function Home() {
           successCount++;
         }
       } catch (e) {
-        console.error(`Failed to generate standalone sticker for ${standalonePreset.name}:`, e);
+        console.error(`Failed to generate vessel sticker for ${vesselPreset.name}:`, e);
       }
 
-      // 2. If in both mode, house the 100% real standalone character into a glass vessel on Canvas!
-      if (isBothMode && createdStandaloneUrl) {
+      // 2. If in both mode, generate clean standalone theme sticker (Zero crops, pure full-body single sticker!)
+      if (isBothMode && standalonePreset) {
         setBatchProgress({
           current: (i - 1) * 2 + 3,
           total: totalExpectedCount,
-          label: `${vesselPreset.name} (100% 실물 어항 결합)`,
+          label: `${standalonePreset.name} (깨끗한 테마 단독 스티커 AI 생성)`,
           packTitle: packName
         });
 
         try {
-          const vesselUrl = await createVesselStickerFromStandalone(
-            createdStandaloneUrl,
-            {
-              theme: subKey,
-              characterIndex: i
-            }
-          );
-
-          const compressedVesselUrl = await compressImageForFirestore(vesselUrl, 800000);
-          const vesselDesign = {
-            image_url: compressedVesselUrl,
-            title: vesselPreset.name,
-            topic: vesselPreset.name,
-            prompt: `100% Real Standalone Housed in Glass Vessel: ${vesselPreset.name} on pure solid white background (#FFFFFF)`,
-            stickerPresetId: vesselPreset.id,
-            sticker_sub: subKey,
-            design_type: 'sticker',
-            is_deleted: false,
-            created_at: new Date().toISOString()
-          };
-
-          await fetch('/api/designs/save', {
+          const res = await fetch('/api/designs/from-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              id: `${vesselPreset.id}-${Date.now()}`,
-              designData: vesselDesign
+              imageBase64: '',
+              prompt: standalonePreset.prompt,
+              title: standalonePreset.name,
+              isPreview: true,
+              styleId: selectedStyleId,
+              catchphrase: '',
+              autoPhrase: false
             })
           });
-          successCount++;
+          const data = await res.json();
+          if (data.success && data.data?.image_url) {
+            const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
+            await fetch('/api/designs/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: data.data.id,
+                designData: {
+                  ...data.data,
+                  image_url: compressedUrl,
+                  title: standalonePreset.name,
+                  topic: standalonePreset.name,
+                  stickerPresetId: standalonePreset.id,
+                  sticker_sub: subKey,
+                  design_type: 'sticker',
+                  is_deleted: false
+                }
+              })
+            });
+            successCount++;
+          }
         } catch (e) {
-          console.error(`Failed to house vessel for ${vesselPreset.name}:`, e);
+          console.error(`Failed to generate standalone sticker for ${standalonePreset.name}:`, e);
         }
       }
     }
@@ -5553,25 +5555,6 @@ export default function Home() {
                     )}
                   </button>
 
-                  {/* 🏺 대안 B: 독립 스티커 ➔ 어항/유리병 스티커 100% 실물 결합 버튼 */}
-                  <button
-                    onClick={handleBuildAllVesselsFromStandalone}
-                    disabled={isBuildingVessels || packStickers.length === 0}
-                    className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 disabled:opacity-50 text-white font-black text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-emerald-400 cursor-pointer"
-                    title="현재 세트의 독립 스티커 원본을 테마별 크리스털 유리 돔/병 안에 쏙 넣어, 100% 오차 없는 어항/유리병 스티커 20종으로 합성 완성합니다"
-                  >
-                    {isBuildingVessels ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>{vesselProgress ? `${vesselProgress.current}/${vesselProgress.total} 어항 결합 중...` : '어항 결합 중...'}</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-base">🏺</span>
-                        <span>독립 ➔ 어항 스티커 100% 실물 결합</span>
-                      </>
-                    )}
-                  </button>
 
                   {/* 1단계: 마스터 표지 다운로드 (Etsy 대표 사진 1번용) */}
                   <button
