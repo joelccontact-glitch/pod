@@ -317,44 +317,74 @@ export async function createCompositeMasterCover(
     }
   }
 
-  // 20 LARGE OVERLAPPING ANCHOR SLOTS ARRANGED IN A WREATH FRAME
-  // Pushed outward to provide a massive clear central space (X: 650-2350, Y: 980-1950) for the bold title
+  // 24 BALANCED ANCHOR SLOTS DESIGNED TO ELIMINATE SPARSE VOIDS (Matches Etsy Bestseller Density)
+  // 1) Yellow Zone 1 (Above "[COUNT]+ CUTE"): Slots 5, 6, 7, 8, 9 fill the upper space seamlessly
+  //    - Slot 7 (x: 1500, y: 620) directly fills the center gap right above "40+ CUTE"
+  // 2) Yellow Zone 2 (Below Ribbon Banner): Slots 16, 17, 18 fill the lower space seamlessly
+  //    - Slot 17 (x: 1500, y: 2080) directly fills the center gap right under the ribbon banner
   const ANCHOR_SLOTS = [
-    // 1. TOP ARCH (5 stickers across the top perimeter)
-    { x: 360,  y: 380,  tilt: -12, scale: 0.90 },
-    { x: 920,  y: 300,  tilt: 7,   scale: 0.88 },
-    { x: 1500, y: 270,  tilt: -4,  scale: 0.88 },
-    { x: 2080, y: 300,  tilt: 8,   scale: 0.88 },
-    { x: 2640, y: 380,  tilt: -10, scale: 0.90 },
+    // --- 1. TOP PERIMETER ROW (5 slots) ---
+    { x: 380,  y: 340,  tilt: -11, scale: 0.88, isJar: true },
+    { x: 920,  y: 280,  tilt: 6,   scale: 0.84, isJar: false },
+    { x: 1500, y: 240,  tilt: -2,  scale: 0.88, isJar: true },
+    { x: 2080, y: 280,  tilt: 7,   scale: 0.84, isJar: false },
+    { x: 2620, y: 340,  tilt: -10, scale: 0.88, isJar: true },
 
-    // 2. UPPER CORNERS (2 stickers framing upper diagonals)
-    { x: 620,  y: 780,  tilt: -7,  scale: 0.82 },
-    { x: 2380, y: 780,  tilt: 8,   scale: 0.82 },
+    // --- 2. UPPER FILLER ARC - YELLOW ZONE 1 (5 slots directly above "40+ CUTE") ---
+    { x: 600,  y: 760,  tilt: -8,  scale: 0.82, isJar: false },
+    { x: 1080, y: 680,  tilt: 6,   scale: 0.82, isJar: false },
+    { x: 1500, y: 620,  tilt: -3,  scale: 0.84, isJar: false }, // ★ Fills yellow zone 1 directly above "40+ CUTE"
+    { x: 1920, y: 680,  tilt: -6,  scale: 0.82, isJar: false },
+    { x: 2400, y: 760,  tilt: 8,   scale: 0.82, isJar: false },
 
-    // 3. LEFT FLANK (3 stickers along outer left wall)
-    { x: 300,  y: 960,  tilt: 10,  scale: 0.90 },
-    { x: 260,  y: 1500, tilt: -8,  scale: 0.90 },
-    { x: 320,  y: 2040, tilt: 9,   scale: 0.90 },
+    // --- 3. LEFT FLANK (3 slots along outer left wall) ---
+    { x: 300,  y: 980,  tilt: 10,  scale: 0.88, isJar: true },
+    { x: 260,  y: 1520, tilt: -7,  scale: 0.88, isJar: true },
+    { x: 320,  y: 2060, tilt: 8,   scale: 0.88, isJar: true },
 
-    // 4. RIGHT FLANK (3 stickers along outer right wall)
-    { x: 2700, y: 960,  tilt: -9,  scale: 0.90 },
-    { x: 2740, y: 1500, tilt: 8,   scale: 0.90 },
-    { x: 2680, y: 2040, tilt: -10, scale: 0.90 },
+    // --- 4. RIGHT FLANK (3 slots along outer right wall) ---
+    { x: 2700, y: 980,  tilt: -9,  scale: 0.88, isJar: true },
+    { x: 2740, y: 1520, tilt: 7,   scale: 0.88, isJar: true },
+    { x: 2680, y: 2060, tilt: -10, scale: 0.88, isJar: true },
 
-    // 5. LOWER FLANK SUPPORTS (2 stickers supporting underneath the ribbon banner flanks)
-    { x: 900,  y: 2080, tilt: -6,  scale: 0.80 },
-    { x: 2100, y: 2080, tilt: 7,   scale: 0.80 },
+    // --- 5. LOWER FILLER ROW - YELLOW ZONE 2 (3 slots directly under Ribbon Banner) ---
+    { x: 960,  y: 2100, tilt: -6,  scale: 0.84, isJar: false },
+    { x: 1500, y: 2080, tilt: 4,   scale: 0.86, isJar: false }, // ★ Fills yellow zone 2 directly under Ribbon Banner
+    { x: 2040, y: 2100, tilt: 6,   scale: 0.84, isJar: false },
 
-    // 6. BOTTOM ARCH (5 stickers across the bottom perimeter)
-    { x: 550,  y: 2580, tilt: -8,  scale: 0.88 },
-    { x: 1020, y: 2680, tilt: 6,   scale: 0.88 },
-    { x: 1500, y: 2720, tilt: -5,  scale: 0.90 },
-    { x: 1980, y: 2680, tilt: 7,   scale: 0.88 },
-    { x: 2450, y: 2580, tilt: -9,  scale: 0.88 },
+    // --- 6. BOTTOM PERIMETER ROW (5 slots) ---
+    { x: 520,  y: 2600, tilt: -8,  scale: 0.86, isJar: true },
+    { x: 1000, y: 2680, tilt: 5,   scale: 0.84, isJar: false },
+    { x: 1500, y: 2720, tilt: -3,  scale: 0.88, isJar: true },
+    { x: 2000, y: 2680, tilt: 6,   scale: 0.84, isJar: false },
+    { x: 2480, y: 2600, tilt: -8,  scale: 0.86, isJar: true },
   ];
 
-  // Take actual stickers to render (up to 20 anchor slots)
-  const realStickersToRender = stickers.slice(0, 20);
+  // Intelligently distribute jars and standalone elements across the 24 slots
+  const realStickersToRender: any[] = [];
+  if (stickers.length >= 28) {
+    const half = Math.floor(stickers.length / 2);
+    const jars = stickers.slice(0, half);
+    const standalones = stickers.slice(half);
+
+    let jIdx = 0;
+    let sIdx = 0;
+
+    for (let i = 0; i < ANCHOR_SLOTS.length; i++) {
+      const slot = ANCHOR_SLOTS[i];
+      if (slot.isJar) {
+        realStickersToRender.push(jars[jIdx % jars.length]);
+        jIdx++;
+      } else {
+        realStickersToRender.push(standalones[sIdx % standalones.length]);
+        sIdx++;
+      }
+    }
+  } else if (stickers.length > 0) {
+    for (let i = 0; i < ANCHOR_SLOTS.length; i++) {
+      realStickersToRender.push(stickers[i % stickers.length]);
+    }
+  }
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -380,12 +410,12 @@ export async function createCompositeMasterCover(
       ctx.lineWidth = 14;
       ctx.strokeRect(8, 8, targetWidth - 16, targetHeight - 16);
 
-      // 3. Load all 20 main sticker images concurrently
+      // 3. Load all sticker images concurrently
       const loadPromises = realStickersToRender.map((s) => {
         return new Promise<HTMLImageElement | null>((res) => {
           const img = new Image();
           img.crossOrigin = 'anonymous';
-          img.src = s.image_url || s.url;
+          img.src = s?.image_url || s?.url || '';
           img.onload = () => res(img);
           img.onerror = () => res(null);
         });
@@ -393,8 +423,8 @@ export async function createCompositeMasterCover(
 
       const loadedImages = await Promise.all(loadPromises);
 
-      // 4. Render ALL 20 Main Stickers with Die-Cut Shadows
-      const baseMaxDim = 840; // 840px base size creates perfect overlap without encroaching center
+      // 4. Render Main Stickers with Die-Cut Shadows
+      const baseMaxDim = 780; // 780px base size creates cozy, rich coverage without encroaching center
 
       for (let i = 0; i < loadedImages.length; i++) {
         const img = loadedImages[i];
