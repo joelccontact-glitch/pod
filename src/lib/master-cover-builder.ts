@@ -104,258 +104,119 @@ function makeBackgroundTransparent(img: HTMLImageElement): HTMLCanvasElement {
   return c;
 }
 
-function drawDieCutBorderPath(ctx: CanvasRenderingContext2D, drawShape: () => void) {
-  ctx.save();
-  // Thick smooth white die-cut border around standalone element
-  ctx.strokeStyle = '#FFFFFF';
-  ctx.lineWidth = 36;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-  ctx.beginPath();
-  drawShape();
-  ctx.stroke();
-  ctx.restore();
-}
 
-function drawStandaloneThemeSticker(
+
+/**
+ * Classic 3D Folded Swallowtail Ribbon Banner (Etsy Bestseller Style)
+ * Hand-drawn aesthetic with bold dark outlines, 3D folded ends, and clean white rounded text.
+ */
+function drawClassicRibbonBanner(
   ctx: CanvasRenderingContext2D,
-  subType: string,
-  index: number,
-  x: number,
-  y: number,
-  scale: number = 1.0,
-  tilt: number = 0
+  cx: number,
+  cy: number,
+  text: string,
+  ribbonFill: string,
+  ribbonFold: string,
+  outlineColor: string = '#261208'
 ) {
   ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate((tilt * Math.PI) / 180);
-  ctx.scale(scale, scale);
 
-  // Sticker Drop Shadow & Thick White Die-Cut Border setup
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.20)';
-  ctx.shadowBlur = 32;
-  ctx.shadowOffsetX = 4;
-  ctx.shadowOffsetY = 12;
+  const bannerW = 980;
+  const bannerH = 110;
+  const arch = 20; // gentle upward curvature
+  const strokeW = 8;
 
-  if (subType === 'terrarium') {
-    const type = index % 6;
-    if (type === 0) {
-      // 1. Succulent Rosette
-      drawDieCutBorderPath(ctx, () => {
-        ctx.arc(0, 0, 95, 0, Math.PI * 2);
-      });
-      ctx.fillStyle = '#059669';
-      for (let i = 0; i < 8; i++) {
-        ctx.save();
-        ctx.rotate((i * Math.PI) / 4);
-        ctx.beginPath();
-        ctx.ellipse(0, -45, 26, 42, 0, 0, Math.PI * 2);
-        ctx.fillStyle = i % 2 === 0 ? '#34D399' : '#10B981';
-        ctx.fill();
-        ctx.strokeStyle = '#065F46';
-        ctx.lineWidth = 4;
-        ctx.stroke();
-        ctx.fillStyle = '#F472B6';
-        ctx.beginPath();
-        ctx.arc(0, -78, 10, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-      ctx.fillStyle = '#F472B6';
-      ctx.beginPath();
-      ctx.arc(0, 0, 22, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (type === 1) {
-      // 2. Red Toadstool Mushroom Pair
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-80, -90, 160, 170);
-      });
-      ctx.fillStyle = '#FEF08A';
-      ctx.beginPath(); ctx.roundRect(-45, -10, 30, 80, 14); ctx.fill();
-      ctx.beginPath(); ctx.roundRect(10, 10, 25, 60, 12); ctx.fill();
-      ctx.fillStyle = '#EF4444';
-      ctx.beginPath(); ctx.arc(-30, -20, 52, Math.PI, 0); ctx.fill();
-      ctx.beginPath(); ctx.arc(22, 0, 38, Math.PI, 0); ctx.fill();
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath(); ctx.arc(-45, -45, 10, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(-15, -55, 12, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(-30, -30, 8, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(15, -20, 8, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(32, -12, 7, 0, Math.PI * 2); ctx.fill();
-    } else if (type === 2) {
-      // 3. Mini Potted Cactus
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-70, -90, 140, 170);
-      });
-      ctx.fillStyle = '#F97316';
-      ctx.beginPath(); ctx.moveTo(-50, 0); ctx.lineTo(-40, 75); ctx.lineTo(40, 75); ctx.lineTo(50, 0); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#10B981';
-      ctx.beginPath(); ctx.roundRect(-35, -70, 70, 80, 32); ctx.fill();
-      ctx.fillStyle = '#EC4899';
-      ctx.beginPath(); ctx.arc(0, -75, 16, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#FDE047';
-      ctx.beginPath(); ctx.arc(0, -75, 7, 0, Math.PI * 2); ctx.fill();
-    } else if (type === 3) {
-      // 4. Amethyst Crystal Cluster
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-70, -85, 140, 160);
-      });
-      ctx.fillStyle = '#8B5CF6';
-      ctx.beginPath(); ctx.moveTo(-20, 60); ctx.lineTo(-50, -30); ctx.lineTo(-25, -75); ctx.lineTo(0, -30); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#A855F7';
-      ctx.beginPath(); ctx.moveTo(0, 60); ctx.lineTo(15, -40); ctx.lineTo(40, -85); ctx.lineTo(55, -30); ctx.closePath(); ctx.fill();
-      ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 4;
-      ctx.beginPath(); ctx.moveTo(-35, -40); ctx.lineTo(-25, -65); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(25, -45); ctx.lineTo(38, -75); ctx.stroke();
-    } else if (type === 4) {
-      // 5. Fern / Leaf Sprig
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-70, -85, 140, 170);
-      });
-      ctx.fillStyle = '#059669';
-      ctx.beginPath(); ctx.ellipse(0, 0, 50, 75, -0.3, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#047857'; ctx.lineWidth = 6;
-      ctx.beginPath(); ctx.moveTo(0, 75); ctx.lineTo(0, -75); ctx.stroke();
-    } else {
-      // 6. Airplant (Tillandsia)
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-80, -80, 160, 160);
-      });
-      ctx.fillStyle = '#10B981';
-      for (let a = -1.2; a <= 1.2; a += 0.4) {
-        ctx.save();
-        ctx.rotate(a);
-        ctx.beginPath(); ctx.ellipse(0, -45, 12, 50, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-      }
-      ctx.fillStyle = '#F472B6';
-      ctx.beginPath(); ctx.arc(-25, 45, 18, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(10, 50, 22, 0, Math.PI * 2); ctx.fill();
-    }
-  } else if (subType === 'saltaquarium') {
-    const type = index % 5;
-    if (type === 0) {
-      // Clownfish (Nemo)
-      drawDieCutBorderPath(ctx, () => {
-        ctx.ellipse(0, 0, 85, 55, 0, 0, Math.PI * 2);
-      });
-      ctx.fillStyle = '#F97316';
-      ctx.beginPath(); ctx.ellipse(0, 0, 70, 42, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(60, 0); ctx.lineTo(90, -30); ctx.lineTo(90, 30); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#FFFFFF'; ctx.strokeStyle = '#000000'; ctx.lineWidth = 4;
-      ctx.beginPath(); ctx.roundRect(-45, -38, 20, 76, 10); ctx.fill(); ctx.stroke();
-      ctx.beginPath(); ctx.roundRect(0, -42, 22, 84, 10); ctx.fill(); ctx.stroke();
-      ctx.beginPath(); ctx.roundRect(45, -28, 16, 56, 8); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.arc(-42, -10, 8, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(-44, -12, 3, 0, Math.PI * 2); ctx.fill();
-    } else if (type === 1) {
-      // Blue Tang (Dory)
-      drawDieCutBorderPath(ctx, () => {
-        ctx.ellipse(0, 0, 85, 55, 0, 0, Math.PI * 2);
-      });
-      ctx.fillStyle = '#2563EB';
-      ctx.beginPath(); ctx.ellipse(-10, 0, 65, 45, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#FACC15';
-      ctx.beginPath(); ctx.moveTo(45, 0); ctx.lineTo(85, -32); ctx.lineTo(85, 32); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.arc(-50, -10, 8, 0, Math.PI * 2); ctx.fill();
-    } else if (type === 2) {
-      // Yellow Seahorse
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-50, -90, 100, 180);
-      });
-      ctx.fillStyle = '#FACC15';
-      ctx.beginPath(); ctx.arc(0, -45, 32, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(-5, 10, 26, 45, 0.2, 0, Math.PI * 2); ctx.fill();
-      ctx.lineWidth = 16; ctx.strokeStyle = '#FACC15'; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.arc(15, 60, 25, 0, Math.PI); ctx.stroke();
-      ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.arc(-12, -50, 7, 0, Math.PI * 2); ctx.fill();
-    } else if (type === 3) {
-      // Coral Reef Cluster
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-80, -80, 160, 160);
-      });
-      ctx.fillStyle = '#EC4899';
-      for (let r = -50; r <= 50; r += 25) {
-        ctx.beginPath(); ctx.roundRect(r, -60, 22, 90, 12); ctx.fill();
-      }
-    } else {
-      // Sea Kelp
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-60, -90, 120, 180);
-      });
-      ctx.fillStyle = '#10B981';
-      ctx.lineWidth = 18; ctx.strokeStyle = '#10B981'; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(-20, 80); ctx.quadraticCurveTo(30, 0, -10, -80); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(10, 80); ctx.quadraticCurveTo(-40, 10, 20, -70); ctx.stroke();
-    }
-  } else if (subType === 'vivarium') {
-    const type = index % 4;
-    if (type === 0) {
-      // Green Tree Frog
-      drawDieCutBorderPath(ctx, () => {
-        ctx.ellipse(0, 0, 75, 55, 0, 0, Math.PI * 2);
-      });
-      ctx.fillStyle = '#22C55E'; ctx.beginPath(); ctx.ellipse(0, 5, 55, 40, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#EAB308'; ctx.beginPath(); ctx.arc(-30, -30, 16, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(30, -30, 16, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.arc(-30, -30, 8, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(30, -30, 8, 0, Math.PI * 2); ctx.fill();
-    } else if (type === 1) {
-      // Baby Chameleon
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-75, -75, 150, 150);
-      });
-      ctx.fillStyle = '#10B981'; ctx.beginPath(); ctx.arc(-10, -10, 45, 0, Math.PI * 2); ctx.fill();
-      ctx.lineWidth = 14; ctx.strokeStyle = '#10B981'; ctx.beginPath(); ctx.arc(35, 20, 25, 0, Math.PI * 1.5); ctx.stroke();
-      ctx.fillStyle = '#FACC15'; ctx.beginPath(); ctx.arc(-28, -22, 14, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#000000'; ctx.beginPath(); ctx.arc(-28, -22, 6, 0, Math.PI * 2); ctx.fill();
-    } else if (type === 2) {
-      // Monstera Leaf
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-70, -85, 140, 170);
-      });
-      ctx.fillStyle = '#047857'; ctx.beginPath(); ctx.ellipse(0, 0, 55, 75, 0, 0, Math.PI * 2); ctx.fill();
-    } else {
-      // Mossy Stone
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-75, -60, 150, 120);
-      });
-      ctx.fillStyle = '#64748B'; ctx.beginPath(); ctx.ellipse(0, 10, 65, 40, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#22C55E'; ctx.beginPath(); ctx.ellipse(0, -15, 55, 25, 0, 0, Math.PI * 2); ctx.fill();
-    }
-  } else {
-    // Freshwater Aquarium
-    const type = index % 4;
-    if (type === 0) {
-      // Red Betta Fish
-      drawDieCutBorderPath(ctx, () => {
-        ctx.ellipse(0, 0, 85, 55, 0, 0, Math.PI * 2);
-      });
-      ctx.fillStyle = '#EF4444'; ctx.beginPath(); ctx.ellipse(-20, 0, 45, 30, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(10, 0); ctx.quadraticCurveTo(80, -60, 90, 0); ctx.quadraticCurveTo(80, 60, 10, 0); ctx.fill();
-    } else if (type === 1) {
-      // Neon Tetra
-      drawDieCutBorderPath(ctx, () => {
-        ctx.ellipse(0, 0, 75, 45, 0, 0, Math.PI * 2);
-      });
-      ctx.fillStyle = '#06B6D4'; ctx.beginPath(); ctx.ellipse(0, 0, 60, 22, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#EF4444'; ctx.beginPath(); ctx.ellipse(15, 5, 35, 12, 0, 0, Math.PI * 2); ctx.fill();
-    } else if (type === 2) {
-      // Yellow Guppy
-      drawDieCutBorderPath(ctx, () => {
-        ctx.ellipse(0, 0, 80, 50, 0, 0, Math.PI * 2);
-      });
-      ctx.fillStyle = '#FACC15'; ctx.beginPath(); ctx.ellipse(-25, 0, 35, 22, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(75, -45); ctx.lineTo(75, 45); ctx.closePath(); ctx.fill();
-    } else {
-      // Water Plant
-      drawDieCutBorderPath(ctx, () => {
-        ctx.rect(-50, -85, 100, 170);
-      });
-      ctx.fillStyle = '#10B981'; ctx.lineWidth = 14; ctx.strokeStyle = '#10B981'; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(0, 75); ctx.lineTo(0, -75); ctx.stroke();
-    }
-  }
+  const halfW = bannerW / 2;
+  const leftX = cx - halfW;
+  const rightX = cx + halfW;
+  const topY = cy - bannerH / 2;
+  const botY = cy + bannerH / 2;
+
+  const tailW = 210;
+  const tailDrop = 36; // tails drop down slightly
+  const notchDepth = 48; // swallowtail V-notch depth
+
+  ctx.lineWidth = strokeW;
+  ctx.strokeStyle = outlineColor;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  // --- 1. LEFT TAIL (Behind) ---
+  const ltLeft = leftX - tailW;
+  const ltRight = leftX + 10;
+  const ltTop = topY + tailDrop;
+  const ltBot = botY + tailDrop;
+
+  ctx.beginPath();
+  ctx.moveTo(ltRight, ltTop);
+  ctx.lineTo(ltLeft, ltTop + 8);
+  ctx.lineTo(ltLeft + notchDepth, (ltTop + ltBot) / 2 + 4); // V-notch center
+  ctx.lineTo(ltLeft, ltBot);
+  ctx.lineTo(ltRight, ltBot - 8);
+  ctx.closePath();
+  ctx.fillStyle = ribbonFill;
+  ctx.fill();
+  ctx.stroke();
+
+  // --- 2. RIGHT TAIL (Behind) ---
+  const rtRight = rightX + tailW;
+  const rtLeft = rightX - 10;
+  const rtTop = topY + tailDrop;
+  const rtBot = botY + tailDrop;
+
+  ctx.beginPath();
+  ctx.moveTo(rtLeft, rtTop);
+  ctx.lineTo(rtRight, rtTop + 8);
+  ctx.lineTo(rtRight - notchDepth, (rtTop + rtBot) / 2 + 4); // V-notch center
+  ctx.lineTo(rtRight, rtBot);
+  ctx.lineTo(rtLeft, rtBot - 8);
+  ctx.closePath();
+  ctx.fillStyle = ribbonFill;
+  ctx.fill();
+  ctx.stroke();
+
+  // --- 3. FOLD TRIANGLES (3D Underneath center banner) ---
+  // Left fold triangle
+  ctx.beginPath();
+  ctx.moveTo(leftX, botY + 10);
+  ctx.lineTo(leftX, ltBot - 8);
+  ctx.lineTo(leftX - 40, ltBot - 8);
+  ctx.closePath();
+  ctx.fillStyle = ribbonFold;
+  ctx.fill();
+  ctx.stroke();
+
+  // Right fold triangle
+  ctx.beginPath();
+  ctx.moveTo(rightX, botY + 10);
+  ctx.lineTo(rightX, rtBot - 8);
+  ctx.lineTo(rightX + 40, rtBot - 8);
+  ctx.closePath();
+  ctx.fillStyle = ribbonFold;
+  ctx.fill();
+  ctx.stroke();
+
+  // --- 4. MAIN CENTER BANNER (In Front) ---
+  ctx.beginPath();
+  // Top arched edge
+  ctx.moveTo(leftX, topY + 10);
+  ctx.quadraticCurveTo(cx, topY - arch, rightX, topY + 10);
+  // Right edge
+  ctx.lineTo(rightX, botY + 10);
+  // Bottom arched edge
+  ctx.quadraticCurveTo(cx, botY - arch, leftX, botY + 10);
+  ctx.closePath();
+
+  ctx.fillStyle = ribbonFill;
+  ctx.fill();
+  ctx.stroke();
+
+  // --- 5. RIBBON TEXT ("PNG DIGITAL DOWNLOAD") ---
+  ctx.fillStyle = '#FFFFFF';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `800 46px 'Lilita One', 'Fredoka', 'Arial Rounded MT Bold', sans-serif`;
+  ctx.fillText(text, cx, cy - 2);
 
   ctx.restore();
 }
@@ -376,42 +237,73 @@ export async function createCompositeMasterCover(
   // Dynamic series title resolution from options.title or subType
   const optTitle = (options.title || '').toLowerCase();
   let seriesTitle = 'STICKER';
-  let primaryColor = '#E11D48'; // Vibrant Rose Pink
-  let ribbonColor = '#0F766E'; // Dark Teal Ribbon
-  let bgColor = '#FFFFFF'; // PURE SOLID WHITE (#FFFFFF) PER CORE RULES!
+  let ribbonColor = '#A84D1D'; // Warm pumpkin terracotta (matching target image)
+  let ribbonFold = '#5C1D07';
+  let ribbonOutline = '#261208';
 
   if (subType === 'halloween' || optTitle.includes('halloween') || optTitle.includes('할로윈') || optTitle.includes('spooky')) {
     seriesTitle = 'HALLOWEEN';
-    primaryColor = '#EA580C'; // Vivid Spooky Pumpkin Orange
-    ribbonColor = '#6B21A8'; // Rich Witch Purple Ribbon
-  } else if (subType === 'christmas' || optTitle.includes('christmas') || optTitle.includes('크리스마스')) {
-    seriesTitle = 'CHRISTMAS';
-    primaryColor = '#DC2626'; // Festive Crimson Red
-    ribbonColor = '#15803D'; // Pine Green Ribbon
+    ribbonColor = '#A84D1D';
+    ribbonFold = '#5C1D07';
+    ribbonOutline = '#261208';
+  } else if (optTitle.includes('harvest') || optTitle.includes('fall') || optTitle.includes('autumn')) {
+    seriesTitle = 'FALL HARVEST';
+    ribbonColor = '#A84D1D';
+    ribbonFold = '#5C1D07';
+    ribbonOutline = '#261208';
   } else if (subType === 'thanksgiving' || optTitle.includes('thanksgiving') || optTitle.includes('추수감사절')) {
     seriesTitle = 'THANKSGIVING';
-    primaryColor = '#D97706'; // Warm Autumn Harvest
-    ribbonColor = '#78350F'; // Warm Brown Ribbon
+    ribbonColor = '#9A3412';
+    ribbonFold = '#431407';
+    ribbonOutline = '#261208';
+  } else if (subType === 'christmas' || optTitle.includes('christmas') || optTitle.includes('크리스마스')) {
+    seriesTitle = 'CHRISTMAS';
+    ribbonColor = '#15803D';
+    ribbonFold = '#052E16';
+    ribbonOutline = '#0F172A';
   } else if (subType === 'vivarium' || optTitle.includes('vivarium') || optTitle.includes('비바리움')) {
     seriesTitle = 'VIVARIUM';
-    primaryColor = '#059669'; // Emerald Green
-    ribbonColor = '#0F766E'; // Dark Teal Ribbon
+    ribbonColor = '#0F766E';
+    ribbonFold = '#042F2E';
+    ribbonOutline = '#0A1E1C';
   } else if (subType === 'saltaquarium' || optTitle.includes('saltaquarium') || optTitle.includes('해수어')) {
     seriesTitle = 'SALTWATER AQUARIUM';
-    primaryColor = '#E11D48'; // Coral Pink
-    ribbonColor = '#0F766E'; // Dark Teal Ribbon
+    ribbonColor = '#0284C7';
+    ribbonFold = '#082F49';
+    ribbonOutline = '#081C2E';
   } else if (subType === 'freshaquarium' || optTitle.includes('freshaquarium') || optTitle.includes('열대어')) {
     seriesTitle = 'FRESHWATER AQUARIUM';
-    primaryColor = '#2563EB'; // Royal Blue
-    ribbonColor = '#059669'; // Emerald Ribbon
+    ribbonColor = '#059669';
+    ribbonFold = '#064E3B';
+    ribbonOutline = '#062820';
   } else if (subType === 'terrarium' || optTitle.includes('terrarium') || optTitle.includes('테라리움')) {
     seriesTitle = 'TERRARIUM';
-    primaryColor = '#E11D48'; // Vibrant Rose Pink
-    ribbonColor = '#0F766E'; // Dark Teal Ribbon
-  } else {
-    seriesTitle = 'CUTE STICKER';
-    primaryColor = '#E11D48';
     ribbonColor = '#0F766E';
+    ribbonFold = '#042F2E';
+    ribbonOutline = '#0A1E1C';
+  } else {
+    if (options.title) {
+      const cleanT = options.title.replace(/[0-9+]+|(cute|stickers?|bundle|png|digital|download)/gi, '').trim();
+      if (cleanT.length > 0) {
+        seriesTitle = cleanT.toUpperCase();
+      }
+    }
+    ribbonColor = '#A84D1D';
+    ribbonFold = '#5C1D07';
+    ribbonOutline = '#261208';
+  }
+
+  // Ensure Google Fonts are active in Canvas
+  if (typeof document !== 'undefined' && document.fonts) {
+    try {
+      await Promise.all([
+        document.fonts.load("900 140px 'Lilita One'"),
+        document.fonts.load("800 140px 'Fredoka'"),
+        document.fonts.load("800 46px 'Lilita One'")
+      ]);
+    } catch {
+      // Fallback seamlessly to system rounded fonts
+    }
   }
 
   // 20 LARGE OVERLAPPING ANCHOR SLOTS FOR MAIN STICKERS (Base size: 920px - 980px)
@@ -526,120 +418,45 @@ export async function createCompositeMasterCover(
         ctx.restore();
       }
 
-      // --- 5. Central Title & Ribbon Banner Typography (Direct on Canvas, NO Big White Box Card) ---
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
+      // --- 5. Central Title & Ribbon Banner Typography (Etsy Bestseller Exact Match) ---
       const centerX = targetWidth / 2;
-      const centerY = 1350;
 
-      const drawPopText = (
-        text: string,
-        x: number,
-        y: number,
-        font: string,
-        fillColor: string,
-        strokeWidth: number = 24
-      ) => {
+      // Draw clean, crisp, cute bold typography in signature Etsy raspberry pink (#E11D48)
+      const drawTitleLine = (text: string, x: number, y: number, initialSize: number = 140) => {
         ctx.save();
-        ctx.font = font;
+        let size = initialSize;
+        ctx.font = `900 ${size}px 'Lilita One', 'Fredoka', 'Arial Rounded MT Bold', sans-serif`;
+        const w = ctx.measureText(text).width;
+        if (w > 1280) {
+          size = Math.floor(size * (1280 / w));
+          ctx.font = `900 ${size}px 'Lilita One', 'Fredoka', 'Arial Rounded MT Bold', sans-serif`;
+        }
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-
-        // Thick smooth white outline pop
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = strokeWidth;
-        ctx.lineJoin = 'round';
-        ctx.strokeText(text, x, y);
-
-        // Soft drop shadow
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.18)';
-        ctx.shadowBlur = 18;
-        ctx.shadowOffsetY = 6;
-
-        ctx.fillStyle = fillColor;
+        ctx.fillStyle = '#E11D48'; // Exact signature Etsy bestseller rose/berry pink
         ctx.fillText(text, x, y);
         ctx.restore();
       };
 
-      // 1. Top Pill Badge ("★ 20+ UNIQUE STICKERS ★")
-      const pillW = 640;
-      const pillH = 72;
-      const pillX = (targetWidth - pillW) / 2;
-      const pillY = centerY - 320;
+      // Line 1: [COUNT]+ CUTE (e.g. 20+ CUTE or 40+ CUTE)
+      drawTitleLine(`${count}+ CUTE`, centerX, 1190, 140);
 
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.14)';
-      ctx.shadowBlur = 16;
-      ctx.shadowOffsetY = 4;
-      ctx.fillStyle = '#FEF08A';
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.roundRect(pillX, pillY, pillW, pillH, 36);
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
+      // Line 2: [SERIES TITLE] (e.g. HALLOWEEN, FALL HARVEST, TERRARIUM)
+      drawTitleLine(seriesTitle, centerX, 1330, 145);
 
-      ctx.font = `800 36px sans-serif`;
-      ctx.fillStyle = '#854D0E';
-      ctx.fillText(`★ ${count}+ UNIQUE STICKERS ★`, centerX, pillY + 38);
+      // Line 3: STICKER BUNDLE
+      drawTitleLine('STICKER BUNDLE', centerX, 1465, 135);
 
-      // 2. Main Headline 1 ("20+ Cute" or "40+ Cute")
-      drawPopText(`${count}+ Cute`, centerX, centerY - 180, `900 135px 'Pacifico', 'Comic Sans MS', sans-serif`, primaryColor, 26);
-
-      // 3. Main Headline 2 ("[SERIES TITLE]")
-      drawPopText(seriesTitle, centerX, centerY - 40, `900 130px 'Impact', 'Arial Black', sans-serif`, '#1E293B', 28);
-
-      // 4. Main Headline 3 ("Sticker Bundle")
-      drawPopText(`Sticker Bundle`, centerX, centerY + 90, `900 100px 'Arial Black', sans-serif`, primaryColor, 24);
-
-      // 5. Ribbon Banner ("✨ PNG DIGITAL DOWNLOAD ✨")
-      const ribW = 1240;
-      const ribH = 96;
-      const ribX = (targetWidth - ribW) / 2;
-      const ribY = centerY + 190;
-
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
-      ctx.shadowBlur = 24;
-      ctx.shadowOffsetY = 8;
-      ctx.fillStyle = ribbonColor;
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.lineWidth = 10;
-      ctx.beginPath();
-      ctx.roundRect(ribX, ribY, ribW, ribH, 48);
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
-
-      ctx.font = `800 46px sans-serif`;
-      ctx.fillStyle = '#FFFFFF';
-      ctx.fillText(`✨ PNG DIGITAL DOWNLOAD ✨`, centerX, ribY + 50);
-
-      // 6. Subtitle ("INSTANT DOWNLOAD • 300 DPI TRANSPARENT PNG")
-      drawPopText(`INSTANT DOWNLOAD • 300 DPI TRANSPARENT PNG`, centerX, centerY + 330, `800 32px sans-serif`, '#475569', 14);
-
-      // 6. Bottom Ribbon Bar (Etsy Best-Seller Footer)
-      const footerY = 2925;
-      const footerW = 2300;
-      const footerH = 68;
-      const footerX = (targetWidth - footerW) / 2;
-
-      ctx.save();
-      ctx.fillStyle = '#FFFFFF';
-      ctx.strokeStyle = '#CBD5E1';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.roundRect(footerX, footerY - 34, footerW, footerH, 34);
-      ctx.fill();
-      ctx.stroke();
-      ctx.restore();
-
-      ctx.font = `700 28px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#334155';
-      ctx.fillText(`🌸 ${count} UNIQUE HIGH QUALITY STICKERS  •  300 DPI TRANSPARENT PNG  •  INSTANT DOWNLOAD 🌸`, centerX, footerY);
+      // 4. Swallowtail 3D Ribbon Banner: PNG DIGITAL DOWNLOAD
+      drawClassicRibbonBanner(
+        ctx,
+        centerX,
+        1605,
+        'PNG DIGITAL DOWNLOAD',
+        ribbonColor,
+        ribbonFold,
+        ribbonOutline
+      );
 
       // 7. Export JPEG with strict Firestore byte limit check (< 650,000 bytes)
       let quality = 0.85;
