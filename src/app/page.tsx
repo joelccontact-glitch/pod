@@ -597,7 +597,20 @@ export default function Home() {
         setSelectedDesign((prev: any) => prev ? { ...prev, ...freshData } : prev);
       }
 
-      alert(`✨ 실제 ${targetCount}종 스티커 100% 실물 일치 마스터 표지 합성이 완료되었습니다!\n(총 ${targetCount}종 스티커가 표지에 자동 배치되었습니다)`);
+      // Automatically trigger download of the newly generated composite cover
+      try {
+        const a = document.createElement('a');
+        a.href = compositeDataUrl;
+        const coverTheme = getCleanEnglishThemeName(coverDesign.sticker_sub, selectedStickerSeriesTab, adjustedTitle);
+        a.download = `00_Master_Cover_${coverTheme}_100Percent_Real_Stickers_300DPI.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (dlErr) {
+        console.error('Auto download error:', dlErr);
+      }
+
+      alert(`✨ 실제 ${targetCount}종 스티커 100% 실물 일치 마스터 표지 합성이 완료되었습니다!\n(총 ${targetCount}종 스티커가 표지에 자동 배치되었으며 다운로드가 시작되었습니다)`);
       await fetchDesigns(page, false, undefined, undefined, true);
     } catch (e: any) {
       console.error('Error creating composite master cover:', e);
