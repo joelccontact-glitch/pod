@@ -373,26 +373,45 @@ export async function createCompositeMasterCover(
 
   const count = stickerCount || (stickers.length > 0 ? stickers.length : 20);
 
-  let seriesTitle = 'TERRARIUM';
+  // Dynamic series title resolution from options.title or subType
+  const optTitle = (options.title || '').toLowerCase();
+  let seriesTitle = 'STICKER';
   let primaryColor = '#E11D48'; // Vibrant Rose Pink
   let ribbonColor = '#0F766E'; // Dark Teal Ribbon
-  let bgColor = '#FDF2F8'; // Soft Pinkish Pastel Tint
+  let bgColor = '#FFFFFF'; // PURE SOLID WHITE (#FFFFFF) PER CORE RULES!
 
-  if (subType === 'vivarium') {
+  if (subType === 'halloween' || optTitle.includes('halloween') || optTitle.includes('할로윈') || optTitle.includes('spooky')) {
+    seriesTitle = 'HALLOWEEN';
+    primaryColor = '#EA580C'; // Vivid Spooky Pumpkin Orange
+    ribbonColor = '#6B21A8'; // Rich Witch Purple Ribbon
+  } else if (subType === 'christmas' || optTitle.includes('christmas') || optTitle.includes('크리스마스')) {
+    seriesTitle = 'CHRISTMAS';
+    primaryColor = '#DC2626'; // Festive Crimson Red
+    ribbonColor = '#15803D'; // Pine Green Ribbon
+  } else if (subType === 'thanksgiving' || optTitle.includes('thanksgiving') || optTitle.includes('추수감사절')) {
+    seriesTitle = 'THANKSGIVING';
+    primaryColor = '#D97706'; // Warm Autumn Harvest
+    ribbonColor = '#78350F'; // Warm Brown Ribbon
+  } else if (subType === 'vivarium' || optTitle.includes('vivarium') || optTitle.includes('비바리움')) {
     seriesTitle = 'VIVARIUM';
     primaryColor = '#059669'; // Emerald Green
     ribbonColor = '#0F766E'; // Dark Teal Ribbon
-    bgColor = '#ECFDF5'; // Soft Mint Pastel Tint
-  } else if (subType === 'saltaquarium') {
+  } else if (subType === 'saltaquarium' || optTitle.includes('saltaquarium') || optTitle.includes('해수어')) {
     seriesTitle = 'SALTWATER AQUARIUM';
     primaryColor = '#E11D48'; // Coral Pink
     ribbonColor = '#0F766E'; // Dark Teal Ribbon
-    bgColor = '#F0F9FF'; // Soft Sky Blue Pastel Tint
-  } else if (subType === 'freshaquarium') {
+  } else if (subType === 'freshaquarium' || optTitle.includes('freshaquarium') || optTitle.includes('열대어')) {
     seriesTitle = 'FRESHWATER AQUARIUM';
     primaryColor = '#2563EB'; // Royal Blue
     ribbonColor = '#059669'; // Emerald Ribbon
-    bgColor = '#EFF6FF'; // Soft Royal Blue Pastel Tint
+  } else if (subType === 'terrarium' || optTitle.includes('terrarium') || optTitle.includes('테라리움')) {
+    seriesTitle = 'TERRARIUM';
+    primaryColor = '#E11D48'; // Vibrant Rose Pink
+    ribbonColor = '#0F766E'; // Dark Teal Ribbon
+  } else {
+    seriesTitle = 'CUTE STICKER';
+    primaryColor = '#E11D48';
+    ribbonColor = '#0F766E';
   }
 
   // 20 LARGE OVERLAPPING ANCHOR SLOTS FOR MAIN STICKERS (Base size: 920px - 980px)
@@ -428,30 +447,7 @@ export async function createCompositeMasterCover(
     { x: 2320, y: 2720, tilt: 9,   scale: 0.95 },
   ];
 
-  // 14 STANDALONE FILLER SLOTS (Fills all white gaps around title & between main stickers)
-  const FILLER_SLOTS = [
-    { x: 610,  y: 340,  tilt: 15,  scale: 1.1 },
-    { x: 1210, y: 300,  tilt: -10, scale: 1.1 },
-    { x: 1790, y: 300,  tilt: 12,  scale: 1.1 },
-    { x: 2390, y: 340,  tilt: -14, scale: 1.1 },
-
-    { x: 520,  y: 720,  tilt: 18,  scale: 1.15 },
-    { x: 2480, y: 720,  tilt: -16, scale: 1.15 },
-
-    { x: 500,  y: 1300, tilt: -12, scale: 1.2 },
-    { x: 2500, y: 1300, tilt: 14,  scale: 1.2 },
-
-    { x: 520,  y: 1940, tilt: 15,  scale: 1.15 },
-    { x: 2480, y: 1940, tilt: -18, scale: 1.15 },
-
-    { x: 1080, y: 1840, tilt: -10, scale: 1.1 },
-    { x: 1920, y: 1840, tilt: 12,  scale: 1.1 },
-
-    { x: 1100, y: 2680, tilt: 14,  scale: 1.1 },
-    { x: 1900, y: 2680, tilt: -12, scale: 1.1 },
-  ];
-
-  // Take all 20 stickers
+  // Take actual stickers to render (up to 20 anchor slots)
   const realStickersToRender = stickers.slice(0, 20);
 
   return new Promise(async (resolve, reject) => {
@@ -469,36 +465,17 @@ export async function createCompositeMasterCover(
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
-      // 1. Soft Warm Pastel Background (#FDF2F8 / #ECFDF5 / #F0F9FF)
-      ctx.fillStyle = bgColor;
+      // 1. PURE SOLID WHITE BACKGROUND (#FFFFFF) - NO TINT
+      ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, targetWidth, targetHeight);
 
-      // Draw subtle floating decorative sparkles ✨ & hearts 💕 in background
-      ctx.save();
-      const accents = [
-        { x: 180, y: 180, char: '✨', size: 54, color: '#F472B6' },
-        { x: 2820, y: 180, char: '💕', size: 56, color: '#F472B6' },
-        { x: 150, y: 1200, char: '🌸', size: 48, color: '#F472B6' },
-        { x: 2850, y: 1200, char: '✨', size: 54, color: '#F472B6' },
-        { x: 200, y: 2800, char: '🌸', size: 56, color: '#F472B6' },
-        { x: 2800, y: 2800, char: '✨', size: 54, color: '#F472B6' },
-      ];
-      accents.forEach(a => {
-        ctx.font = `${a.size}px sans-serif`;
-        ctx.fillStyle = a.color;
-        ctx.fillText(a.char, a.x, a.y);
-      });
-      ctx.restore();
-
       // Subtle outer boundary stroke frame
-      ctx.strokeStyle = '#CBD5E1';
+      ctx.strokeStyle = '#E2E8F0';
       ctx.lineWidth = 14;
       ctx.strokeRect(8, 8, targetWidth - 16, targetHeight - 16);
 
-      // 2. Render 14 STANDALONE THEME FILLER STICKERS in gaps (Background layer)
-      FILLER_SLOTS.forEach((slot, idx) => {
-        drawStandaloneThemeSticker(ctx, subType, idx, slot.x, slot.y, slot.scale, slot.tilt);
-      });
+      // NOTE: Weird artificial geometric filler shapes (drawStandaloneThemeSticker) COMPLETELY REMOVED!
+      // Only genuine, real sticker assets are rendered on canvas!
 
       // 3. Load all 20 main sticker images concurrently
       const loadPromises = realStickersToRender.map((s) => {
