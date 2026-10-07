@@ -2531,24 +2531,21 @@ export default function Home() {
     let successCount = 0;
 
     for (let i = 0; i < targetPresets.length; i++) {
-      const preset = targetPresets[i];
       const isCover = i === 0;
-      const itemName = isCover ? formatCoverTitleWithCount(preset.name, totalStickerItems) : preset.name;
-      const itemPrompt = isCover ? formatCoverPromptWithCount(preset.prompt, totalStickerItems) : preset.prompt;
 
-      setBatchProgress({
-        current: isBothMode ? (i === 0 ? 1 : (i - 1) * 2 + 2) : i + 1,
-        total: totalExpectedCount,
-        label: itemName,
-        packTitle: packName
-      });
+      if (isCover) {
+        // Master Cover generation
+        const preset = targetPresets[0];
+        const itemName = formatCoverTitleWithCount(preset.name, totalStickerItems);
+        const itemPrompt = formatCoverPromptWithCount(preset.prompt, totalStickerItems);
 
-      let attempts = 0;
-      let generatedSuccess = false;
-      let createdTankImageBase64 = '';
+        setBatchProgress({
+          current: 1,
+          total: totalExpectedCount,
+          label: itemName,
+          packTitle: packName
+        });
 
-      while (attempts < 2 && !generatedSuccess) {
-        attempts++;
         try {
           const res = await fetch('/api/designs/from-image', {
             method: 'POST',
@@ -2564,106 +2561,132 @@ export default function Home() {
             })
           });
           const data = await res.json();
-
           if (data.success && data.data) {
-            createdTankImageBase64 = data.data.image_url;
             const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
-            const designToSave = {
-              ...data.data,
-              image_url: compressedUrl,
-              title: itemName,
-              topic: itemName,
-              stickerPresetId: preset.id,
-              sticker_sub: subKey,
-              design_type: 'sticker',
-              is_deleted: false
-            };
-
             await fetch('/api/designs/save', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 id: data.data.id,
-                designData: designToSave
+                designData: {
+                  ...data.data,
+                  image_url: compressedUrl,
+                  title: itemName,
+                  topic: itemName,
+                  stickerPresetId: preset.id,
+                  sticker_sub: subKey,
+                  design_type: 'sticker',
+                  is_deleted: false
+                }
               })
             });
             successCount++;
-            generatedSuccess = true;
-
-            if (i === 0) {
-              fetchDesigns(1, false);
-            }
+            fetchDesigns(1, false);
           }
         } catch (e) {
-          console.error(`Batch generation attempt ${attempts} failed for ${preset.name}:`, e);
+          console.error('Failed to generate cover:', e);
         }
+        continue;
       }
 
-      // If in simultaneous both mode (i > 0), extract 100% REAL matching standalone sticker from newly created tank image!
-      if (isBothMode && i > 0 && createdTankImageBase64 && targetStandalonePresets[i]) {
-        const standalonePreset = targetStandalonePresets[i];
+      // For i > 0 (Main stickers):
+      // SOLUTION B: Generate clean standalone character first, then house into 100% identical glass vessel!
+      const standalonePreset = isBothMode ? (targetStandalonePresets[i] || targetPresets[i]) : targetPresets[i];
+      const vesselPreset = targetPresets[i];
+
+      setBatchProgress({
+        current: isBothMode ? (i - 1) * 2 + 2 : i + 1,
+        total: totalExpectedCount,
+        label: `${standalonePreset.name} (순수 단독 스티커 AI 생성)`,
+        packTitle: packName
+      });
+
+      let createdStandaloneUrl = '';
+
+      // 1. Generate clean standalone character via AI (No glass, no container, pure full body)
+      try {
+        const res = await fetch('/api/designs/from-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            imageBase64: '',
+            prompt: standalonePreset.prompt,
+            title: standalonePreset.name,
+            isPreview: true,
+            styleId: selectedStyleId,
+            catchphrase: '',
+            autoPhrase: false
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.data?.image_url) {
+          createdStandaloneUrl = data.data.image_url;
+          const compressedUrl = await compressImageForFirestore(createdStandaloneUrl, 800000);
+          await fetch('/api/designs/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: data.data.id,
+              designData: {
+                ...data.data,
+                image_url: compressedUrl,
+                title: standalonePreset.name,
+                topic: standalonePreset.name,
+                stickerPresetId: standalonePreset.id,
+                sticker_sub: subKey,
+                design_type: 'sticker',
+                is_deleted: false
+              }
+            })
+          });
+          successCount++;
+        }
+      } catch (e) {
+        console.error(`Failed to generate standalone sticker for ${standalonePreset.name}:`, e);
+      }
+
+      // 2. If in both mode, house the 100% real standalone character into a glass vessel on Canvas!
+      if (isBothMode && createdStandaloneUrl) {
         setBatchProgress({
           current: (i - 1) * 2 + 3,
           total: totalExpectedCount,
-          label: `${standalonePreset.name} (100% 실물 객체 직접 추출)`,
+          label: `${vesselPreset.name} (100% 실물 어항 결합)`,
           packTitle: packName
         });
 
         try {
-          // Solution 1: Direct 100% Real Object Crop & Die-Cut Sticker Transformation
-          let extractedUrl = '';
-          try {
-            extractedUrl = await extractStandaloneStickerFromTank(
-              createdTankImageBase64,
-              standalonePreset.name
-            );
-          } catch (extErr) {
-            console.warn(`Direct extraction failed for ${standalonePreset.name}, fallback to Vision from-image:`, extErr);
-            const res = await fetch('/api/designs/from-image', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                imageBase64: createdTankImageBase64,
-                prompt: standalonePreset.prompt,
-                title: standalonePreset.name,
-                isPreview: true,
-                styleId: selectedStyleId,
-                catchphrase: '',
-                autoPhrase: false
-              })
-            });
-            const data = await res.json();
-            if (data.success && data.data?.image_url) {
-              extractedUrl = data.data.image_url;
+          const vesselUrl = await createVesselStickerFromStandalone(
+            createdStandaloneUrl,
+            {
+              theme: subKey,
+              characterIndex: i
             }
-          }
+          );
 
-          if (extractedUrl) {
-            const compressedUrl = await compressImageForFirestore(extractedUrl, 800000);
-            const designToSave = {
-              image_url: compressedUrl,
-              title: standalonePreset.name,
-              topic: standalonePreset.name,
-              prompt: `100% Real Object Extracted Die-Cut Sticker: ${standalonePreset.name} on pure solid white background (#FFFFFF)`,
-              stickerPresetId: standalonePreset.id,
-              sticker_sub: subKey,
-              design_type: 'sticker',
-              is_deleted: false,
-              created_at: new Date().toISOString()
-            };
+          const compressedVesselUrl = await compressImageForFirestore(vesselUrl, 800000);
+          const vesselDesign = {
+            image_url: compressedVesselUrl,
+            title: vesselPreset.name,
+            topic: vesselPreset.name,
+            prompt: `100% Real Standalone Housed in Glass Vessel: ${vesselPreset.name} on pure solid white background (#FFFFFF)`,
+            stickerPresetId: vesselPreset.id,
+            sticker_sub: subKey,
+            design_type: 'sticker',
+            is_deleted: false,
+            created_at: new Date().toISOString()
+          };
 
-            await fetch('/api/designs/save', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                id: `${standalonePreset.id}-${Date.now()}`,
-                designData: designToSave
-              })
-            });
-            successCount++;
-          }
+          await fetch('/api/designs/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: `${vesselPreset.id}-${Date.now()}`,
+              designData: vesselDesign
+            })
+          });
+          successCount++;
         } catch (e) {
-          console.error(`Standalone 100% extraction failed for ${standalonePreset.name}:`, e);
+          console.error(`Failed to house vessel for ${vesselPreset.name}:`, e);
         }
       }
     }
