@@ -2530,6 +2530,8 @@ export default function Home() {
     setBatchCompletionNotice(null);
     let successCount = 0;
 
+    let coverDocData: any = null;
+
     for (let i = 0; i < targetPresets.length; i++) {
       const isCover = i === 0;
 
@@ -2563,21 +2565,23 @@ export default function Home() {
           const data = await res.json();
           if (data.success && data.data) {
             const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
+            coverDocData = {
+              ...data.data,
+              image_url: compressedUrl,
+              title: itemName,
+              topic: itemName,
+              stickerPresetId: preset.id,
+              sticker_sub: subKey,
+              design_type: 'sticker',
+              is_deleted: false
+            };
+
             await fetch('/api/designs/save', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 id: data.data.id,
-                designData: {
-                  ...data.data,
-                  image_url: compressedUrl,
-                  title: itemName,
-                  topic: itemName,
-                  stickerPresetId: preset.id,
-                  sticker_sub: subKey,
-                  design_type: 'sticker',
-                  is_deleted: false
-                }
+                designData: coverDocData
               })
             });
             successCount++;
@@ -2690,6 +2694,33 @@ export default function Home() {
         } catch (e) {
           console.error(`Failed to generate standalone sticker for ${standalonePreset.name}:`, e);
         }
+      }
+    }
+
+    // ✨ AUTOMATION: Automatically synthesize 100% real sticker composite cover upon completion!
+    if (coverDocData) {
+      setBatchProgress({
+        current: totalExpectedCount,
+        total: totalExpectedCount,
+        label: `✨ 실물 스티커 100% 일치 마스터 표지 자동 합성 중...`,
+        packTitle: packName
+      });
+
+      try {
+        const poolRes = await fetch(`/api/designs?limit=1000&type=sticker&subType=${subKey}&nocache=true`);
+        const poolData = await poolRes.json();
+        if (poolData.success && Array.isArray(poolData.data)) {
+          const freshCover = poolData.data.find((d: any) => d.id === coverDocData.id || isCoverDesign(d)) || coverDocData;
+          const freshStickers = poolData.data
+            .filter((d: any) => d.id !== freshCover.id && !isCoverDesign(d))
+            .slice(0, totalStickerItems);
+
+          if (freshStickers.length > 0) {
+            await handleGenerateRealCompositeCover(freshCover, freshStickers);
+          }
+        }
+      } catch (autoCoverErr) {
+        console.error('Failed to auto generate composite cover after batch:', autoCoverErr);
       }
     }
 
