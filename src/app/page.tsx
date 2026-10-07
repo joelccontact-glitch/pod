@@ -5287,25 +5287,6 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    onClick={() => handleRegenerateMasterCover(selectedPackCover, packStickers.length)}
-                    disabled={isRegeneratingCover}
-                    className="bg-purple-700 hover:bg-purple-800 disabled:opacity-50 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-sm transition-all flex items-center gap-1.5 border border-purple-500 cursor-pointer"
-                    title={`AI 프롬프트를 통해 새 마스터 표지 디자인을 다시 생성합니다`}
-                  >
-                    {isRegeneratingCover ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>AI 재생성 중...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>🔄</span>
-                        <span>AI 표지 재생성</span>
-                      </>
-                    )}
-                  </button>
-
                   {/* ✨ 100% 실물 일치 마스터 표지 합성 버튼 */}
                   <button
                     onClick={() => handleGenerateRealCompositeCover(selectedPackCover, packStickers)}
