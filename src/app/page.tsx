@@ -2011,29 +2011,34 @@ export default function Home() {
         }
       }
 
-      // Also generate and package the A4 Printable Sticker Sheets into the ZIP bundle
+      // Also generate and package BOTH Transparent and White A4 Printable Sticker Sheets into the ZIP bundle
       const nonCoverStickers = targetDesigns.filter(d => !isCoverDesign(d));
       if (nonCoverStickers.length > 0) {
         try {
-          const a4Pages = await generateA4StickerSheets(nonCoverStickers, { background: 'transparent', pageSize: 20 });
-          if (a4Pages.length === 1) {
-            const a4Base64 = a4Pages[0].split(',')[1];
+          // 1. Transparent Background A4 Sheets (For Cricut / Silhouette cutting machines & Digital Planners)
+          const a4TransparentPages = await generateA4StickerSheets(nonCoverStickers, { background: 'transparent', pageSize: 20 });
+          for (let p = 0; p < a4TransparentPages.length; p++) {
+            const a4Base64 = a4TransparentPages[p].split(',')[1];
             const a4Binary = atob(a4Base64);
             const a4Bytes = new Uint8Array(a4Binary.length);
             for (let b = 0; b < a4Binary.length; b++) {
               a4Bytes[b] = a4Binary.charCodeAt(b);
             }
-            folder?.file(`00_A4_${themeName}_Stickers_300DPI.png`, a4Bytes.buffer);
-          } else {
-            for (let p = 0; p < a4Pages.length; p++) {
-              const a4Base64 = a4Pages[p].split(',')[1];
-              const a4Binary = atob(a4Base64);
-              const a4Bytes = new Uint8Array(a4Binary.length);
-              for (let b = 0; b < a4Binary.length; b++) {
-                a4Bytes[b] = a4Binary.charCodeAt(b);
-              }
-              folder?.file(`00_A4_${themeName}_Stickers_Sheet${p + 1}_300DPI.png`, a4Bytes.buffer);
+            const sheetSuffix = a4TransparentPages.length > 1 ? `_Sheet${p + 1}` : '';
+            folder?.file(`00_A4_Printable${sheetSuffix}_Transparent_For_Cricut_300DPI.png`, a4Bytes.buffer);
+          }
+
+          // 2. Solid White Background A4 Sheets (For standard home printers / scissor cutting on A4 sticker paper)
+          const a4WhitePages = await generateA4StickerSheets(nonCoverStickers, { background: 'white', pageSize: 20 });
+          for (let p = 0; p < a4WhitePages.length; p++) {
+            const a4Base64 = a4WhitePages[p].split(',')[1];
+            const a4Binary = atob(a4Base64);
+            const a4Bytes = new Uint8Array(a4Binary.length);
+            for (let b = 0; b < a4Binary.length; b++) {
+              a4Bytes[b] = a4Binary.charCodeAt(b);
             }
+            const sheetSuffix = a4WhitePages.length > 1 ? `_Sheet${p + 1}` : '';
+            folder?.file(`00_A4_Printable${sheetSuffix}_White_For_Home_Printers_300DPI.png`, a4Bytes.buffer);
           }
         } catch (a4Err) {
           console.error('Error generating A4 sheets for ZIP bundle:', a4Err);
@@ -5368,14 +5373,14 @@ export default function Home() {
                 </div>
 
                 {/* 하단 친절한 Etsy 등록 3단계 안내 가이드 배너 */}
-                <div className="mt-3 bg-amber-50/90 border border-amber-200 text-amber-900 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-2xs">
+                <div className="mt-3 bg-gradient-to-r from-amber-50 to-emerald-50 border border-emerald-200 text-stone-800 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-2xs">
                   <div className="flex items-start sm:items-center gap-2 text-xs font-semibold leading-relaxed">
                     <span className="text-base shrink-0">💡</span>
                     <span>
                       <strong className="text-amber-950 font-black">Etsy 간편 등록 3단계:</strong>{' '}
-                      <span className="inline-block bg-amber-200/80 text-amber-900 px-1.5 py-0.5 rounded font-black mr-1">1단계</span> <strong>마스터 표지</strong>를 받아 <strong>대표 사진</strong> 등록 ➔{' '}
-                      <span className="inline-block bg-indigo-100 text-indigo-900 px-1.5 py-0.5 rounded font-black mr-1">2단계</span> <strong>A4 시트</strong>를 받아 <strong>추가 사진</strong> 등록 ➔{' '}
-                      <span className="inline-block bg-emerald-100 text-emerald-900 px-1.5 py-0.5 rounded font-black mr-1">3단계</span> <strong>전체 ZIP</strong>(A4 시트 자동포함됨)을 받아 <strong>Digital files</strong>에 업로드하면 끝!
+                      <span className="inline-block bg-teal-100 text-teal-900 px-1.5 py-0.5 rounded font-black mr-1">1단계</span> <strong>마스터 표지</strong>(대표 사진) ➔{' '}
+                      <span className="inline-block bg-indigo-100 text-indigo-900 px-1.5 py-0.5 rounded font-black mr-1">2단계</span> <strong>A4 시트</strong>(추가 사진 목업) ➔{' '}
+                      <span className="inline-block bg-emerald-100 text-emerald-950 px-1.5 py-0.5 rounded font-black mr-1">3단계</span> <strong>전체 ZIP</strong>(크리컷용 투명 + 일반 프린터용 화이트 A4 시트 2종 모두 자동 포함!)을 <strong>Digital files</strong>에 업로드!
                     </span>
                   </div>
                 </div>
