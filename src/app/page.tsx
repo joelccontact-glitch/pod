@@ -34,6 +34,7 @@ import JSZip from 'jszip';
 import { createCompositeMasterCover } from '@/lib/master-cover-builder';
 import { generateA4StickerSheet, generateA4StickerSheets } from '@/lib/sticker-sheet-builder';
 import { generateCreativeFabricaTags, formatCFTagsForClipboard } from '@/lib/creative-fabrica-tags';
+import { extractStandaloneStickerFromTank } from '@/lib/standalone-extractor';
 
 const isCoverDesign = (d: any) => {
   if (!d) return false;
@@ -617,6 +618,108 @@ export default function Home() {
       alert('실체 합성 마스터 표지 생성 실패: ' + (e.message || String(e)));
     } finally {
       setIsBuildingComposite(false);
+    }
+  };
+
+  const [isExtractingStandalone, setIsExtractingStandalone] = useState(false);
+  const [extractProgress, setExtractProgress] = useState<{ current: number; total: number; label: string } | null>(null);
+
+  const handleExtractAllStandaloneFromTanks = async () => {
+    if (!selectedPackCover || packStickers.length === 0) return;
+
+    const tankStickers = packStickers.filter((s: any) => {
+      const title = (s.title || s.prompt || '').toLowerCase();
+      const preset = (s.stickerPresetId || '').toLowerCase();
+      return !title.includes('단일') && !title.includes('단독') && !preset.includes('standalone');
+    });
+
+    if (tankStickers.length === 0) {
+      alert('어항/유리병 본품 스티커를 찾을 수 없습니다.');
+      return;
+    }
+
+    if (!confirm(`현재 어항/유리병 본품 스티커 ${tankStickers.length}종에서 내부 주인공 아이템을 100% 동일하게 직접 추출하여 독립 스티커를 생성/교체하시겠습니까?`)) {
+      return;
+    }
+
+    setIsExtractingStandalone(true);
+    let successCount = 0;
+
+    try {
+      const coverCategory = getDesignCategoryKey(selectedPackCover);
+      const seasonalPresets = getSeasonalPackPresets(coverCategory);
+      const standaloneSeries = seasonalPresets?.standaloneSeries || [];
+
+      for (let idx = 0; idx < tankStickers.length; idx++) {
+        const tank = tankStickers[idx];
+        const defaultName = standaloneSeries[idx + 1]?.name || `${tank.title ? tank.title.replace(/ 어항| 유리병| 수조| 미니| 돔/gi, '') : '아이템'} 단일 스티커`;
+        setExtractProgress({
+          current: idx + 1,
+          total: tankStickers.length,
+          label: `${defaultName} (100% 실물 추출 중...)`
+        });
+
+        try {
+          const extractedUrl = await extractStandaloneStickerFromTank(
+            tank.image_url,
+            defaultName
+          );
+
+          // Find existing matching standalone sticker in packStickers if present
+          const existingStandalone = packStickers.find((s: any) => {
+            const title = (s.title || '').toLowerCase();
+            const preset = (s.stickerPresetId || '').toLowerCase();
+            return (title.includes('단일') || title.includes('단독') || preset.includes('standalone')) &&
+                   (s.stickerPresetId === standaloneSeries[idx + 1]?.id || title.includes(defaultName) || title.includes(tank.title));
+          });
+
+          const compressedUrl = await compressImageForFirestore(extractedUrl, 800000);
+          const designData = {
+            image_url: compressedUrl,
+            title: defaultName,
+            topic: defaultName,
+            prompt: `100% Real Object Extracted Die-Cut Sticker: ${defaultName} on pure solid white background (#FFFFFF)`,
+            stickerPresetId: standaloneSeries[idx + 1]?.id || `standalone-${tank.id}`,
+            sticker_sub: coverCategory,
+            design_type: 'sticker',
+            is_deleted: false,
+            updated_at: new Date().toISOString()
+          };
+
+          if (existingStandalone) {
+            await fetch('/api/designs/update', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: existingStandalone.id,
+                updates: designData
+              })
+            });
+          } else {
+            await fetch('/api/designs/save', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: `${designData.stickerPresetId}-${Date.now()}`,
+                designData: { ...designData, created_at: new Date().toISOString() }
+              })
+            });
+          }
+          successCount++;
+        } catch (e) {
+          console.error(`Failed to extract standalone for tank ${tank.id}:`, e);
+        }
+      }
+
+      alert(`✨ 어항 본품 ${successCount}종에서 100% 실물 일치 독립 스티커 추출이 완료되었습니다!`);
+      await handleOpenPackDetail(selectedPackCover);
+      await fetchDesigns(page, false, undefined, undefined, true);
+    } catch (e: any) {
+      console.error('Error in handleExtractAllStandaloneFromTanks:', e);
+      alert('독립 스티커 추출 중 오류가 발생했습니다: ' + (e.message || String(e)));
+    } finally {
+      setIsExtractingStandalone(false);
+      setExtractProgress(null);
     }
   };
 
@@ -2391,56 +2494,71 @@ export default function Home() {
         }
       }
 
-      // If in simultaneous both mode (i > 0), generate matching standalone sticker from newly created tank image via Vision AI!
+      // If in simultaneous both mode (i > 0), extract 100% REAL matching standalone sticker from newly created tank image!
       if (isBothMode && i > 0 && createdTankImageBase64 && targetStandalonePresets[i]) {
         const standalonePreset = targetStandalonePresets[i];
         setBatchProgress({
           current: (i - 1) * 2 + 3,
           total: totalExpectedCount,
-          label: `${standalonePreset.name} (Vision 1:1 추출)`,
+          label: `${standalonePreset.name} (100% 실물 객체 직접 추출)`,
           packTitle: packName
         });
 
         try {
-          const res = await fetch('/api/designs/from-image', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              imageBase64: createdTankImageBase64,
-              prompt: standalonePreset.prompt,
-              title: standalonePreset.name,
-              isPreview: true,
-              styleId: selectedStyleId,
-              catchphrase: '',
-              autoPhrase: false
-            })
-          });
-          const data = await res.json();
-          if (data.success && data.data) {
-            const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
+          // Solution 1: Direct 100% Real Object Crop & Die-Cut Sticker Transformation
+          let extractedUrl = '';
+          try {
+            extractedUrl = await extractStandaloneStickerFromTank(
+              createdTankImageBase64,
+              standalonePreset.name
+            );
+          } catch (extErr) {
+            console.warn(`Direct extraction failed for ${standalonePreset.name}, fallback to Vision from-image:`, extErr);
+            const res = await fetch('/api/designs/from-image', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageBase64: createdTankImageBase64,
+                prompt: standalonePreset.prompt,
+                title: standalonePreset.name,
+                isPreview: true,
+                styleId: selectedStyleId,
+                catchphrase: '',
+                autoPhrase: false
+              })
+            });
+            const data = await res.json();
+            if (data.success && data.data?.image_url) {
+              extractedUrl = data.data.image_url;
+            }
+          }
+
+          if (extractedUrl) {
+            const compressedUrl = await compressImageForFirestore(extractedUrl, 800000);
             const designToSave = {
-              ...data.data,
               image_url: compressedUrl,
               title: standalonePreset.name,
               topic: standalonePreset.name,
+              prompt: `100% Real Object Extracted Die-Cut Sticker: ${standalonePreset.name} on pure solid white background (#FFFFFF)`,
               stickerPresetId: standalonePreset.id,
               sticker_sub: subKey,
               design_type: 'sticker',
-              is_deleted: false
+              is_deleted: false,
+              created_at: new Date().toISOString()
             };
 
             await fetch('/api/designs/save', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                id: data.data.id,
+                id: `${standalonePreset.id}-${Date.now()}`,
                 designData: designToSave
               })
             });
             successCount++;
           }
         } catch (e) {
-          console.error(`Standalone Vision generation failed for ${standalonePreset.name}:`, e);
+          console.error(`Standalone 100% extraction failed for ${standalonePreset.name}:`, e);
         }
       }
     }
@@ -5303,6 +5421,26 @@ export default function Home() {
                       <>
                         <span className="text-base">✨</span>
                         <span>100% 실물 일치 표지 합성 ({packStickers.length || 20}종 본품)</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* ✂️ 독립 스티커 100% 실물 추출 버튼 */}
+                  <button
+                    onClick={handleExtractAllStandaloneFromTanks}
+                    disabled={isExtractingStandalone || packStickers.length === 0}
+                    className="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 hover:from-amber-700 hover:to-rose-700 disabled:opacity-50 text-white font-black text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-amber-400 cursor-pointer"
+                    title="어항/유리병 본품 스티커 내부의 주인공 캐릭터를 100% 오차 없이 직접 추출하여 일치하는 독립 스티커 세트로 변환합니다"
+                  >
+                    {isExtractingStandalone ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>{extractProgress ? `${extractProgress.current}/${extractProgress.total} 실물 추출 중...` : '실물 추출 중...'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-base">✂️</span>
+                        <span>독립 스티커 100% 실물 추출</span>
                       </>
                     )}
                   </button>
