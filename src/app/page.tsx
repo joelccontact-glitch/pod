@@ -5277,18 +5277,38 @@ export default function Home() {
                   <button
                     onClick={() => handleRegenerateMasterCover(selectedPackCover, packStickers.length)}
                     disabled={isRegeneratingCover}
-                    className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-lg transition-all flex items-center gap-2 border border-purple-400 cursor-pointer"
-                    title={`실제 ${packStickers.length || 20}종 본품 스티커 구성을 반영하여 AI 마스터 표지를 새로 생성합니다`}
+                    className="bg-purple-700 hover:bg-purple-800 disabled:opacity-50 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-sm transition-all flex items-center gap-1.5 border border-purple-500 cursor-pointer"
+                    title={`AI 프롬프트를 통해 새 마스터 표지 디자인을 다시 생성합니다`}
                   >
                     {isRegeneratingCover ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        <span>마스터 표지 재생성 중...</span>
+                        <span>AI 재생성 중...</span>
                       </>
                     ) : (
                       <>
                         <span>🔄</span>
-                        <span>마스터 표지 단독 재생성 ({packStickers.length > 0 ? `${packStickers.length}종` : '20종'} 반영)</span>
+                        <span>AI 표지 재생성</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* ✨ 100% 실물 일치 마스터 표지 합성 버튼 */}
+                  <button
+                    onClick={() => handleGenerateRealCompositeCover(selectedPackCover, packStickers)}
+                    disabled={isBuildingComposite || packStickers.length === 0}
+                    className="bg-gradient-to-r from-pink-600 via-rose-600 to-amber-600 hover:from-pink-700 hover:to-amber-700 disabled:opacity-50 text-white font-black text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-pink-400 cursor-pointer ring-2 ring-pink-300/40"
+                    title="실제 하위 본품 스티커들을 캔버스에 100% 그대로 배치하여 오차 없는 실물 일치 마스터 표지를 합성합니다"
+                  >
+                    {isBuildingComposite ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>실물 스티커 표지 합성 중...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-base">✨</span>
+                        <span>100% 실물 일치 표지 합성 ({packStickers.length || 20}종 본품)</span>
                       </>
                     )}
                   </button>
