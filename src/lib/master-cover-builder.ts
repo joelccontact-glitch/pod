@@ -109,22 +109,23 @@ function makeBackgroundTransparent(img: HTMLImageElement): HTMLCanvasElement {
 /**
  * Classic 3D Folded Swallowtail Ribbon Banner (Etsy Bestseller Style)
  * Hand-drawn aesthetic with bold dark outlines, 3D folded ends, and clean white rounded text.
+ * Scaled up to 1520px width and 155px height to match the Etsy bestseller master cover sample.
  */
 function drawClassicRibbonBanner(
   ctx: CanvasRenderingContext2D,
   cx: number,
   cy: number,
   text: string,
-  ribbonFill: string,
-  ribbonFold: string,
+  ribbonFill: string = '#C25E26',
+  ribbonFold: string = '#6C2A0C',
   outlineColor: string = '#261208'
 ) {
   ctx.save();
 
-  const bannerW = 980;
-  const bannerH = 110;
-  const arch = 20; // gentle upward curvature
-  const strokeW = 8;
+  const bannerW = 1520; // Expanded to 1520px for massive Etsy bestseller presence
+  const bannerH = 155;  // 155px height for rich volume
+  const arch = 28;      // Gentle upward curvature
+  const strokeW = 10;   // Distinct bold outline
 
   const halfW = bannerW / 2;
   const leftX = cx - halfW;
@@ -132,9 +133,9 @@ function drawClassicRibbonBanner(
   const topY = cy - bannerH / 2;
   const botY = cy + bannerH / 2;
 
-  const tailW = 210;
-  const tailDrop = 36; // tails drop down slightly
-  const notchDepth = 48; // swallowtail V-notch depth
+  const tailW = 280;    // Wide swallowtail wings
+  const tailDrop = 48;  // Natural drop below center banner
+  const notchDepth = 64;// Deep V-notch swallowtail cut
 
   ctx.lineWidth = strokeW;
   ctx.strokeStyle = outlineColor;
@@ -143,16 +144,16 @@ function drawClassicRibbonBanner(
 
   // --- 1. LEFT TAIL (Behind) ---
   const ltLeft = leftX - tailW;
-  const ltRight = leftX + 10;
+  const ltRight = leftX + 15;
   const ltTop = topY + tailDrop;
   const ltBot = botY + tailDrop;
 
   ctx.beginPath();
   ctx.moveTo(ltRight, ltTop);
-  ctx.lineTo(ltLeft, ltTop + 8);
-  ctx.lineTo(ltLeft + notchDepth, (ltTop + ltBot) / 2 + 4); // V-notch center
+  ctx.lineTo(ltLeft, ltTop + 10);
+  ctx.lineTo(ltLeft + notchDepth, (ltTop + ltBot) / 2 + 5); // V-notch center
   ctx.lineTo(ltLeft, ltBot);
-  ctx.lineTo(ltRight, ltBot - 8);
+  ctx.lineTo(ltRight, ltBot - 10);
   ctx.closePath();
   ctx.fillStyle = ribbonFill;
   ctx.fill();
@@ -160,37 +161,35 @@ function drawClassicRibbonBanner(
 
   // --- 2. RIGHT TAIL (Behind) ---
   const rtRight = rightX + tailW;
-  const rtLeft = rightX - 10;
+  const rtLeft = rightX - 15;
   const rtTop = topY + tailDrop;
   const rtBot = botY + tailDrop;
 
   ctx.beginPath();
   ctx.moveTo(rtLeft, rtTop);
-  ctx.lineTo(rtRight, rtTop + 8);
-  ctx.lineTo(rtRight - notchDepth, (rtTop + rtBot) / 2 + 4); // V-notch center
+  ctx.lineTo(rtRight, rtTop + 10);
+  ctx.lineTo(rtRight - notchDepth, (rtTop + rtBot) / 2 + 5); // V-notch center
   ctx.lineTo(rtRight, rtBot);
-  ctx.lineTo(rtLeft, rtBot - 8);
+  ctx.lineTo(rtLeft, rtBot - 10);
   ctx.closePath();
   ctx.fillStyle = ribbonFill;
   ctx.fill();
   ctx.stroke();
 
   // --- 3. FOLD TRIANGLES (3D Underneath center banner) ---
-  // Left fold triangle
   ctx.beginPath();
-  ctx.moveTo(leftX, botY + 10);
-  ctx.lineTo(leftX, ltBot - 8);
-  ctx.lineTo(leftX - 40, ltBot - 8);
+  ctx.moveTo(leftX, botY + 12);
+  ctx.lineTo(leftX, ltBot - 10);
+  ctx.lineTo(leftX - 48, ltBot - 10);
   ctx.closePath();
   ctx.fillStyle = ribbonFold;
   ctx.fill();
   ctx.stroke();
 
-  // Right fold triangle
   ctx.beginPath();
-  ctx.moveTo(rightX, botY + 10);
-  ctx.lineTo(rightX, rtBot - 8);
-  ctx.lineTo(rightX + 40, rtBot - 8);
+  ctx.moveTo(rightX, botY + 12);
+  ctx.lineTo(rightX, rtBot - 10);
+  ctx.lineTo(rightX + 48, rtBot - 10);
   ctx.closePath();
   ctx.fillStyle = ribbonFold;
   ctx.fill();
@@ -199,12 +198,12 @@ function drawClassicRibbonBanner(
   // --- 4. MAIN CENTER BANNER (In Front) ---
   ctx.beginPath();
   // Top arched edge
-  ctx.moveTo(leftX, topY + 10);
-  ctx.quadraticCurveTo(cx, topY - arch, rightX, topY + 10);
+  ctx.moveTo(leftX, topY + 12);
+  ctx.quadraticCurveTo(cx, topY - arch, rightX, topY + 12);
   // Right edge
-  ctx.lineTo(rightX, botY + 10);
+  ctx.lineTo(rightX, botY + 12);
   // Bottom arched edge
-  ctx.quadraticCurveTo(cx, botY - arch, leftX, botY + 10);
+  ctx.quadraticCurveTo(cx, botY - arch, leftX, botY + 12);
   ctx.closePath();
 
   ctx.fillStyle = ribbonFill;
@@ -215,7 +214,7 @@ function drawClassicRibbonBanner(
   ctx.fillStyle = '#FFFFFF';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.font = `800 46px 'Lilita One', 'Fredoka', 'Arial Rounded MT Bold', sans-serif`;
+  ctx.font = `900 68px 'Lilita One', 'Fredoka', 'Arial Rounded MT Bold', sans-serif`;
   ctx.fillText(text, cx, cy - 2);
 
   ctx.restore();
@@ -237,59 +236,69 @@ export async function createCompositeMasterCover(
   // Dynamic series title resolution from options.title or subType
   const optTitle = (options.title || '').toLowerCase();
   let seriesTitle = 'STICKER';
-  let ribbonColor = '#A84D1D'; // Warm pumpkin terracotta (matching target image)
-  let ribbonFold = '#5C1D07';
+  let titleColor = '#B91C1C'; // Deep warm crimson bold lettering (matching target image exactly)
+  let ribbonColor = '#C25E26'; // Warm pumpkin terracotta (matching target image)
+  let ribbonFold = '#6C2A0C';
   let ribbonOutline = '#261208';
 
   if (subType === 'halloween' || optTitle.includes('halloween') || optTitle.includes('할로윈') || optTitle.includes('spooky')) {
     seriesTitle = 'HALLOWEEN';
-    ribbonColor = '#A84D1D';
-    ribbonFold = '#5C1D07';
+    titleColor = '#B91C1C';
+    ribbonColor = '#C25E26';
+    ribbonFold = '#6C2A0C';
     ribbonOutline = '#261208';
   } else if (optTitle.includes('harvest') || optTitle.includes('fall') || optTitle.includes('autumn')) {
     seriesTitle = 'FALL HARVEST';
-    ribbonColor = '#A84D1D';
-    ribbonFold = '#5C1D07';
+    titleColor = '#B91C1C';
+    ribbonColor = '#C25E26';
+    ribbonFold = '#6C2A0C';
     ribbonOutline = '#261208';
   } else if (subType === 'thanksgiving' || optTitle.includes('thanksgiving') || optTitle.includes('추수감사절')) {
     seriesTitle = 'THANKSGIVING';
-    ribbonColor = '#9A3412';
-    ribbonFold = '#431407';
+    titleColor = '#B91C1C';
+    ribbonColor = '#B45309';
+    ribbonFold = '#451A03';
     ribbonOutline = '#261208';
   } else if (subType === 'christmas' || optTitle.includes('christmas') || optTitle.includes('크리스마스')) {
     seriesTitle = 'CHRISTMAS';
+    titleColor = '#B91C1C';
     ribbonColor = '#15803D';
     ribbonFold = '#052E16';
     ribbonOutline = '#0F172A';
   } else if (subType === 'vivarium' || optTitle.includes('vivarium') || optTitle.includes('비바리움')) {
     seriesTitle = 'VIVARIUM';
+    titleColor = '#0F766E';
     ribbonColor = '#0F766E';
     ribbonFold = '#042F2E';
     ribbonOutline = '#0A1E1C';
   } else if (subType === 'saltaquarium' || optTitle.includes('saltaquarium') || optTitle.includes('해수어')) {
     seriesTitle = 'SALTWATER AQUARIUM';
+    titleColor = '#0369A1';
     ribbonColor = '#0284C7';
     ribbonFold = '#082F49';
     ribbonOutline = '#081C2E';
   } else if (subType === 'freshaquarium' || optTitle.includes('freshaquarium') || optTitle.includes('열대어')) {
     seriesTitle = 'FRESHWATER AQUARIUM';
+    titleColor = '#047857';
     ribbonColor = '#059669';
     ribbonFold = '#064E3B';
     ribbonOutline = '#062820';
   } else if (subType === 'terrarium' || optTitle.includes('terrarium') || optTitle.includes('테라리움')) {
     seriesTitle = 'TERRARIUM';
+    titleColor = '#0F766E';
     ribbonColor = '#0F766E';
     ribbonFold = '#042F2E';
     ribbonOutline = '#0A1E1C';
   } else {
     if (options.title) {
-      const cleanT = options.title.replace(/[0-9+]+|(cute|stickers?|bundle|png|digital|download)/gi, '').trim();
+      const cleanT = options.title.replace(/[0-9+]+| (cute|stickers?|bundle|png|digital|download) /gi, '').trim();
       if (cleanT.length > 0) {
         seriesTitle = cleanT.toUpperCase();
       }
     }
-    ribbonColor = '#A84D1D';
-    ribbonFold = '#5C1D07';
+    titleColor = '#B91C1C';
+    ribbonColor = '#C25E26';
+    ribbonFold = '#6C2A0C';
     ribbonOutline = '#261208';
   }
 
@@ -297,46 +306,51 @@ export async function createCompositeMasterCover(
   if (typeof document !== 'undefined' && document.fonts) {
     try {
       await Promise.all([
-        document.fonts.load("900 140px 'Lilita One'"),
-        document.fonts.load("800 140px 'Fredoka'"),
-        document.fonts.load("800 46px 'Lilita One'")
+        document.fonts.load("900 230px 'Lilita One'"),
+        document.fonts.load("900 210px 'Lilita One'"),
+        document.fonts.load("900 180px 'Lilita One'"),
+        document.fonts.load("800 210px 'Fredoka'"),
+        document.fonts.load("900 68px 'Lilita One'")
       ]);
     } catch {
       // Fallback seamlessly to system rounded fonts
     }
   }
 
-  // 20 LARGE OVERLAPPING ANCHOR SLOTS FOR MAIN STICKERS (Base size: 920px - 980px)
+  // 20 LARGE OVERLAPPING ANCHOR SLOTS ARRANGED IN A WREATH FRAME
+  // Pushed outward to provide a massive clear central space (X: 650-2350, Y: 980-1950) for the bold title
   const ANCHOR_SLOTS = [
-    // ROW 1: TOP ROW (5 stickers across top edge)
-    { x: 320,  y: 380,  tilt: -12, scale: 0.95 },
-    { x: 920,  y: 320,  tilt: 8,   scale: 0.92 },
-    { x: 1500, y: 280,  tilt: -5,  scale: 0.92 },
-    { x: 2080, y: 320,  tilt: 9,   scale: 0.92 },
-    { x: 2680, y: 380,  tilt: -11, scale: 0.95 },
+    // 1. TOP ARCH (5 stickers across the top perimeter)
+    { x: 360,  y: 380,  tilt: -12, scale: 0.90 },
+    { x: 920,  y: 300,  tilt: 7,   scale: 0.88 },
+    { x: 1500, y: 270,  tilt: -4,  scale: 0.88 },
+    { x: 2080, y: 300,  tilt: 8,   scale: 0.88 },
+    { x: 2640, y: 380,  tilt: -10, scale: 0.90 },
 
-    // ROW 2: UPPER MID FLANKS (4 stickers framing title top corners)
-    { x: 300,  y: 980,  tilt: 10,  scale: 0.95 },
-    { x: 750,  y: 880,  tilt: -8,  scale: 0.88 },
-    { x: 2250, y: 880,  tilt: 8,   scale: 0.88 },
-    { x: 2700, y: 980,  tilt: -10, scale: 0.95 },
+    // 2. UPPER CORNERS (2 stickers framing upper diagonals)
+    { x: 620,  y: 780,  tilt: -7,  scale: 0.82 },
+    { x: 2380, y: 780,  tilt: 8,   scale: 0.82 },
 
-    // ROW 3: LOWER MID FLANKS (4 stickers framing title bottom corners)
-    { x: 300,  y: 1620, tilt: -11, scale: 0.95 },
-    { x: 750,  y: 1720, tilt: 7,   scale: 0.88 },
-    { x: 2250, y: 1720, tilt: -8,  scale: 0.88 },
-    { x: 2700, y: 1620, tilt: 10,  scale: 0.95 },
+    // 3. LEFT FLANK (3 stickers along outer left wall)
+    { x: 300,  y: 960,  tilt: 10,  scale: 0.90 },
+    { x: 260,  y: 1500, tilt: -8,  scale: 0.90 },
+    { x: 320,  y: 2040, tilt: 9,   scale: 0.90 },
 
-    // ROW 4: BOTTOM MID ROW (4 stickers across lower canvas)
-    { x: 420,  y: 2280, tilt: -8,  scale: 0.95 },
-    { x: 1020, y: 2200, tilt: 9,   scale: 0.92 },
-    { x: 1980, y: 2200, tilt: -7,  scale: 0.92 },
-    { x: 2580, y: 2280, tilt: 8,   scale: 0.95 },
+    // 4. RIGHT FLANK (3 stickers along outer right wall)
+    { x: 2700, y: 960,  tilt: -9,  scale: 0.90 },
+    { x: 2740, y: 1500, tilt: 8,   scale: 0.90 },
+    { x: 2680, y: 2040, tilt: -10, scale: 0.90 },
 
-    // ROW 5: BOTTOM ROW (3 stickers across bottom edge)
-    { x: 680,  y: 2720, tilt: 8,   scale: 0.95 },
-    { x: 1500, y: 2780, tilt: -6,  scale: 0.98 },
-    { x: 2320, y: 2720, tilt: 9,   scale: 0.95 },
+    // 5. LOWER FLANK SUPPORTS (2 stickers supporting underneath the ribbon banner flanks)
+    { x: 900,  y: 2080, tilt: -6,  scale: 0.80 },
+    { x: 2100, y: 2080, tilt: 7,   scale: 0.80 },
+
+    // 6. BOTTOM ARCH (5 stickers across the bottom perimeter)
+    { x: 550,  y: 2580, tilt: -8,  scale: 0.88 },
+    { x: 1020, y: 2680, tilt: 6,   scale: 0.88 },
+    { x: 1500, y: 2720, tilt: -5,  scale: 0.90 },
+    { x: 1980, y: 2680, tilt: 7,   scale: 0.88 },
+    { x: 2450, y: 2580, tilt: -9,  scale: 0.88 },
   ];
 
   // Take actual stickers to render (up to 20 anchor slots)
@@ -366,9 +380,6 @@ export async function createCompositeMasterCover(
       ctx.lineWidth = 14;
       ctx.strokeRect(8, 8, targetWidth - 16, targetHeight - 16);
 
-      // NOTE: Weird artificial geometric filler shapes (drawStandaloneThemeSticker) COMPLETELY REMOVED!
-      // Only genuine, real sticker assets are rendered on canvas!
-
       // 3. Load all 20 main sticker images concurrently
       const loadPromises = realStickersToRender.map((s) => {
         return new Promise<HTMLImageElement | null>((res) => {
@@ -382,8 +393,8 @@ export async function createCompositeMasterCover(
 
       const loadedImages = await Promise.all(loadPromises);
 
-      // 4. Render ALL 20 Main Stickers with LARGE 920px Scale & Die-Cut Shadows
-      const baseMaxDim = 920;
+      // 4. Render ALL 20 Main Stickers with Die-Cut Shadows
+      const baseMaxDim = 840; // 840px base size creates perfect overlap without encroaching center
 
       for (let i = 0; i < loadedImages.length; i++) {
         const img = loadedImages[i];
@@ -409,8 +420,8 @@ export async function createCompositeMasterCover(
         ctx.rotate((slot.tilt * Math.PI) / 180);
 
         // Rich die-cut drop shadow around pure sticker object
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.24)';
-        ctx.shadowBlur = 42;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
+        ctx.shadowBlur = 40;
         ctx.shadowOffsetX = 6;
         ctx.shadowOffsetY = 16;
 
@@ -421,37 +432,37 @@ export async function createCompositeMasterCover(
       // --- 5. Central Title & Ribbon Banner Typography (Etsy Bestseller Exact Match) ---
       const centerX = targetWidth / 2;
 
-      // Draw clean, crisp, cute bold typography in signature Etsy raspberry pink (#E11D48)
-      const drawTitleLine = (text: string, x: number, y: number, initialSize: number = 140) => {
+      // Draw massive, crisp, cute bold typography matching Etsy bestseller reference (Left Sample)
+      const drawTitleLine = (text: string, x: number, y: number, initialSize: number = 210, maxW: number = 1650) => {
         ctx.save();
         let size = initialSize;
         ctx.font = `900 ${size}px 'Lilita One', 'Fredoka', 'Arial Rounded MT Bold', sans-serif`;
         const w = ctx.measureText(text).width;
-        if (w > 1280) {
-          size = Math.floor(size * (1280 / w));
+        if (w > maxW) {
+          size = Math.floor(size * (maxW / w));
           ctx.font = `900 ${size}px 'Lilita One', 'Fredoka', 'Arial Rounded MT Bold', sans-serif`;
         }
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#E11D48'; // Exact signature Etsy bestseller rose/berry pink
+        ctx.fillStyle = titleColor; // Signature deep crimson bold lettering (#B91C1C)
         ctx.fillText(text, x, y);
         ctx.restore();
       };
 
       // Line 1: [COUNT]+ CUTE (e.g. 20+ CUTE or 40+ CUTE)
-      drawTitleLine(`${count}+ CUTE`, centerX, 1190, 140);
+      drawTitleLine(`${count}+ CUTE`, centerX, 1160, 205, 1400);
 
       // Line 2: [SERIES TITLE] (e.g. HALLOWEEN, FALL HARVEST, TERRARIUM)
-      drawTitleLine(seriesTitle, centerX, 1330, 145);
+      drawTitleLine(seriesTitle, centerX, 1345, 220, 1680);
 
       // Line 3: STICKER BUNDLE
-      drawTitleLine('STICKER BUNDLE', centerX, 1465, 135);
+      drawTitleLine('STICKER BUNDLE', centerX, 1515, 195, 1600);
 
       // 4. Swallowtail 3D Ribbon Banner: PNG DIGITAL DOWNLOAD
       drawClassicRibbonBanner(
         ctx,
         centerX,
-        1605,
+        1695,
         'PNG DIGITAL DOWNLOAD',
         ribbonColor,
         ribbonFold,
