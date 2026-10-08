@@ -19,18 +19,24 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const v = searchParams.get('v');
+    const nocache = searchParams.get('nocache') === 'true' || searchParams.has('_t');
     if (!id) return new NextResponse('Missing id', { status: 400 });
 
+    const cacheKey = v ? `${id}_${v}` : id;
+
     // 1. Check in-memory cache first (0 Firestore reads!)
-    const cached = inMemoryImageCache.get(id);
-    if (cached) {
-      return new NextResponse(new Uint8Array(cached.buffer), {
-        headers: {
-          'Content-Type': cached.mimeType,
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
-        },
-      });
+    if (!nocache) {
+      const cached = inMemoryImageCache.get(cacheKey);
+      if (cached) {
+        return new NextResponse(new Uint8Array(cached.buffer), {
+          headers: {
+            'Content-Type': cached.mimeType,
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400',
+          },
+        });
+      }
     }
 
     if (!process.env.FIREBASE_PROJECT_ID) {
@@ -61,13 +67,13 @@ export async function GET(request: Request) {
             const firstKey = inMemoryImageCache.keys().next().value;
             if (firstKey) inMemoryImageCache.delete(firstKey);
           }
-          inMemoryImageCache.set(id, { buffer, mimeType: contentType });
+          inMemoryImageCache.set(cacheKey, { buffer, mimeType: contentType });
 
           return new NextResponse(new Uint8Array(buffer), {
             headers: {
               'Content-Type': contentType,
               'Access-Control-Allow-Origin': '*',
-              'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
+              'Cache-Control': nocache ? 'no-store, no-cache, must-revalidate' : (v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400'),
             },
           });
         }
@@ -89,13 +95,13 @@ export async function GET(request: Request) {
       const firstKey = inMemoryImageCache.keys().next().value;
       if (firstKey) inMemoryImageCache.delete(firstKey);
     }
-    inMemoryImageCache.set(id, { buffer, mimeType });
+    inMemoryImageCache.set(cacheKey, { buffer, mimeType });
 
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': mimeType,
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
+        'Cache-Control': nocache ? 'no-store, no-cache, must-revalidate' : (v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400'),
       },
     });
   } catch (error: any) {

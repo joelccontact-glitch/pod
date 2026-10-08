@@ -47,7 +47,7 @@ const getCachedStickersPool = async (forceRefresh = false): Promise<any[]> => {
     return clientPoolCache.data;
   }
   try {
-    const res = await fetch('/api/designs?limit=1000&type=sticker');
+    const res = await fetch(`/api/designs?limit=1000&type=sticker${forceRefresh ? `&nocache=true&_t=${now}` : ''}`);
     const data = await res.json();
     if (data.success && Array.isArray(data.data)) {
       clientPoolCache = { data: data.data, timestamp: now };
@@ -860,7 +860,7 @@ export default function Home() {
     setPackStickers([]);
 
     try {
-      const pool = await getCachedStickersPool();
+      const pool = await getCachedStickersPool(true);
       if (pool && pool.length > 0) {
         const coverTime = new Date(coverDesign.created_at || 0).getTime();
         const coverCategory = getDesignCategoryKey(coverDesign);
