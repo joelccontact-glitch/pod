@@ -8,9 +8,58 @@
  */
 
 export interface TransparentPNGOptions {
-  targetWidth?: number; // default 4000px
-  targetHeight?: number; // default 4000px
+  targetWidth?: number; // default 3000px
+  targetHeight?: number; // default 3000px
   tolerance?: number;
+}
+
+/**
+ * Robust image loader with CORS handling, fallback, and timeout protection.
+ */
+function loadImageElement(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    let settled = false;
+
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        reject(new Error('Image load timed out: ' + src.slice(0, 60)));
+      }
+    }, 15000);
+
+    img.onload = () => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        resolve(img);
+      }
+    };
+
+    img.onerror = () => {
+      if (settled) return;
+      // If anonymous CORS failed, try fallback without crossOrigin for local/proxy URLs
+      const fallbackImg = new Image();
+      fallbackImg.onload = () => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timer);
+          resolve(fallbackImg);
+        }
+      };
+      fallbackImg.onerror = (err) => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timer);
+          reject(new Error('Image failed to load: ' + (err instanceof Event ? 'Network/CORS error' : String(err))));
+        }
+      };
+      fallbackImg.src = src;
+    };
+
+    img.crossOrigin = 'anonymous';
+    img.src = src;
+  });
 }
 
 export async function processTransparentPNG(
@@ -18,223 +67,206 @@ export async function processTransparentPNG(
   options: TransparentPNGOptions = {}
 ): Promise<string> {
   const {
-    targetWidth = 4000,
-    targetHeight = 4000,
+    targetWidth = 3000,
+    targetHeight = 3000,
   } = options;
 
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = imageUrl;
+  const img = await loadImageElement(imageUrl);
 
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = targetWidth;
-      canvas.height = targetHeight;
-      const ctx = canvas.getContext('2d');
+  const canvas = document.createElement('canvas');
+  // Maintain natural size or target resolution
+  const width = Math.min(targetWidth, Math.max(img.naturalWidth || 1024, 1500));
+  const height = Math.min(targetHeight, Math.max(img.naturalHeight || 1024, 1500));
+  canvas.width = width;
+  canvas.height = height;
 
-      if (!ctx) {
-        reject(new Error('Canvas context not available'));
-        return;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) {
+    throw new Error('Canvas context not available');
+  }
+
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, 0, 0, width, height);
+
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+  const totalPixels = width * height;
+
+  // Sample background color from 4 corners
+  const samplePoints = [
+    (0 * width + 0) * 4,
+    (0 * width + (width - 1)) * 4,
+    ((height - 1) * width + 0) * 4,
+    ((height - 1) * width + (width - 1)) * 4,
+  ];
+
+  let bgR = 0, bgG = 0, bgB = 0;
+  samplePoints.forEach(idx => {
+    bgR += data[idx];
+    bgG += data[idx + 1];
+    bgB += data[idx + 2];
+  });
+  bgR = Math.round(bgR / 4);
+  bgG = Math.round(bgG / 4);
+  bgB = Math.round(bgB / 4);
+
+  const visited = new Uint8Array(totalPixels);
+  // Store 1D indices (y * width + x) for 50% memory savings and cache locality
+  const queue = new Int32Array(totalPixels);
+  let head = 0;
+  let tail = 0;
+
+  const isBackgroundPixel = (x: number, y: number) => {
+    const idx = (y * width + x) * 4;
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    const a = data[idx + 3];
+
+    if (a === 0) return true;
+
+    // 1. Color distance from sampled corner background
+    const dr = Math.abs(r - bgR);
+    const dg = Math.abs(g - bgG);
+    const db = Math.abs(b - bgB);
+    if (dr <= 32 && dg <= 32 && db <= 32) return true;
+
+    // 2. Off-white / light gray ground shadow / floor noise under feet/chairs
+    if (r >= 150 && g >= 150 && b >= 145) {
+      const maxC = Math.max(r, g, b);
+      const minC = Math.min(r, g, b);
+      if (maxC - minC <= 20) {
+        return true;
       }
+    }
 
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
+    return false;
+  };
 
-      ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+  // 1. Seed 4 outer border edges for BFS Flood Fill
+  for (let x = 0; x < width; x++) {
+    if (isBackgroundPixel(x, 0)) {
+      const idx = 0 * width + x;
+      if (!visited[idx]) { visited[idx] = 1; queue[tail++] = idx; }
+    }
+    const bIdx = (height - 1) * width + x;
+    if (isBackgroundPixel(x, height - 1)) {
+      if (!visited[bIdx]) { visited[bIdx] = 1; queue[tail++] = bIdx; }
+    }
+  }
 
-      const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
-      const data = imageData.data;
-      const width = targetWidth;
-      const height = targetHeight;
-      const totalPixels = width * height;
+  for (let y = 0; y < height; y++) {
+    const lIdx = y * width + 0;
+    if (isBackgroundPixel(0, y)) {
+      if (!visited[lIdx]) { visited[lIdx] = 1; queue[tail++] = lIdx; }
+    }
+    const rIdx = y * width + (width - 1);
+    if (isBackgroundPixel(width - 1, y)) {
+      if (!visited[rIdx]) { visited[rIdx] = 1; queue[tail++] = rIdx; }
+    }
+  }
 
-      // Sample background color from 4 corners
-      const samplePoints = [
-        (0 * width + 0) * 4,
-        (0 * width + (width - 1)) * 4,
-        ((height - 1) * width + 0) * 4,
-        ((height - 1) * width + (width - 1)) * 4,
-      ];
+  // BFS Flood Fill 4-directional
+  const dx = [1, -1, 0, 0];
+  const dy = [0, 0, 1, -1];
 
-      let bgR = 0, bgG = 0, bgB = 0;
-      samplePoints.forEach(idx => {
-        bgR += data[idx];
-        bgG += data[idx + 1];
-        bgB += data[idx + 2];
-      });
-      bgR = Math.round(bgR / 4);
-      bgG = Math.round(bgG / 4);
-      bgB = Math.round(bgB / 4);
+  while (head < tail) {
+    const cidx = queue[head++];
+    const cx = cidx % width;
+    const cy = (cidx / width) | 0;
 
-      const visited = new Uint8Array(totalPixels);
-      const queue = new Int32Array(totalPixels * 2);
-      let head = 0;
-      let tail = 0;
+    for (let i = 0; i < 4; i++) {
+      const nx = cx + dx[i];
+      const ny = cy + dy[i];
 
-      const isBackgroundPixel = (x: number, y: number) => {
-        const idx = (y * width + x) * 4;
-        const r = data[idx];
-        const g = data[idx + 1];
-        const b = data[idx + 2];
-        const a = data[idx + 3];
-
-        if (a === 0) return true;
-
-        // 1. Color distance from sampled corner background
-        const dr = Math.abs(r - bgR);
-        const dg = Math.abs(g - bgG);
-        const db = Math.abs(b - bgB);
-        if (dr <= 32 && dg <= 32 && db <= 32) return true;
-
-        // 2. Off-white / light gray ground shadow / floor noise under feet/chairs
-        // (High brightness & low saturation neutral gray ground shadow)
-        if (r >= 150 && g >= 150 && b >= 145) {
-          const maxC = Math.max(r, g, b);
-          const minC = Math.min(r, g, b);
-          if (maxC - minC <= 20) { // Low saturation neutral ground shadow
-            return true;
-          }
-        }
-
-        return false;
-      };
-
-
-      // 1. Seed 4 outer border edges for BFS Flood Fill
-      for (let x = 0; x < width; x++) {
-        if (isBackgroundPixel(x, 0)) {
-          const idx = 0 * width + x;
-          if (!visited[idx]) { visited[idx] = 1; queue[tail++] = x; queue[tail++] = 0; }
-        }
-        if (isBackgroundPixel(x, height - 1)) {
-          const idx = (height - 1) * width + x;
-          if (!visited[idx]) { visited[idx] = 1; queue[tail++] = x; queue[tail++] = height - 1; }
-        }
-      }
-
-      for (let y = 0; y < height; y++) {
-        if (isBackgroundPixel(0, y)) {
-          const idx = y * width + 0;
-          if (!visited[idx]) { visited[idx] = 1; queue[tail++] = 0; queue[tail++] = y; }
-        }
-        if (isBackgroundPixel(width - 1, y)) {
-          const idx = y * width + (width - 1);
-          if (!visited[idx]) { visited[idx] = 1; queue[tail++] = width - 1; queue[tail++] = y; }
-        }
-      }
-
-      // BFS Flood Fill 4-directional
-      const dx = [1, -1, 0, 0];
-      const dy = [0, 0, 1, -1];
-
-      while (head < tail) {
-        const cx = queue[head++];
-        const cy = queue[head++];
-
-        for (let i = 0; i < 4; i++) {
-          const nx = cx + dx[i];
-          const ny = cy + dy[i];
-
-          if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-            const nidx = ny * width + nx;
-            if (!visited[nidx] && isBackgroundPixel(nx, ny)) {
-              visited[nidx] = 1;
-              queue[tail++] = nx;
-              queue[tail++] = ny;
-            }
-          }
+      if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+        const nidx = ny * width + nx;
+        if (!visited[nidx] && isBackgroundPixel(nx, ny)) {
+          visited[nidx] = 1;
+          queue[tail++] = nidx;
         }
       }
+    }
+  }
 
-      // 2. Enclosed Letter Hole Cleanup for ALL text stroke colors (mint, pink, coral, black, etc.)
-      // Strictly small enclosed background holes (< 400px on 4K) surrounded by non-background strokes
-      const maxHoleArea = Math.min(500, Math.max(40, Math.round(totalPixels * 0.00003)));
+  // 2. Enclosed Letter Hole Cleanup with PRE-ALLOCATED tiny static buffers
+  // Strictly small enclosed background holes (< 500px) surrounded by non-background strokes
+  const maxHoleArea = Math.min(500, Math.max(40, Math.round(totalPixels * 0.00003)));
+  const islandQueue = new Int32Array(maxHoleArea * 4 + 64);
+  const islandPixels = new Int32Array(maxHoleArea + 16);
 
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const startIdx = y * width + x;
-          if (!visited[startIdx] && isBackgroundPixel(x, y)) {
-            let iHead = 0;
-            let iTail = 0;
-            const islandQueue = new Int32Array(totalPixels * 2);
-            const islandPixels = new Int32Array(totalPixels);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const startIdx = y * width + x;
+      if (!visited[startIdx] && isBackgroundPixel(x, y)) {
+        let iHead = 0;
+        let iTail = 0;
+        visited[startIdx] = 2; // Mark temporary
+        islandQueue[iTail++] = startIdx;
+        islandPixels[0] = startIdx;
+        let count = 1;
+        let strokeBoundaryCount = 0;
+        let isTooLarge = false;
 
-            visited[startIdx] = 2; // Mark temporary
-            islandQueue[iTail++] = x;
-            islandQueue[iTail++] = y;
-            islandPixels[0] = startIdx;
-            let count = 1;
-            let strokeBoundaryCount = 0;
+        while (iHead < iTail) {
+          const cidx = islandQueue[iHead++];
+          const ix = cidx % width;
+          const iy = (cidx / width) | 0;
 
-            while (iHead < iTail) {
-              const ix = islandQueue[iHead++];
-              const iy = islandQueue[iHead++];
+          for (let d = 0; d < 4; d++) {
+            const nx = ix + dx[d];
+            const ny = iy + dy[d];
 
-              for (let d = 0; d < 4; d++) {
-                const nx = ix + dx[d];
-                const ny = iy + dy[d];
-
-                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                  const nidx = ny * width + nx;
-                  if (!visited[nidx]) {
-                    if (isBackgroundPixel(nx, ny)) {
-                      visited[nidx] = 2;
-                      islandQueue[iTail++] = nx;
-                      islandQueue[iTail++] = ny;
-                      islandPixels[count++] = nidx;
-                    } else {
-                      // Neighbor is a non-background stroke pixel (mint green, pink, black, coral, etc.)
-                      strokeBoundaryCount++;
-                    }
+            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+              const nidx = ny * width + nx;
+              if (!visited[nidx]) {
+                if (isBackgroundPixel(nx, ny)) {
+                  visited[nidx] = 2;
+                  if (count < maxHoleArea) {
+                    islandQueue[iTail++] = nidx;
+                    islandPixels[count++] = nidx;
+                  } else {
+                    isTooLarge = true;
                   }
+                } else {
+                  strokeBoundaryCount++;
                 }
               }
             }
+          }
+        }
 
-            // Clear if small background hole is bounded by text stroke (mint, pink, coral, black)
-            if (count <= maxHoleArea && strokeBoundaryCount > 4) {
-              for (let k = 0; k < count; k++) {
-                visited[islandPixels[k]] = 1;
-              }
-            }
+        // Clear if small background hole is bounded by text stroke (mint, pink, coral, black)
+        if (!isTooLarge && count <= maxHoleArea && strokeBoundaryCount > 4) {
+          for (let k = 0; k < count; k++) {
+            visited[islandPixels[k]] = 1;
           }
         }
       }
+    }
+  }
 
+  // 3. Clear background & letter holes with smooth anti-aliased defringing
+  for (let i = 0; i < totalPixels; i++) {
+    if (visited[i] === 1) {
+      const pIdx = i * 4;
+      const r = data[pIdx];
+      const g = data[pIdx + 1];
+      const b = data[pIdx + 2];
+      const minVal = Math.min(r, g, b);
 
-      // 3. Clear background & letter holes with smooth anti-aliased defringing
-      for (let i = 0; i < totalPixels; i++) {
-        if (visited[i] === 1) {
-          const pIdx = i * 4;
-          const r = data[pIdx];
-          const g = data[pIdx + 1];
-          const b = data[pIdx + 2];
-          const minVal = Math.min(r, g, b);
-
-          if (minVal >= 242) {
-            data[pIdx + 3] = 0; // 100% transparent for background & letter holes
-          } else if (minVal >= 215) {
-            const alphaRatio = (255 - minVal) / 40;
-            data[pIdx + 3] = Math.min(data[pIdx + 3], Math.floor((1 - alphaRatio) * 255));
-          } else {
-            data[pIdx + 3] = 0;
-          }
-        }
+      if (minVal >= 242) {
+        data[pIdx + 3] = 0; // 100% transparent for background & letter holes
+      } else if (minVal >= 215) {
+        const alphaRatio = (255 - minVal) / 40;
+        data[pIdx + 3] = Math.min(data[pIdx + 3], Math.floor((1 - alphaRatio) * 255));
+      } else {
+        data[pIdx + 3] = 0;
       }
+    }
+  }
 
-
-
-
-      ctx.putImageData(imageData, 0, 0);
-      resolve(canvas.toDataURL('image/png'));
-    };
-
-    img.onerror = (err) => {
-      reject(err);
-    };
-  });
+  ctx.putImageData(imageData, 0, 0);
+  return canvas.toDataURL('image/png');
 }
-
-
-

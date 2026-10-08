@@ -20,9 +20,29 @@ export async function GET(request: Request) {
     const data = doc.data();
     const imageUrl = data?.image_url;
 
-    if (!imageUrl || !imageUrl.startsWith('data:image/')) {
-      // If it's a regular URL, just redirect to it
-      return NextResponse.redirect(imageUrl || 'https://placehold.co/800x800?text=No+Image');
+    if (!imageUrl) {
+      return NextResponse.redirect('https://placehold.co/800x800?text=No+Image');
+    }
+
+    if (!imageUrl.startsWith('data:image/')) {
+      // If it's a regular URL, try fetching to provide CORS headers or fallback to redirect
+      try {
+        const fetchRes = await fetch(imageUrl);
+        if (fetchRes.ok) {
+          const contentType = fetchRes.headers.get('content-type') || 'image/png';
+          const arrayBuf = await fetchRes.arrayBuffer();
+          return new NextResponse(Buffer.from(arrayBuf), {
+            headers: {
+              'Content-Type': contentType,
+              'Access-Control-Allow-Origin': '*',
+              'Cache-Control': 'public, max-age=86400',
+            },
+          });
+        }
+      } catch (e) {
+        // Fallback to redirect
+      }
+      return NextResponse.redirect(imageUrl);
     }
 
     // Extract base64 and mime type
@@ -35,9 +55,10 @@ export async function GET(request: Request) {
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': mimeType,
+        'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
         'Pragma': 'no-cache',
-        'Expires': '0'
+        'Expires': '0',
       },
     });
   } catch (error) {

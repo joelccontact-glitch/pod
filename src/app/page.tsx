@@ -195,6 +195,7 @@ export default function Home() {
   >('terrarium20');
   const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-20-pack-1');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
+  const [exportBundleProgress, setExportBundleProgress] = useState<{ current: number; total: number; message: string } | null>(null);
   const [isBatchZipModalOpen, setIsBatchZipModalOpen] = useState(false);
   const [batchZipSessions, setBatchZipSessions] = useState<any[]>([]);
   const [allZipPool, setAllZipPool] = useState<any[]>([]);
@@ -2173,12 +2174,20 @@ export default function Home() {
   };
 
   const downloadBatchSession = async (targetDesigns: any[], sessionName: string) => {
+    if (!targetDesigns || targetDesigns.length === 0) {
+      alert('다운로드할 스티커가 없습니다.');
+      return;
+    }
+    if (isExportingBundle) return; // Prevent duplicate clicks
+
     try {
       setIsExportingBundle(true);
       setIsBatchZipModalOpen(false);
+      setExportBundleProgress({ current: 0, total: targetDesigns.length, message: 'ZIP 파일 생성 준비 중...' });
 
+      const items = [...targetDesigns];
       // Sort: Master Cover first, then stickers chronologically (01 -> 20)
-      targetDesigns.sort((a, b) => {
+      items.sort((a, b) => {
         const aIsCover = isCoverDesign(a);
         const bIsCover = isCoverDesign(b);
         if (aIsCover && !bIsCover) return -1;
@@ -2189,55 +2198,92 @@ export default function Home() {
       });
 
       const themeName = getCleanEnglishThemeName(
-        targetDesigns[0]?.sticker_sub,
+        items[0]?.sticker_sub,
         selectedStickerSeriesTab,
-        sessionName || targetDesigns[0]?.topic
+        sessionName || items[0]?.topic
       );
       const cleanSessionName = `${themeName}_Sticker_Bundle`;
       const zip = new JSZip();
       const folder = zip.folder(cleanSessionName);
 
+      const totalItems = items.length;
       let stickerCounter = 1;
-      for (let i = 0; i < targetDesigns.length; i++) {
-        const d = targetDesigns[i];
+      const processedStickers: any[] = [];
+
+      for (let i = 0; i < totalItems; i++) {
+        const d = items[i];
+        const isCover = i === 0 || isCoverDesign(d);
         const rawUrl = d.transparent_png_url || (d.id ? `/api/designs/image?id=${d.id}` : d.image_url || d.url);
         if (!rawUrl) continue;
 
+        setExportBundleProgress({
+          current: i + 1,
+          total: totalItems,
+          message: isCover 
+            ? `마스터 표지 패키징 중 (${i + 1}/${totalItems})...` 
+            : `스티커 투명 배경 처리 중 (${i + 1}/${totalItems})...`
+        });
+
+        // Yield to browser main thread so UI updates smoothly
+        await new Promise(resolve => setTimeout(resolve, 15));
+
         try {
-          const transparentDataUrl = await processTransparentPNG(rawUrl, {
-            targetWidth: 3000,
-            targetHeight: 3000,
-          });
-
-          const base64Data = transparentDataUrl.split(',')[1];
-          const binaryString = atob(base64Data);
-          const len = binaryString.length;
-          const bytes = new Uint8Array(len);
-          for (let b = 0; b < len; b++) {
-            bytes[b] = binaryString.charCodeAt(b);
-          }
-
-          const isCover = i === 0 || isCoverDesign(d);
-          let fileName = '';
-          if (isCover && i === 0) {
-            fileName = `00_Master_Cover_${themeName}_300DPI.png`;
+          if (isCover) {
+            // Master Cover: Preserve original background & high resolution, do NOT remove background!
+            let coverArrayBuffer: ArrayBuffer | null = null;
+            if (rawUrl.startsWith('data:image/')) {
+              const base64Data = rawUrl.split(',')[1];
+              const binaryString = atob(base64Data);
+              const bytes = new Uint8Array(binaryString.length);
+              for (let b = 0; b < binaryString.length; b++) bytes[b] = binaryString.charCodeAt(b);
+              coverArrayBuffer = bytes.buffer;
+            } else {
+              const res = await fetch(rawUrl);
+              coverArrayBuffer = await res.arrayBuffer();
+            }
+            if (coverArrayBuffer) {
+              folder?.file(`00_Master_Cover_${themeName}_300DPI.jpg`, coverArrayBuffer);
+            }
           } else {
-            fileName = `${String(stickerCounter).padStart(2, '0')}_${themeName}_Sticker_300DPI.png`;
-            stickerCounter++;
-          }
+            // Sticker item: Process high-res transparent PNG
+            const transparentDataUrl = await processTransparentPNG(rawUrl, {
+              targetWidth: 2400,
+              targetHeight: 2400,
+            });
 
-          folder?.file(fileName, bytes.buffer);
+            const base64Data = transparentDataUrl.split(',')[1];
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let b = 0; b < binaryString.length; b++) {
+              bytes[b] = binaryString.charCodeAt(b);
+            }
+
+            const fileName = `${String(stickerCounter).padStart(2, '0')}_${themeName}_Sticker_300DPI.png`;
+            folder?.file(fileName, bytes.buffer);
+            stickerCounter++;
+
+            processedStickers.push({
+              ...d,
+              processedTransparentDataUrl: transparentDataUrl,
+            });
+          }
         } catch (err) {
           console.error(`Error processing image index ${i} for ZIP:`, err);
         }
       }
 
-      // Also generate and package BOTH Transparent and White A4 Printable Sticker Sheets into the ZIP bundle
-      const nonCoverStickers = targetDesigns.filter(d => !isCoverDesign(d));
-      if (nonCoverStickers.length > 0) {
+      // Generate and package BOTH Transparent and White A4 Printable Sticker Sheets into the ZIP bundle
+      if (processedStickers.length > 0) {
+        setExportBundleProgress({
+          current: totalItems,
+          total: totalItems,
+          message: 'A4 인쇄용 시트 (투명 및 화이트) 생성 중...'
+        });
+        await new Promise(resolve => setTimeout(resolve, 15));
+
         try {
-          // 1. Transparent Background A4 Sheets (For Cricut / Silhouette cutting machines & Digital Planners)
-          const a4TransparentPages = await generateA4StickerSheets(nonCoverStickers, { background: 'transparent', pageSize: 20 });
+          // 1. Transparent Background A4 Sheets (reuses pre-processed transparent PNGs!)
+          const a4TransparentPages = await generateA4StickerSheets(processedStickers, { background: 'transparent', pageSize: 20 });
           for (let p = 0; p < a4TransparentPages.length; p++) {
             const a4Base64 = a4TransparentPages[p].split(',')[1];
             const a4Binary = atob(a4Base64);
@@ -2249,8 +2295,8 @@ export default function Home() {
             folder?.file(`00_A4_Printable${sheetSuffix}_Transparent_For_Cricut_300DPI.png`, a4Bytes.buffer);
           }
 
-          // 2. Solid White Background A4 Sheets (For standard home printers / scissor cutting on A4 sticker paper)
-          const a4WhitePages = await generateA4StickerSheets(nonCoverStickers, { background: 'white', pageSize: 20 });
+          // 2. Solid White Background A4 Sheets
+          const a4WhitePages = await generateA4StickerSheets(processedStickers, { background: 'white', pageSize: 20 });
           for (let p = 0; p < a4WhitePages.length; p++) {
             const a4Base64 = a4WhitePages[p].split(',')[1];
             const a4Binary = atob(a4Base64);
@@ -2266,6 +2312,13 @@ export default function Home() {
         }
       }
 
+      setExportBundleProgress({
+        current: totalItems,
+        total: totalItems,
+        message: 'ZIP 압축 패키징 및 다운로드 시작 중...'
+      });
+      await new Promise(resolve => setTimeout(resolve, 15));
+
       const zipBlob = await zip.generateAsync({ type: 'blob' });
       const url = window.URL.createObjectURL(zipBlob);
       const a = document.createElement('a');
@@ -2276,9 +2329,11 @@ export default function Home() {
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (err: any) {
+      console.error(err);
       alert(err.message || 'ZIP 번들 파일 생성 중 오류가 발생했습니다.');
     } finally {
       setIsExportingBundle(false);
+      setExportBundleProgress(null);
     }
   };
 
@@ -5571,22 +5626,14 @@ export default function Home() {
                   {/* 1단계: 마스터 표지 다운로드 (Etsy 대표 사진 1번용) */}
                   <button
                     onClick={async () => {
-                      try {
-                        const transparentDataUrl = await processTransparentPNG(selectedPackCover.image_url, { targetWidth: 3000, targetHeight: 3000 });
-                        const a = document.createElement('a');
-                        a.href = transparentDataUrl;
-                        const coverTheme = getCleanEnglishThemeName(selectedPackCover.sticker_sub, selectedStickerSeriesTab, selectedPackCover.topic || selectedPackCover.title);
-                        a.download = `00_Master_Cover_${coverTheme}_300DPI.png`;
-                        a.click();
-                      } catch (e) {
-                        const a = document.createElement('a');
-                        a.href = selectedPackCover.image_url;
-                        const coverTheme = getCleanEnglishThemeName(selectedPackCover.sticker_sub, selectedStickerSeriesTab, selectedPackCover.topic || selectedPackCover.title);
-                        a.download = `00_Master_Cover_${coverTheme}_300DPI.jpg`;
-                        a.click();
-                      }
+                      const coverTheme = getCleanEnglishThemeName(selectedPackCover.sticker_sub, selectedStickerSeriesTab, selectedPackCover.topic || selectedPackCover.title);
+                      const a = document.createElement('a');
+                      a.href = selectedPackCover.image_url;
+                      a.download = `00_Master_Cover_${coverTheme}_300DPI.jpg`;
+                      a.click();
                     }}
-                    className="bg-teal-700 hover:bg-teal-800 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-teal-600 cursor-pointer"
+                    disabled={isExportingBundle}
+                    className="bg-teal-700 hover:bg-teal-800 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-teal-600 cursor-pointer disabled:cursor-not-allowed"
                     title="[1단계] Etsy 상품 등록 시 '1번 대표 사진'으로 올릴 고화질 마스터 표지를 다운로드합니다."
                   >
                     <span className="bg-teal-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-teal-200">1단계</span>
@@ -5597,8 +5644,8 @@ export default function Home() {
                   {/* 2단계: A4 인쇄용 시트 (Etsy 추가 사진 2~3번용 목업) */}
                   <button
                     onClick={() => handleGenerateAndOpenA4Sheet(packStickers, 'transparent')}
-                    disabled={a4SheetLoading || packStickers.length === 0}
-                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-indigo-500 cursor-pointer"
+                    disabled={a4SheetLoading || isExportingBundle || packStickers.length === 0}
+                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-indigo-500 cursor-pointer disabled:cursor-not-allowed"
                     title="[2단계] Etsy 상품 등록 시 '추가 사진(2~3번)'으로 올려 구매자에게 A4 출력 구성을 보여주는 인쇄용 시트를 다운로드합니다."
                   >
                     <span className="bg-indigo-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-indigo-200">2단계</span>
@@ -5609,12 +5656,21 @@ export default function Home() {
                   {/* 3단계: 전체 ZIP 파일 일괄 다운로드 (Etsy Digital files 구매자 다운로드용) */}
                   <button
                     onClick={() => downloadBatchSession([selectedPackCover, ...packStickers], `${selectedPackCover.topic || 'Sticker_Pack'}_Bundle`)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-emerald-500 cursor-pointer"
+                    disabled={isExportingBundle || packStickers.length === 0}
+                    className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-800 disabled:opacity-90 text-white font-extrabold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-emerald-500 cursor-pointer disabled:cursor-wait"
                     title="[3단계] Etsy 상품 등록 시 'Digital files'에 올릴 40종 전체 + A4 시트 포함 정식 압축팩을 다운로드합니다."
                   >
                     <span className="bg-emerald-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-emerald-200">3단계</span>
-                    <span>📦</span>
-                    <span>이 팩 전체 {packStickers.length}종 ZIP 일괄 다운로드</span>
+                    {isExportingBundle ? (
+                      <span className="animate-spin inline-block">⏳</span>
+                    ) : (
+                      <span>📦</span>
+                    )}
+                    <span>
+                      {isExportingBundle 
+                        ? (exportBundleProgress ? exportBundleProgress.message : 'ZIP 압축 생성 중...') 
+                        : `이 팩 전체 ${packStickers.length}종 ZIP 일괄 다운로드`}
+                    </span>
                   </button>
 
                   {/* 부가 도구: 표지 편집 및 삭제 */}
@@ -5625,7 +5681,8 @@ export default function Home() {
                         setSelectedMockupId(selectedPackCover.recommended_mockup);
                       }
                     }}
-                    className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
+                    disabled={isExportingBundle}
+                    className="bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
                     title="마스터 표지를 상세보기 모달에서 지우개/텍스트/AI수정합니다"
                   >
                     <span>🛠️</span>
@@ -5640,12 +5697,38 @@ export default function Home() {
                         setIsPackDetailModalOpen(false);
                       }
                     }}
-                    className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
+                    disabled={isExportingBundle}
+                    className="bg-rose-600 hover:bg-rose-700 disabled:bg-gray-400 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
                   >
                     <span>🗑️</span>
                     <span>팩 삭제</span>
                   </button>
                 </div>
+
+                {/* 3단계 진행 상황 실시간 배너 */}
+                {isExportingBundle && (
+                  <div className="w-full mt-3 bg-emerald-900 text-white border-2 border-emerald-400 rounded-xl p-3.5 shadow-lg">
+                    <div className="flex items-center justify-between text-xs sm:text-sm font-bold mb-2">
+                      <span className="flex items-center gap-2 text-emerald-200">
+                        <span className="animate-spin inline-block text-base">⏳</span>
+                        <span>{exportBundleProgress?.message || '고화질 300DPI ZIP 압축팩 생성 중...'}</span>
+                      </span>
+                      <span className="text-emerald-300 font-mono font-black text-sm">
+                        {exportBundleProgress ? Math.round((exportBundleProgress.current / Math.max(1, exportBundleProgress.total)) * 100) : 0}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-emerald-950/80 rounded-full h-3 overflow-hidden border border-emerald-700">
+                      <div 
+                        className="bg-gradient-to-r from-emerald-400 to-teal-300 h-3 rounded-full transition-all duration-200"
+                        style={{ width: `${exportBundleProgress ? Math.round((exportBundleProgress.current / Math.max(1, exportBundleProgress.total)) * 100) : 5}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-[11px] text-emerald-300 mt-1.5 flex items-center gap-1">
+                      <span>💡</span>
+                      <span>개별 스티커의 투명 배경(PNG) 변환 및 A4 인쇄용 시트 2장을 정밀 생성 후 자동으로 ZIP 다운로드가 시작됩니다. 잠시만 기다려 주세요!</span>
+                    </p>
+                  </div>
+                )}
 
                 {/* 하단 친절한 Etsy 등록 3단계 안내 가이드 배너 */}
                 <div className="mt-3 bg-gradient-to-r from-amber-50 to-emerald-50 border border-emerald-200 text-stone-800 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-2xs">
@@ -6050,6 +6133,32 @@ export default function Home() {
                 >
                   <span>🌐 전체 누적 스티커 통합 다운로드 (총 {allZipPool.length}장)</span>
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 화면 하단 플로팅 실시간 ZIP 압축 다운로드 진행상황 도크 */}
+        {isExportingBundle && (
+          <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-emerald-950/95 backdrop-blur-md text-white border-2 border-emerald-400 p-3.5 rounded-2xl shadow-2xl flex items-center gap-3.5 max-w-sm sm:max-w-md w-[calc(100vw-2rem)] sm:w-auto animate-bounce-subtle">
+            <div className="w-5 h-5 border-3 border-emerald-400/40 border-t-emerald-400 rounded-full animate-spin shrink-0" />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-black text-emerald-300 truncate">
+                  📦 ZIP 압축팩 패키징 중
+                </span>
+                <span className="text-[11px] font-mono font-bold text-emerald-200 shrink-0">
+                  {exportBundleProgress ? Math.round((exportBundleProgress.current / Math.max(exportBundleProgress.total, 1)) * 100) : 0}%
+                </span>
+              </div>
+              <p className="text-[10.5px] text-gray-300 truncate mt-0.5">
+                {exportBundleProgress?.message || '고화질 스티커 투명 배경 및 A4 시트 생성 중...'}
+              </p>
+              <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden mt-1.5">
+                <div
+                  className="bg-gradient-to-r from-teal-400 to-emerald-400 h-full rounded-full transition-all duration-200"
+                  style={{ width: `${exportBundleProgress ? Math.round((exportBundleProgress.current / Math.max(exportBundleProgress.total, 1)) * 100) : 5}%` }}
+                />
               </div>
             </div>
           </div>

@@ -71,9 +71,41 @@ function getTrimmedBoundingBox(ctx: CanvasRenderingContext2D, width: number, hei
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        reject(new Error('Image load timed out'));
+      }
+    }, 15000);
+
+    img.onload = () => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        resolve(img);
+      }
+    };
+    img.onerror = () => {
+      if (settled) return;
+      const fallback = new Image();
+      fallback.onload = () => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timer);
+          resolve(fallback);
+        }
+      };
+      fallback.onerror = (e) => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timer);
+          reject(e);
+        }
+      };
+      fallback.src = src;
+    };
     img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = (e) => reject(e);
     img.src = src;
   });
 }
@@ -144,13 +176,15 @@ export async function generateA4StickerSheet(
 
     try {
       const rawUrl = d.transparent_png_url || (d.id ? `/api/designs/image?id=${d.id}` : d.image_url || d.url);
-      if (!rawUrl) continue;
+      if (!rawUrl && !d.processedTransparentDataUrl) continue;
 
-      // 1. Process transparent PNG (1200x1200 high resolution for sheet cell)
-      const transparentDataUrl = await processTransparentPNG(rawUrl, {
-        targetWidth: 1200,
-        targetHeight: 1200,
-      });
+      // 1. Process transparent PNG or reuse pre-processed data URL
+      const transparentDataUrl = d.processedTransparentDataUrl
+        ? d.processedTransparentDataUrl
+        : await processTransparentPNG(rawUrl, {
+            targetWidth: 1200,
+            targetHeight: 1200,
+          });
 
       const stickerImg = await loadImage(transparentDataUrl);
 
