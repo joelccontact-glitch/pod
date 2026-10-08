@@ -247,26 +247,44 @@ export async function processTransparentPNG(
     }
   }
 
-  // 3. Clear background & letter holes with smooth anti-aliased defringing
+  // 3. Clear background & letter holes with 100% strict transparency
   for (let i = 0; i < totalPixels; i++) {
     if (visited[i] === 1) {
       const pIdx = i * 4;
-      const r = data[pIdx];
-      const g = data[pIdx + 1];
-      const b = data[pIdx + 2];
-      const minVal = Math.min(r, g, b);
-
-      if (minVal >= 242) {
-        data[pIdx + 3] = 0; // 100% transparent for background & letter holes
-      } else if (minVal >= 215) {
-        const alphaRatio = (255 - minVal) / 40;
-        data[pIdx + 3] = Math.min(data[pIdx + 3], Math.floor((1 - alphaRatio) * 255));
-      } else {
-        data[pIdx + 3] = 0;
-      }
+      data[pIdx + 3] = 0; // 100% strictly transparent! Never leave semi-transparent residue for sticker die-cuts
     }
   }
 
   ctx.putImageData(imageData, 0, 0);
+
+  // 4. Quality Assurance Guardrail: Ensure 4 corners are 100% transparent
+  const cornerChecks = [
+    0, // (0, 0)
+    (width - 1) * 4, // (w-1, 0)
+    ((height - 1) * width) * 4, // (0, h-1)
+    ((height - 1) * width + (width - 1)) * 4, // (w-1, h-1)
+  ];
+  let cornersClean = true;
+  for (const cIdx of cornerChecks) {
+    if (data[cIdx + 3] > 0) {
+      cornersClean = false;
+      break;
+    }
+  }
+
+  // If any corner still has alpha, perform a strict edge flush
+  if (!cornersClean) {
+    for (let i = 0; i < totalPixels; i++) {
+      const pIdx = i * 4;
+      const x = i % width;
+      const y = (i / width) | 0;
+      if (x < 10 || x >= width - 10 || y < 10 || y >= height - 10) {
+        data[pIdx + 3] = 0;
+      }
+    }
+    ctx.putImageData(imageData, 0, 0);
+  }
+
   return canvas.toDataURL('image/png');
 }
+

@@ -2228,8 +2228,26 @@ export default function Home() {
       setIsBatchZipModalOpen(false);
       setExportBundleProgress({ current: 0, total: targetDesigns.length, message: 'ZIP 파일 생성 준비 중...' });
 
-      const items = [...targetDesigns];
-      // Sort: Master Cover first, then stickers chronologically (01 -> 20/40)
+      // 🚨 CRITICAL GUARANTEE: Strictly exclude any apparel, POD products, or mockups from sticker bundle!
+      const items = targetDesigns.filter(d => {
+        if (!d) return false;
+        if (d.design_type === 'pod' || d.is_mockup === true) return false;
+        const titleLower = `${d.title || ''} ${d.topic || ''} ${d.prompt || ''}`.toLowerCase();
+        if (
+          titleLower.includes('t-shirt') ||
+          titleLower.includes('tshirt') ||
+          titleLower.includes('tee') ||
+          titleLower.includes('hoodie') ||
+          titleLower.includes('sweatshirt') ||
+          titleLower.includes('티셔츠') ||
+          titleLower.includes('후드티') ||
+          titleLower.includes('mockup') ||
+          titleLower.includes('목업')
+        ) {
+          return false;
+        }
+        return true;
+      });
       items.sort((a, b) => {
         const aIsCover = isCoverDesign(a);
         const bIsCover = isCoverDesign(b);
