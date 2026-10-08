@@ -2193,12 +2193,18 @@ export default function Home() {
     }
   };
 
-  const downloadBatchSession = async (targetDesigns: any[], sessionName: string) => {
+  const downloadBatchSession = async (
+    targetDesigns: any[],
+    sessionName: string,
+    options?: { splitForEtsy?: boolean }
+  ) => {
     if (!targetDesigns || targetDesigns.length === 0) {
       alert('다운로드할 스티커가 없습니다.');
       return;
     }
     if (isExportingBundle) return; // Prevent duplicate clicks
+
+    const splitForEtsy = options?.splitForEtsy !== false; // Default: true for Etsy 20MB compliance
 
     try {
       setIsExportingBundle(true);
@@ -2206,7 +2212,7 @@ export default function Home() {
       setExportBundleProgress({ current: 0, total: targetDesigns.length, message: 'ZIP 파일 생성 준비 중...' });
 
       const items = [...targetDesigns];
-      // Sort: Master Cover first, then stickers chronologically (01 -> 20)
+      // Sort: Master Cover first, then stickers chronologically (01 -> 20/40)
       items.sort((a, b) => {
         const aIsCover = isCoverDesign(a);
         const bIsCover = isCoverDesign(b);
@@ -2223,12 +2229,12 @@ export default function Home() {
         sessionName || items[0]?.topic
       );
       const cleanSessionName = `${themeName}_Sticker_Bundle`;
-      const zip = new JSZip();
-      const folder = zip.folder(cleanSessionName);
 
       const totalItems = items.length;
       let stickerCounter = 1;
       const processedStickers: any[] = [];
+      let coverFile: { fileName: string; bytes: Uint8Array } | null = null;
+      const stickerFiles: { fileName: string; bytes: Uint8Array }[] = [];
 
       for (let i = 0; i < totalItems; i++) {
         const d = items[i];
@@ -2283,7 +2289,10 @@ export default function Home() {
             const bytes = new Uint8Array(binaryString.length);
             for (let b = 0; b < binaryString.length; b++) bytes[b] = binaryString.charCodeAt(b);
 
-            folder?.file(`00_Master_Cover_${themeName}_300DPI.png`, bytes.buffer);
+            coverFile = {
+              fileName: `00_Master_Cover_${themeName}_300DPI.png`,
+              bytes,
+            };
           } else {
             // Sticker item: Process high-res transparent PNG
             const transparentDataUrl = await processTransparentPNG(rawUrl, {
@@ -2299,7 +2308,7 @@ export default function Home() {
             }
 
             const fileName = `${String(stickerCounter).padStart(2, '0')}_${themeName}_Sticker_300DPI.png`;
-            folder?.file(fileName, bytes.buffer);
+            stickerFiles.push({ fileName, bytes });
             stickerCounter++;
 
             processedStickers.push({
@@ -2312,7 +2321,8 @@ export default function Home() {
         }
       }
 
-      // Generate and package BOTH Transparent and White A4 Printable Sticker Sheets into the ZIP bundle
+      // Generate and package BOTH Transparent and White A4 Printable Sticker Sheets
+      const printableFiles: { fileName: string; bytes: Uint8Array }[] = [];
       if (processedStickers.length > 0) {
         setExportBundleProgress({
           current: totalItems,
@@ -2334,7 +2344,10 @@ export default function Home() {
               a4Bytes[b] = a4Binary.charCodeAt(b);
             }
             const sheetSuffix = transparentPages.length > 1 ? `_Sheet${p + 1}` : '';
-            folder?.file(`00_A4_Printable${sheetSuffix}_Transparent_For_Cricut_300DPI.png`, a4Bytes.buffer);
+            printableFiles.push({
+              fileName: `00_A4_Printable${sheetSuffix}_Transparent_For_Cricut_300DPI.png`,
+              bytes: a4Bytes,
+            });
           }
 
           // 2. Solid White Background A4 Sheets
@@ -2346,29 +2359,128 @@ export default function Home() {
               a4Bytes[b] = a4Binary.charCodeAt(b);
             }
             const sheetSuffix = whitePages.length > 1 ? `_Sheet${p + 1}` : '';
-            folder?.file(`00_A4_Printable${sheetSuffix}_White_For_Home_Printers_300DPI.png`, a4Bytes.buffer);
+            printableFiles.push({
+              fileName: `00_A4_Printable${sheetSuffix}_White_For_Home_Printers_300DPI.png`,
+              bytes: a4Bytes,
+            });
           }
         } catch (a4Err) {
           console.error('Error generating A4 sheets for ZIP bundle:', a4Err);
         }
       }
 
-      setExportBundleProgress({
-        current: totalItems,
-        total: totalItems,
-        message: 'ZIP 압축 패키징 및 다운로드 시작 중...'
-      });
-      await new Promise(resolve => setTimeout(resolve, 15));
+      const triggerDownload = (blob: Blob, filename: string) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      };
 
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
-      const url = window.URL.createObjectURL(zipBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${cleanSessionName}_300DPI.zip`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
+      // Determine Packaging Strategy:
+      // If splitForEtsy is true and we have > 20 stickers: Split into Etsy-compliant parts (each safely < 20MB)
+      if (splitForEtsy && stickerFiles.length > 20) {
+        // Divide into 5 Etsy parts (max 5 files on Etsy, each ~15MB < 20MB limit):
+        // Part 1: Cover + Stickers 01..10
+        // Part 2: Stickers 11..20
+        // Part 3: Stickers 21..30
+        // Part 4: Stickers 31..40
+        // Part 5: 4 A4 Printable Sheets
+        const parts: { name: string; folderName: string; files: { fileName: string; bytes: Uint8Array }[] }[] = [];
+
+        // Part 1
+        const p1Files: { fileName: string; bytes: Uint8Array }[] = [];
+        if (coverFile) p1Files.push(coverFile);
+        p1Files.push(...stickerFiles.slice(0, 10));
+        parts.push({
+          name: `01_${themeName}_Part1_Stickers_01-10_300DPI.zip`,
+          folderName: `${cleanSessionName}_Part1`,
+          files: p1Files,
+        });
+
+        // Part 2
+        parts.push({
+          name: `02_${themeName}_Part2_Stickers_11-20_300DPI.zip`,
+          folderName: `${cleanSessionName}_Part2`,
+          files: stickerFiles.slice(10, 20),
+        });
+
+        // Part 3
+        parts.push({
+          name: `03_${themeName}_Part3_Stickers_21-30_300DPI.zip`,
+          folderName: `${cleanSessionName}_Part3`,
+          files: stickerFiles.slice(20, 30),
+        });
+
+        // Part 4
+        parts.push({
+          name: `04_${themeName}_Part4_Stickers_31-40_300DPI.zip`,
+          folderName: `${cleanSessionName}_Part4`,
+          files: stickerFiles.slice(30, 40),
+        });
+
+        // Part 5
+        parts.push({
+          name: `05_${themeName}_Part5_Printable_A4_Sheets_300DPI.zip`,
+          folderName: `${cleanSessionName}_Printables`,
+          files: printableFiles,
+        });
+
+        for (let p = 0; p < parts.length; p++) {
+          setExportBundleProgress({
+            current: totalItems,
+            total: totalItems,
+            message: `[Etsy 분할 ${p + 1}/${parts.length}] ${parts[p].name} 압축 및 다운로드 중...`
+          });
+          await new Promise(resolve => setTimeout(resolve, 30));
+
+          const partZip = new JSZip();
+          const pFolder = partZip.folder(parts[p].folderName);
+          for (const f of parts[p].files) {
+            pFolder?.file(f.fileName, f.bytes);
+          }
+
+          const blob = await partZip.generateAsync({
+            type: 'blob',
+            compression: 'DEFLATE',
+            compressionOptions: { level: 6 }
+          });
+          triggerDownload(blob, parts[p].name);
+          if (p < parts.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+          }
+        }
+      } else {
+        // Single Unified ZIP (for Creative Fabrica or packs <= 20 stickers)
+        setExportBundleProgress({
+          current: totalItems,
+          total: totalItems,
+          message: '통합 ZIP 압축 패키징 및 다운로드 중...'
+        });
+        await new Promise(resolve => setTimeout(resolve, 30));
+
+        const singleZip = new JSZip();
+        const sFolder = singleZip.folder(cleanSessionName);
+        if (coverFile) {
+          sFolder?.file(coverFile.fileName, coverFile.bytes);
+        }
+        for (const f of stickerFiles) {
+          sFolder?.file(f.fileName, f.bytes);
+        }
+        for (const f of printableFiles) {
+          sFolder?.file(f.fileName, f.bytes);
+        }
+
+        const zipBlob = await singleZip.generateAsync({
+          type: 'blob',
+          compression: 'DEFLATE',
+          compressionOptions: { level: 6 }
+        });
+        triggerDownload(zipBlob, `${cleanSessionName}_300DPI.zip`);
+      }
     } catch (err: any) {
       console.error(err);
       alert(err.message || 'ZIP 번들 파일 생성 중 오류가 발생했습니다.');
@@ -5731,25 +5843,42 @@ export default function Home() {
                     <span>A4 인쇄용 시트 ({packStickers.length > 20 ? '2장 세트' : '1장'})</span>
                   </button>
 
-                  {/* 3단계: 전체 ZIP 파일 일괄 다운로드 (Etsy Digital files 구매자 다운로드용) */}
-                  <button
-                    onClick={() => downloadBatchSession([selectedPackCover, ...packStickers], `${selectedPackCover.topic || 'Sticker_Pack'}_Bundle`)}
-                    disabled={isExportingBundle || packStickers.length === 0}
-                    className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-800 disabled:opacity-90 text-white font-extrabold text-xs sm:text-sm py-2 px-4 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-emerald-500 cursor-pointer disabled:cursor-wait"
-                    title="[3단계] Etsy 상품 등록 시 'Digital files'에 올릴 40종 전체 + A4 시트 포함 정식 압축팩을 다운로드합니다."
-                  >
-                    <span className="bg-emerald-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-emerald-200">3단계</span>
-                    {isExportingBundle ? (
-                      <span className="animate-spin inline-block">⏳</span>
-                    ) : (
-                      <span>📦</span>
+                  {/* 3단계: 전체 ZIP 파일 일괄 다운로드 (Etsy 20MB 분할 vs CF 단일 통합) */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <button
+                      onClick={() => downloadBatchSession([selectedPackCover, ...packStickers], `${selectedPackCover.topic || 'Sticker_Pack'}_Bundle`, { splitForEtsy: true })}
+                      disabled={isExportingBundle || packStickers.length === 0}
+                      className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-800 disabled:opacity-90 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-emerald-500 cursor-pointer disabled:cursor-wait"
+                      title="[Etsy 전용] Etsy 파일 20MB 제한을 통과하도록 20MB 이하 분할 ZIP으로 자동 다운로드합니다."
+                    >
+                      <span className="bg-emerald-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-emerald-200">
+                        {packStickers.length > 20 ? 'Etsy용' : '3단계'}
+                      </span>
+                      {isExportingBundle ? (
+                        <span className="animate-spin inline-block">⏳</span>
+                      ) : (
+                        <span>📦</span>
+                      )}
+                      <span>
+                        {isExportingBundle 
+                          ? (exportBundleProgress ? exportBundleProgress.message : 'ZIP 압축 생성 중...') 
+                          : (packStickers.length > 20 ? `Etsy 20MB 분할 다운로드 (${packStickers.length}종)` : `이 팩 전체 ${packStickers.length}종 ZIP 다운로드`)}
+                      </span>
+                    </button>
+
+                    {packStickers.length > 20 && (
+                      <button
+                        onClick={() => downloadBatchSession([selectedPackCover, ...packStickers], `${selectedPackCover.topic || 'Sticker_Pack'}_Bundle`, { splitForEtsy: false })}
+                        disabled={isExportingBundle || packStickers.length === 0}
+                        className="bg-teal-700 hover:bg-teal-800 disabled:bg-teal-900 disabled:opacity-90 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-all flex items-center gap-1.5 border border-teal-600 cursor-pointer disabled:cursor-wait"
+                        title="[Creative Fabrica / 구글드라이브 보관용] 전체 40종을 1개의 단일 대용량 ZIP 파일로 다운로드합니다."
+                      >
+                        <span className="bg-teal-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-teal-200">CF용</span>
+                        <span>📁</span>
+                        <span>단일 통합 ZIP</span>
+                      </button>
                     )}
-                    <span>
-                      {isExportingBundle 
-                        ? (exportBundleProgress ? exportBundleProgress.message : 'ZIP 압축 생성 중...') 
-                        : `이 팩 전체 ${packStickers.length}종 ZIP 일괄 다운로드`}
-                    </span>
-                  </button>
+                  </div>
 
                   {/* 부가 도구: 표지 편집 및 삭제 */}
                   <button
