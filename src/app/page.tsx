@@ -36,6 +36,7 @@ import { generateA4StickerSheet, generateA4StickerSheets, generateA4StickerSheet
 import { generateCreativeFabricaTags, formatCFTagsForClipboard } from '@/lib/creative-fabrica-tags';
 import { extractStandaloneStickerFromTank } from '@/lib/standalone-extractor';
 import { createVesselStickerFromStandalone } from '@/lib/vessel-housing-builder';
+import { generateEtsySeo } from '@/lib/etsy-seo-generator';
 
 // Client-side cache for high-frequency design pool queries to eliminate redundant Firestore reads (95%+ reduction)
 let clientPoolCache: { data: any[]; timestamp: number } | null = null;
@@ -202,6 +203,13 @@ export default function Home() {
   const [copiedCFSeasonId, setCopiedCFSeasonId] = useState<string | null>(null);
   const [copiedCFTagsNotice, setCopiedCFTagsNotice] = useState(false);
   const [copiedCFTabNotice, setCopiedCFTabNotice] = useState(false);
+  const [copiedEtsyTitleNotice, setCopiedEtsyTitleNotice] = useState(false);
+  const [copiedEtsyDescNotice, setCopiedEtsyDescNotice] = useState(false);
+  const [copiedPackTitleNotice, setCopiedPackTitleNotice] = useState(false);
+  const [copiedPackDescNotice, setCopiedPackDescNotice] = useState(false);
+  const [copiedPackTagsNotice, setCopiedPackTagsNotice] = useState(false);
+  const [isPackSeoExpanded, setIsPackSeoExpanded] = useState(true);
+  const [isDetailDescExpanded, setIsDetailDescExpanded] = useState(false);
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<
@@ -4595,6 +4603,7 @@ export default function Home() {
                       categoryOrSub: currentActiveDesign.sticker_sub || currentActiveDesign.design_type,
                       maxTags: 45
                     }) : [];
+                    const etsySeo = currentActiveDesign ? generateEtsySeo(currentActiveDesign) : null;
 
                     return (
                       <>
@@ -4614,9 +4623,64 @@ export default function Home() {
                         )}
 
                         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{currentActiveDesign?.title}</h2>
+                        
+                        {/* 📝 Etsy 영문 SEO Title (140자 최적화) 배너 */}
+                        {etsySeo && (
+                          <div className="mb-4 p-3.5 bg-gradient-to-r from-blue-50/90 to-indigo-50/80 border-2 border-indigo-200 rounded-2xl space-y-2 shadow-2xs">
+                            <div className="flex items-center justify-between gap-2 flex-wrap">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-base">📝</span>
+                                <span className="text-xs font-black text-indigo-950 uppercase tracking-wider">Etsy 영문 제목 (SEO Title)</span>
+                                <span className="text-[10px] bg-indigo-200 text-indigo-900 font-extrabold px-2 py-0.5 rounded-full">
+                                  {etsySeo.charCount}/140자
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleCopy(etsySeo.title);
+                                  setCopiedEtsyTitleNotice(true);
+                                  setTimeout(() => setCopiedEtsyTitleNotice(false), 2000);
+                                }}
+                                className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1 rounded-lg transition-all flex items-center gap-1 shadow-xs cursor-pointer"
+                              >
+                                <span>{copiedEtsyTitleNotice ? '✓ 복사완료!' : '📋 영문 제목 복사'}</span>
+                              </button>
+                            </div>
+                            <div className="p-2.5 bg-white rounded-xl border border-indigo-100 text-xs sm:text-sm text-gray-800 font-medium select-all">
+                              {etsySeo.title}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 복사 액션 버튼 모음 */}
                         <div className="flex flex-wrap gap-2 mb-6">
-                          <button onClick={() => handleCopy(currentActiveDesign?.title)} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-3.5 py-1.5 rounded-full font-medium transition-colors cursor-pointer">제목 복사</button>
-                          <button onClick={() => handleCopy(currentActiveDesign?.tags?.join(', '))} className="text-xs sm:text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3.5 py-1.5 rounded-full font-medium transition-colors cursor-pointer">Etsy 13태그 복사</button>
+                          <button onClick={() => handleCopy(currentActiveDesign?.title)} className="text-xs sm:text-sm bg-gray-100 hover:bg-gray-200 px-3.5 py-1.5 rounded-full font-medium transition-colors cursor-pointer">한글명 복사</button>
+                          {etsySeo && (
+                            <button 
+                              onClick={() => {
+                                handleCopy(etsySeo.title);
+                                setCopiedEtsyTitleNotice(true);
+                                setTimeout(() => setCopiedEtsyTitleNotice(false), 2000);
+                              }} 
+                              className="text-xs sm:text-sm bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-1.5 rounded-full font-bold transition-colors cursor-pointer shadow-2xs"
+                            >
+                              {copiedEtsyTitleNotice ? '✓ 영문 제목 복사완료!' : '📋 Etsy 영문 제목 복사'}
+                            </button>
+                          )}
+                          <button onClick={() => handleCopy(etsySeo ? etsySeo.tags.join(', ') : currentActiveDesign?.tags?.join(', '))} className="text-xs sm:text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3.5 py-1.5 rounded-full font-medium transition-colors cursor-pointer">Etsy 13태그 복사</button>
+                          {etsySeo && (
+                            <button 
+                              onClick={() => {
+                                handleCopy(etsySeo.description);
+                                setCopiedEtsyDescNotice(true);
+                                setTimeout(() => setCopiedEtsyDescNotice(false), 2000);
+                              }}
+                              className="text-xs sm:text-sm bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-1.5 rounded-full font-bold transition-colors cursor-pointer shadow-2xs"
+                            >
+                              {copiedEtsyDescNotice ? '✓ 영문 설명 복사완료!' : '📋 Etsy 영문 상세설명 복사'}
+                            </button>
+                          )}
                           <button 
                             onClick={() => {
                               handleCopy(formatCFTagsForClipboard(cfDetailTags));
@@ -4691,6 +4755,49 @@ export default function Home() {
                               ))}
                             </div>
                           </div>
+
+                          {/* 📄 Etsy 영문 상세설명 (Listing Description) 전문 섹션 */}
+                          {etsySeo && (
+                            <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-2.5">
+                              <div className="flex items-center justify-between gap-2 flex-wrap">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-base">📄</span>
+                                  <h4 className="text-xs font-extrabold text-amber-950 uppercase tracking-wider">
+                                    Etsy 영문 상세설명 (Listing Description)
+                                  </h4>
+                                  <span className="text-[10px] bg-amber-500 text-white font-bold px-2 py-0.5 rounded-full">
+                                    원클릭 복사
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setIsDetailDescExpanded(!isDetailDescExpanded)}
+                                    className="text-xs text-amber-800 hover:text-amber-950 font-bold px-2.5 py-1 rounded-lg border border-amber-300 bg-white/80 transition-colors cursor-pointer"
+                                  >
+                                    {isDetailDescExpanded ? '접기 ▲' : '전문 보기 ▼'}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleCopy(etsySeo.description);
+                                      setCopiedEtsyDescNotice(true);
+                                      setTimeout(() => setCopiedEtsyDescNotice(false), 2000);
+                                    }}
+                                    className="text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1 rounded-lg transition-all flex items-center gap-1 shadow-xs cursor-pointer"
+                                  >
+                                    <span>{copiedEtsyDescNotice ? '✓ 복사완료!' : '📋 영문 설명 복사'}</span>
+                                  </button>
+                                </div>
+                              </div>
+                              <p className="text-[11px] text-amber-900/90 leading-relaxed">
+                                Etsy 상품 등록 시 <strong>Description</strong> 입력창에 그대로 붙여넣을 수 있는 라이선스, 구성품, 소프트웨어 호환성 완벽 포맷 전문입니다.
+                              </p>
+                              <div className={`p-3 bg-white rounded-xl border border-amber-200 text-xs text-gray-700 font-mono leading-relaxed whitespace-pre-wrap ${isDetailDescExpanded ? 'max-h-[500px]' : 'max-h-36'} overflow-y-auto custom-scrollbar select-all`}>
+                                {etsySeo.description}
+                              </div>
+                            </div>
+                          )}
 
                           <div className="pt-4 border-t border-gray-100 space-y-3">
                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">고해상도 다운로드 옵션</h4>
@@ -5988,6 +6095,116 @@ export default function Home() {
 
               {/* Grid Content Section */}
               <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-stone-50">
+                {/* 📝 Etsy 상품 등록용 영문 정보 (SEO Title, Description, Tags) 카드 */}
+                {(() => {
+                  const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
+                  return (
+                    <div className="mb-5 bg-gradient-to-r from-blue-50/90 via-indigo-50/80 to-teal-50/90 border-2 border-indigo-200 rounded-2xl p-4 shadow-sm">
+                      <div className="flex items-center justify-between gap-2 flex-wrap mb-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl shrink-0">📝</span>
+                          <div>
+                            <h4 className="text-sm font-black text-indigo-950 flex items-center gap-2">
+                              <span>Etsy 상품 등록용 영문 정보 (Listing Title & Description)</span>
+                              <span className="text-[10px] bg-indigo-600 text-white font-extrabold px-2 py-0.5 rounded-full shadow-2xs">
+                                Etsy 140자 최적화
+                              </span>
+                            </h4>
+                            <p className="text-[11px] text-indigo-800 mt-0.5">
+                              Etsy에 상품 등록 시 복사하여 붙여넣을 수 있는 영문 제목, 13태그, 상세설명 전문입니다.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setIsPackSeoExpanded(!isPackSeoExpanded)}
+                            className="text-xs text-indigo-700 hover:text-indigo-900 font-bold px-3 py-1.5 rounded-xl border border-indigo-200 bg-white transition-colors cursor-pointer shadow-2xs"
+                          >
+                            {isPackSeoExpanded ? '접기 ▲' : '상세정보 펼치기 ▼'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {isPackSeoExpanded && (
+                        <div className="space-y-3 pt-1">
+                          {/* 1. Etsy English Title */}
+                          <div className="bg-white rounded-xl border border-indigo-100 p-3 shadow-2xs">
+                            <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-xs font-black text-indigo-950">① Etsy Listing Title (영문 제목)</span>
+                                <span className="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">
+                                  {packSeo.charCount}/140자
+                                </span>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleCopy(packSeo.title);
+                                  setCopiedPackTitleNotice(true);
+                                  setTimeout(() => setCopiedPackTitleNotice(false), 2000);
+                                }}
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer shadow-xs"
+                              >
+                                <span>{copiedPackTitleNotice ? '✓ 복사완료!' : '📋 영문 제목 복사'}</span>
+                              </button>
+                            </div>
+                            <p className="text-xs sm:text-sm text-gray-800 font-medium bg-indigo-50/40 p-2.5 rounded-lg border border-indigo-100/60 select-all">
+                              {packSeo.title}
+                            </p>
+                          </div>
+
+                          {/* 2. Etsy 13 Tags */}
+                          <div className="bg-white rounded-xl border border-indigo-100 p-3 shadow-2xs">
+                            <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                              <span className="text-xs font-black text-indigo-950">② Etsy 13 SEO Tags (영문 태그 13개)</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleCopy(packSeo.tags.join(', '));
+                                  setCopiedPackTagsNotice(true);
+                                  setTimeout(() => setCopiedPackTagsNotice(false), 2000);
+                                }}
+                                className="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer shadow-xs"
+                              >
+                                <span>{copiedPackTagsNotice ? '✓ 복사완료!' : '📋 13태그 복사'}</span>
+                              </button>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {packSeo.tags.map((tag, idx) => (
+                                <span key={idx} className="text-xs bg-teal-50 text-teal-800 px-2.5 py-1 rounded-lg border border-teal-200/80 font-medium">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* 3. Etsy Listing Description */}
+                          <div className="bg-white rounded-xl border border-indigo-100 p-3 shadow-2xs">
+                            <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
+                              <span className="text-xs font-black text-indigo-950">③ Etsy Listing Description (영문 상세설명 전문)</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  handleCopy(packSeo.description);
+                                  setCopiedPackDescNotice(true);
+                                  setTimeout(() => setCopiedPackDescNotice(false), 2000);
+                                }}
+                                className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer shadow-xs"
+                              >
+                                <span>{copiedPackDescNotice ? '✓ 복사완료!' : '📋 영문 상세설명 복사'}</span>
+                              </button>
+                            </div>
+                            <div className="max-h-48 overflow-y-auto bg-amber-50/30 p-2.5 rounded-lg border border-amber-200/60 text-xs text-gray-700 font-mono leading-relaxed whitespace-pre-wrap custom-scrollbar select-all">
+                              {packSeo.description}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {loadingPackStickers ? (
                   <div className="py-24 text-center text-teal-800 font-medium space-y-3">
                     <div className="w-10 h-10 border-4 border-teal-300 border-t-teal-700 rounded-full animate-spin mx-auto"></div>
