@@ -25,23 +25,40 @@ interface BoundingBox {
 }
 
 /**
- * Finds the non-transparent bounding box of an image canvas
- * to eliminate unnecessary outer empty margins and maximize sticker sizing.
+ * Finds the non-transparent bounding box of an image using a lightweight downsampled probe canvas.
+ * This prevents browser canvas memory exhaustion (OOM) when handling 40+ large 3000x3000px stickers.
  */
-function getTrimmedBoundingBox(ctx: CanvasRenderingContext2D, width: number, height: number): BoundingBox {
-  const imgData = ctx.getImageData(0, 0, width, height);
+function getImageBoundingBox(img: HTMLImageElement): BoundingBox {
+  const origW = img.naturalWidth || img.width || 1200;
+  const origH = img.naturalHeight || img.height || 1200;
+
+  const sampleMax = 400;
+  const scale = Math.min(sampleMax / origW, sampleMax / origH, 1);
+  const sw = Math.max(1, Math.round(origW * scale));
+  const sh = Math.max(1, Math.round(origH * scale));
+
+  const probe = document.createElement('canvas');
+  probe.width = sw;
+  probe.height = sh;
+  const pctx = probe.getContext('2d', { willReadFrequently: true });
+  if (!pctx) {
+    return { x: 0, y: 0, w: origW, h: origH };
+  }
+
+  pctx.drawImage(img, 0, 0, sw, sh);
+  const imgData = pctx.getImageData(0, 0, sw, sh);
   const data = imgData.data;
 
-  let minX = width;
-  let minY = height;
+  let minX = sw;
+  let minY = sh;
   let maxX = 0;
   let maxY = 0;
   let found = false;
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const alpha = data[(y * width + x) * 4 + 3];
-      if (alpha > 15) { // non-transparent threshold
+  for (let y = 0; y < sh; y++) {
+    for (let x = 0; x < sw; x++) {
+      const alpha = data[(y * sw + x) * 4 + 3];
+      if (alpha > 15) {
         if (x < minX) minX = x;
         if (x > maxX) maxX = x;
         if (y < minY) minY = y;
@@ -51,18 +68,27 @@ function getTrimmedBoundingBox(ctx: CanvasRenderingContext2D, width: number, hei
     }
   }
 
+  // Release probe canvas immediately
+  probe.width = 0;
+  probe.height = 0;
+
   if (!found) {
-    return { x: 0, y: 0, w: width, h: height };
+    return { x: 0, y: 0, w: origW, h: origH };
   }
 
-  // Add small 4px breathing padding around trimmed box if within bounds
+  const invScale = 1 / scale;
   const pad = 4;
-  const clampedX = Math.max(0, minX - pad);
-  const clampedY = Math.max(0, minY - pad);
-  const clampedW = Math.min(width - clampedX, (maxX - minX + 1) + pad * 2);
-  const clampedH = Math.min(height - clampedY, (maxY - minY + 1) + pad * 2);
+  const origMinX = Math.max(0, Math.floor(minX * invScale) - pad);
+  const origMinY = Math.max(0, Math.floor(minY * invScale) - pad);
+  const origMaxX = Math.min(origW, Math.ceil((maxX + 1) * invScale) + pad);
+  const origMaxY = Math.min(origH, Math.ceil((maxY + 1) * invScale) + pad);
 
-  return { x: clampedX, y: clampedY, w: clampedW, h: clampedH };
+  return {
+    x: origMinX,
+    y: origMinY,
+    w: Math.max(1, origMaxX - origMinX),
+    h: Math.max(1, origMaxY - origMinY),
+  };
 }
 
 /**
@@ -105,7 +131,9 @@ function loadImage(src: string): Promise<HTMLImageElement> {
       };
       fallback.src = src;
     };
-    img.crossOrigin = 'anonymous';
+    if (!src.startsWith('data:')) {
+      img.crossOrigin = 'anonymous';
+    }
     img.src = src;
   });
 }
@@ -188,15 +216,8 @@ export async function generateA4StickerSheet(
 
       const stickerImg = await loadImage(transparentDataUrl);
 
-      // 2. Compute non-transparent bounding box on a temporary canvas
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = stickerImg.width;
-      tempCanvas.height = stickerImg.height;
-      const tempCtx = tempCanvas.getContext('2d');
-      if (!tempCtx) continue;
-
-      tempCtx.drawImage(stickerImg, 0, 0);
-      const bbox = getTrimmedBoundingBox(tempCtx, tempCanvas.width, tempCanvas.height);
+      // 2. Compute non-transparent bounding box with lightweight probe
+      const bbox = getImageBoundingBox(stickerImg);
 
       // 3. Calculate target grid coordinates
       const col = i % cols;
@@ -214,9 +235,9 @@ export async function generateA4StickerSheet(
       const drawX = cellX + (cellWidth - drawW) / 2;
       const drawY = cellY + (cellHeight - drawH) / 2;
 
-      // 5. Draw sticker into the A4 canvas
+      // 5. Draw sticker into the A4 canvas directly from image element
       ctx.drawImage(
-        tempCanvas,
+        stickerImg,
         bbox.x,
         bbox.y,
         bbox.w,
@@ -235,7 +256,10 @@ export async function generateA4StickerSheet(
     onProgress(total, total, 'A4 시트 렌더링 완료');
   }
 
-  return canvas.toDataURL('image/png');
+  const resultDataUrl = canvas.toDataURL('image/png');
+  canvas.width = 0;
+  canvas.height = 0;
+  return resultDataUrl;
 }
 
 /**
@@ -271,4 +295,73 @@ export async function generateA4StickerSheets(
   }
 
   return pages;
+}
+
+export interface StickerSheetsPairResult {
+  transparentPages: string[];
+  whitePages: string[];
+}
+
+/**
+ * Efficiently generates both Transparent (Cricut) and White (Home Printers) A4 sheets in a single pass.
+ * Prevents memory exhaustion by reusing the rendered transparent sheet onto a white background.
+ */
+export async function generateA4StickerSheetsPair(
+  stickers: any[],
+  options: StickerSheetOptions = {}
+): Promise<StickerSheetsPairResult> {
+  const { onProgress } = options;
+  const pageSize = options.pageSize || 20;
+  const totalPages = Math.ceil(stickers.length / pageSize) || 1;
+  const transparentPages: string[] = [];
+  const whitePages: string[] = [];
+
+  for (let p = 0; p < totalPages; p++) {
+    const start = p * pageSize;
+    const end = Math.min(start + pageSize, stickers.length);
+    const chunk = stickers.slice(start, end);
+
+    const pageProgress = (curr: number, tot: number, msg: string) => {
+      if (onProgress) {
+        const overallCurrent = p * pageSize + curr;
+        onProgress(overallCurrent, stickers.length, `[시트 ${p + 1}/${totalPages}장] ${msg}`);
+      }
+    };
+
+    // 1. Generate transparent sheet
+    const transparentDataUrl = await generateA4StickerSheet(chunk, {
+      ...options,
+      background: 'transparent',
+      onProgress: pageProgress,
+    });
+    transparentPages.push(transparentDataUrl);
+
+    // 2. Instantly generate white sheet by compositing transparent sheet onto solid white background
+    try {
+      const transparentImg = await loadImage(transparentDataUrl);
+      const format = options.format || 'a4';
+      const canvasWidth = format === 'us_letter' ? 2550 : 2480;
+      const canvasHeight = format === 'us_letter' ? 3300 : 3508;
+
+      const whiteCanvas = document.createElement('canvas');
+      whiteCanvas.width = canvasWidth;
+      whiteCanvas.height = canvasHeight;
+      const wctx = whiteCanvas.getContext('2d');
+      if (wctx) {
+        wctx.fillStyle = '#FFFFFF';
+        wctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        wctx.drawImage(transparentImg, 0, 0);
+        whitePages.push(whiteCanvas.toDataURL('image/png'));
+      } else {
+        whitePages.push(transparentDataUrl);
+      }
+      whiteCanvas.width = 0;
+      whiteCanvas.height = 0;
+    } catch (e) {
+      console.error('Failed to create white sheet composite, fallback to transparent:', e);
+      whitePages.push(transparentDataUrl);
+    }
+  }
+
+  return { transparentPages, whitePages };
 }

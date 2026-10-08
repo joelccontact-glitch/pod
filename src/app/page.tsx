@@ -32,7 +32,7 @@ import {
 } from '@/lib/sticker-prompts';
 import JSZip from 'jszip';
 import { createCompositeMasterCover } from '@/lib/master-cover-builder';
-import { generateA4StickerSheet, generateA4StickerSheets } from '@/lib/sticker-sheet-builder';
+import { generateA4StickerSheet, generateA4StickerSheets, generateA4StickerSheetsPair } from '@/lib/sticker-sheet-builder';
 import { generateCreativeFabricaTags, formatCFTagsForClipboard } from '@/lib/creative-fabrica-tags';
 import { extractStandaloneStickerFromTank } from '@/lib/standalone-extractor';
 import { createVesselStickerFromStandalone } from '@/lib/vessel-housing-builder';
@@ -2275,13 +2275,15 @@ export default function Home() {
               cctx.drawImage(img, 0, 0, cw, ch);
             }
 
-            const coverDataUrl = coverCanvas.toDataURL('image/jpeg', 0.95);
+            const coverDataUrl = coverCanvas.toDataURL('image/png');
+            coverCanvas.width = 0;
+            coverCanvas.height = 0;
             const base64Data = coverDataUrl.split(',')[1];
             const binaryString = atob(base64Data);
             const bytes = new Uint8Array(binaryString.length);
             for (let b = 0; b < binaryString.length; b++) bytes[b] = binaryString.charCodeAt(b);
 
-            folder?.file(`00_Master_Cover_${themeName}_300DPI.jpg`, bytes.buffer);
+            folder?.file(`00_Master_Cover_${themeName}_300DPI.png`, bytes.buffer);
           } else {
             // Sticker item: Process high-res transparent PNG
             const transparentDataUrl = await processTransparentPNG(rawUrl, {
@@ -2320,29 +2322,30 @@ export default function Home() {
         await new Promise(resolve => setTimeout(resolve, 15));
 
         try {
-          // 1. Transparent Background A4 Sheets (reuses pre-processed transparent PNGs!)
-          const a4TransparentPages = await generateA4StickerSheets(processedStickers, { background: 'transparent', pageSize: 20 });
-          for (let p = 0; p < a4TransparentPages.length; p++) {
-            const a4Base64 = a4TransparentPages[p].split(',')[1];
+          // Efficiently generate BOTH Transparent (Cricut) and White (Home Printers) A4 sheets in a single pass
+          const { transparentPages, whitePages } = await generateA4StickerSheetsPair(processedStickers, { pageSize: 20 });
+
+          // 1. Transparent Background A4 Sheets
+          for (let p = 0; p < transparentPages.length; p++) {
+            const a4Base64 = transparentPages[p].split(',')[1];
             const a4Binary = atob(a4Base64);
             const a4Bytes = new Uint8Array(a4Binary.length);
             for (let b = 0; b < a4Binary.length; b++) {
               a4Bytes[b] = a4Binary.charCodeAt(b);
             }
-            const sheetSuffix = a4TransparentPages.length > 1 ? `_Sheet${p + 1}` : '';
+            const sheetSuffix = transparentPages.length > 1 ? `_Sheet${p + 1}` : '';
             folder?.file(`00_A4_Printable${sheetSuffix}_Transparent_For_Cricut_300DPI.png`, a4Bytes.buffer);
           }
 
           // 2. Solid White Background A4 Sheets
-          const a4WhitePages = await generateA4StickerSheets(processedStickers, { background: 'white', pageSize: 20 });
-          for (let p = 0; p < a4WhitePages.length; p++) {
-            const a4Base64 = a4WhitePages[p].split(',')[1];
+          for (let p = 0; p < whitePages.length; p++) {
+            const a4Base64 = whitePages[p].split(',')[1];
             const a4Binary = atob(a4Base64);
             const a4Bytes = new Uint8Array(a4Binary.length);
             for (let b = 0; b < a4Binary.length; b++) {
               a4Bytes[b] = a4Binary.charCodeAt(b);
             }
-            const sheetSuffix = a4WhitePages.length > 1 ? `_Sheet${p + 1}` : '';
+            const sheetSuffix = whitePages.length > 1 ? `_Sheet${p + 1}` : '';
             folder?.file(`00_A4_Printable${sheetSuffix}_White_For_Home_Printers_300DPI.png`, a4Bytes.buffer);
           }
         } catch (a4Err) {
