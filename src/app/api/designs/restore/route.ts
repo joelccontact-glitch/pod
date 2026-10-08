@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
+import { clearDesignsCache } from '../route';
 
 export async function POST(req: Request) {
   try {
@@ -24,6 +25,8 @@ export async function POST(req: Request) {
       }
 
       await batch.commit();
+      clearDesignsCache();
+
       return NextResponse.json({
         success: true,
         message: 'Restored successfully',

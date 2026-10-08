@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
+import { clearDesignsCache } from '../route';
+import { clearImageCache } from '../image/route';
 
 export async function POST(req: Request) {
   try {
@@ -29,6 +31,9 @@ export async function POST(req: Request) {
       }
 
       await batch.commit();
+      clearDesignsCache();
+      targetIds.forEach(tId => clearImageCache(tId));
+
       return NextResponse.json({
         success: true,
         message: permanent ? 'Permanently deleted successfully' : 'Moved to trash successfully',

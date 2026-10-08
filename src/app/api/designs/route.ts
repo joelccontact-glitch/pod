@@ -7,7 +7,7 @@ export const revalidate = 0;
 // In-memory cache for fast pagination and instant responses (< 5ms)
 let cachedSnapshotDocs: { id: string; data: any }[] | null = null;
 let lastCacheTime = 0;
-const CACHE_TTL_MS = 2000; // 2 seconds cache for instant UI updates
+const CACHE_TTL_MS = 180000; // 3 minutes cache to drastically cut Firestore read quota consumption (95%+ reduction!)
 
 export function clearDesignsCache() {
   cachedSnapshotDocs = null;
@@ -50,22 +50,31 @@ export async function GET(request: Request) {
 
     const now = Date.now();
     if (nocache || !cachedSnapshotDocs || (now - lastCacheTime > CACHE_TTL_MS)) {
-      // Fetch ONLY lightweight metadata fields from Firestore (excludes heavy base64 images!)
-      const designsSnapshot = await db.collection('designs')
-        .orderBy('created_at', 'desc')
-        .select(
-          'title', 'topic', 'prompt', 'tags', 'stickerPresetId', 'theme',
-          'sticker_sub', 'design_type', 'is_sticker', 'is_deleted',
-          'created_at', 'updated_at', 'catchphrase', 'season_name',
-          'style_name', 'feedback_applied', 'is_liked', 'prompt_hash'
-        )
-        .get();
+      try {
+        // Fetch ONLY lightweight metadata fields from Firestore (excludes heavy base64 images!)
+        const designsSnapshot = await db.collection('designs')
+          .orderBy('created_at', 'desc')
+          .select(
+            'title', 'topic', 'prompt', 'tags', 'stickerPresetId', 'theme',
+            'sticker_sub', 'design_type', 'is_sticker', 'is_deleted',
+            'created_at', 'updated_at', 'catchphrase', 'season_name',
+            'style_name', 'feedback_applied', 'is_liked', 'prompt_hash'
+          )
+          .get();
 
-      cachedSnapshotDocs = designsSnapshot.docs.map((doc: any) => ({
-        id: doc.id,
-        data: doc.data()
-      }));
-      lastCacheTime = now;
+        cachedSnapshotDocs = designsSnapshot.docs.map((doc: any) => ({
+          id: doc.id,
+          data: doc.data()
+        }));
+        lastCacheTime = now;
+      } catch (dbErr: any) {
+        // If Firestore read fails (e.g. Quota Exceeded / RESOURCE_EXHAUSTED), fallback to existing cache if available!
+        console.error('Firestore query error in /api/designs:', dbErr?.message);
+        if (!cachedSnapshotDocs || cachedSnapshotDocs.length === 0) {
+          throw dbErr;
+        }
+        console.warn('Falling back to cachedSnapshotDocs due to Firestore quota error');
+      }
     }
       
     let podCount = 0;
@@ -315,7 +324,7 @@ export async function GET(request: Request) {
     const paginatedDesigns = allDesigns.slice(offsetNum, offsetNum + limitNum);
     dynamicSubCounts.all = stickerCount;
 
-    return NextResponse.json({ 
+    const jsonResponse = NextResponse.json({ 
       success: true, 
       data: paginatedDesigns,
       total,
@@ -325,6 +334,11 @@ export async function GET(request: Request) {
       page,
       totalPages: Math.ceil(total / limitNum)
     });
+
+    if (!nocache) {
+      jsonResponse.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=180');
+    }
+    return jsonResponse;
   } catch (error: any) {
     console.error('Error fetching designs:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

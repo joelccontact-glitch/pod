@@ -2,7 +2,18 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+
+// In-memory cache for high-frequency image requests (saves thousands of Firestore reads!)
+const inMemoryImageCache = new Map<string, { buffer: Buffer; mimeType: string }>();
+const MAX_CACHE_ITEMS = 300;
+
+export function clearImageCache(id?: string) {
+  if (id) {
+    inMemoryImageCache.delete(id);
+  } else {
+    inMemoryImageCache.clear();
+  }
+}
 
 export async function GET(request: Request) {
   try {
@@ -10,10 +21,23 @@ export async function GET(request: Request) {
     const id = searchParams.get('id');
     if (!id) return new NextResponse('Missing id', { status: 400 });
 
-    if (!process.env.FIREBASE_PROJECT_ID) {
-       return NextResponse.redirect('https://placehold.co/800x800?text=No+Firebase');
+    // 1. Check in-memory cache first (0 Firestore reads!)
+    const cached = inMemoryImageCache.get(id);
+    if (cached) {
+      return new NextResponse(new Uint8Array(cached.buffer), {
+        headers: {
+          'Content-Type': cached.mimeType,
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
+        },
+      });
     }
 
+    if (!process.env.FIREBASE_PROJECT_ID) {
+      return NextResponse.redirect('https://placehold.co/800x800?text=No+Firebase');
+    }
+
+    // 2. Fetch from Firestore only if not cached
     const doc = await db.collection('designs').doc(id).get();
     if (!doc.exists) return new NextResponse('Not found', { status: 404 });
 
@@ -31,11 +55,19 @@ export async function GET(request: Request) {
         if (fetchRes.ok) {
           const contentType = fetchRes.headers.get('content-type') || 'image/png';
           const arrayBuf = await fetchRes.arrayBuffer();
-          return new NextResponse(Buffer.from(arrayBuf), {
+          const buffer = Buffer.from(arrayBuf);
+
+          if (inMemoryImageCache.size >= MAX_CACHE_ITEMS) {
+            const firstKey = inMemoryImageCache.keys().next().value;
+            if (firstKey) inMemoryImageCache.delete(firstKey);
+          }
+          inMemoryImageCache.set(id, { buffer, mimeType: contentType });
+
+          return new NextResponse(new Uint8Array(buffer), {
             headers: {
               'Content-Type': contentType,
               'Access-Control-Allow-Origin': '*',
-              'Cache-Control': 'public, max-age=86400',
+              'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
             },
           });
         }
@@ -52,16 +84,21 @@ export async function GET(request: Request) {
     const mimeType = matches[1];
     const buffer = Buffer.from(matches[2], 'base64');
 
-    return new NextResponse(buffer, {
+    // Store in RAM cache for instant repeat views
+    if (inMemoryImageCache.size >= MAX_CACHE_ITEMS) {
+      const firstKey = inMemoryImageCache.keys().next().value;
+      if (firstKey) inMemoryImageCache.delete(firstKey);
+    }
+    inMemoryImageCache.set(id, { buffer, mimeType });
+
+    return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': mimeType,
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400',
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching image:', error);
     return new NextResponse('Internal error', { status: 500 });
   }

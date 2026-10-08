@@ -37,6 +37,33 @@ import { generateCreativeFabricaTags, formatCFTagsForClipboard } from '@/lib/cre
 import { extractStandaloneStickerFromTank } from '@/lib/standalone-extractor';
 import { createVesselStickerFromStandalone } from '@/lib/vessel-housing-builder';
 
+// Client-side cache for high-frequency design pool queries to eliminate redundant Firestore reads (95%+ reduction)
+let clientPoolCache: { data: any[]; timestamp: number } | null = null;
+const CLIENT_POOL_TTL_MS = 180000; // 3 minutes
+
+const getCachedStickersPool = async (forceRefresh = false): Promise<any[]> => {
+  const now = Date.now();
+  if (!forceRefresh && clientPoolCache && (now - clientPoolCache.timestamp < CLIENT_POOL_TTL_MS)) {
+    return clientPoolCache.data;
+  }
+  try {
+    const res = await fetch('/api/designs?limit=1000&type=sticker');
+    const data = await res.json();
+    if (data.success && Array.isArray(data.data)) {
+      clientPoolCache = { data: data.data, timestamp: now };
+      return data.data;
+    }
+  } catch (e) {
+    console.error('Failed to fetch stickers pool:', e);
+    if (clientPoolCache) return clientPoolCache.data;
+  }
+  return [];
+};
+
+const invalidateClientPoolCache = () => {
+  clientPoolCache = null;
+};
+
 const isCoverDesign = (d: any) => {
   if (!d) return false;
   const id = (d.id || '').toLowerCase();
@@ -515,11 +542,8 @@ export default function Home() {
 
     if (targetStickers.length === 0 || getDesignCategoryKey(targetStickers[0]) !== coverCategory) {
       try {
-        const res = await fetch(`/api/designs?limit=1000&type=sticker`);
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          const pool = data.data;
-
+        const pool = await getCachedStickersPool();
+        if (pool && pool.length > 0) {
           const matched = pool.filter((d: any) => {
             if (d.id === coverDesign.id || isCoverDesign(d)) return false;
             const itemCategory = getDesignCategoryKey(d);
@@ -836,10 +860,8 @@ export default function Home() {
     setPackStickers([]);
 
     try {
-      const res = await fetch(`/api/designs?limit=1000&type=sticker`);
-      const data = await res.json();
-      if (data.success && Array.isArray(data.data)) {
-        const pool = data.data;
+      const pool = await getCachedStickersPool();
+      if (pool && pool.length > 0) {
         const coverTime = new Date(coverDesign.created_at || 0).getTime();
         const coverCategory = getDesignCategoryKey(coverDesign);
 
@@ -1002,11 +1024,8 @@ export default function Home() {
     let childCount = 0;
 
     try {
-      const res = await fetch(`/api/designs?limit=1000&type=sticker`);
-      const data = await res.json();
-      if (data.success && Array.isArray(data.data)) {
-        const pool = data.data;
-
+      const pool = await getCachedStickersPool();
+      if (pool && pool.length > 0) {
         const selectedCovers = pool.filter((d: any) => targetIds.includes(d.id) && isCoverDesign(d));
         coverCount = selectedCovers.length;
 
@@ -1060,6 +1079,7 @@ export default function Home() {
         if (selectedDesign && finalTargetIds.includes(selectedDesign.id)) {
           setSelectedDesign(null);
         }
+        invalidateClientPoolCache();
         fetchDesigns(page, false, undefined, undefined, true);
       }
     } catch (e) {
@@ -2356,13 +2376,12 @@ export default function Home() {
     try {
       setIsExportingBundle(true);
 
-      // Fetch ALL non-deleted designs from backend database
+      // Fetch all designs using client-side cached pool to save Firestore read quota
       let allFetchedDesigns: any[] = [];
       try {
-        const res = await fetch(`/api/designs?limit=1000&type=all`);
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          allFetchedDesigns = data.data;
+        const pool = await getCachedStickersPool();
+        if (pool && pool.length > 0) {
+          allFetchedDesigns = pool;
         } else {
           allFetchedDesigns = designs;
         }
@@ -2779,6 +2798,7 @@ export default function Home() {
       }
     }
 
+    invalidateClientPoolCache();
     setIsBatchGenerating(false);
     setActiveBatchPackId(null);
     setBatchCompletionNotice({

@@ -1,5 +1,7 @@
 import { db } from '@/lib/firebase-admin';
 import { NextResponse } from 'next/server';
+import { clearDesignsCache } from '../route';
+import { clearImageCache } from '../image/route';
 
 export async function POST(req: Request) {
   try {
@@ -15,6 +17,8 @@ export async function POST(req: Request) {
         ...designData,
         created_at: new Date().toISOString()
       });
+      clearDesignsCache();
+      clearImageCache(id);
     }
 
     return NextResponse.json({ success: true });
