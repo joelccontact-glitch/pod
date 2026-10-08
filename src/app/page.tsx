@@ -340,11 +340,13 @@ export default function Home() {
       selectedStickerSeriesTab,
       selectedPackCover?.topic || selectedPackCover?.title
     );
+    const isJpeg = dataUrl.startsWith('data:image/jpeg');
+    const ext = isJpeg ? 'jpg' : 'png';
     const bgName = a4SheetBg === 'transparent' ? 'Transparent' : 'White';
     const sheetNum = targetIdx + 1;
     a.download = a4SheetPages.length > 1
-      ? `A4_${englishTheme}_Stickers_Sheet${sheetNum}_${bgName}_300DPI.png`
-      : `A4_${englishTheme}_Stickers_${bgName}_300DPI.png`;
+      ? `A4_${englishTheme}_Stickers_Sheet${sheetNum}_${bgName}_300DPI.${ext}`
+      : `A4_${englishTheme}_Stickers_${bgName}_300DPI.${ext}`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -2324,7 +2326,9 @@ export default function Home() {
               cctx.drawImage(img, 0, 0, cw, ch);
             }
 
-            const coverDataUrl = coverCanvas.toDataURL('image/png');
+            // Master Cover: 3000x3000px solid white background.
+            // Exported as high-res JPEG (0.94) to keep file under 1.5MB (vs 8MB PNG) and protect Part 1 from exceeding 20MB.
+            const coverDataUrl = coverCanvas.toDataURL('image/jpeg', 0.94);
             coverCanvas.width = 0;
             coverCanvas.height = 0;
             const base64Data = coverDataUrl.split(',')[1];
@@ -2333,7 +2337,7 @@ export default function Home() {
             for (let b = 0; b < binaryString.length; b++) bytes[b] = binaryString.charCodeAt(b);
 
             coverFile = {
-              fileName: `00_Master_Cover_${themeName}_300DPI.png`,
+              fileName: `00_Master_Cover_${themeName}_300DPI.jpg`,
               bytes,
             };
           } else {
@@ -2378,7 +2382,7 @@ export default function Home() {
           // Efficiently generate BOTH Transparent (Cricut) and White (Home Printers) A4 sheets in a single pass
           const { transparentPages, whitePages } = await generateA4StickerSheetsPair(processedStickers, { pageSize: 20 });
 
-          // 1. Transparent Background A4 Sheets
+          // 1. Transparent Background A4 Sheets (Optimized for Cricut / Silhouette cutting machines)
           for (let p = 0; p < transparentPages.length; p++) {
             const a4Base64 = transparentPages[p].split(',')[1];
             const a4Binary = atob(a4Base64);
@@ -2388,12 +2392,12 @@ export default function Home() {
             }
             const sheetSuffix = transparentPages.length > 1 ? `_Sheet${p + 1}` : '';
             printableFiles.push({
-              fileName: `00_A4_Printable${sheetSuffix}_Transparent_For_Cricut_300DPI.png`,
+              fileName: `00_A4_Printable${sheetSuffix}_Transparent_For_Cricut.png`,
               bytes: a4Bytes,
             });
           }
 
-          // 2. Solid White Background A4 Sheets
+          // 2. Solid White Background A4 Sheets (Full 300 DPI High-Res JPG for Home Printers)
           for (let p = 0; p < whitePages.length; p++) {
             const a4Base64 = whitePages[p].split(',')[1];
             const a4Binary = atob(a4Base64);
@@ -2403,7 +2407,7 @@ export default function Home() {
             }
             const sheetSuffix = whitePages.length > 1 ? `_Sheet${p + 1}` : '';
             printableFiles.push({
-              fileName: `00_A4_Printable${sheetSuffix}_White_For_Home_Printers_300DPI.png`,
+              fileName: `00_A4_Printable${sheetSuffix}_White_For_Home_Printers_300DPI.jpg`,
               bytes: a4Bytes,
             });
           }
@@ -2489,8 +2493,11 @@ export default function Home() {
           const blob = await partZip.generateAsync({
             type: 'blob',
             compression: 'DEFLATE',
-            compressionOptions: { level: 6 }
+            compressionOptions: { level: 9 }
           });
+          const mbSize = (blob.size / (1024 * 1024)).toFixed(2);
+          console.log(`[Etsy ZIP ${p + 1}/${parts.length}] ${parts[p].name} generated: ${mbSize} MB`);
+
           triggerDownload(blob, parts[p].name);
           if (p < parts.length - 1) {
             await new Promise(resolve => setTimeout(resolve, 800));
@@ -2520,7 +2527,7 @@ export default function Home() {
         const zipBlob = await singleZip.generateAsync({
           type: 'blob',
           compression: 'DEFLATE',
-          compressionOptions: { level: 6 }
+          compressionOptions: { level: 9 }
         });
         triggerDownload(zipBlob, `${cleanSessionName}_300DPI.zip`);
       }

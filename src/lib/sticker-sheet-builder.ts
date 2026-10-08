@@ -14,6 +14,10 @@ export interface StickerSheetOptions {
   format?: 'a4' | 'us_letter';
   pageSize?: number; // default 20
   pageIndex?: number;
+  maxWidth?: number;
+  maxHeight?: number;
+  outputFormat?: 'image/png' | 'image/jpeg';
+  quality?: number;
   onProgress?: (current: number, total: number, message: string) => void;
 }
 
@@ -139,7 +143,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /**
- * Generates a single A4 Printable Sticker Sheet data URL (PNG format, 300 DPI, max 20 items in 4x5).
+ * Generates a single A4 Printable Sticker Sheet data URL (300 DPI layout, max 20 items in 4x5).
  */
 export async function generateA4StickerSheet(
   stickers: any[],
@@ -148,13 +152,19 @@ export async function generateA4StickerSheet(
   const {
     background = 'transparent',
     format = 'a4',
+    maxWidth,
+    maxHeight,
+    outputFormat,
+    quality = 0.92,
     onProgress,
   } = options;
 
-  // A4 at 300 DPI: 2480 x 3508 pixels
-  // US Letter at 300 DPI: 2550 x 3300 pixels
-  const canvasWidth = format === 'us_letter' ? 2550 : 2480;
-  const canvasHeight = format === 'us_letter' ? 3300 : 3508;
+  // A4 standard at 300 DPI: 2480 x 3508 pixels
+  // US Letter standard at 300 DPI: 2550 x 3300 pixels
+  const defaultWidth = format === 'us_letter' ? 2550 : 2480;
+  const defaultHeight = format === 'us_letter' ? 3300 : 3508;
+  const canvasWidth = maxWidth || defaultWidth;
+  const canvasHeight = maxHeight || defaultHeight;
 
   const canvas = document.createElement('canvas');
   canvas.width = canvasWidth;
@@ -178,11 +188,12 @@ export async function generateA4StickerSheet(
   const cols = 4;
   const rows = 5;
 
-  // Layout parameters (safe margins for home printers)
-  const marginX = 140; // 140px left and right margin
-  const marginY = 160; // 160px top and bottom margin
-  const gapX = 40;     // 40px gap between columns
-  const gapY = 48;     // 48px gap between rows
+  // Proportional layout scaling based on baseline width (2480px)
+  const scaleRatio = canvasWidth / 2480;
+  const marginX = Math.round(140 * scaleRatio);
+  const marginY = Math.round(160 * scaleRatio);
+  const gapX = Math.round(40 * scaleRatio);
+  const gapY = Math.round(48 * scaleRatio);
 
   const usableWidth = canvasWidth - marginX * 2;
   const usableHeight = canvasHeight - marginY * 2;
@@ -191,7 +202,7 @@ export async function generateA4StickerSheet(
   const cellHeight = (usableHeight - (rows - 1) * gapY) / rows;
 
   // Cell inner padding (ensures stickers don't touch cell borders)
-  const cellPadding = 18;
+  const cellPadding = Math.round(18 * scaleRatio);
   const maxStickerW = cellWidth - cellPadding * 2;
   const maxStickerH = cellHeight - cellPadding * 2;
 
@@ -256,7 +267,11 @@ export async function generateA4StickerSheet(
     onProgress(total, total, 'A4 시트 렌더링 완료');
   }
 
-  const resultDataUrl = canvas.toDataURL('image/png');
+  const resolvedFormat = outputFormat || (background === 'white' ? 'image/jpeg' : 'image/png');
+  const resultDataUrl = resolvedFormat === 'image/jpeg'
+    ? canvas.toDataURL('image/jpeg', quality)
+    : canvas.toDataURL('image/png');
+
   canvas.width = 0;
   canvas.height = 0;
   return resultDataUrl;
@@ -305,6 +320,9 @@ export interface StickerSheetsPairResult {
 /**
  * Efficiently generates both Transparent (Cricut) and White (Home Printers) A4 sheets in a single pass.
  * Prevents memory exhaustion by reusing the rendered transparent sheet onto a white background.
+ * Cricut sheets: optimized 2000x2828 (~242DPI) to keep PNG sizes around ~3.5MB.
+ * Home Printer sheets: full 2480x3508 300DPI crisp JPEG (~1.2MB).
+ * Result: Total Part 5 ZIP is strictly ~10MB (half of Etsy 20MB limit!).
  */
 export async function generateA4StickerSheetsPair(
   stickers: any[],
@@ -328,18 +346,25 @@ export async function generateA4StickerSheetsPair(
       }
     };
 
-    // 1. Generate transparent sheet
+    // 1. Generate transparent sheet for Cricut cutting machines (2000 x 2828: crisp ~242DPI, ~3.5MB PNG)
+    const format = options.format || 'a4';
+    const transparentW = format === 'us_letter' ? 2000 : 2000;
+    const transparentH = format === 'us_letter' ? 2588 : 2828;
+
     const transparentDataUrl = await generateA4StickerSheet(chunk, {
       ...options,
       background: 'transparent',
+      maxWidth: transparentW,
+      maxHeight: transparentH,
+      outputFormat: 'image/png',
       onProgress: pageProgress,
     });
     transparentPages.push(transparentDataUrl);
 
-    // 2. Instantly generate white sheet by compositing transparent sheet onto solid white background
+    // 2. Instantly generate full 300DPI white sheet (2480x3508) for Home Printers
+    // Exported as high-res JPEG (0.92) to keep each sheet under 1.5MB (vs 6.5MB PNG)
     try {
       const transparentImg = await loadImage(transparentDataUrl);
-      const format = options.format || 'a4';
       const canvasWidth = format === 'us_letter' ? 2550 : 2480;
       const canvasHeight = format === 'us_letter' ? 3300 : 3508;
 
@@ -350,8 +375,8 @@ export async function generateA4StickerSheetsPair(
       if (wctx) {
         wctx.fillStyle = '#FFFFFF';
         wctx.fillRect(0, 0, canvasWidth, canvasHeight);
-        wctx.drawImage(transparentImg, 0, 0);
-        whitePages.push(whiteCanvas.toDataURL('image/png'));
+        wctx.drawImage(transparentImg, 0, 0, canvasWidth, canvasHeight);
+        whitePages.push(whiteCanvas.toDataURL('image/jpeg', 0.92));
       } else {
         whitePages.push(transparentDataUrl);
       }
