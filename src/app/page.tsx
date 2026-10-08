@@ -2249,21 +2249,39 @@ export default function Home() {
 
         try {
           if (isCover) {
-            // Master Cover: Preserve original background & high resolution, do NOT remove background!
-            let coverArrayBuffer: ArrayBuffer | null = null;
-            if (rawUrl.startsWith('data:image/')) {
-              const base64Data = rawUrl.split(',')[1];
-              const binaryString = atob(base64Data);
-              const bytes = new Uint8Array(binaryString.length);
-              for (let b = 0; b < binaryString.length; b++) bytes[b] = binaryString.charCodeAt(b);
-              coverArrayBuffer = bytes.buffer;
-            } else {
-              const res = await fetch(rawUrl);
-              coverArrayBuffer = await res.arrayBuffer();
+            // Master Cover: MUST have solid white (#FFFFFF) background! Never transparent!
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            await new Promise((resolve) => {
+              img.onload = resolve;
+              img.onerror = () => {
+                const fb = new Image();
+                fb.onload = resolve;
+                fb.onerror = resolve;
+                fb.src = rawUrl;
+              };
+              img.src = rawUrl;
+            });
+
+            const coverCanvas = document.createElement('canvas');
+            const cw = Math.max(img.naturalWidth || 3000, 3000);
+            const ch = Math.max(img.naturalHeight || 3000, 3000);
+            coverCanvas.width = cw;
+            coverCanvas.height = ch;
+            const cctx = coverCanvas.getContext('2d');
+            if (cctx) {
+              cctx.fillStyle = '#FFFFFF';
+              cctx.fillRect(0, 0, cw, ch);
+              cctx.drawImage(img, 0, 0, cw, ch);
             }
-            if (coverArrayBuffer) {
-              folder?.file(`00_Master_Cover_${themeName}_300DPI.jpg`, coverArrayBuffer);
-            }
+
+            const coverDataUrl = coverCanvas.toDataURL('image/jpeg', 0.95);
+            const base64Data = coverDataUrl.split(',')[1];
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let b = 0; b < binaryString.length; b++) bytes[b] = binaryString.charCodeAt(b);
+
+            folder?.file(`00_Master_Cover_${themeName}_300DPI.jpg`, bytes.buffer);
           } else {
             // Sticker item: Process high-res transparent PNG
             const transparentDataUrl = await processTransparentPNG(rawUrl, {
@@ -5646,11 +5664,48 @@ export default function Home() {
                   {/* 1단계: 마스터 표지 다운로드 (Etsy 대표 사진 1번용) */}
                   <button
                     onClick={async () => {
-                      const coverTheme = getCleanEnglishThemeName(selectedPackCover.sticker_sub, selectedStickerSeriesTab, selectedPackCover.topic || selectedPackCover.title);
-                      const a = document.createElement('a');
-                      a.href = selectedPackCover.image_url;
-                      a.download = `00_Master_Cover_${coverTheme}_300DPI.jpg`;
-                      a.click();
+                      try {
+                        const coverTheme = getCleanEnglishThemeName(selectedPackCover.sticker_sub, selectedStickerSeriesTab, selectedPackCover.topic || selectedPackCover.title);
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous';
+                        await new Promise((resolve) => {
+                          img.onload = resolve;
+                          img.onerror = () => {
+                            const fb = new Image();
+                            fb.onload = resolve;
+                            fb.onerror = resolve;
+                            fb.src = selectedPackCover.image_url;
+                          };
+                          img.src = selectedPackCover.image_url;
+                        });
+
+                        const canvas = document.createElement('canvas');
+                        const cw = Math.max(img.naturalWidth || 3000, 3000);
+                        const ch = Math.max(img.naturalHeight || 3000, 3000);
+                        canvas.width = cw;
+                        canvas.height = ch;
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) {
+                          ctx.fillStyle = '#FFFFFF';
+                          ctx.fillRect(0, 0, cw, ch);
+                          ctx.drawImage(img, 0, 0, cw, ch);
+                        }
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                        const a = document.createElement('a');
+                        a.href = dataUrl;
+                        a.download = `00_Master_Cover_${coverTheme}_300DPI.jpg`;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                      } catch (e) {
+                        console.error('Error downloading cover:', e);
+                        const a = document.createElement('a');
+                        a.href = selectedPackCover.image_url;
+                        const coverTheme = getCleanEnglishThemeName(selectedPackCover.sticker_sub, selectedStickerSeriesTab, selectedPackCover.topic || selectedPackCover.title);
+                        a.download = `00_Master_Cover_${coverTheme}_300DPI.jpg`;
+                        a.click();
+                      }
                     }}
                     disabled={isExportingBundle}
                     className="bg-teal-700 hover:bg-teal-800 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-teal-600 cursor-pointer disabled:cursor-not-allowed"
