@@ -65,24 +65,52 @@ const invalidateClientPoolCache = () => {
   clientPoolCache = null;
 };
 
-const isCoverDesign = (d: any) => {
+export const isCoverDesign = (d: any): boolean => {
   if (!d) return false;
+  if (d.is_cover === true) return true;
+
   const id = (d.id || '').toLowerCase();
   const presetId = (d.stickerPresetId || '').toLowerCase();
+
+  // 1. Strict ID & presetId check (must end with -cover or contain -pack-cover / master-cover)
+  if (
+    presetId.endsWith('-cover') ||
+    presetId.includes('-pack-cover') ||
+    id.endsWith('-cover') ||
+    id.includes('-pack-cover') ||
+    presetId.includes('master-cover') ||
+    id.includes('master-cover')
+  ) {
+    return true;
+  }
+
+  // 2. Strict Title / Topic check (only cover designs have these specific title markers)
   const title = (d.title || d.topic || '').toLowerCase();
-  const prompt = (d.prompt || '').toLowerCase();
-  return (
-    id.includes('cover') ||
-    presetId.includes('cover') ||
-    title.includes('커버 표지') ||
+  if (
+    title.includes('마스터 썸네일') ||
     title.includes('마스터 표지') ||
+    title.includes('대표 커버') ||
     title.includes('master cover') ||
     title.includes('bundle cover') ||
+    title.includes('pack cover')
+  ) {
+    return true;
+  }
+
+  // 3. Prompt check (strictly check for master cover specific multi-word phrases, NEVER isolated words or fragments like '-cover'!)
+  const prompt = (d.prompt || '').toLowerCase();
+  if (
     prompt.includes('bundle master cover') ||
-    prompt.includes('40+ cute') ||
-    prompt.includes('20+ cute')
-  );
+    prompt.includes('master cover graphic') ||
+    prompt.includes('sticker bundle master') ||
+    prompt.includes('etsy digital sticker bundle')
+  ) {
+    return true;
+  }
+
+  return false;
 };
+
 
 const getDesignCategoryKey = (d: any): string => {
   if (!d) return 'other';
@@ -1333,38 +1361,7 @@ export default function Home() {
     return '귀여운 수채화/벡터 일러스트';
   };
 
-  const isCoverDesign = (d: any) => {
-    if (!d) return false;
-    const scanStr = `${d.title || ''} ${d.topic || ''} ${d.prompt || ''} ${d.feedback_applied || ''} ${d.stickerPresetId || ''} ${d.id || ''}`.toLowerCase();
-    
-    // Explicit preset IDs for 20-pack and 40-pack master covers
-    const explicitCoverIds = [
-      '-pack-cover',
-      '-cover',
-      'terrarium-20-pack-cover',
-      'vivarium-20-pack-cover',
-      'saltaquarium-20-pack-cover',
-      'freshaquarium-20-pack-cover'
-    ];
-    if (explicitCoverIds.some(id => scanStr.includes(id))) return true;
 
-    return (
-      scanStr.includes('마스터 썸네일') ||
-      scanStr.includes('마스터 표지') ||
-      scanStr.includes('대표 커버') ||
-      scanStr.includes('master cover') ||
-      scanStr.includes('bundle cover') ||
-      scanStr.includes('pack cover') ||
-      scanStr.includes('cover graphic') ||
-      scanStr.includes('sticker bundle master') ||
-      scanStr.includes('20+ cute') ||
-      scanStr.includes('40+ cute') ||
-      scanStr.includes('20+ sticker') ||
-      scanStr.includes('40+ sticker') ||
-      scanStr.includes('sticker bundle') ||
-      scanStr.includes('etsy digital sticker bundle')
-    );
-  };
 
   useEffect(() => {
     const updateScale = () => {
