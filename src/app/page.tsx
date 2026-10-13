@@ -2732,53 +2732,75 @@ export default function Home() {
       };
 
       // Determine Packaging Strategy:
-      // If splitForEtsy is true and we have > 20 stickers: Split into Etsy-compliant parts (each safely < 20MB)
-      if (splitForEtsy && stickerFiles.length > 20) {
-        // Divide into 5 Etsy parts (max 5 files on Etsy, each ~15MB < 20MB limit):
-        // Part 1: Cover + Stickers 01..10
-        // Part 2: Stickers 11..20
-        // Part 3: Stickers 21..30
-        // Part 4: Stickers 31..40
-        // Part 5: 4 A4 Printable Sheets
+      // Etsy strictly enforces MAX 5 files per listing and MAX 20.00MB per file.
+      if (splitForEtsy && stickerFiles.length > 10) {
         const parts: { name: string; folderName: string; files: { fileName: string; bytes: Uint8Array }[] }[] = [];
 
-        // Part 1
-        const p1Files: { fileName: string; bytes: Uint8Array }[] = [];
-        if (coverFile) p1Files.push(coverFile);
-        p1Files.push(...stickerFiles.slice(0, 10));
-        parts.push({
-          name: `01_${themeName}_Part1_Stickers_01-10_300DPI.zip`,
-          folderName: `${cleanSessionName}_Part1`,
-          files: p1Files,
-        });
+        if (stickerFiles.length > 20) {
+          // 40-pack: Divide into 5 Etsy parts (max 5 files on Etsy, each ~10-15MB < 20MB limit):
+          // Part 1: Cover + Stickers 01..10
+          // Part 2: Stickers 11..20
+          // Part 3: Stickers 21..30
+          // Part 4: Stickers 31..40
+          // Part 5: 4 A4 Printable Sheets
+          const p1Files: { fileName: string; bytes: Uint8Array }[] = [];
+          if (coverFile) p1Files.push(coverFile);
+          p1Files.push(...stickerFiles.slice(0, 10));
+          parts.push({
+            name: `01_${themeName}_Part1_Stickers_01-10_300DPI.zip`,
+            folderName: `${cleanSessionName}_Part1`,
+            files: p1Files,
+          });
 
-        // Part 2
-        parts.push({
-          name: `02_${themeName}_Part2_Stickers_11-20_300DPI.zip`,
-          folderName: `${cleanSessionName}_Part2`,
-          files: stickerFiles.slice(10, 20),
-        });
+          parts.push({
+            name: `02_${themeName}_Part2_Stickers_11-20_300DPI.zip`,
+            folderName: `${cleanSessionName}_Part2`,
+            files: stickerFiles.slice(10, 20),
+          });
 
-        // Part 3
-        parts.push({
-          name: `03_${themeName}_Part3_Stickers_21-30_300DPI.zip`,
-          folderName: `${cleanSessionName}_Part3`,
-          files: stickerFiles.slice(20, 30),
-        });
+          parts.push({
+            name: `03_${themeName}_Part3_Stickers_21-30_300DPI.zip`,
+            folderName: `${cleanSessionName}_Part3`,
+            files: stickerFiles.slice(20, 30),
+          });
 
-        // Part 4
-        parts.push({
-          name: `04_${themeName}_Part4_Stickers_31-40_300DPI.zip`,
-          folderName: `${cleanSessionName}_Part4`,
-          files: stickerFiles.slice(30, 40),
-        });
+          parts.push({
+            name: `04_${themeName}_Part4_Stickers_31-40_300DPI.zip`,
+            folderName: `${cleanSessionName}_Part4`,
+            files: stickerFiles.slice(30, 40),
+          });
 
-        // Part 5
-        parts.push({
-          name: `05_${themeName}_Part5_Printable_A4_Sheets_300DPI.zip`,
-          folderName: `${cleanSessionName}_Printables`,
-          files: printableFiles,
-        });
+          parts.push({
+            name: `05_${themeName}_Part5_Printable_A4_Sheets_300DPI.zip`,
+            folderName: `${cleanSessionName}_Printables`,
+            files: printableFiles,
+          });
+        } else {
+          // 20-pack: Divide into exactly 3 Etsy parts (each safely ~10-12MB < 20MB limit, 3 files <= 5 files):
+          // Part 1: Cover + Stickers 01..10 (~11MB)
+          // Part 2: Stickers 11..20 (~10MB)
+          // Part 3: Printable A4 Sheets (~5MB, Transparent for Cricut + White for Home Printers)
+          const p1Files: { fileName: string; bytes: Uint8Array }[] = [];
+          if (coverFile) p1Files.push(coverFile);
+          p1Files.push(...stickerFiles.slice(0, 10));
+          parts.push({
+            name: `01_${themeName}_Part1_Stickers_01-10_300DPI.zip`,
+            folderName: `${cleanSessionName}_Part1`,
+            files: p1Files,
+          });
+
+          parts.push({
+            name: `02_${themeName}_Part2_Stickers_11-20_300DPI.zip`,
+            folderName: `${cleanSessionName}_Part2`,
+            files: stickerFiles.slice(10, 20),
+          });
+
+          parts.push({
+            name: `03_${themeName}_Part3_Printable_A4_Sheets_300DPI.zip`,
+            folderName: `${cleanSessionName}_Printables`,
+            files: printableFiles,
+          });
+        }
 
         for (let p = 0; p < parts.length; p++) {
           setExportBundleProgress({
@@ -6116,7 +6138,7 @@ export default function Home() {
                       <span>
                         {isExportingBundle 
                           ? (exportBundleProgress ? exportBundleProgress.message : 'ZIP 압축 생성 중...') 
-                          : (packStickers.length > 20 ? `Etsy 분할 다운 (${packStickers.length}종)` : `전체 ZIP 다운 (${packStickers.length}종)`)}
+                          : (packStickers.length > 10 ? `Etsy 분할 다운 (${packStickers.length}종)` : `전체 ZIP 다운 (${packStickers.length}종)`)}
                       </span>
                     </button>
                   </div>
