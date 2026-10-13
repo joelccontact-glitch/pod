@@ -6094,7 +6094,7 @@ export default function Home() {
                   >
                     <span className="bg-indigo-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-indigo-200">2단계</span>
                     <span>🖨️</span>
-                    <span>A4 시트 ({packStickers.length > 20 ? '2장' : '화이트/투명'})</span>
+                    <span>A4 시트 (상품 사진용)</span>
                   </button>
 
                   {/* 3단계: 전체 ZIP 파일 일괄 다운로드 (Etsy 20MB 분할 vs CF 단일 통합) */}
@@ -6490,39 +6490,14 @@ export default function Home() {
 
               {/* Controls Bar */}
               <div className="px-4 sm:px-6 py-3 bg-stone-50 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
-                {/* Background selector */}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-gray-700">배경 선택:</span>
-                  <div className="flex bg-gray-200 p-0.5 rounded-xl text-xs font-semibold">
-                    <button
-                      onClick={() => {
-                        if (a4SheetBg !== 'white') {
-                          handleGenerateAndOpenA4Sheet(packStickers, 'white');
-                        }
-                      }}
-                      className={`px-3 py-1.5 rounded-lg transition-all ${
-                        a4SheetBg === 'white'
-                          ? 'bg-white text-indigo-700 shadow-xs font-bold'
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      ⬜ 화이트 배경 (Etsy 사진 등록용 필수)
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (a4SheetBg !== 'transparent') {
-                          handleGenerateAndOpenA4Sheet(packStickers, 'transparent');
-                        }
-                      }}
-                      className={`px-3 py-1.5 rounded-lg transition-all ${
-                        a4SheetBg === 'transparent'
-                          ? 'bg-white text-indigo-700 shadow-xs font-bold'
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      🏁 투명 배경 (크리컷 커팅기용)
-                    </button>
-                  </div>
+                {/* Sheet Purpose Info */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-black text-indigo-950 bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-xl shadow-2xs">
+                    ⬜ Etsy 상품 사진(2~3번) 등록 전용 화이트 시트 (300 DPI)
+                  </span>
+                  <span className="text-[11px] text-gray-500 font-medium">
+                    (※ 크리컷/실루엣 커팅기용 투명 A4 시트는 3단계 전체 ZIP에 자동 포함되어 있습니다)
+                  </span>
                 </div>
 
                 {/* Download Buttons */}
