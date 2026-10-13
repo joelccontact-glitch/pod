@@ -27,6 +27,7 @@ export async function POST(req: Request) {
     const isSticker = (
       lowerScan.includes('sticker') ||
       lowerScan.includes('스티커') ||
+      lowerScan.includes('die-cut') ||
       lowerScan.includes('terrarium') ||
       lowerScan.includes('테라리움') ||
       lowerScan.includes('vivarium') ||
@@ -35,10 +36,35 @@ export async function POST(req: Request) {
       lowerScan.includes('해수어항') ||
       lowerScan.includes('freshaquarium') ||
       lowerScan.includes('열대어어항') ||
+      lowerScan.includes('booktok') ||
+      lowerScan.includes('북톡') ||
+      lowerScan.includes('dessert') ||
+      lowerScan.includes('디저트') ||
+      lowerScan.includes('socialbattery') ||
+      lowerScan.includes('사회적 배터리') ||
+      lowerScan.includes('hangul') ||
+      lowerScan.includes('한글') ||
+      lowerScan.includes('christmas') ||
+      lowerScan.includes('크리스마스') ||
+      lowerScan.includes('halloween') ||
+      lowerScan.includes('할로윈') ||
+      lowerScan.includes('thanksgiving') ||
+      lowerScan.includes('추수감사절') ||
       lowerScan.includes('master cover') ||
       lowerScan.includes('마스터 썸네일') ||
       lowerScan.includes('마스터 표지')
     );
+    const promptLower = prompt.toLowerCase();
+    const isTemplatePrompt = (
+      promptLower.includes('die-cut') ||
+      promptLower.includes('master cover') ||
+      promptLower.includes('sticker bundle') ||
+      promptLower.includes('etsy digital sticker') ||
+      promptLower.includes('20+ cute') ||
+      promptLower.includes('20+ sticker') ||
+      promptLower.includes('master cover graphic')
+    );
+
     let productInfo: any = { 
       title: presetTitle || (isSticker ? `[MOCK] Image derived Sticker` : `[MOCK] Image derived T-Shirt`), 
       tags: isSticker ? ["sticker", "digital download", "die cut", "png"] : ["mock", "derived"] 
@@ -56,17 +82,6 @@ export async function POST(req: Request) {
       const { likedDesigns, likedPromptSummary } = await fetchLikedDesignsSummary(db, 3);
       const likedInstruction = likedDesigns.length > 0 ? `\nCRITICAL #1 MASTER BENCHMARK: The user LIKED (HEARTED) these favorite designs. Ensure the style matches their aesthetic:\n${likedPromptSummary}\n` : '';
 
-      const promptLower = prompt.toLowerCase();
-      const isTemplatePrompt = (
-        promptLower.includes('die-cut') ||
-        promptLower.includes('master cover') ||
-        promptLower.includes('sticker bundle') ||
-        promptLower.includes('etsy digital sticker') ||
-        promptLower.includes('20+ cute') ||
-        promptLower.includes('20+ sticker') ||
-        promptLower.includes('master cover graphic')
-      );
-
       let typographyInstruction = '';
       if (catchphrase) {
         typographyInstruction = `CRUCIAL TYPOGRAPHY: Incorporate the typography text "${catchphrase}". This text MUST be drawn in an elegant, cute, hand-drawn script font using colors that perfectly match the mood and palette of the image.`;
@@ -76,30 +91,37 @@ export async function POST(req: Request) {
         typographyInstruction = `STRICT TYPOGRAPHY RULE: DO NOT invent, generate, or add ANY extra text, catchphrases, or typography beyond what is explicitly written in the instruction.`;
       }
 
+      const productTypeDesc = isSticker
+        ? 'cute die-cut sticker design (STRICT NEGATIVE: Absolutely NO t-shirts, NO clothing, NO collar lines, NO apparel, NO mockups)'
+        : 't-shirt design';
+      const productStyleDesc = isSticker
+        ? 'vector sticker art, crisp white die-cut border, pure solid white background (#FFFFFF), NO scenery, NO apparel, sticker design style'
+        : 'vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style';
+
       let contentsArray: any[] = [];
       if (styleData) {
         console.log(`🎨 Applying style: ${styleData.name}`);
         if (base64Data) {
           contentsArray = [
-            `You are an expert prompt engineer. The user wants to create a new t-shirt design based on the FIRST image (concept), with the instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the SECOND image (style reference), as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) that captures the essence of the first image but completely applies the style of the second image. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
+            `You are an expert prompt engineer. The user wants to create a new ${productTypeDesc} based on the FIRST image (concept), with the instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the SECOND image (style reference), as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like ${productStyleDesc}) that captures the essence of the first image but completely applies the style of the second image. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
             { inlineData: { data: base64Data, mimeType: 'image/jpeg' } },
             { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
           ];
         } else {
           contentsArray = [
-            `You are an expert prompt engineer. The user wants to create a new t-shirt design based on the instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference image, as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) that applies the instruction while strictly following the style reference. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
+            `You are an expert prompt engineer. The user wants to create a new ${productTypeDesc} based on the instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} IMPORTANT: Match the exact artistic style, coloring, texture, and mood of the provided reference image, as well as these style instructions: "${styleData.style_prompt}". Generate a highly detailed prompt for an image generator (like ${productStyleDesc}) that applies the instruction while strictly following the style reference. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
             { inlineData: { data: styleData.image_url.replace(/^data:image\/\w+;base64,/, ""), mimeType: 'image/jpeg' } }
           ];
         }
       } else {
         if (base64Data) {
           contentsArray = [
-            `Analyze this reference image. The user wants to create a new t-shirt design based on this, with the following instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) that captures the essence of the reference image but applies the user's instruction. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
+            `Analyze this reference image. The user wants to create a new ${productTypeDesc} based on this, with the following instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} Generate a highly detailed prompt for an image generator (like ${productStyleDesc}) that captures the essence of the reference image but applies the user's instruction. CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`,
             { inlineData: { data: base64Data, mimeType: 'image/jpeg' } }
           ];
         } else {
           contentsArray = [
-            `You are an expert prompt engineer. Generate a highly detailed prompt for an image generator (like vector art, pure solid white background (#FFFFFF), NO scenery, t-shirt design style) based on this instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`
+            `You are an expert prompt engineer. Generate a highly detailed prompt for an image generator (like ${productStyleDesc}) based on this instruction: "${prompt}". ${affinityInstruction} ${typographyInstruction} CRITICAL INSTRUCTION: You must append this strict rule to the prompt: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Return ONLY the new prompt string.`
           ];
         }
       }
@@ -135,7 +157,14 @@ export async function POST(req: Request) {
 
     const finalTitle = presetTitle || productInfo.title;
 
-    newPrompt = buildEnforced2DVectorPrompt(newPrompt, spellingInstruction, isSticker);
+    if (!isTemplatePrompt) {
+      newPrompt = buildEnforced2DVectorPrompt(newPrompt, spellingInstruction, isSticker);
+    } else {
+      newPrompt = newPrompt
+        .replace(/\bt-shirt graphic illustration\b/gi, 'sticker illustration')
+        .replace(/\bt-shirt design\b/gi, 'sticker design')
+        .replace(/\bt-shirt\b/gi, 'sticker');
+    }
 
     let newImageUrl = `https://placehold.co/800x800/eff6ff/1d4ed8?text=Image+Derived+Preview`;
     let verificationInfo: any = null;
@@ -143,8 +172,8 @@ export async function POST(req: Request) {
 
     if (process.env.GEMINI_API_KEY) {
       try {
-        console.log(`🎨 Drawing derived image with Imagen 4.0 & Gemini Vision OCR Verification...`);
-        const result = await generateImageWithVisionRetry(ai, newPrompt, catchphrase || undefined, 2);
+        console.log(`🎨 Drawing derived image with Imagen 4.0 & Gemini Vision OCR Verification (isSticker: ${isSticker})...`);
+        const result = await generateImageWithVisionRetry(ai, newPrompt, catchphrase || undefined, 2, isSticker);
         newImageUrl = result.imageUrl;
         verificationInfo = result.verification;
         totalAttempts = result.totalAttempts;

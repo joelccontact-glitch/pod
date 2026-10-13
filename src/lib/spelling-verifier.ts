@@ -181,11 +181,24 @@ export function cleanPromptFor2DVector(rawPrompt: string): string {
 }
 
 export function buildEnforced2DVectorPrompt(rawPrompt: string, spellingInstruction?: string, isSticker: boolean = false): string {
+  const isStickerDetected = isSticker || /sticker|die-cut|decal|digital download|booktok|terrarium|vivarium|aquarium|standalone/i.test(rawPrompt);
+
+  // If rawPrompt is already a complete dedicated sticker preset prompt, preserve it completely
+  if (rawPrompt.includes('CRITICAL STICKER RULES') || rawPrompt.includes('STRICT NO GLASS TANKS') || rawPrompt.includes('A cute die-cut sticker design')) {
+    return rawPrompt
+      .replace(/\bt-shirt graphic illustration\b/gi, 'sticker illustration')
+      .replace(/\bt-shirt design\b/gi, 'sticker design')
+      .replace(/\bt-shirt\b/gi, 'sticker');
+  }
+
   const cleaned = cleanPromptFor2DVector(rawPrompt);
   const typographySection = spellingInstruction ? ` ${spellingInstruction}` : '';
-  const typeDescriptor = isSticker ? 'sticker illustration' : 't-shirt graphic illustration';
   
-  return `Square 1:1 ratio 2D vector graphic ${typeDescriptor} of ${cleaned}.${typographySection} Isolated cute adorable animal artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`;
+  if (isStickerDetected) {
+    return `Square 1:1 ratio 2D vector graphic cute die-cut sticker illustration of ${cleaned}.${typographySection} Crisp thick die-cut white border around the entire design. Centered on a pure solid white background (#FFFFFF). STRICT NEGATIVE: Absolutely NO t-shirt, NO clothing, NO collar neckline, NO shirt outlines, NO mockups, NO apparel. Standalone sticker art only.`;
+  }
+  
+  return `Square 1:1 ratio 2D vector graphic t-shirt graphic illustration of ${cleaned}.${typographySection} Isolated cute adorable animal artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`;
 }
 
 export interface LikedDesignRef {
@@ -237,10 +250,21 @@ export async function fetchLikedDesignsSummary(db: any, limitCount = 4): Promise
  * 2. Direct Google Imagen 3 REST API
  * 3. High Precision Flux.1 Engine via Pollinations
  */
-async function callGenerateImagesWithFallback(ai: any, rawPrompt: string): Promise<string> {
+async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isSticker: boolean = false): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY;
 
-  const prompt = buildEnforced2DVectorPrompt(rawPrompt);
+  const isStickerDetected = isSticker || /sticker|die-cut|decal|digital download|booktok|terrarium|vivarium|aquarium|standalone/i.test(rawPrompt);
+  const isAlreadyEnforced = rawPrompt.includes('Square 1:1 ratio') || rawPrompt.includes('CRITICAL STICKER RULES') || rawPrompt.includes('CRITICAL: The image MUST have a pure solid white background');
+
+  let prompt = rawPrompt;
+  if (!isAlreadyEnforced) {
+    prompt = buildEnforced2DVectorPrompt(rawPrompt, undefined, isStickerDetected);
+  } else if (isStickerDetected) {
+    prompt = prompt
+      .replace(/\bt-shirt graphic illustration\b/gi, 'sticker illustration')
+      .replace(/\bt-shirt design\b/gi, 'sticker design')
+      .replace(/\bt-shirt\b/gi, 'sticker');
+  }
 
   const googleModels = [
     'gemini-3.1-flash-image',
@@ -311,15 +335,16 @@ export async function generateImageWithVisionRetry(
   ai: any,
   initialPrompt: string,
   targetPhrase?: string,
-  maxRetries: number = 1
+  maxRetries: number = 1,
+  isSticker: boolean = false
 ): Promise<{
   base64Image: string;
   imageUrl: string;
   verification: any;
   totalAttempts: number;
 }> {
-  console.log(`🎨 Drawing image directly (Fast Mode)...`);
-  const base64Image = await callGenerateImagesWithFallback(ai, initialPrompt);
+  console.log(`🎨 Drawing image directly (Fast Mode, isSticker: ${isSticker})...`);
+  const base64Image = await callGenerateImagesWithFallback(ai, initialPrompt, isSticker);
 
   return {
     base64Image,
