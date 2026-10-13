@@ -81,6 +81,9 @@ export async function GET(request: Request) {
     let stickerCount = 0;
     const dynamicSubCounts: Record<string, number> = {
       all: 0,
+      dessert: 0,
+      socialbattery: 0,
+      hangul: 0,
       terrarium: 0,
       vivarium: 0,
       saltaquarium: 0,
@@ -156,7 +159,13 @@ export async function GET(request: Request) {
             stickerSub = explicitSub;
           }
           // Priority 1: Explicit presetId prefix matching
-          else if (presetId.startsWith('christmas')) {
+          else if (presetId.startsWith('dessert')) {
+            stickerSub = 'dessert';
+          } else if (presetId.startsWith('socialbattery') || presetId.startsWith('social-battery')) {
+            stickerSub = 'socialbattery';
+          } else if (presetId.startsWith('hangul')) {
+            stickerSub = 'hangul';
+          } else if (presetId.startsWith('christmas')) {
             stickerSub = 'christmas';
           } else if (presetId.startsWith('halloween')) {
             stickerSub = 'halloween';
@@ -191,6 +200,21 @@ export async function GET(request: Request) {
           } 
           // Priority 2: Explicit Title & Topic Matching (HIGHEST DETERMINISTIC INTENT)
           else if (
+            title.includes('디저트') || title.includes('베이커리') || title.includes('dessert') || title.includes('bakery') || title.includes('sweet treat') ||
+            topic.includes('디저트') || topic.includes('베이커리') || topic.includes('dessert') || topic.includes('bakery')
+          ) {
+            stickerSub = 'dessert';
+          } else if (
+            title.includes('사회적 배터리') || title.includes('내향인') || title.includes('social battery') || title.includes('introvert') ||
+            topic.includes('사회적 배터리') || topic.includes('내향인') || topic.includes('social battery') || topic.includes('introvert')
+          ) {
+            stickerSub = 'socialbattery';
+          } else if (
+            title.includes('한글') || title.includes('k-감성') || title.includes('hangul') || title.includes('k-vibe') || title.includes('korean vibe') ||
+            topic.includes('한글') || topic.includes('hangul') || topic.includes('k-vibe')
+          ) {
+            stickerSub = 'hangul';
+          } else if (
             title.includes('크리스마스') || title.includes('christmas') || title.includes('스노우볼') ||
             topic.includes('크리스마스') || topic.includes('christmas')
           ) {
@@ -233,6 +257,18 @@ export async function GET(request: Request) {
           }
           // Priority 3: Keyword / Prompt text matching (Fallback when title has no explicit series tag)
           else if (
+            text.includes('croissant') || text.includes('크루아상') || text.includes('pancake') || text.includes('팬케이크') || text.includes('dessert') || text.includes('bakery') || text.includes('디저트')
+          ) {
+            stickerSub = 'dessert';
+          } else if (
+            text.includes('social battery') || text.includes('배터리') || text.includes('introvert') || text.includes('overstimulated') || text.includes('recharging')
+          ) {
+            stickerSub = 'socialbattery';
+          } else if (
+            text.includes('대박') || text.includes('괜찮아') || text.includes('hangul') || text.includes('한글') || text.includes('k-vibe') || text.includes('gwenchana') || text.includes('daebak')
+          ) {
+            stickerSub = 'hangul';
+          } else if (
             text.includes('christmas') || text.includes('크리스마스') || text.includes('snowglobe') || text.includes('스노우볼') || text.includes('gingerbread')
           ) {
             stickerSub = 'christmas';

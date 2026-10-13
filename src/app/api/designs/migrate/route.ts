@@ -51,7 +51,7 @@ export async function GET() {
         resolvedType = 'pod';
       }
 
-      let stickerSub: 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'booktok' | 'other' = 'other';
+      let stickerSub: 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium' | 'booktok' | 'dessert' | 'socialbattery' | 'hangul' | 'other' = 'other';
 
       if (resolvedType === 'sticker') {
         const presetId = (data.stickerPresetId || doc.id || '').toLowerCase();
@@ -72,6 +72,12 @@ export async function GET() {
           stickerSub = 'terrarium';
         } else if (presetId.startsWith('booktok')) {
           stickerSub = 'booktok';
+        } else if (presetId.startsWith('dessert')) {
+          stickerSub = 'dessert';
+        } else if (presetId.startsWith('social-battery') || presetId.startsWith('socialbattery')) {
+          stickerSub = 'socialbattery';
+        } else if (presetId.startsWith('hangul')) {
+          stickerSub = 'hangul';
         }
         // Priority 2: Explicit Title & Topic Matching (HIGHEST DETERMINISTIC INTENT)
         else if (
@@ -99,6 +105,21 @@ export async function GET() {
           topic.includes('북톡') || topic.includes('booktok')
         ) {
           stickerSub = 'booktok';
+        } else if (
+          title.includes('디저트') || title.includes('베이커리') || title.includes('dessert') || title.includes('bakery') ||
+          topic.includes('디저트') || topic.includes('dessert')
+        ) {
+          stickerSub = 'dessert';
+        } else if (
+          title.includes('사회적 배터리') || title.includes('배터리') || title.includes('내향인') || title.includes('social battery') || title.includes('introvert') ||
+          topic.includes('배터리') || topic.includes('social battery')
+        ) {
+          stickerSub = 'socialbattery';
+        } else if (
+          title.includes('한글') || title.includes('hangul') || title.includes('korean') ||
+          topic.includes('한글') || topic.includes('hangul')
+        ) {
+          stickerSub = 'hangul';
         }
         // Priority 3: Keyword / Prompt text matching (Fallback when title has no explicit series tag)
         else if (
@@ -121,6 +142,18 @@ export async function GET() {
           text.includes('booktok') || text.includes('북톡') || text.includes('kindle girlie') || text.includes('book club') || text.includes('킨들') || text.includes('cozy reader')
         ) {
           stickerSub = 'booktok';
+        } else if (
+          text.includes('dessert') || text.includes('디저트') || text.includes('팬케이크') || text.includes('크루아상') || text.includes('크루키') || text.includes('bakery') || text.includes('sweet treat')
+        ) {
+          stickerSub = 'dessert';
+        } else if (
+          text.includes('social battery') || text.includes('overstimulated') || text.includes('introvert') || text.includes('배터리') || text.includes('내향인') || text.includes('low energy')
+        ) {
+          stickerSub = 'socialbattery';
+        } else if (
+          text.includes('hangul') || text.includes('한글') || text.includes('괜찮아') || text.includes('대박') || text.includes('gwenchana') || text.includes('daebak') || text.includes('붕어빵')
+        ) {
+          stickerSub = 'hangul';
         } else {
           stickerSub = 'other';
         }

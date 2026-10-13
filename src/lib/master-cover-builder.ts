@@ -295,6 +295,24 @@ export async function createCompositeMasterCover(
     ribbonColor = '#BE185D';
     ribbonFold = '#500724';
     ribbonOutline = '#300416';
+  } else if (subType === 'dessert' || optTitle.includes('dessert') || optTitle.includes('디저트') || optTitle.includes('베이커리')) {
+    seriesTitle = 'SWEET DESSERT CAFE';
+    titleColor = '#C2410C';
+    ribbonColor = '#EA580C';
+    ribbonFold = '#7C2D12';
+    ribbonOutline = '#431407';
+  } else if (subType === 'socialbattery' || optTitle.includes('socialbattery') || optTitle.includes('배터리') || optTitle.includes('내향인')) {
+    seriesTitle = 'INTROVERT & BATTERY';
+    titleColor = '#6D28D9';
+    ribbonColor = '#7C3AED';
+    ribbonFold = '#4C1D95';
+    ribbonOutline = '#2E1065';
+  } else if (subType === 'hangul' || optTitle.includes('hangul') || optTitle.includes('한글') || optTitle.includes('korean')) {
+    seriesTitle = 'KOREAN HANGUL';
+    titleColor = '#DB2777';
+    ribbonColor = '#EC4899';
+    ribbonFold = '#831843';
+    ribbonOutline = '#500724';
   } else {
     if (options.title) {
       const cleanT = options.title.replace(/[0-9+]+| (cute|stickers?|bundle|png|digital|download) /gi, '').trim();

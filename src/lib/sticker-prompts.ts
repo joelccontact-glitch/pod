@@ -820,6 +820,479 @@ export const BOOKTOK_20_SERIES: StickerPreset[] = [
   }) as unknown as StickerPreset[]
 ];
 
+export const DESSERT_20_SERIES: StickerPreset[] = [
+  {
+    id: 'dessert-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 디저트 & 베이커리 20종 스티커 팩 대표 커버 표지',
+    animal: 'Sweet Dessert Bakery Cover',
+    animalValue: '',
+    affinityObject: 'Sweet Dessert Bakery Cover',
+    theme: 'Dessert Bakery 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 달콤한 디저트 & 베이커리 카페 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE SWEET DESSERT & CAFE STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are large individual die-cut sticker samples of fluffy soufflé pancakes with baby bear, sleeping croissant kitten, bamboo matcha boba red panda, strawberry shortcake bunny, crookie cookie croissant hamster, mochi donuts, cinnamon roll puppy, and vintage cherry pie arranged artistically across the white background. STRICT NO GLASS TANKS: Absolutely NO fish tanks, NO terrarium jars. ONLY standalone adorable bakery dessert animals, pastries, cakes, and sweet treats. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      {
+        name: '수플레 팬케이크 & 아기 곰',
+        desc: '도톰한 3단 팬케이크 위에 앉아 딸기를 든 아기 곰 스티커',
+        phrase: 'Sweetest Treat',
+        detail: 'standalone adorable chubby baby brown bear sitting happily on top of a giant fluffy soufflé pancake stack with melting butter, dripping golden maple syrup, and fresh strawberries'
+      },
+      {
+        name: '크루아상 침대 속 아기 고양이',
+        desc: '갓 구운 황금빛 크루아상 속에서 낮잠 자는 아기 고양이 스티커',
+        phrase: 'Freshly Baked',
+        detail: 'standalone adorable fluffy baby kitten curled up sleeping cozily inside a giant warm golden flaky French croissant, dusted with powdered sugar and mini pastel heart sprinkles'
+      },
+      {
+        name: '대나무 말차 버블티 레서판다',
+        desc: '말차 버블티를 빨대로 마시는 후드티 레서판다 스티커',
+        phrase: 'Boba & Chill',
+        detail: 'standalone cute baby red panda wearing a cozy oversized knit hoodie, sipping a layered iced matcha bamboo boba bubble tea with tapioca pearls through a straw'
+      },
+      {
+        name: '딸기 쇼트케이크 토끼',
+        desc: '생크림 딸기 쇼트케이크를 안고 있는 아기 토끼 스티커',
+        phrase: 'Berry Sweet',
+        detail: 'standalone sweet baby bunny with floppy ears holding a slice of fluffy Japanese strawberry shortcake topped with fresh whipped cream and ripe red strawberries'
+      },
+      {
+        name: '크루키(Crookie) 든 아기 햄스터',
+        desc: '초코칩 쿠키가 박힌 크루키를 든 볼빵빵 햄스터 스티커',
+        phrase: 'Cookie Crunch',
+        detail: 'standalone chubby baby hamster with stuffed cheeks holding a warm chocolate chip cookie croissant (Crookie) with gooey melted chocolate chips'
+      },
+      {
+        name: '모찌 도넛 해달',
+        desc: '파스텔 딸기 모찌 도넛을 안고 둥둥 뜬 아기 해달 스티커',
+        phrase: 'Donut Worry',
+        detail: 'standalone cute baby sea otter pup floating on its back, hugging a pastel pink frosted ring mochi pon-de-ring donut with rainbow sprinkles'
+      },
+      {
+        name: '시나몬 롤 아기 강아지',
+        desc: '달콤한 바닐라 글레이즈 시나몬 롤을 안은 골든리트리버 스티커',
+        phrase: 'Sweet Cinnamon Roll',
+        detail: 'standalone fluffy golden retriever puppy curled up happily beside a warm freshly baked cinnamon roll swirling with vanilla cream cheese glaze'
+      },
+      {
+        name: '빈티지 체리 파이 흑곰',
+        desc: '격자무늬 체리 파이 한 조각을 든 아기 흑곰 스티커',
+        phrase: 'Slice of Joy',
+        detail: 'standalone cute chubby baby black bear wearing a gingham apron, holding a fork and a generous slice of lattice crust ruby red cherry pie with a scoop of vanilla ice cream'
+      },
+      {
+        name: '마카롱 탑 아기 다람쥐',
+        desc: '파스텔 마카롱 4단 탑을 안고 있는 아기 다람쥐 스티커',
+        phrase: 'Macaron Magic',
+        detail: 'standalone adorable baby chipmunk with a bushy tail balancing a colorful stack of pastel macarons (pistachio, strawberry, lavender, lemon)'
+      },
+      {
+        name: '와플 아이스크림 피그미하마',
+        desc: '벨기에 와플과 딸기 아이스크림을 든 피그미하마 스티커',
+        phrase: 'Waffle Pal',
+        detail: 'standalone chubby baby pygmy hippo holding a golden Belgian waffle topped with a scoop of strawberry gelato and chocolate drizzle'
+      },
+      {
+        name: '체리 컵케이크 아기 돼지',
+        desc: '핑크 생크림 컵케이크를 꼭 쥔 아기 돼지 스티커',
+        phrase: 'Sweet Tooth',
+        detail: 'standalone cute baby piglet wearing a chef hat, happily holding a pastel pink buttercream swirl cupcake with a shiny red cherry on top'
+      },
+      {
+        name: '아이스 말차 라떼 아기 사슴',
+        desc: '말차 라떼 컵을 두 손으로 쥔 아기 꽃사슴 스티커',
+        phrase: 'Matcha Love',
+        detail: 'standalone gentle baby fawn with white spots wearing a floral neck bandana, sipping a tall iced matcha latte with cloud cold foam'
+      },
+      {
+        name: '복숭아 파르페 아기 오리',
+        desc: '복숭아 과육 파르페 옆 아기 오리 스티커',
+        phrase: 'Peachy Keen',
+        detail: 'standalone cute fluffy yellow duckling wearing a tiny flower crown standing next to an elaborate tall glass of peach soft-serve parfait'
+      },
+      {
+        name: '초코 퐁듀 아기 고슴도치',
+        desc: '딸기를 초코 퐁듀에 찍은 아기 고슴도치 스티커',
+        phrase: 'Choco Dipped',
+        detail: 'standalone tiny baby hedgehog wearing a baker apron holding a fondue fork with a strawberry dipped in rich dark melted chocolate'
+      },
+      {
+        name: '민트 초코 젤라또 펭귄',
+        desc: '와플 콘 민트초코 젤라또를 든 아기 펭귄 스티커',
+        phrase: 'Minty Cool',
+        detail: 'standalone adorable baby penguin chick wearing a winter scarf, holding a waffle cone piled high with mint chocolate chip gelato'
+      },
+      {
+        name: '생딸기 찹쌀떡 나무늘보',
+        desc: '말랑한 딸기 찹쌀떡을 꼭 껴안은 아기 나무늘보 스티커',
+        phrase: 'Sweet & Slow',
+        detail: 'standalone sweet baby sloth holding a squishy powdered strawberry mochi daifuku with sweet red bean and a fresh whole strawberry inside'
+      },
+      {
+        name: '바닐라 슈크림 아기 수달',
+        desc: '슈크림이 듬뿍 든 크림퍼프를 든 아기 수달 스티커',
+        phrase: 'Cream Puff',
+        detail: 'standalone playful baby otter pup holding a giant French choux cream puff overflowing with rich speckled vanilla bean pastry cream'
+      },
+      {
+        name: '블루베리 타르트 아기 여우',
+        desc: '반짝이는 블루베리 타르트를 안은 아기 붉은 여우 스티커',
+        phrase: 'Berry Tart',
+        detail: 'standalone cute baby red fox curled around a buttery crisp pastry tart loaded with shiny fresh blueberries and mint leaves'
+      },
+      {
+        name: '캐러멜 푸딩 아기 판다',
+        desc: '탱글탱글한 커스터드 푸딩 옆 아기 판다 스티커',
+        phrase: 'Pudding Dreams',
+        detail: 'standalone chubby baby giant panda tapping a bouncy Japanese custard purin pudding crowned with amber caramel syrup and a cherry'
+      },
+      {
+        name: '베이커리 쉐프 고양이',
+        desc: '밀대를 든 꼬마 파티시에 아기 고양이 스티커',
+        phrase: 'Master Baker',
+        detail: 'standalone proud baby calico kitten wearing a tall white chef toque hat, holding a wooden rolling pin with cute flour dusted on its nose'
+      }
+    ][i];
+
+    return {
+      id: `dessert-20-pack-${num}`,
+      name: `🥞 [디저트 ${num}/20] ${items.name}`,
+      animal: 'Dessert Bakery 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Dessert Bakery 20 Pack',
+      phrase: items.phrase,
+      description: items.desc,
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    };
+  }) as unknown as StickerPreset[]
+];
+
+export const SOCIAL_BATTERY_20_SERIES: StickerPreset[] = [
+  {
+    id: 'social-battery-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 사회적 배터리 & 내향인 20종 스티커 팩 대표 커버 표지',
+    animal: 'Social Battery Introvert Cover',
+    animalValue: '',
+    affinityObject: 'Social Battery Introvert Cover',
+    theme: 'Social Battery 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 사회적 배터리 & 내향인 힐링 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold violet script typography reading "20+ CUTE INTROVERT & SOCIAL BATTERY STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish lilac ribbon banner. Surrounding the text are large individual die-cut sticker samples of burrito blanket sloth holding 1% battery, overstimulated hoodie hamster with iced coffee, need to recharge sleepy cat, headphones do not perceive bear, cancelled plans puppy, and quiet mode signs arranged artistically across the white background. STRICT NO GLASS TANKS: Absolutely NO fish tanks, NO terrarium jars. ONLY standalone humorous introvert animals, low battery meters, cozy blankets, and relatable meme stickers. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      {
+        name: '담요 김밥 1% 배터리 나무늘보',
+        desc: '포근한 담요에 싸여 1% 배터리를 쥔 나무늘보 스티커',
+        phrase: 'Social Battery 1%',
+        detail: 'standalone exhausted baby sloth wrapped cozy inside a soft knit blanket like a burrito, lying on its belly and holding a glowing smartphone battery icon showing 1% red battery'
+      },
+      {
+        name: '후드티 아이스커피 햄스터',
+        desc: '보라색 후드티를 푹 눌러쓰고 아이스커피를 쥔 햄스터 스티커',
+        phrase: 'Overstimulated',
+        detail: 'standalone chubby baby hamster sitting down with an oversized pastel purple hoodie pulled down over its round eyes, hugging a tall iced coffee cup with two paws'
+      },
+      {
+        name: '이불 밖은 위험해 아기 고양이',
+        desc: '침대 이불 속에서 코만 내민 채 충전 중인 고양이 스티커',
+        phrase: 'Need to Recharge',
+        detail: 'standalone sleepy baby kitten tucked under a fluffy cloud duvet with only its little face and pink paws showing, next to a glowing battery recharge plug'
+      },
+      {
+        name: '노룩 헤드폰 아기 곰',
+        desc: '노이즈 캔슬링 헤드폰을 끼고 눈 감은 아기 곰 스티커',
+        phrase: 'Do Not Perceive Me',
+        detail: 'standalone chubby baby brown bear wearing giant oversized pastel headphones, eyes blissfully closed, floating with tiny musical notes'
+      },
+      {
+        name: '아이스커피와 불안 아기 토끼',
+        desc: '커다란 아이스 라떼를 안고 눈치보는 아기 토끼 스티커',
+        phrase: 'Living on Iced Coffee & Anxiety',
+        detail: 'standalone sweet baby bunny with wide nervous eyes clutching an oversized mason jar of iced caramel macchiato'
+      },
+      {
+        name: '조용한 퇴장 레서판다',
+        desc: '말없이 파티를 빠져나가는 닌자 망토 레서판다 스티커',
+        phrase: 'Irish Exit Specialist',
+        detail: 'standalone cute baby red panda wearing a little stealth cape, sneaking away on tiptoes with a sly peace sign gesture and vanishing sparkle smoke'
+      },
+      {
+        name: '약속 취소 만세 강아지',
+        desc: '약속 취소 문자를 받고 침대에서 환호하는 아기 강아지 스티커',
+        phrase: 'Plans Got Cancelled!',
+        detail: 'standalone joyful golden retriever puppy rolling on its back in bed with paws in the air celebrating seeing a "let us reschedule" text message'
+      },
+      {
+        name: '완전 방전 0% 아기 해달',
+        desc: '바닥에 대자로 뻗어버린 0% 배터리 아기 해달 스티커',
+        phrase: 'Battery Depleted 0%',
+        detail: 'standalone baby sea otter pup flat on its belly melted like a puddle, holding an empty flashing 0% battery icon'
+      },
+      {
+        name: '말걸지 마세요 고슴도치',
+        desc: '조용히 해주세요 팻말 뒤에 숨은 아기 고슴도치 스티커',
+        phrase: 'Quiet Mode Activated',
+        detail: 'standalone tiny shy baby hedgehog peeking from behind a wooden sign that has a shushing finger icon and "Quiet Mode"'
+      },
+      {
+        name: '내 고양이가 내 테라피스트',
+        desc: '고양이를 껴안고 눈물 훔치는 아기 동물 듀오 스티커',
+        phrase: 'My Cat is My Therapist',
+        detail: 'standalone cute emotional fluffy kitten being gently cuddled with heart sparkles and a tiny doctor stethoscope'
+      },
+      {
+        name: '외출 5분 후 귀가 희망 사슴',
+        desc: '밖으로 나오자마자 집 가고 싶어하는 아기 사슴 스티커',
+        phrase: 'I Want to Go Home',
+        detail: 'standalone timid baby fawn standing awkwardly outside, checking a tiny pocket watch with a homesick expression'
+      },
+      {
+        name: '사회화 한도 초과 펭귄',
+        desc: '사회적 할당량을 다 채우고 얼음집으로 뛰어가는 펭귄 스티커',
+        phrase: 'Social Quota Met',
+        detail: 'standalone cute baby penguin chick waving a tiny white flag, sliding on its belly towards a warm glowing cozy igloo'
+      },
+      {
+        name: '투명인간 모드 피그미하마',
+        desc: '박스를 뒤집어쓰고 눈구멍만 뚫어놓은 피그미하마 스티커',
+        phrase: 'Incognito Mode',
+        detail: 'standalone chubby baby pygmy hippo wearing a cardboard box like a disguise with two cute eye cutouts'
+      },
+      {
+        name: '고속 충전 중 다람쥐',
+        desc: '충전 케이블을 꼬리에 감고 도토리 먹는 다람쥐 스티커',
+        phrase: 'Fast Charging',
+        detail: 'standalone cute baby squirrel curled in a charging dock station with a glowing 100% green thunderbolt icon'
+      },
+      {
+        name: '사람 너무 많아 아기 오리',
+        desc: '혼잡한 인파 속에서 어지러운 아기 오리 스티커',
+        phrase: 'Too Many Humans',
+        detail: 'standalone tiny baby yellow duckling with dizzy spiral eyes holding a small chamomile tea cup'
+      },
+      {
+        name: '비행기 모드 가동 나무늘보',
+        desc: '비행기 모드 아이콘을 머리에 띄운 나무늘보 스티커',
+        phrase: 'Airplane Mode On',
+        detail: 'standalone peaceful baby sloth sleeping soundly on a pillow with a floating airplane silhouette symbol'
+      },
+      {
+        name: '새벽 감성 혼자만의 시간 흑곰',
+        desc: '달빛 아래서 혼자 따뜻한 차를 마시는 아기 흑곰 스티커',
+        phrase: 'My Midnight Peace',
+        detail: 'standalone cozy baby black bear sitting in a moonlit armchair wrapped in a quilt with a steaming mug and reading book'
+      },
+      {
+        name: '나만의 안전지대 텐트 여우',
+        desc: '실내 인디언 텐트 속에서 쿠션을 껴안은 아기 여우 스티커',
+        phrase: 'My Safe Space',
+        detail: 'standalone sweet baby fox peeking out from a fairy-lit cozy indoor pillow blanket fort'
+      },
+      {
+        name: '집순이 클럽 회장 판다',
+        desc: '수면바지 입고 팝콘 먹으며 TV 보는 아기 판다 스티커',
+        phrase: 'Homebody Club President',
+        detail: 'standalone chubby baby panda wearing polka-dot pajama pants, hugging a bowl of popcorn and a remote control'
+      },
+      {
+        name: '방전 주의 경고등 햄스터',
+        desc: '머리 위에 빨간 사이렌 경고등이 켜진 아기 햄스터 스티커',
+        phrase: 'Low Energy Warning',
+        detail: 'standalone cute tired baby hamster with a soft glowing yellow hazard warning triangle and battery meter'
+      }
+    ][i];
+
+    return {
+      id: `social-battery-20-pack-${num}`,
+      name: `🔋 [배터리 ${num}/20] ${items.name}`,
+      animal: 'Social Battery 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Social Battery 20 Pack',
+      phrase: items.phrase,
+      description: items.desc,
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    };
+  }) as unknown as StickerPreset[]
+];
+
+export const HANGUL_20_SERIES: StickerPreset[] = [
+  {
+    id: 'hangul-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] K-감성 한글 & 동물 20종 스티커 팩 대표 커버 표지',
+    animal: 'Korean Hangul Aesthetic Cover',
+    animalValue: '',
+    affinityObject: 'Korean Hangul Aesthetic Cover',
+    theme: 'Korean Hangul 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 K-감성 한글 & 아기 동물 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold colorful script typography reading "20+ CUTE KOREAN HANGUL & BABY ANIMAL STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish pastel ribbon banner. Surrounding the text are large individual die-cut sticker samples of Gwenchana bunny holding heart, Daebak celebration red panda with confetti, Bling Bling sparkling kitten, Bungeoppang bear, You Got This hamster, and Korean street food stickers arranged artistically across the white background. STRICT NO GLASS TANKS: Absolutely NO fish tanks, NO terrarium jars. ONLY standalone adorable Korean Hangul calligraphy stickers with cute baby animals and English subtitles. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      {
+        name: '괜찮아 아기 토끼',
+        desc: '귀에 반창고를 붙이고 하트를 안은 힐링 아기 토끼 스티커',
+        phrase: '괜찮아',
+        sub: "It's Okay",
+        detail: 'adorable baby bunny with a cute band-aid on its floppy ear, smiling gently and hugging a glowing pink heart'
+      },
+      {
+        name: '대박 환호 레서판다',
+        desc: '별가루를 뿌리며 환호하는 아기 레서판다 스티커',
+        phrase: '대박',
+        sub: 'Daebak (Awesome!)',
+        detail: 'excited cute baby red panda with sparkling big happy eyes, raising its paws and throwing colorful star confetti into the air'
+      },
+      {
+        name: '반짝반짝 별가루 고양이',
+        desc: '황금 별가루를 뿜어내는 아기 삼색 고양이 스티커',
+        phrase: '반짝반짝',
+        sub: 'Sparkle Bling',
+        detail: 'cute fluffy kitten reaching up playfully towards floating glowing yellow and pink twinkling stars'
+      },
+      {
+        name: '냠냠 붕어빵 아기 곰',
+        desc: '따끈따끈한 붕어빵을 베어 무는 아기 곰 스티커',
+        phrase: '냠냠',
+        sub: 'Yummy!',
+        detail: 'chubby baby brown bear holding a golden brown fish-shaped Korean bungeoppang pastry with sweet red bean steam'
+      },
+      {
+        name: '파이팅 응원 햄스터',
+        desc: '주먹을 불끈 쥐고 머리띠를 두른 응원 햄스터 스티커',
+        phrase: '파이팅',
+        sub: 'You Got This!',
+        detail: 'determined baby hamster wearing a cute white cheer headband, pumping a tiny clenched fist in the air with encouragement sparkles'
+      },
+      {
+        name: '사랑해 하트 아기 해달',
+        desc: '커다란 핑크 하트를 껴안고 둥둥 뜬 해달 스티커',
+        phrase: '사랑해',
+        sub: 'I Love You',
+        detail: 'fluffy baby sea otter floating on its back, hugging an oversized puffy pink plush heart with sweet blushing cheeks'
+      },
+      {
+        name: '쿨쿨 낮잠 나무늘보',
+        desc: '폭신한 구름 베개 위에서 침 흘리며 자는 나무늘보 스티커',
+        phrase: '쿨쿨',
+        sub: 'Sleepy Zzz',
+        detail: 'sweet baby sloth sleeping deeply on a fluffy cloud pillow with floating "Zzz" bubble letters'
+      },
+      {
+        name: '콩닥콩닥 수줍은 사슴',
+        desc: '두 뺨이 발그레해져 가슴을 쥔 아기 꽃사슴 스티커',
+        phrase: '콩닥콩닥',
+        sub: 'Heart Flutter',
+        detail: 'gentle baby fawn with blushing pink cheeks, placing two front hooves over its chest with fluttering mini red hearts'
+      },
+      {
+        name: '뽀짝 아기 강아지 발자국',
+        desc: '아장아장 걸어오는 아기 골든리트리버와 분홍 젤리 발자국',
+        phrase: '뽀짝',
+        sub: 'Tiny Steps',
+        detail: 'tiny golden retriever puppy waddling forward cheerfully, leaving a trail of pink paw print stamps behind'
+      },
+      {
+        name: '아이고 머리짚는 피그미하마',
+        desc: '손으로 이마를 짚으며 억울해하는 피그미하마 스티커',
+        phrase: '아이고',
+        sub: 'Aigo!',
+        detail: 'chubby baby pygmy hippo with a comical overdramatic sigh, resting its tiny palm on its forehead'
+      },
+      {
+        name: '행복해 미소 아기 돼지',
+        desc: '클로버 꽃밭에서 눈웃음 짓는 아기 돼지 스티커',
+        phrase: '행복해',
+        sub: 'So Happy',
+        detail: 'smiling cute baby piglet wearing a flower necklace, beaming with pure radiant joy in a sunny clover patch'
+      },
+      {
+        name: '붕어빵 모자 쓴 펭귄',
+        desc: '붕어빵 모양 털모자를 쓴 아기 펭귄 스티커',
+        phrase: '붕어빵',
+        sub: 'Bungeoppang Pal',
+        detail: 'baby emperor penguin chick wearing a funny warm knitted bungeoppang fish hat on its head'
+      },
+      {
+        name: '심쿵 심장잡은 다람쥐',
+        desc: '너무 귀여워서 심장을 부여잡은 아기 다람쥐 스티커',
+        phrase: '심쿵',
+        sub: 'Heart Attack!',
+        detail: 'cute baby chipmunk clutching its heart with round shocked anime eyes and sparkling exclamation marks'
+      },
+      {
+        name: '멍~ 멍때리는 아기 오리',
+        desc: '머리 위에 물음표를 띄우고 멍때리는 오리 스티커',
+        phrase: '멍~',
+        sub: 'Spaced Out',
+        detail: 'fluffy baby yellow duckling staring blankly into space with a translucent thought bubble with floating dots "..."'
+      },
+      {
+        name: '힐링 온천 목욕 고슴도치',
+        desc: '머리에 수건을 얹고 나무 대야에 몸을 담근 고슴도치 스티커',
+        phrase: '힐링',
+        sub: 'Healing Time',
+        detail: 'tiny baby hedgehog soaking in a warm wooden hot spring bath tub with a folded mini towel on its head'
+      },
+      {
+        name: '찰떡궁합 떡볶이와 튀김 듀오',
+        desc: '귀여운 떡볶이 떡과 바삭한 김말이 캐릭터 듀오 스티커',
+        phrase: '찰떡궁합',
+        sub: 'Perfect Match',
+        detail: 'two smiling kawaii characters: a cheerful red tteokbokki rice cake and a golden crispy fried tempura holding hands'
+      },
+      {
+        name: '토닥토닥 위로하는 흑곰',
+        desc: '작은 친구를 따뜻하게 안아주는 아기 흑곰 스티커',
+        phrase: '토닥토닥',
+        sub: 'There There',
+        detail: 'gentle baby black bear gently patting the back of a little bird with warm comforting smiles'
+      },
+      {
+        name: '꿀잠 수면안대 아기 여우',
+        desc: '당근 모양 수면 안대를 쓰고 웅크린 아기 여우 스티커',
+        phrase: '꿀잠',
+        sub: 'Sweet Sleep',
+        detail: 'cozy baby red fox curled into a fluffy ball wearing a silk sleep mask, dreaming of starry skies'
+      },
+      {
+        name: '으쌰으쌰 힘내는 레서판다',
+        desc: '작은 덤벨을 들고 운동하는 씩씩한 레서판다 스티커',
+        phrase: '으쌰으쌰',
+        sub: 'Power Up!',
+        detail: 'energetic baby red panda wearing athletic wristbands, lifting a tiny barbell with cheerful sweat drop'
+      },
+      {
+        name: '최고야 엄지척 아기 강아지',
+        desc: '엄지손가락(발가락)을 치켜세우고 윙크하는 강아지 스티커',
+        phrase: '최고야',
+        sub: 'You Are The Best',
+        detail: 'winking fluffy puppy dog giving a big enthusiastic thumbs-up paw with sparkling golden confetti'
+      }
+    ][i];
+
+    return {
+      id: `hangul-20-pack-${num}`,
+      name: `🇰🇷 [한글 ${num}/20] ${items.name}`,
+      animal: 'Korean Hangul 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Korean Hangul 20 Pack',
+      phrase: `${items.phrase} (${items.sub})`,
+      description: items.desc,
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Bold cute rounded Korean Hangul typography text reads "${items.phrase}" with small cute English subtitle "${items.sub}". ${STICKER_RULES_PROMPT_SUFFIX}`
+    };
+  }) as unknown as StickerPreset[]
+];
+
 export function buildStickerPrompt(
   animalName: string,
   affinityObject: string,

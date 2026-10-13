@@ -104,6 +104,48 @@ const CATEGORY_SEO_DICT: Record<string, {
       '✨ Warm, aesthetic hand-drawn illustrations for hopeless romantics, bookworms & fantasy readers'
     ]
   },
+  dessert: {
+    name: 'Sweet Dessert Bakery Cafe',
+    bundleKeywords: [
+      'Dessert Stickers PNG Bundle',
+      'Sweet Bakery Clipart Cute',
+      'Cafe Pastry Die Cut'
+    ],
+    singleKeywords: ['Sweet Dessert Sticker PNG', 'Bakery Pastry Clipart', 'Cute Cafe Die Cut'],
+    descriptionHighlights: [
+      '🥞 Mouthwatering sweet desserts & pastries (Soufflé Pancakes, Croissants, Boba, Shortcake & Mochi Donuts)',
+      '🍓 Kawaii aesthetic bakery treats paired with adorable cozy animal companions',
+      '🧁 Ideal for bullet journals, recipe scrapbooks, GoodNotes planners, and water bottle decals'
+    ]
+  },
+  socialbattery: {
+    name: 'Introvert & Social Battery Humor',
+    bundleKeywords: [
+      'Social Battery Stickers PNG Bundle',
+      'Introvert Meme Clipart Cute',
+      'Low Energy Die Cut'
+    ],
+    singleKeywords: ['Social Battery Sticker PNG', 'Introvert Humor Clipart', 'Low Battery Die Cut'],
+    descriptionHighlights: [
+      '🔋 Relatable introvert & mental health humor (1% Battery Sloth, Overstimulated Hamster & Blanket Burritos)',
+      '☕ Perfect self-care and burnout normalization stickers for laptops, Stanley tumblers, and iPads',
+      '💜 Funny, empathetic designs for homebodies, students, and exhausted professionals'
+    ]
+  },
+  hangul: {
+    name: 'Korean Hangul & K-Vibe Animals',
+    bundleKeywords: [
+      'Korean Hangul Stickers PNG Bundle',
+      'Cute K-Drama Clipart Set',
+      'Polco Deco Die Cut'
+    ],
+    singleKeywords: ['Korean Hangul Sticker PNG', 'Cute K-Drama Clipart', 'Polco Deco Die Cut'],
+    descriptionHighlights: [
+      '🇰🇷 Cute Korean Hangul calligraphy paired with English subtitles & endearing baby animals',
+      '💖 Iconic Korean emotional words & phrases (Gwenchana, Daebak, Bungeoppang, Saranghae & Healing)',
+      '✨ Essential for K-pop photocard decorating (Polco), Korean study journals, and travel scrapbooks'
+    ]
+  },
   christmas: {
     name: 'Cozy Christmas Holiday',
     bundleKeywords: [
@@ -225,7 +267,21 @@ const KO_EN_TRANSLATE: [RegExp, string][] = [
   [/책탑/i, 'Book Stack'],
   [/책갈피/i, 'Bookmark Ribbon'],
   [/북\s*카트/i, 'Book Cart'],
-  [/뱃지/i, 'Bookish Badge']
+  [/뱃지/i, 'Bookish Badge'],
+  [/팬케이크|와플/i, 'Pancakes Dessert'],
+  [/크루아상|크루키/i, 'Croissant Bakery'],
+  [/버블티|보바/i, 'Boba Tea Drink'],
+  [/도넛|마카롱|타르트/i, 'Pastry Treat'],
+  [/배터리|방전/i, 'Social Battery 1%'],
+  [/과부하|오버/i, 'Overstimulated Humor'],
+  [/내향인|집순이/i, 'Introvert Homebody'],
+  [/괜찮아/i, 'Gwenchana It is OK'],
+  [/대박/i, 'Daebak Awesome'],
+  [/반짝반짝/i, 'Sparkle Bling'],
+  [/붕어빵/i, 'Bungeoppang Pastry'],
+  [/파이팅/i, 'Fighting Cheer Up'],
+  [/사랑해/i, 'Saranghae Love'],
+  [/한글/i, 'Korean Hangul']
 ];
 
 function translateKoItemToEnglish(koreanText: string): string {

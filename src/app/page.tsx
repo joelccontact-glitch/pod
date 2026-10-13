@@ -22,6 +22,9 @@ import {
   THANKSGIVING_20_SERIES,
   THANKSGIVING_STANDALONE_20_SERIES,
   BOOKTOK_20_SERIES,
+  DESSERT_20_SERIES,
+  SOCIAL_BATTERY_20_SERIES,
+  HANGUL_20_SERIES,
   SEASONAL_RECOMMENDATIONS,
   getDynamicSeasonalStickerRecommendations,
   getSeasonalPackPresets,
@@ -118,6 +121,9 @@ const getDesignCategoryKey = (d: any): string => {
   if (sub && sub !== 'other') return sub;
 
   const presetId = (d.stickerPresetId || d.id || '').toLowerCase();
+  if (presetId.includes('dessert')) return 'dessert';
+  if (presetId.includes('socialbattery') || presetId.includes('social-battery')) return 'socialbattery';
+  if (presetId.includes('hangul')) return 'hangul';
   if (presetId.includes('christmas')) return 'christmas';
   if (presetId.includes('halloween')) return 'halloween';
   if (presetId.includes('thanksgiving')) return 'thanksgiving';
@@ -136,6 +142,9 @@ const getDesignCategoryKey = (d: any): string => {
   if (presetId.includes('booktok') || presetId.includes('reading')) return 'booktok';
 
   const title = (d.title || d.topic || '').toLowerCase();
+  if (title.includes('디저트') || title.includes('베이커리') || title.includes('dessert') || title.includes('bakery')) return 'dessert';
+  if (title.includes('사회적 배터리') || title.includes('내향인') || title.includes('social battery') || title.includes('introvert')) return 'socialbattery';
+  if (title.includes('한글') || title.includes('k-감성') || title.includes('hangul') || title.includes('k-vibe')) return 'hangul';
   if (title.includes('크리스마스') || title.includes('스노우볼') || title.includes('christmas')) return 'christmas';
   if (title.includes('할로윈') || title.includes('halloween') || title.includes('스푸키')) return 'halloween';
   if (title.includes('추수감사절') || title.includes('thanksgiving') || title.includes('가을 수확') || title.includes('하베스트')) return 'thanksgiving';
@@ -153,6 +162,9 @@ const getDesignCategoryKey = (d: any): string => {
 };
 
 const getStickerSeriesTitle = (tab: string) => {
+  if (tab.startsWith('dessert20')) return '🥞 미국 유행 디저트 & 베이커리 20종 스티커 팩';
+  if (tab.startsWith('socialbattery20')) return '🔋 사회적 배터리 & 내향인 20종 스티커 팩';
+  if (tab.startsWith('hangul20')) return '🇰🇷 K-감성 한글 & 아기 동물 20종 스티커 팩';
   if (tab.startsWith('booktok20')) return '📚 북톡 & 코지 리딩 20종 스티커 팩';
   if (tab.startsWith('terrarium20')) return tab.includes('standalone') ? '🪴 테라리움 단일 식물 20종 스티커 팩' : '🫙 테라리움 세트 완성 20종 스티커 팩';
   if (tab.startsWith('vivarium20')) return tab.includes('standalone') ? '🦎 비바리움 단일 동물 20종 스티커 팩' : '🦎 비바리움 세트 완성 20종 스티커 팩';
@@ -169,6 +181,9 @@ const getStickerSeriesTitle = (tab: string) => {
 };
 
 const getPresetSeriesList = (tab: string): StickerPreset[] => {
+  if (tab === 'dessert20') return DESSERT_20_SERIES;
+  if (tab === 'socialbattery20') return SOCIAL_BATTERY_20_SERIES;
+  if (tab === 'hangul20') return HANGUL_20_SERIES;
   if (tab === 'booktok20') return BOOKTOK_20_SERIES;
   if (tab === 'terrarium20') return TERRARIUM_20_SERIES;
   if (tab === 'terrarium20_standalone') return TERRARIUM_STANDALONE_20_SERIES;
@@ -212,6 +227,9 @@ export default function Home() {
   const [selectedStickerSubTab, setSelectedStickerSubTab] = useState<string>('all');
   const [stickerSubCounts, setStickerSubCounts] = useState<Record<string, number>>({
     all: 0,
+    dessert: 0,
+    socialbattery: 0,
+    hangul: 0,
     terrarium: 0,
     vivarium: 0,
     saltaquarium: 0,
@@ -243,6 +261,9 @@ export default function Home() {
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<
+    | 'dessert20'
+    | 'socialbattery20'
+    | 'hangul20'
     | 'booktok20'
     | 'terrarium20'
     | 'terrarium20_standalone'
@@ -258,7 +279,7 @@ export default function Home() {
     | 'halloween20_standalone'
     | 'thanksgiving20'
     | 'thanksgiving20_standalone'
-  >('booktok20');
+  >('dessert20');
   const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-20-pack-1');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
   const [exportBundleProgress, setExportBundleProgress] = useState<{ current: number; total: number; message: string } | null>(null);
@@ -326,6 +347,9 @@ export default function Home() {
   const getCleanEnglishThemeName = (subKey?: string, tabKey?: string, topic?: string): string => {
     const raw = (subKey || tabKey || '').toLowerCase();
     
+    if (raw.includes('dessert') || raw.includes('bakery')) return 'Dessert';
+    if (raw.includes('socialbattery') || raw.includes('social_battery') || raw.includes('introvert')) return 'SocialBattery';
+    if (raw.includes('hangul') || raw.includes('korean')) return 'HangulKVibe';
     if (raw.includes('halloween')) return 'Halloween';
     if (raw.includes('christmas')) return 'Christmas';
     if (raw.includes('thanksgiving')) return 'Thanksgiving';
@@ -340,6 +364,9 @@ export default function Home() {
     if (raw.includes('booktok') || raw.includes('reading') || raw.includes('book_club')) return 'BookTok';
 
     const topicLower = (topic || '').toLowerCase();
+    if (topicLower.includes('dessert') || topicLower.includes('디저트') || topicLower.includes('베이커리')) return 'Dessert';
+    if (topicLower.includes('social battery') || topicLower.includes('배터리') || topicLower.includes('내향')) return 'SocialBattery';
+    if (topicLower.includes('hangul') || topicLower.includes('한글') || topicLower.includes('대박') || topicLower.includes('괜찮아')) return 'HangulKVibe';
     if (topicLower.includes('halloween') || topicLower.includes('할로윈')) return 'Halloween';
     if (topicLower.includes('christmas') || topicLower.includes('크리스마스')) return 'Christmas';
     if (topicLower.includes('thanksgiving') || topicLower.includes('추수감사절')) return 'Thanksgiving';
@@ -478,7 +505,16 @@ export default function Home() {
       const presetId = (coverDesign.stickerPresetId || coverDesign.id || '').toLowerCase();
       const sub = coverDesign.sticker_sub;
 
-      if (presetId.includes('terrarium') || sub === 'terrarium') {
+      if (presetId.includes('dessert') || sub === 'dessert') {
+        const p = DESSERT_20_SERIES.find(s => s.id === 'dessert-20-pack-cover');
+        if (p) basePrompt = p.prompt;
+      } else if (presetId.includes('socialbattery') || presetId.includes('social-battery') || sub === 'socialbattery') {
+        const p = SOCIAL_BATTERY_20_SERIES.find(s => s.id === 'social-battery-20-pack-cover');
+        if (p) basePrompt = p.prompt;
+      } else if (presetId.includes('hangul') || sub === 'hangul') {
+        const p = HANGUL_20_SERIES.find(s => s.id === 'hangul-20-pack-cover');
+        if (p) basePrompt = p.prompt;
+      } else if (presetId.includes('terrarium') || sub === 'terrarium') {
         const p = TERRARIUM_20_SERIES.find(s => s.id === 'terrarium-20-pack-cover');
         if (p) basePrompt = p.prompt;
       } else if (presetId.includes('vivarium') || sub === 'vivarium') {
@@ -2547,10 +2583,22 @@ export default function Home() {
 
   const handleExportZIPBundle = async () => {
     const currentTab = selectedStickerSeriesTab;
-    let bundleName = 'BookTok_20_Stickers_Bundle';
-    let seriesTitle = '[북톡 & 코지 리딩 (20종)]';
+    let bundleName = 'Dessert_20_Stickers_Bundle';
+    let seriesTitle = '[미국 유행 디저트 & 베이커리 (20종)]';
 
-    if (currentTab === 'terrarium20') {
+    if (currentTab === 'dessert20') {
+      bundleName = 'Dessert_20_Stickers_Bundle';
+      seriesTitle = '[미국 유행 디저트 & 베이커리 (20종)]';
+    } else if (currentTab === 'socialbattery20') {
+      bundleName = 'Social_Battery_20_Stickers_Bundle';
+      seriesTitle = '[사회적 배터리 & 내향인 (20종)]';
+    } else if (currentTab === 'hangul20') {
+      bundleName = 'Hangul_K_Vibe_20_Stickers_Bundle';
+      seriesTitle = '[K-감성 한글 & 아기 동물 (20종)]';
+    } else if (currentTab === 'booktok20') {
+      bundleName = 'BookTok_20_Stickers_Bundle';
+      seriesTitle = '[북톡 & 코지 리딩 (20종)]';
+    } else if (currentTab === 'terrarium20') {
       bundleName = 'Terrarium_20_Stickers_Bundle';
       seriesTitle = '[테라리움 완성 세트 (20종)]';
     } else if (currentTab === 'vivarium20') {
@@ -2591,7 +2639,13 @@ export default function Home() {
         const textToScan = `${d.title || ''} ${d.prompt || ''} ${d.topic || ''} ${d.feedback_applied || ''}`.toLowerCase();
         const sub = d.sticker_sub;
 
-        if (currentTab === 'booktok20') {
+        if (currentTab === 'dessert20') {
+          return sub === 'dessert' || presetId.startsWith('dessert') || textToScan.includes('dessert') || textToScan.includes('디저트') || textToScan.includes('베이커리');
+        } else if (currentTab === 'socialbattery20') {
+          return sub === 'socialbattery' || presetId.startsWith('social-battery') || presetId.startsWith('socialbattery') || textToScan.includes('social battery') || textToScan.includes('사회적 배터리') || textToScan.includes('내향');
+        } else if (currentTab === 'hangul20') {
+          return sub === 'hangul' || presetId.startsWith('hangul') || textToScan.includes('hangul') || textToScan.includes('한글') || textToScan.includes('k-감성') || textToScan.includes('대박') || textToScan.includes('괜찮아');
+        } else if (currentTab === 'booktok20') {
           return sub === 'booktok' || presetId.startsWith('booktok') || textToScan.includes('booktok') || textToScan.includes('북톡') || textToScan.includes('독서');
         } else if (currentTab === 'terrarium20') {
           return sub === 'terrarium' || presetId.startsWith('terrarium') || textToScan.includes('terrarium') || textToScan.includes('테라리움');
@@ -2739,7 +2793,22 @@ export default function Home() {
     let packName = '[북톡 & 코지 리딩 20종 스티커 팩]';
     let subKey = 'booktok';
 
-    if (baseType.startsWith('booktok')) {
+    if (baseType.startsWith('dessert')) {
+      targetPresets = DESSERT_20_SERIES;
+      targetStandalonePresets = DESSERT_20_SERIES;
+      packName = '[미국 유행 디저트 & 베이커리 20종 스티커 팩]';
+      subKey = 'dessert';
+    } else if (baseType.startsWith('socialbattery') || baseType.startsWith('social-battery')) {
+      targetPresets = SOCIAL_BATTERY_20_SERIES;
+      targetStandalonePresets = SOCIAL_BATTERY_20_SERIES;
+      packName = '[사회적 배터리 & 내향인 20종 스티커 팩]';
+      subKey = 'socialbattery';
+    } else if (baseType.startsWith('hangul')) {
+      targetPresets = HANGUL_20_SERIES;
+      targetStandalonePresets = HANGUL_20_SERIES;
+      packName = '[K-감성 한글 & 아기 동물 20종 스티커 팩]';
+      subKey = 'hangul';
+    } else if (baseType.startsWith('booktok')) {
       targetPresets = BOOKTOK_20_SERIES;
       targetStandalonePresets = BOOKTOK_20_SERIES;
       packName = '[북톡 & 코지 리딩 20종 스티커 팩]';
@@ -3911,161 +3980,57 @@ export default function Home() {
             )}
 
             <div className="pt-2 border-t border-teal-200/60">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
-                <label className="block text-xs font-bold text-teal-900">
-                  🎯 Etsy 틈새 스티커 팩 테마 선택 (20 Unique Stickers Pack):
-                </label>
-                <div className="flex flex-wrap items-center gap-1 bg-teal-100/70 p-1 rounded-xl">
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('booktok20')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'booktok20'
-                        ? 'bg-rose-700 text-white shadow-sm ring-1 ring-rose-400'
-                        : 'text-rose-950 hover:bg-rose-200/50'
-                    }`}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2 bg-teal-100/60 p-2 sm:p-2.5 rounded-2xl border border-teal-200">
+                <div className="flex items-center gap-2">
+                  <span className="text-base sm:text-lg">🎯</span>
+                  <div>
+                    <label htmlFor="series-select" className="block text-xs font-bold text-teal-950">
+                      스티커 팩 테마 선택 (20 Unique Stickers Pack):
+                    </label>
+                    <p className="text-[11px] text-teal-700">
+                      원하는 틈새 테마를 선택하면 일괄 생성 및 템플릿 목록이 자동 전환됩니다.
+                    </p>
+                  </div>
+                </div>
+                <div className="w-full sm:w-auto min-w-[280px]">
+                  <select
+                    id="series-select"
+                    value={selectedStickerSeriesTab}
+                    onChange={(e) => {
+                      const val = e.target.value as any;
+                      setSelectedStickerSeriesTab(val);
+                      const presets = getPresetSeriesList(val);
+                      if (presets && presets.length > 1) {
+                        setSelectedStickerPresetId(presets[1].id);
+                      }
+                    }}
+                    className="w-full bg-white text-teal-950 font-extrabold text-xs sm:text-sm py-2 px-3 rounded-xl border-2 border-teal-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400 cursor-pointer"
                   >
-                    📚 북톡 독서
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('terrarium20')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'terrarium20'
-                        ? 'bg-teal-700 text-white shadow-sm'
-                        : 'text-teal-900 hover:bg-teal-200/50'
-                    }`}
-                  >
-                    🫙 테라 세트
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('terrarium20_standalone')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'terrarium20_standalone'
-                        ? 'bg-teal-800 text-white shadow-sm ring-1 ring-teal-400'
-                        : 'text-teal-900 hover:bg-teal-200/50'
-                    }`}
-                  >
-                    🪴 테라 단일
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('vivarium20')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'vivarium20'
-                        ? 'bg-emerald-700 text-white shadow-sm'
-                        : 'text-teal-900 hover:bg-teal-200/50'
-                    }`}
-                  >
-                    🦎 비바 세트
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('vivarium20_standalone')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'vivarium20_standalone'
-                        ? 'bg-emerald-800 text-white shadow-sm ring-1 ring-emerald-400'
-                        : 'text-teal-900 hover:bg-teal-200/50'
-                    }`}
-                  >
-                    🦎 비바 단일
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('saltaquarium20')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'saltaquarium20'
-                        ? 'bg-cyan-700 text-white shadow-sm'
-                        : 'text-teal-900 hover:bg-teal-200/50'
-                    }`}
-                  >
-                    🪸 해수 세트
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('saltaquarium20_standalone')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'saltaquarium20_standalone'
-                        ? 'bg-cyan-800 text-white shadow-sm ring-1 ring-cyan-400'
-                        : 'text-teal-900 hover:bg-teal-200/50'
-                    }`}
-                  >
-                    🐠 해수 단일
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('freshaquarium20')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'freshaquarium20'
-                        ? 'bg-blue-700 text-white shadow-sm'
-                        : 'text-teal-900 hover:bg-teal-200/50'
-                    }`}
-                  >
-                    🐠 담수 세트
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('freshaquarium20_standalone')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'freshaquarium20_standalone'
-                        ? 'bg-blue-800 text-white shadow-sm ring-1 ring-blue-400'
-                        : 'text-teal-900 hover:bg-teal-200/50'
-                    }`}
-                  >
-                    🐟 담수 단일
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('christmas20')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'christmas20'
-                        ? 'bg-rose-700 text-white shadow-sm ring-1 ring-rose-400'
-                        : 'text-rose-900 hover:bg-rose-200/50'
-                    }`}
-                  >
-                    🎄 성탄 세트
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('christmas20_standalone')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'christmas20_standalone'
-                        ? 'bg-rose-800 text-white shadow-sm ring-1 ring-rose-400'
-                        : 'text-rose-900 hover:bg-rose-200/50'
-                    }`}
-                  >
-                    🎁 성탄 단일
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('halloween20')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'halloween20'
-                        ? 'bg-orange-700 text-white shadow-sm ring-1 ring-orange-400'
-                        : 'text-orange-950 hover:bg-orange-200/50'
-                    }`}
-                  >
-                    🎃 할로윈 세트
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('halloween20_standalone')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'halloween20_standalone'
-                        ? 'bg-orange-800 text-white shadow-sm ring-1 ring-orange-400'
-                        : 'text-orange-950 hover:bg-orange-200/50'
-                    }`}
-                  >
-                    👻 할로윈 단일
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('thanksgiving20')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'thanksgiving20'
-                        ? 'bg-amber-700 text-white shadow-sm ring-1 ring-amber-400'
-                        : 'text-amber-950 hover:bg-amber-200/50'
-                    }`}
-                  >
-                    🦃 추수 세트
-                  </button>
-                  <button
-                    onClick={() => setSelectedStickerSeriesTab('thanksgiving20_standalone')}
-                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
-                      selectedStickerSeriesTab === 'thanksgiving20_standalone'
-                        ? 'bg-amber-800 text-white shadow-sm ring-1 ring-amber-400'
-                        : 'text-amber-950 hover:bg-amber-200/50'
-                    }`}
-                  >
-                    🍂 추수 단일
-                  </button>
+                    <optgroup label="🌟 신규 인기 틈새 테마 (NEW)">
+                      <option value="dessert20">🥞 미국 유행 디저트 & 베이커리 20종</option>
+                      <option value="socialbattery20">🔋 사회적 배터리 & 내향인 20종</option>
+                      <option value="hangul20">🇰🇷 K-감성 한글 & 아기 동물 20종</option>
+                      <option value="booktok20">📚 북톡 & 코지 리딩 20종</option>
+                    </optgroup>
+                    <optgroup label="🌿 수조 & 생태계 테마">
+                      <option value="terrarium20">🫙 테라리움 세트 완성 20종</option>
+                      <option value="terrarium20_standalone">🪴 테라리움 단일 식물 20종</option>
+                      <option value="vivarium20">🦎 비바리움 세트 완성 20종</option>
+                      <option value="vivarium20_standalone">🦎 비바리움 단일 동물 20종</option>
+                      <option value="saltaquarium20">🪸 해수어항 세트 완성 20종</option>
+                      <option value="saltaquarium20_standalone">🐠 해수어 단일 어류 20종</option>
+                      <option value="freshaquarium20">🐠 열대어어항 세트 완성 20종</option>
+                      <option value="freshaquarium20_standalone">🐟 열대어 단일 어류 20종</option>
+                    </optgroup>
+                    <optgroup label="🎉 시즌 & 홀리데이 테마">
+                      <option value="christmas20">🎄 크리스마스 윈터 스노우볼 20종</option>
+                      <option value="christmas20_standalone">🎁 크리스마스 단일 오브젝트 20종</option>
+                      <option value="halloween20">🎃 할로윈 스푸키 큐트 20종</option>
+                      <option value="halloween20_standalone">👻 할로윈 단일 오브젝트 20종</option>
+                      <option value="thanksgiving20">🦃 추수감사절 코지 어텀 20종</option>
+                      <option value="thanksgiving20_standalone">🍂 추수감사절 단일 오브젝트 20종</option>
+                    </optgroup>
+                  </select>
                 </div>
               </div>
 
@@ -4229,129 +4194,63 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Sticker Pack Sub-Category Filter Bar (Terrarium / Vivarium / Saltwater / Freshwater / All) */}
+        {/* Sticker Pack Sub-Category Filter Bar (Dropdown Combo Box Selector) */}
         {selectedCategoryTab === 'sticker' && (
-          <div className="mb-4 bg-teal-50/90 p-2 sm:p-2.5 rounded-2xl border border-teal-200 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 overflow-x-auto w-full pb-1 sm:pb-0 custom-scrollbar">
-              <span className="text-xs font-bold text-teal-950 shrink-0 mr-1 flex items-center gap-1">
-                <span>🎯 테마별 필터:</span>
+          <div className="mb-4 bg-teal-50/90 p-2.5 sm:p-3 rounded-2xl border border-teal-200 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
+              <span className="text-xs font-bold text-teal-950 shrink-0 flex items-center gap-1.5">
+                <span>🎯 테마별 갤러리 필터:</span>
+                <span className="text-[11px] font-semibold text-teal-700 bg-teal-100/90 px-2 py-0.5 rounded-full">
+                  현재 {selectedStickerSubTab === 'all' ? (stickerSubCounts.all || stickerCount) : (stickerSubCounts[selectedStickerSubTab] || 0)}장 표시
+                </span>
               </span>
 
-              <button
-                onClick={() => handleSelectStickerSubTab('all')}
-                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-                  selectedStickerSubTab === 'all'
-                    ? 'bg-teal-700 text-white shadow-xs ring-1 ring-teal-400'
-                    : 'bg-white text-teal-900 hover:bg-teal-100 border border-teal-200'
-                }`}
-              >
-                <span>🌐 전체</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'all' ? 'bg-teal-900 text-teal-100' : 'bg-teal-100 text-teal-800'}`}>
-                  {stickerSubCounts.all || stickerCount}
-                </span>
-              </button>
-
-              <button
-                onClick={() => handleSelectStickerSubTab('terrarium')}
-                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-                  selectedStickerSubTab === 'terrarium'
-                    ? 'bg-teal-700 text-white shadow-xs ring-1 ring-teal-400'
-                    : 'bg-white text-teal-900 hover:bg-teal-100 border border-teal-200'
-                }`}
-              >
-                <span>🫙 테라</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'terrarium' ? 'bg-teal-900 text-teal-100' : 'bg-teal-100 text-teal-800'}`}>
-                  {stickerSubCounts.terrarium || 0}
-                </span>
-              </button>
-
-              <button
-                onClick={() => handleSelectStickerSubTab('vivarium')}
-                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-                  selectedStickerSubTab === 'vivarium'
-                    ? 'bg-emerald-700 text-white shadow-xs ring-1 ring-emerald-400'
-                    : 'bg-white text-emerald-950 hover:bg-emerald-100 border border-emerald-200'
-                }`}
-              >
-                <span>🦎 비바</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'vivarium' ? 'bg-emerald-900 text-emerald-100' : 'bg-emerald-100 text-emerald-800'}`}>
-                  {stickerSubCounts.vivarium || 0}
-                </span>
-              </button>
-
-              <button
-                onClick={() => handleSelectStickerSubTab('saltaquarium')}
-                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-                  selectedStickerSubTab === 'saltaquarium'
-                    ? 'bg-cyan-700 text-white shadow-xs ring-1 ring-cyan-400'
-                    : 'bg-white text-cyan-950 hover:bg-cyan-100 border border-cyan-200'
-                }`}
-              >
-                <span>🪸 해수</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'saltaquarium' ? 'bg-cyan-900 text-cyan-100' : 'bg-cyan-100 text-cyan-800'}`}>
-                  {stickerSubCounts.saltaquarium || 0}
-                </span>
-              </button>
-
-              <button
-                onClick={() => handleSelectStickerSubTab('freshaquarium')}
-                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-                  selectedStickerSubTab === 'freshaquarium'
-                    ? 'bg-blue-700 text-white shadow-xs ring-1 ring-blue-400'
-                    : 'bg-white text-blue-950 hover:bg-blue-100 border border-blue-200'
-                }`}
-              >
-                <span>🐠 담수</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'freshaquarium' ? 'bg-blue-900 text-blue-100' : 'bg-blue-100 text-blue-800'}`}>
-                  {stickerSubCounts.freshaquarium || 0}
-                </span>
-              </button>
-
-              <button
-                onClick={() => handleSelectStickerSubTab('booktok')}
-                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-                  selectedStickerSubTab === 'booktok'
-                    ? 'bg-rose-700 text-white shadow-xs ring-1 ring-rose-400'
-                    : 'bg-white text-rose-950 hover:bg-rose-100 border border-rose-200'
-                }`}
-              >
-                <span>📚 북톡</span>
-                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'booktok' ? 'bg-rose-900 text-rose-100' : 'bg-rose-100 text-rose-800'}`}>
-                  {stickerSubCounts.booktok || 0}
-                </span>
-              </button>
-
-              {(dynamicSeasonalRecommendations.length > 0 ? dynamicSeasonalRecommendations : SEASONAL_RECOMMENDATIONS).map((season) => {
-                const shortSeasonName = 
-                  season.seasonId === 'halloween' ? '할로윈' :
-                  season.seasonId === 'thanksgiving' ? '추수' :
-                  season.seasonId === 'christmas' ? '성탄' :
-                  season.seasonId === 'valentines' ? '발렌타인' :
-                  season.seasonId === 'stpatrick' ? '성패트릭' :
-                  season.seasonId === 'easter' ? '부활절' :
-                  season.seasonId === 'mothersday' ? '마더스' :
-                  season.seasonId === 'newyear' ? '새해' :
-                  (season.title.split(' ')[1] || season.seasonId);
-
-                return (
-                  <button
-                    key={season.seasonId}
-                    onClick={() => handleSelectStickerSubTab(season.seasonId)}
-                    className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-                      selectedStickerSubTab === season.seasonId
-                        ? 'bg-rose-700 text-white shadow-xs ring-1 ring-rose-400'
-                        : 'bg-white text-rose-950 hover:bg-rose-100 border border-rose-200'
-                    }`}
-                  >
-                    <span>{season.icon} {shortSeasonName}</span>
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === season.seasonId ? 'bg-rose-900 text-rose-100' : 'bg-rose-100 text-rose-800'}`}>
-                      {stickerSubCounts[season.seasonId] || 0}
-                    </span>
-                  </button>
-                );
-              })}
+              <div className="w-full sm:w-auto min-w-[260px] sm:max-w-md">
+                <select
+                  value={selectedStickerSubTab}
+                  onChange={(e) => handleSelectStickerSubTab(e.target.value)}
+                  className="w-full bg-white text-teal-950 font-bold text-xs sm:text-sm py-2 px-3 rounded-xl border-2 border-teal-500 shadow-xs focus:outline-none focus:ring-2 focus:ring-teal-400 cursor-pointer"
+                >
+                  <option value="all">🌐 전체 테마 보기 (총 {stickerSubCounts.all || stickerCount}장)</option>
+                  <optgroup label="🌟 신규 인기 틈새 테마">
+                    <option value="dessert">🥞 미국 유행 디저트 & 베이커리 ({stickerSubCounts.dessert || 0}장)</option>
+                    <option value="socialbattery">🔋 사회적 배터리 & 내향인 ({stickerSubCounts.socialbattery || 0}장)</option>
+                    <option value="hangul">🇰🇷 K-감성 한글 & 아기 동물 ({stickerSubCounts.hangul || 0}장)</option>
+                    <option value="booktok">📚 북톡 & 코지 리딩 ({stickerSubCounts.booktok || 0}장)</option>
+                  </optgroup>
+                  <optgroup label="🌿 수조 & 생태계 테마">
+                    <option value="terrarium">🫙 테라리움 세트 ({stickerSubCounts.terrarium || 0}장)</option>
+                    <option value="vivarium">🦎 비바리움 세트 ({stickerSubCounts.vivarium || 0}장)</option>
+                    <option value="saltaquarium">🪸 해수어항 세트 ({stickerSubCounts.saltaquarium || 0}장)</option>
+                    <option value="freshaquarium">🐠 열대어어항 세트 ({stickerSubCounts.freshaquarium || 0}장)</option>
+                  </optgroup>
+                  <optgroup label="🎉 시즌 & 홀리데이 테마">
+                    <option value="christmas">🎄 크리스마스 ({stickerSubCounts.christmas || 0}장)</option>
+                    <option value="halloween">🎃 할로윈 ({stickerSubCounts.halloween || 0}장)</option>
+                    <option value="thanksgiving">🦃 추수감사절 ({stickerSubCounts.thanksgiving || 0}장)</option>
+                    <option value="valentines">💖 발렌타인데이 ({stickerSubCounts.valentines || 0}장)</option>
+                    <option value="stpatrick">☘️ 성 패트릭 데이 ({stickerSubCounts.stpatrick || 0}장)</option>
+                    <option value="easter">🌸 부활절 ({stickerSubCounts.easter || 0}장)</option>
+                    <option value="mothersday">💐 마더스데이 ({stickerSubCounts.mothersday || 0}장)</option>
+                    <option value="fathersday">👔 파더스데이 ({stickerSubCounts.fathersday || 0}장)</option>
+                    <option value="july4th">🎆 미국 독립기념일 ({stickerSubCounts.july4th || 0}장)</option>
+                    <option value="backtoschool">🎒 백투스쿨 ({stickerSubCounts.backtoschool || 0}장)</option>
+                    <option value="newyear">🎊 새해 뉴이어 ({stickerSubCounts.newyear || 0}장)</option>
+                  </optgroup>
+                </select>
+              </div>
             </div>
 
+            {/* Quick reset / switch button */}
+            {selectedStickerSubTab !== 'all' && (
+              <button
+                onClick={() => handleSelectStickerSubTab('all')}
+                className="shrink-0 text-xs font-bold text-teal-800 hover:text-teal-950 bg-teal-100 hover:bg-teal-200/80 px-3 py-1.5 rounded-xl border border-teal-300 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                title="모든 테마 스티커 전체 보기로 초기화"
+              >
+                <span>↺ 전체 보기</span>
+              </button>
+            )}
           </div>
         )}
 
