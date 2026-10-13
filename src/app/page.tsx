@@ -6697,18 +6697,27 @@ export default function Home() {
                           </div>
 
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5">
-                            {/* 1. 이미지 복사 */}
+                            {/* 1. 이미지 다운로드 */}
                             <button
                               type="button"
                               onClick={() => {
                                 const coverUrl = selectedPackCover?.image_url;
-                                if (coverUrl) handleCopyImageToClipboard(coverUrl);
+                                if (!coverUrl) return;
+                                const cleanTheme = (selectedPackCover.topic || selectedPackCover.title || 'Stickers').replace(/[^a-zA-Z0-9_-]/g, '_');
+                                const a = document.createElement('a');
+                                a.href = coverUrl;
+                                a.download = `00_Pinterest_Cover_${cleanTheme}.jpg`;
+                                document.body.appendChild(a);
+                                a.click();
+                                a.remove();
+                                setCopiedImageNotice(true);
+                                setTimeout(() => setCopiedImageNotice(false), 2000);
                               }}
                               className="bg-stone-900 hover:bg-black text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                              title="표지 이미지를 클립보드에 복사합니다. 핀 만들기 화면에서 Ctrl+V를 누르세요."
+                              title="핀터레스트 업로드용 표지 사진을 즉시 다운로드합니다. (핀 만들기 화면에 드래그&드롭)"
                             >
-                              <span>🖼️</span>
-                              <span>{copiedImageNotice ? '✓ 복사완료!' : '1. 표지 복사'}</span>
+                              <span>📥</span>
+                              <span>{copiedImageNotice ? '✓ 다운로드됨!' : '1. 사진 다운로드'}</span>
                             </button>
 
                             {/* 2. 제목 복사 */}
@@ -6758,6 +6767,25 @@ export default function Home() {
                               <span>🔗</span>
                               <span>{copiedLinkNotice ? '✓ 복사완료!' : '4. 링크 복사'}</span>
                             </button>
+                          </div>
+
+                          {/* 친절한 3단계 가이드 박스 */}
+                          <div className="bg-stone-50 rounded-xl p-2.5 border border-gray-200 text-xs space-y-1">
+                            <div className="font-extrabold text-stone-900 flex items-center gap-1.5 text-[11px]">
+                              <span>📌</span>
+                              <span>정품 비즈니스 핀 등록 3단계 (좌측 비바리움과 100% 동일):</span>
+                            </div>
+                            <div className="text-[11px] text-stone-600 space-y-0.5 leading-relaxed pl-1">
+                              <p>
+                                <strong>①</strong> <strong>[1. 사진 다운로드]</strong> 클릭 ➔ 상단 <strong>[🚀 핀 만들기 열기]</strong> 클릭
+                              </p>
+                              <p>
+                                <strong>②</strong> 핀터레스트 왼쪽 큰 점선 네모 박스에 <strong>방금 다운로드된 사진 끌어다 놓기(드래그)</strong>
+                              </p>
+                              <p>
+                                <strong>③</strong> <strong>[2. 제목]</strong>, <strong>[3. 설명]</strong>, <strong>[4. 링크]</strong> 순서대로 클릭하여 우측 칸들에 <strong>Ctrl+V</strong> 붙여넣기 ➔ <strong>[게시]</strong> 끝!
+                              </p>
+                            </div>
                           </div>
 
                           <div className="flex items-center justify-between text-[11px] text-gray-500 pt-1 border-t border-gray-100 flex-wrap gap-1">
