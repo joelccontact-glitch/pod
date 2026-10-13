@@ -106,6 +106,22 @@ export async function GET(request: Request) {
     });
   } catch (error: any) {
     console.error('Error fetching image:', error);
+    if (error?.message?.includes('RESOURCE_EXHAUSTED') || error?.message?.includes('Quota exceeded')) {
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+        <rect width="600" height="600" fill="#FFFBEB" stroke="#FDE68A" stroke-width="4" rx="20"/>
+        <text x="50%" y="36%" text-anchor="middle" font-size="52">⏳</text>
+        <text x="50%" y="46%" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="bold" fill="#92400E">Firebase DB 1일 무료 한도 소진</text>
+        <text x="50%" y="54%" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="15" fill="#B45309">오후 4시 정각 자동 리셋되거나</text>
+        <text x="50%" y="60%" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="bold" fill="#D97706">Blaze(종량제) 전환 시 즉시 복구됩니다.</text>
+      </svg>`;
+      return new NextResponse(svg, {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/svg+xml',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        },
+      });
+    }
     return new NextResponse('Internal error', { status: 500 });
   }
 }
