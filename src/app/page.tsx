@@ -670,7 +670,8 @@ export default function Home() {
             return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
           });
 
-          const maxItems = (coverDesign.title || '').includes('40종') || matched.length >= 35 ? 40 : 20;
+          const is20Theme = ['booktok', 'dessert', 'socialbattery', 'hangul'].includes(coverCategory);
+          const maxItems = !is20Theme && ((coverDesign.title || '').includes('40종') || matched.length >= 35) ? 40 : 20;
           const finalItems = matched.slice(0, maxItems);
           finalItems.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
           targetStickers = finalItems;
@@ -996,16 +997,32 @@ export default function Home() {
           return isTimeMatched || (coverCategory !== 'other' && itemCategory === coverCategory);
         });
 
-        // Sort by closest creation time to cover
-        matched.sort((a: any, b: any) => {
-          const timeA = new Date(a.created_at || 0).getTime();
-          const timeB = new Date(b.created_at || 0).getTime();
-          return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
-        });
+        const is20PackTheme = ['booktok', 'dessert', 'socialbattery', 'hangul'].includes(coverCategory);
+        const titleLower = (coverDesign.title || coverDesign.topic || '').toLowerCase();
+        const is40Pack = !is20PackTheme && (titleLower.includes('40종') || titleLower.includes('40'));
+        const targetMax = is40Pack ? 40 : 20;
 
-        // Support up to 40 stickers if available in this pack
-        const maxItems = matched.length > 20 ? 40 : 20;
-        const finalStickers = matched.slice(0, maxItems);
+        // Sort by newest first to ensure the latest version of any regenerated sticker is chosen
+        matched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+
+        // Smart deduplication: If a sticker preset was generated multiple times, keep only the newest 1 copy
+        const deduplicatedStickers: any[] = [];
+        const seenKeys = new Set<string>();
+
+        for (const item of matched) {
+          const presetKey = (item.stickerPresetId || '').toLowerCase().trim();
+          const cleanName = (item.title || item.topic || '').replace(/\[.*?\]/g, '').trim().toLowerCase();
+          const uniqueKey = presetKey || cleanName;
+
+          if (uniqueKey && seenKeys.has(uniqueKey)) {
+            continue; // Skip duplicate instance
+          }
+          if (uniqueKey) seenKeys.add(uniqueKey);
+          deduplicatedStickers.push(item);
+          if (deduplicatedStickers.length >= targetMax) break;
+        }
+
+        const finalStickers = deduplicatedStickers;
 
         // Sort so that Main Tanks (Sheet 1) come first, and Standalone Objects (Sheet 2) come next
         finalStickers.sort((a: any, b: any) => {
