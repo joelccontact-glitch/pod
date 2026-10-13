@@ -5992,7 +5992,7 @@ export default function Home() {
 
                   {/* 2단계: A4 인쇄용 시트 (Etsy 추가 사진 2~3번용 목업) */}
                   <button
-                    onClick={() => handleGenerateAndOpenA4Sheet(packStickers, 'transparent')}
+                    onClick={() => handleGenerateAndOpenA4Sheet(packStickers, 'white')}
                     disabled={a4SheetLoading || isExportingBundle || packStickers.length === 0}
                     className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-indigo-500 cursor-pointer disabled:cursor-not-allowed"
                     title="[2단계] Etsy 상품 등록 시 '추가 사진(2~3번)'으로 올려 구매자에게 A4 출력 구성을 보여주는 인쇄용 시트를 다운로드합니다."
@@ -6378,26 +6378,18 @@ export default function Home() {
                 </button>
               </div>
 
+              {/* Etsy Photo Tip Banner */}
+              <div className="bg-amber-50 px-4 py-2 border-b border-amber-200 text-xs text-amber-900 flex items-center gap-2">
+                <span className="text-base shrink-0">💡</span>
+                <span><strong>Etsy 상품 사진(Photos) 업로드 팁:</strong> Etsy 뷰어는 투명 PNG를 검은색 배경으로 자동 처리하므로, <strong>상품 사진 등록용으로는 반드시 '화이트 배경' 시트</strong>를 다운받아 등록하세요!</span>
+              </div>
+
               {/* Controls Bar */}
               <div className="px-4 sm:px-6 py-3 bg-stone-50 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3">
                 {/* Background selector */}
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-gray-700">배경 선택:</span>
                   <div className="flex bg-gray-200 p-0.5 rounded-xl text-xs font-semibold">
-                    <button
-                      onClick={() => {
-                        if (a4SheetBg !== 'transparent') {
-                          handleGenerateAndOpenA4Sheet(packStickers, 'transparent');
-                        }
-                      }}
-                      className={`px-3 py-1.5 rounded-lg transition-all ${
-                        a4SheetBg === 'transparent'
-                          ? 'bg-white text-indigo-700 shadow-xs font-bold'
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      🏁 투명 배경 (크리컷/디지털용)
-                    </button>
                     <button
                       onClick={() => {
                         if (a4SheetBg !== 'white') {
@@ -6410,7 +6402,21 @@ export default function Home() {
                           : 'text-gray-600 hover:text-gray-900'
                       }`}
                     >
-                      ⬜ 화이트 배경 (일반 프린터용)
+                      ⬜ 화이트 배경 (Etsy 사진 등록용 필수)
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (a4SheetBg !== 'transparent') {
+                          handleGenerateAndOpenA4Sheet(packStickers, 'transparent');
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-lg transition-all ${
+                        a4SheetBg === 'transparent'
+                          ? 'bg-white text-indigo-700 shadow-xs font-bold'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      🏁 투명 배경 (크리컷 커팅기용)
                     </button>
                   </div>
                 </div>
