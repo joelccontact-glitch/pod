@@ -1032,21 +1032,19 @@ export default function Home() {
           if (d.id === coverDesign.id) return false;
           if (isCoverDesign(d)) return false;
 
-          // 🚨 CRITICAL: Strictly exclude POD Apparel (T-shirts, hoodies, mugs) and Mockups from Sticker Packs!
+          // 🚨 CRITICAL: Strictly exclude POD Apparel and Mockups, but NEVER exclude stickers where the animal wears clothes (e.g. hoodie/후드티)
           if (d.design_type === 'pod' || d.is_mockup === true) return false;
-          const titleLower = `${d.title || ''} ${d.topic || ''} ${d.prompt || ''}`.toLowerCase();
-          if (
-            titleLower.includes('t-shirt') ||
-            titleLower.includes('tshirt') ||
-            titleLower.includes('tee') ||
-            titleLower.includes('hoodie') ||
-            titleLower.includes('sweatshirt') ||
-            titleLower.includes('티셔츠') ||
-            titleLower.includes('후드티') ||
-            titleLower.includes('mockup') ||
-            titleLower.includes('목업')
-          ) {
-            return false;
+          if (d.design_type !== 'sticker' && !d.stickerPresetId) {
+            const titleOnly = `${d.title || ''} ${d.topic || ''}`.toLowerCase();
+            if (
+              titleOnly.includes('t-shirt') ||
+              titleOnly.includes('tshirt') ||
+              titleOnly.includes('티셔츠') ||
+              titleOnly.includes('mockup') ||
+              titleOnly.includes('목업')
+            ) {
+              return false;
+            }
           }
 
           const itemCategory = getDesignCategoryKey(d);
@@ -2550,19 +2548,17 @@ export default function Home() {
       const items = targetDesigns.filter(d => {
         if (!d) return false;
         if (d.design_type === 'pod' || d.is_mockup === true) return false;
-        const titleLower = `${d.title || ''} ${d.topic || ''} ${d.prompt || ''}`.toLowerCase();
-        if (
-          titleLower.includes('t-shirt') ||
-          titleLower.includes('tshirt') ||
-          titleLower.includes('tee') ||
-          titleLower.includes('hoodie') ||
-          titleLower.includes('sweatshirt') ||
-          titleLower.includes('티셔츠') ||
-          titleLower.includes('후드티') ||
-          titleLower.includes('mockup') ||
-          titleLower.includes('목업')
-        ) {
-          return false;
+        if (d.design_type !== 'sticker' && !d.stickerPresetId) {
+          const titleOnly = `${d.title || ''} ${d.topic || ''}`.toLowerCase();
+          if (
+            titleOnly.includes('t-shirt') ||
+            titleOnly.includes('tshirt') ||
+            titleOnly.includes('티셔츠') ||
+            titleOnly.includes('mockup') ||
+            titleOnly.includes('목업')
+          ) {
+            return false;
+          }
         }
         return true;
       });
