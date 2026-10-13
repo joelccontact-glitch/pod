@@ -434,10 +434,10 @@ export default function Home() {
       ? window.location.origin
       : 'https://pod-ebon.vercel.app';
 
-    // If customMediaUrl is data: (base64), fallback to public cover API URL to avoid URL-length errors
+    // If customMediaUrl is data: (base64), fallback to public cover API URL with .jpg extension to pass Pinterest file validation
     let mediaUrl = customMediaUrl;
     if (!mediaUrl || mediaUrl.startsWith('data:')) {
-      mediaUrl = `${baseUrl}/api/designs/image?id=${selectedPackCover.id}`;
+      mediaUrl = `${baseUrl}/api/designs/image/master-cover.jpg?id=${selectedPackCover.id}`;
     }
 
     const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);

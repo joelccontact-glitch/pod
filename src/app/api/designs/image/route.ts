@@ -32,6 +32,8 @@ export async function GET(request: Request) {
         return new NextResponse(new Uint8Array(cached.buffer), {
           headers: {
             'Content-Type': cached.mimeType,
+            'Content-Length': cached.buffer.length.toString(),
+            'Content-Disposition': 'inline; filename="sticker-cover.jpg"',
             'Access-Control-Allow-Origin': '*',
             'Cache-Control': v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400',
           },
@@ -72,6 +74,8 @@ export async function GET(request: Request) {
           return new NextResponse(new Uint8Array(buffer), {
             headers: {
               'Content-Type': contentType,
+              'Content-Length': buffer.length.toString(),
+              'Content-Disposition': 'inline; filename="sticker-cover.jpg"',
               'Access-Control-Allow-Origin': '*',
               'Cache-Control': nocache ? 'no-store, no-cache, must-revalidate' : (v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400'),
             },
@@ -100,6 +104,8 @@ export async function GET(request: Request) {
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
         'Content-Type': mimeType,
+        'Content-Length': buffer.length.toString(),
+        'Content-Disposition': 'inline; filename="sticker-cover.jpg"',
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': nocache ? 'no-store, no-cache, must-revalidate' : (v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400'),
       },
