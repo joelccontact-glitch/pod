@@ -1,88 +1,98 @@
 /**
  * Lifestyle Mockup Generator for Etsy Digital Stickers & Pinterest Pins
- * Automatically generates 3 hyper-realistic, aesthetic real-life sticker mockups:
- * 1. 📖 Journal / Planner Deco (Cozy wooden desk, open journal, latte, dry flowers)
- * 2. 💻 Laptop Cover Deco (MacBook cover with artful sticker placement)
- * 3. 🥤 Tumbler & Desk Lifestyle (Minimalist white insulated tumbler with desk stickers)
+ * Benchmark: Etsy Top 1% Best-Selling Digital Sticker Shops
+ * 
+ * 100% Top-Down 90-Degree Flat-Lay Perspective (Zero 3D perspective distortion!)
+ * 1. 📱 iPad GoodNotes Digital Planner Spread (Top-Down Flat-Lay on aesthetic oak desk)
+ * 2. 🖨️ A4 Label Sheet Print & DIY Scissors Craft Mockup (Printed sheet + Hand-cut stickers on journal)
+ * 3. 📱 Clear Phone Case & Daily Lined Journal Deco Mockup (iPhone transparent case + Desk journal)
  *
- * Output: High-Resolution 2048x2048 JPG (0.95 quality) ready for Etsy secondary photos (photos #2, #3, #4)
- * and Pinterest 1000x1500 / Square Pins.
+ * Output: 2048x2048 Ultra High-Res JPEG (0.95 quality) ready for Etsy listing photos #2, #3, #4
+ * and high-converting Pinterest visual search pins.
  */
 
 import { processTransparentPNG } from './image-processor';
 
 export interface LifestyleMockupResult {
-  id: 'journal' | 'laptop' | 'tumbler';
+  id: 'ipad_planner' | 'print_craft' | 'phone_journal';
   title: string;
   filename: string;
   dataUrl: string;
   description: string;
+  recommendedUse: string;
 }
 
 interface StickerPlacementSlot {
-  xPct: number;     // 0.0 ~ 1.0 (X center position in ratio)
-  yPct: number;     // 0.0 ~ 1.0 (Y center position in ratio)
-  sizePct: number;  // 0.0 ~ 1.0 (Relative size ratio compared to canvas width)
+  xPct: number;     // 0.0 ~ 1.0 (X center ratio)
+  yPct: number;     // 0.0 ~ 1.0 (Y center ratio)
+  sizePct: number;  // 0.0 ~ 1.0 (Width/Height ratio relative to canvas size)
   tiltDeg: number;  // Rotation in degrees
   shadowBlur: number;
   shadowAlpha: number;
+  shadowOffsetY?: number;
 }
 
 interface MockupTemplateConfig {
-  id: 'journal' | 'laptop' | 'tumbler';
+  id: 'ipad_planner' | 'print_craft' | 'phone_journal';
   title: string;
   bgUrl: string;
   description: string;
+  recommendedUse: string;
   slots: StickerPlacementSlot[];
 }
 
 const MOCKUP_CONFIGS: MockupTemplateConfig[] = [
   {
-    id: 'journal',
-    title: '📖 다이어리 / 굿노트 플래너 다꾸 목업',
-    bgUrl: '/mockup_journal.jpg',
-    description: '원목 책상 위 펼쳐진 감성 다이어리에 스티커를 아기자기하게 붙인 다꾸 연출 컷',
+    id: 'ipad_planner',
+    title: '📱 iPad 굿노트 디지털 플래너 다꾸 목업',
+    bgUrl: '/mockup_ipad_planner.jpg',
+    description: 'Etsy 1위 표준! 아이패드 위클리 플래너 서식에 스티커를 실제로 붙여 활용한 정면 컷',
+    recommendedUse: 'Etsy 2번 사진 (In-Action Spread) & Pinterest 다꾸 핀',
     slots: [
-      // Right Page (Main focus page)
-      { xPct: 0.655, yPct: 0.490, sizePct: 0.260, tiltDeg: -5, shadowBlur: 14, shadowAlpha: 0.22 },
-      { xPct: 0.725, yPct: 0.335, sizePct: 0.185, tiltDeg: 8, shadowBlur: 12, shadowAlpha: 0.20 },
-      { xPct: 0.605, yPct: 0.665, sizePct: 0.175, tiltDeg: 4, shadowBlur: 12, shadowAlpha: 0.20 },
-      // Left Page (Complementary deco)
-      { xPct: 0.315, yPct: 0.435, sizePct: 0.210, tiltDeg: -7, shadowBlur: 14, shadowAlpha: 0.20 },
+      // 1. Right side "Notes" box on iPad screen (Main hero sticker)
+      { xPct: 0.580, yPct: 0.505, sizePct: 0.155, tiltDeg: -2, shadowBlur: 6, shadowAlpha: 0.18, shadowOffsetY: 3 },
+      // 2. Left side WED/THU planner grid cell
+      { xPct: 0.410, yPct: 0.560, sizePct: 0.125, tiltDeg: 4, shadowBlur: 6, shadowAlpha: 0.18, shadowOffsetY: 3 },
+      // 3. Left side MON top grid cell
+      { xPct: 0.440, yPct: 0.415, sizePct: 0.115, tiltDeg: -3, shadowBlur: 5, shadowAlpha: 0.16, shadowOffsetY: 2 },
+      // 4. Right side To-Do / Checklist bottom space
+      { xPct: 0.585, yPct: 0.770, sizePct: 0.120, tiltDeg: 3, shadowBlur: 6, shadowAlpha: 0.18, shadowOffsetY: 3 },
+      // 5. Aesthetic placement on top-left book cover outside iPad
+      { xPct: 0.210, yPct: 0.210, sizePct: 0.135, tiltDeg: -8, shadowBlur: 10, shadowAlpha: 0.24, shadowOffsetY: 5 },
     ],
   },
   {
-    id: 'laptop',
-    title: '💻 맥북 / 노트북 상판 스티커 데코 목업',
-    bgUrl: '/mockup_laptop.jpg',
-    description: '애플 맥북 실버 상판에 개성 넘치게 배치된 스트릿 & 감성 스티커 밤 연출 컷',
+    id: 'print_craft',
+    title: '🖨️ A4 라벨 인쇄 & DIY 가위 컷팅 목업',
+    bgUrl: '/mockup_print_craft.jpg',
+    description: '실물 인쇄 시트(우측)와 가위로 직접 오려 저널에 붙인(좌측) 생생한 핸드메이드 컷',
+    recommendedUse: 'Etsy 3번 사진 (Print & Cut Showcase) & Pinterest 인쇄 핀',
     slots: [
-      // Near Apple logo bottom-left
-      { xPct: 0.410, yPct: 0.585, sizePct: 0.210, tiltDeg: -12, shadowBlur: 12, shadowAlpha: 0.26 },
-      // Top-right of Apple logo
-      { xPct: 0.665, yPct: 0.430, sizePct: 0.190, tiltDeg: 14, shadowBlur: 12, shadowAlpha: 0.24 },
-      // Bottom-right corner
-      { xPct: 0.635, yPct: 0.645, sizePct: 0.185, tiltDeg: -6, shadowBlur: 12, shadowAlpha: 0.24 },
-      // Top-left corner
-      { xPct: 0.395, yPct: 0.405, sizePct: 0.165, tiltDeg: 9, shadowBlur: 10, shadowAlpha: 0.22 },
-      // On wooden desk table next to laptop
-      { xPct: 0.225, yPct: 0.745, sizePct: 0.175, tiltDeg: -15, shadowBlur: 16, shadowAlpha: 0.28 },
+      // Right Side: A4 White Printed Sticker Sheet (2x2 Neat Grid)
+      { xPct: 0.630, yPct: 0.410, sizePct: 0.130, tiltDeg: 0, shadowBlur: 3, shadowAlpha: 0.12, shadowOffsetY: 1 },
+      { xPct: 0.760, yPct: 0.410, sizePct: 0.130, tiltDeg: 0, shadowBlur: 3, shadowAlpha: 0.12, shadowOffsetY: 1 },
+      { xPct: 0.630, yPct: 0.580, sizePct: 0.130, tiltDeg: 0, shadowBlur: 3, shadowAlpha: 0.12, shadowOffsetY: 1 },
+      { xPct: 0.760, yPct: 0.580, sizePct: 0.130, tiltDeg: 0, shadowBlur: 3, shadowAlpha: 0.12, shadowOffsetY: 1 },
+      // Left Side: Cream Journal Notebook (Cut and pasted stickers)
+      { xPct: 0.380, yPct: 0.440, sizePct: 0.180, tiltDeg: -6, shadowBlur: 9, shadowAlpha: 0.22, shadowOffsetY: 5 },
+      { xPct: 0.390, yPct: 0.630, sizePct: 0.160, tiltDeg: 5, shadowBlur: 9, shadowAlpha: 0.22, shadowOffsetY: 5 },
     ],
   },
   {
-    id: 'tumbler',
-    title: '🥤 화이트 텀블러 & 데스크 라이프스타일 목업',
-    bgUrl: '/mockup_tumbler.jpg',
-    description: '홈카페 원형 텀블러 본체에 붙인 스티커와 책상 위 연출 스티커 조화 컷',
+    id: 'phone_journal',
+    title: '📱 투명 폰케이스 & 감성 줄노트 다꾸 목업',
+    bgUrl: '/mockup_phone_journal.jpg',
+    description: '아이폰 투명 케이스 뒷면과 책상 위 줄노트에 일상 소품으로 스티커를 부착한 컷',
+    recommendedUse: 'Etsy 4번 사진 (Everyday Lifestyle) & Pinterest 라이프스타일 핀',
     slots: [
-      // Tumbler body center
-      { xPct: 0.490, yPct: 0.540, sizePct: 0.205, tiltDeg: -1, shadowBlur: 14, shadowAlpha: 0.28 },
-      // Tumbler body lower
-      { xPct: 0.490, yPct: 0.675, sizePct: 0.130, tiltDeg: 3, shadowBlur: 10, shadowAlpha: 0.26 },
-      // Left desk runner
-      { xPct: 0.285, yPct: 0.730, sizePct: 0.190, tiltDeg: -14, shadowBlur: 16, shadowAlpha: 0.26 },
-      // Right desk corner
-      { xPct: 0.680, yPct: 0.710, sizePct: 0.170, tiltDeg: 15, shadowBlur: 16, shadowAlpha: 0.26 },
+      // 1. Center back of iPhone inside transparent case
+      { xPct: 0.630, yPct: 0.580, sizePct: 0.145, tiltDeg: 0, shadowBlur: 8, shadowAlpha: 0.24, shadowOffsetY: 3 },
+      // 2. Top area of open lined notebook on the left
+      { xPct: 0.220, yPct: 0.660, sizePct: 0.170, tiltDeg: -8, shadowBlur: 8, shadowAlpha: 0.20, shadowOffsetY: 4 },
+      // 3. Lower area of open lined notebook
+      { xPct: 0.370, yPct: 0.830, sizePct: 0.155, tiltDeg: 6, shadowBlur: 8, shadowAlpha: 0.20, shadowOffsetY: 4 },
+      // 4. Soft decorative placement on desk near coffee coaster
+      { xPct: 0.430, yPct: 0.320, sizePct: 0.130, tiltDeg: -12, shadowBlur: 10, shadowAlpha: 0.22, shadowOffsetY: 5 },
     ],
   },
 ];
@@ -135,7 +145,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 /**
- * Trims transparent bounds from canvas to eliminate empty white/transparent borders
+ * Trims transparent bounds from canvas to eliminate empty padding
  */
 function trimCanvas(sourceCanvas: HTMLCanvasElement): HTMLCanvasElement {
   const ctx = sourceCanvas.getContext('2d', { willReadFrequently: true });
@@ -283,10 +293,11 @@ export async function renderSingleLifestyleMockup(
       ctx.rotate((slot.tiltDeg * Math.PI) / 180);
 
       // Realistic Die-Cut Drop Shadow for tactile sticker effect
+      const shadowY = slot.shadowOffsetY ?? (slot.shadowBlur / 2 + 2);
       ctx.shadowColor = `rgba(0, 0, 0, ${slot.shadowAlpha})`;
-      ctx.shadowBlur = slot.shadowBlur * 2;
-      ctx.shadowOffsetX = Math.sin((slot.tiltDeg * Math.PI) / 180) * 4 + 4;
-      ctx.shadowOffsetY = slot.shadowBlur + 6;
+      ctx.shadowBlur = slot.shadowBlur * 1.8;
+      ctx.shadowOffsetX = Math.sin((slot.tiltDeg * Math.PI) / 180) * 3 + 2;
+      ctx.shadowOffsetY = shadowY;
 
       ctx.drawImage(stickerCanvas, -drawW / 2, -drawH / 2, drawW, drawH);
       ctx.restore();
@@ -303,6 +314,7 @@ export async function renderSingleLifestyleMockup(
     filename: `02_Mockup_${config.id.toUpperCase()}_${cleanTheme}.jpg`,
     dataUrl,
     description: config.description,
+    recommendedUse: config.recommendedUse,
   };
 }
 
@@ -314,7 +326,7 @@ export async function generateAllLifestyleMockups(
   themeName: string = 'Sticker_Pack',
   onProgress?: (current: number, total: number, message: string) => void
 ): Promise<LifestyleMockupResult[]> {
-  onProgress?.(1, 4, '스티커 배경 투명화 및 디테일 최적화 중...');
+  onProgress?.(1, 4, '스티커 배경 투명화 및 정밀 다이컷 최적화 중...');
   const stickerCanvases = await prepareStickerCanvases(stickers, 6);
 
   const results: LifestyleMockupResult[] = [];
@@ -322,11 +334,11 @@ export async function generateAllLifestyleMockups(
 
   for (let i = 0; i < total; i++) {
     const config = MOCKUP_CONFIGS[i];
-    onProgress?.(i + 2, total + 1, `${config.title} 정밀 합성 렌더링 중...`);
+    onProgress?.(i + 2, total + 1, `${config.title} 정밀 렌더링 중...`);
     const result = await renderSingleLifestyleMockup(config, stickerCanvases, themeName);
     results.push(result);
   }
 
-  onProgress?.(total + 1, total + 1, '실물 시연 목업 3종 완성!');
+  onProgress?.(total + 1, total + 1, 'Etsy 벤치마크 목업 3종 완성!');
   return results;
 }

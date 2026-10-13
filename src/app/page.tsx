@@ -6848,9 +6848,9 @@ export default function Home() {
                             alt={mockup.title}
                             className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
                           />
-                          <div className="absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-xs text-white text-[11px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
-                            <span>{idx === 0 ? '📖' : idx === 1 ? '💻' : '🥤'}</span>
-                            <span>{idx === 0 ? '다이어리 컷' : idx === 1 ? '맥북 상판 컷' : '텀블러 데스크 컷'}</span>
+                          <div className="absolute top-2.5 left-2.5 bg-black/75 backdrop-blur-xs text-white text-[11px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1.5">
+                            <span>{mockup.id === 'ipad_planner' ? '📱' : mockup.id === 'print_craft' ? '🖨️' : '📱'}</span>
+                            <span>{mockup.id === 'ipad_planner' ? '굿노트 다꾸' : mockup.id === 'print_craft' ? 'A4 인쇄 & DIY 가위 컷' : '폰케이스 & 저널'}</span>
                           </div>
                           <div className="absolute bottom-2.5 right-2.5 bg-white/90 text-stone-700 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs opacity-0 group-hover:opacity-100 transition-opacity">
                             클릭하여 확대 🔍
@@ -6867,10 +6867,10 @@ export default function Home() {
                               {mockup.description}
                             </p>
                             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                              <span className="text-[10px] font-bold bg-violet-100 text-violet-800 px-2 py-0.5 rounded">
-                                Etsy {idx + 2}번 사진 추천
+                              <span className="text-[10px] font-extrabold bg-violet-100 text-violet-800 border border-violet-200 px-2 py-0.5 rounded-md shadow-2xs">
+                                {mockup.recommendedUse || `Etsy ${idx + 2}번 사진 추천`}
                               </span>
-                              <span className="text-[10px] font-bold bg-pink-100 text-pink-800 px-2 py-0.5 rounded">
+                              <span className="text-[10px] font-bold bg-pink-100 text-pink-800 px-2 py-0.5 rounded-md">
                                 📌 Pinterest 핀 추천
                               </span>
                             </div>
