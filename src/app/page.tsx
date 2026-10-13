@@ -232,6 +232,72 @@ const getPackSeriesPresets = (coverDesign: any): StickerPreset[] => {
   return [];
 };
 
+const matchStickerToPresetSlot = (item: any, presets: StickerPreset[]): number => {
+  if (!item || !presets || presets.length <= 1) return -1;
+  const stickerPresets = presets.slice(1); // 20 presets
+
+  const itemPresetId = (item.stickerPresetId || '').toLowerCase().trim();
+  const itemId = (item.id || '').toLowerCase().trim();
+  const itemTitle = (item.title || item.topic || '').toLowerCase();
+  const itemPrompt = (item.prompt || '').toLowerCase();
+  const fullText = `${itemTitle} ${itemPrompt} ${itemPresetId}`;
+
+  // 1. High priority: Check if title has numbered pattern e.g. "17/20" or "독서 17/20"
+  const titleNumMatch = itemTitle.match(/(?:독서|스티커|배터리|디저트|한글|\s|^)(\d{1,2})\s*\/\s*20/) || 
+                        itemTitle.match(/\[.*?(\d{1,2})\s*\/\s*20.*?\]/);
+  if (titleNumMatch && titleNumMatch[1]) {
+    const num = parseInt(titleNumMatch[1], 10);
+    if (num >= 1 && num <= stickerPresets.length) {
+      return num - 1;
+    }
+  }
+
+  // 2. Direct exact preset ID match (must respect word/digit boundaries, e.g. pack-1 must not match pack-17)
+  const exactIdMatch = (id: string, targetId: string) => {
+    if (!id || !targetId) return false;
+    if (id === targetId) return true;
+    const regex = new RegExp(`(^|[^a-z0-9])${targetId}($|[^a-z0-9])`, 'i');
+    return regex.test(id);
+  };
+
+  for (let idx = 0; idx < stickerPresets.length; idx++) {
+    const p = stickerPresets[idx];
+    const pid = (p.id || '').toLowerCase();
+    if (pid && (exactIdMatch(itemPresetId, pid) || exactIdMatch(itemId, pid))) {
+      return idx;
+    }
+  }
+
+  // 3. English phrase match with word boundary (e.g. "Kindle Girlie", "Late Night Book Club")
+  for (let idx = 0; idx < stickerPresets.length; idx++) {
+    const p = stickerPresets[idx];
+    const pPhrase = (p.phrase || '').trim().toLowerCase();
+    if (pPhrase && pPhrase.length >= 3) {
+      const escaped = pPhrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const phraseRegex = new RegExp(`(^|[^a-z0-9])${escaped}($|[^a-z0-9])`, 'i');
+      if (phraseRegex.test(fullText)) {
+        return idx;
+      }
+    }
+  }
+
+  // 4. Affinity object & Korean title match
+  for (let idx = 0; idx < stickerPresets.length; idx++) {
+    const p = stickerPresets[idx];
+    const pObj = (p.affinityObject || '').trim().toLowerCase();
+    const pName = (p.name || '').replace(/\[.*?\]/g, '').trim().toLowerCase();
+
+    if (pObj && pObj.length >= 3 && (itemTitle.includes(pObj) || itemPrompt.includes(pObj))) {
+      return idx;
+    }
+    if (pName && pName.length >= 3 && (itemTitle.includes(pName) || itemPrompt.includes(pName))) {
+      return idx;
+    }
+  }
+
+  return -1;
+};
+
 export default function Home() {
   const { data: session } = useSession();
   const [designs, setDesigns] = useState<any[]>([]);
@@ -1002,42 +1068,79 @@ export default function Home() {
         const is40Pack = !is20PackTheme && (titleLower.includes('40종') || titleLower.includes('40'));
         const targetMax = is40Pack ? 40 : 20;
 
-        // Sort by newest first to ensure the latest version of any regenerated sticker is chosen
-        matched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+        const seriesPresets = getPackSeriesPresets(coverDesign);
+        let finalStickers: any[] = [];
 
-        // Smart deduplication: If a sticker preset was generated multiple times, keep only the newest 1 copy
-        const deduplicatedStickers: any[] = [];
-        const seenKeys = new Set<string>();
+        if (seriesPresets && seriesPresets.length > 1) {
+          const expectedSlots = seriesPresets.slice(1);
+          const slotBuckets = new Map<number, any[]>();
+          const unmatched: any[] = [];
 
-        for (const item of matched) {
-          const presetKey = (item.stickerPresetId || '').toLowerCase().trim();
-          const cleanName = (item.title || item.topic || '').replace(/\[.*?\]/g, '').trim().toLowerCase();
-          const uniqueKey = presetKey || cleanName;
+          // Sort by newest first to ensure the latest version of any regenerated sticker is chosen
+          matched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
 
-          if (uniqueKey && seenKeys.has(uniqueKey)) {
-            continue; // Skip duplicate instance
+          for (const item of matched) {
+            const slot = matchStickerToPresetSlot(item, seriesPresets);
+            if (slot >= 0 && slot < expectedSlots.length) {
+              if (!slotBuckets.has(slot)) slotBuckets.set(slot, []);
+              slotBuckets.get(slot)!.push(item);
+            } else {
+              unmatched.push(item);
+            }
           }
-          if (uniqueKey) seenKeys.add(uniqueKey);
-          deduplicatedStickers.push(item);
-          if (deduplicatedStickers.length >= targetMax) break;
+
+          // Pick the latest 1 copy for each slot (Slot 0 ~ Slot N-1)
+          const slotOrdered: any[] = [];
+          for (let i = 0; i < expectedSlots.length; i++) {
+            const bucket = slotBuckets.get(i);
+            if (bucket && bucket.length > 0) {
+              slotOrdered.push(bucket[0]); // newest sticker for this slot
+            }
+          }
+
+          // If there are unmatched stickers and total is still under targetMax, append them
+          for (const item of unmatched) {
+            if (slotOrdered.length >= targetMax) break;
+            slotOrdered.push(item);
+          }
+
+          finalStickers = slotOrdered;
+        } else {
+          // Fallback for non-series packs
+          matched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+          const deduplicatedStickers: any[] = [];
+          const seenKeys = new Set<string>();
+
+          for (const item of matched) {
+            const presetKey = (item.stickerPresetId || '').toLowerCase().trim();
+            const cleanName = (item.title || item.topic || '').replace(/\[.*?\]/g, '').trim().toLowerCase();
+            const uniqueKey = presetKey || cleanName;
+
+            if (uniqueKey && seenKeys.has(uniqueKey)) {
+              continue; // Skip duplicate instance
+            }
+            if (uniqueKey) seenKeys.add(uniqueKey);
+            deduplicatedStickers.push(item);
+            if (deduplicatedStickers.length >= targetMax) break;
+          }
+
+          finalStickers = deduplicatedStickers;
+
+          // Sort so that Main Tanks (Sheet 1) come first, and Standalone Objects (Sheet 2) come next
+          finalStickers.sort((a: any, b: any) => {
+            const aTitle = (a.title || a.prompt || '').toLowerCase();
+            const bTitle = (b.title || b.prompt || '').toLowerCase();
+            const aPreset = (a.stickerPresetId || '').toLowerCase();
+            const bPreset = (b.stickerPresetId || '').toLowerCase();
+
+            const isAStandalone = aTitle.includes('단일') || aTitle.includes('단독') || aPreset.includes('standalone');
+            const isBStandalone = bTitle.includes('단일') || bTitle.includes('단독') || bPreset.includes('standalone');
+
+            if (!isAStandalone && isBStandalone) return -1;
+            if (isAStandalone && !isBStandalone) return 1;
+            return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+          });
         }
-
-        const finalStickers = deduplicatedStickers;
-
-        // Sort so that Main Tanks (Sheet 1) come first, and Standalone Objects (Sheet 2) come next
-        finalStickers.sort((a: any, b: any) => {
-          const aTitle = (a.title || a.prompt || '').toLowerCase();
-          const bTitle = (b.title || b.prompt || '').toLowerCase();
-          const aPreset = (a.stickerPresetId || '').toLowerCase();
-          const bPreset = (b.stickerPresetId || '').toLowerCase();
-
-          const isAStandalone = aTitle.includes('단일') || aTitle.includes('단독') || aPreset.includes('standalone');
-          const isBStandalone = bTitle.includes('단일') || bTitle.includes('단독') || bPreset.includes('standalone');
-
-          if (!isAStandalone && isBStandalone) return -1;
-          if (isAStandalone && !isBStandalone) return 1;
-          return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
-        });
 
         setPackStickers(finalStickers);
 
@@ -1137,8 +1240,38 @@ export default function Home() {
       }
 
       if (addedCount > 0) {
-        invalidateClientPoolCache();
-        const updatedStickers = [...packStickers, ...newlyAddedStickers];
+        const combined = [...packStickers, ...newlyAddedStickers];
+        const seriesPresets = getPackSeriesPresets(selectedPackCover);
+        let updatedStickers = combined;
+
+        if (seriesPresets && seriesPresets.length > 1) {
+          const expectedSlots = seriesPresets.slice(1);
+          const slotBuckets = new Map<number, any[]>();
+          const unmatched: any[] = [];
+          combined.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+
+          for (const item of combined) {
+            const slot = matchStickerToPresetSlot(item, seriesPresets);
+            if (slot >= 0 && slot < expectedSlots.length) {
+              if (!slotBuckets.has(slot)) slotBuckets.set(slot, []);
+              slotBuckets.get(slot)!.push(item);
+            } else {
+              unmatched.push(item);
+            }
+          }
+
+          const slotOrdered: any[] = [];
+          for (let i = 0; i < expectedSlots.length; i++) {
+            const bucket = slotBuckets.get(i);
+            if (bucket && bucket.length > 0) slotOrdered.push(bucket[0]);
+          }
+          for (const item of unmatched) {
+            if (slotOrdered.length >= 20) break;
+            slotOrdered.push(item);
+          }
+          updatedStickers = slotOrdered;
+        }
+
         setPackStickers(updatedStickers);
 
         const newTotalCount = updatedStickers.length;
@@ -5836,21 +5969,20 @@ export default function Home() {
               {/* Missing Stickers Detection & 1-Click Recovery Banner */}
               {(() => {
                 const allSeriesPresets = getPackSeriesPresets(selectedPackCover);
+                if (!allSeriesPresets || allSeriesPresets.length <= 1) return null;
                 const expectedStickers = allSeriesPresets.slice(1);
-                const missingPresets = expectedStickers.filter(preset => {
-                  return !packStickers.some((s: any) => {
-                    if (s.stickerPresetId && s.stickerPresetId === preset.id) return true;
-                    const sTitle = (s.title || '').toLowerCase();
-                    const pName = preset.name.toLowerCase();
-                    const coreName = preset.affinityObject ? preset.affinityObject.toLowerCase() : '';
-                    if (coreName && sTitle.includes(coreName)) return true;
-                    const cleanP = pName.replace(/\[.*?\]/g, '').trim();
-                    const cleanS = sTitle.replace(/\[.*?\]/g, '').trim();
-                    return cleanS === cleanP || (cleanP.length > 3 && cleanS.includes(cleanP));
-                  });
+
+                const coveredSlotIndices = new Set<number>();
+                packStickers.forEach((s: any) => {
+                  const slot = matchStickerToPresetSlot(s, allSeriesPresets);
+                  if (slot >= 0 && slot < expectedStickers.length) {
+                    coveredSlotIndices.add(slot);
+                  }
                 });
 
-                if (expectedStickers.length === 0 || missingPresets.length === 0) return null;
+                const missingPresets = expectedStickers.filter((_, idx) => !coveredSlotIndices.has(idx));
+
+                if (missingPresets.length === 0) return null;
 
                 return (
                   <div className="bg-amber-500/20 border-b-2 border-amber-400 p-3 sm:px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-950 shrink-0">
