@@ -3507,12 +3507,12 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center gap-2 shrink-0">
-                <span className="text-[11px] font-extrabold text-rose-900 bg-white/95 border border-rose-200 px-3 py-1 rounded-full shadow-2xs hidden md:flex items-center gap-1.5">
+                <span className="text-[11px] font-extrabold text-rose-900 bg-white/95 border border-rose-200 px-2.5 py-1 rounded-full shadow-2xs hidden md:flex items-center gap-1">
                   <span>🖨️</span>
-                  <span>A4 300DPI 2장 분할 시트 지원</span>
+                  <span>A4 2장 분할</span>
                 </span>
-                <span className="text-xs font-bold text-rose-900 bg-white/90 border border-rose-300 px-3 py-1.5 rounded-xl shadow-xs flex items-center gap-1">
-                  <span>{isSeasonalRadarExpanded ? '▲ 레이더 접기' : '▼ 시즌 레이더 펼치기'}</span>
+                <span className="text-xs font-bold text-rose-900 bg-white/90 border border-rose-300 px-2.5 py-1 rounded-xl shadow-xs flex items-center gap-1">
+                  <span>{isSeasonalRadarExpanded ? '▲ 접기' : '▼ 펼치기'}</span>
                 </span>
               </div>
             </div>
@@ -3667,10 +3667,10 @@ export default function Home() {
                             >
                               <span className="flex items-center gap-1">
                                 <span>📈</span>
-                                <span>실전 판매 전략 & Etsy 13태그</span>
+                                <span>실전 전략 & Etsy 태그</span>
                               </span>
                               <span className="text-[10px] bg-amber-200/70 px-1.5 py-0.5 rounded text-amber-900 font-extrabold">
-                                {expandedStrategySeasonIds.includes(season.seasonId) ? '▲ 닫기' : '▼ 가이드 보기'}
+                                {expandedStrategySeasonIds.includes(season.seasonId) ? '▲ 닫기' : '▼ 가이드'}
                               </span>
                             </button>
 
@@ -3698,7 +3698,7 @@ export default function Home() {
                                   <div className="flex items-center justify-between mb-1">
                                     <span className="font-extrabold text-gray-900 text-[11px] flex items-center gap-1">
                                       <span>🏷️</span>
-                                      <span>Etsy 추천 13태그:</span>
+                                      <span>추천 13태그:</span>
                                     </span>
                                     <div className="flex items-center gap-1">
                                       <button
@@ -3711,9 +3711,9 @@ export default function Home() {
                                           setCopiedTagsSeasonId(season.seasonId);
                                           setTimeout(() => setCopiedTagsSeasonId(null), 2000);
                                         }}
-                                        className="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded border border-indigo-200 transition-colors flex items-center gap-1 cursor-pointer"
+                                        className="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-1.5 py-0.5 rounded border border-indigo-200 transition-colors flex items-center gap-1 cursor-pointer"
                                       >
-                                        <span>{copiedTagsSeasonId === season.seasonId ? '✓ Etsy완료' : '📋 Etsy 13태그'}</span>
+                                        <span>{copiedTagsSeasonId === season.seasonId ? '✓ 완료' : '📋 Etsy태그'}</span>
                                       </button>
                                       <button
                                         type="button"
@@ -3731,9 +3731,9 @@ export default function Home() {
                                           setCopiedCFSeasonId(season.seasonId);
                                           setTimeout(() => setCopiedCFSeasonId(null), 2000);
                                         }}
-                                        className="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded border border-emerald-300 transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                                        className="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded border border-emerald-300 transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
                                       >
-                                        <span>{copiedCFSeasonId === season.seasonId ? '✓ CF완료' : '🎨 CF Tags(45개)'}</span>
+                                        <span>{copiedCFSeasonId === season.seasonId ? '✓ 완료' : '🎨 CF태그'}</span>
                                       </button>
                                     </div>
                                   </div>
@@ -3756,28 +3756,28 @@ export default function Home() {
 
                       <div className="pt-2 border-t border-gray-100 space-y-2">
                         {/* 40종 패키지 구성 안내 바 (버튼 바로 위 배치) */}
-                        <div className="bg-purple-50/90 border border-purple-200/80 rounded-xl px-2.5 py-1.5 text-[11px] flex items-center justify-between gap-1">
-                          <span className="font-bold text-purple-950 flex items-center gap-1">
+                        <div className="bg-purple-50/90 border border-purple-200/80 rounded-xl px-2 py-1 text-[11px] flex items-center justify-between gap-1">
+                          <span className="font-bold text-purple-950 flex items-center gap-1 truncate">
                             <span>🎁</span>
-                            <span><strong>40종 세트</strong>: 메인 20종 + 단독 낱개 20종</span>
+                            <span><strong>40종 세트</strong> (완성20 + 낱개20)</span>
                           </span>
                           <span className="text-[10px] font-extrabold text-purple-700 bg-white px-1.5 py-0.5 rounded border border-purple-200 shrink-0">
-                            A4 2장 시트
+                            A4 2장
                           </span>
                         </div>
 
                         {/* 동적 상태 버튼: 생성 중 / 대기 중 / 기본 */}
                         {isBatchGenerating && activeBatchPackId === `${season.seasonId}20_both` ? (
-                          <div className="w-full bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-extrabold text-xs py-2.5 px-3 rounded-xl shadow-md flex items-center justify-center gap-2 border border-purple-400 animate-pulse">
-                            <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin shrink-0" />
-                            <span>생성 진행 중 ({batchProgress.current} / {batchProgress.total}장)</span>
+                          <div className="w-full bg-gradient-to-r from-purple-700 to-indigo-700 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-md flex items-center justify-center gap-2 border border-purple-400 animate-pulse">
+                            <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin shrink-0" />
+                            <span>생성 중 ({batchProgress.current} / {batchProgress.total}장)</span>
                           </div>
                         ) : isBatchGenerating ? (
                           <button
                             disabled
-                            className="w-full bg-gray-200 text-gray-500 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 cursor-not-allowed opacity-60"
+                            className="w-full bg-gray-200 text-gray-500 font-bold text-xs py-2 px-3 rounded-xl flex items-center justify-center gap-1 cursor-not-allowed opacity-60"
                           >
-                            <span>⏳ 다른 팩 생성 진행 중...</span>
+                            <span>⏳ 다른 팩 생성 중...</span>
                           </button>
                         ) : (
                           <button
@@ -3787,7 +3787,7 @@ export default function Home() {
                             title={`${season.title} (메인 20종 + 단독 20종 = 총 41장 및 A4 2장 시트) 일괄 자동 생성을 시작합니다`}
                           >
                             <span>⚡️</span>
-                            <span>이 시즌 40종 팩 원클릭 동시 생성</span>
+                            <span>40종 원클릭 생성</span>
                           </button>
                         )}
 
@@ -3821,7 +3821,7 @@ export default function Home() {
                           className="w-full bg-white hover:bg-stone-50 text-gray-700 border border-gray-200 text-[11px] font-bold py-1.5 px-2 rounded-xl transition-colors flex items-center justify-center gap-1 cursor-pointer"
                         >
                           <span>👀</span>
-                          <span>20종 템플릿 둘러보기</span>
+                          <span>템플릿 둘러보기</span>
                         </button>
                       </div>
                     </div>
@@ -3920,107 +3920,107 @@ export default function Home() {
                 <div className="flex flex-wrap items-center gap-1 bg-teal-100/70 p-1 rounded-xl">
                   <button
                     onClick={() => setSelectedStickerSeriesTab('terrarium20')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'terrarium20'
                         ? 'bg-teal-700 text-white shadow-sm'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🫙 테라리움 세트
+                    🫙 테라 세트
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('terrarium20_standalone')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'terrarium20_standalone'
                         ? 'bg-teal-800 text-white shadow-sm ring-1 ring-teal-400'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🪴 테라리움 단일 식물
+                    🪴 테라 단일
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('vivarium20')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'vivarium20'
                         ? 'bg-emerald-700 text-white shadow-sm'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🦎 비바리움 세트
+                    🦎 비바 세트
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('vivarium20_standalone')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'vivarium20_standalone'
                         ? 'bg-emerald-800 text-white shadow-sm ring-1 ring-emerald-400'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🦎 비바리움 단일 동물
+                    🦎 비바 단일
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('saltaquarium20')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'saltaquarium20'
                         ? 'bg-cyan-700 text-white shadow-sm'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🪸 해수어항 세트
+                    🪸 해수 세트
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('saltaquarium20_standalone')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'saltaquarium20_standalone'
                         ? 'bg-cyan-800 text-white shadow-sm ring-1 ring-cyan-400'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🐠 해수어 단일 어류
+                    🐠 해수 단일
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('freshaquarium20')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'freshaquarium20'
                         ? 'bg-blue-700 text-white shadow-sm'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🐠 열대어어항 세트
+                    🐠 담수 세트
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('freshaquarium20_standalone')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'freshaquarium20_standalone'
                         ? 'bg-blue-800 text-white shadow-sm ring-1 ring-blue-400'
                         : 'text-teal-900 hover:bg-teal-200/50'
                     }`}
                   >
-                    🐟 열대어 단일 어류
+                    🐟 담수 단일
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('christmas20')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'christmas20'
                         ? 'bg-rose-700 text-white shadow-sm ring-1 ring-rose-400'
                         : 'text-rose-900 hover:bg-rose-200/50'
                     }`}
                   >
-                    🎄 크리스마스 세트
+                    🎄 성탄 세트
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('christmas20_standalone')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'christmas20_standalone'
                         ? 'bg-rose-800 text-white shadow-sm ring-1 ring-rose-400'
                         : 'text-rose-900 hover:bg-rose-200/50'
                     }`}
                   >
-                    🎁 크리스마스 단일
+                    🎁 성탄 단일
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('halloween20')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'halloween20'
                         ? 'bg-orange-700 text-white shadow-sm ring-1 ring-orange-400'
                         : 'text-orange-950 hover:bg-orange-200/50'
@@ -4030,7 +4030,7 @@ export default function Home() {
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('halloween20_standalone')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'halloween20_standalone'
                         ? 'bg-orange-800 text-white shadow-sm ring-1 ring-orange-400'
                         : 'text-orange-950 hover:bg-orange-200/50'
@@ -4040,23 +4040,23 @@ export default function Home() {
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('thanksgiving20')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'thanksgiving20'
                         ? 'bg-amber-700 text-white shadow-sm ring-1 ring-amber-400'
                         : 'text-amber-950 hover:bg-amber-200/50'
                     }`}
                   >
-                    🦃 추수감사절 세트
+                    🦃 추수 세트
                   </button>
                   <button
                     onClick={() => setSelectedStickerSeriesTab('thanksgiving20_standalone')}
-                    className={`px-2.5 py-1 text-[11px] sm:text-xs font-bold rounded-lg transition-all ${
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'thanksgiving20_standalone'
                         ? 'bg-amber-800 text-white shadow-sm ring-1 ring-amber-400'
                         : 'text-amber-950 hover:bg-amber-200/50'
                     }`}
                   >
-                    🍂 추수감사절 단일
+                    🍂 추수 단일
                   </button>
                 </div>
               </div>
@@ -4065,12 +4065,12 @@ export default function Home() {
                 <button
                   type="button"
                   onClick={() => setIsPresetGridExpanded(!isPresetGridExpanded)}
-                  className="w-full py-2 px-3 text-xs font-bold text-teal-800 bg-white hover:bg-teal-50 border border-teal-300 rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition-all select-none"
+                  className="w-full py-1.5 px-3 text-xs font-bold text-teal-800 bg-white hover:bg-teal-50 border border-teal-300 rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition-all select-none"
                 >
                   <span>
                     {isPresetGridExpanded
-                      ? '▲ 개별 20종 템플릿 카드 목록 접기'
-                      : `▼ 개별 20종 템플릿 카드 목록 보기 (${getPresetSeriesList(selectedStickerSeriesTab).length}개 항목)`}
+                      ? '▲ 템플릿 목록 접기'
+                      : `▼ 템플릿 목록 보기 (${getPresetSeriesList(selectedStickerSeriesTab).length}개)`}
                   </span>
                 </button>
               </div>
@@ -4231,13 +4231,13 @@ export default function Home() {
 
               <button
                 onClick={() => handleSelectStickerSubTab('all')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
                   selectedStickerSubTab === 'all'
                     ? 'bg-teal-700 text-white shadow-xs ring-1 ring-teal-400'
                     : 'bg-white text-teal-900 hover:bg-teal-100 border border-teal-200'
                 }`}
               >
-                <span>🌐 스티커 전체</span>
+                <span>🌐 전체</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'all' ? 'bg-teal-900 text-teal-100' : 'bg-teal-100 text-teal-800'}`}>
                   {stickerSubCounts.all || stickerCount}
                 </span>
@@ -4245,13 +4245,13 @@ export default function Home() {
 
               <button
                 onClick={() => handleSelectStickerSubTab('terrarium')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
                   selectedStickerSubTab === 'terrarium'
                     ? 'bg-teal-700 text-white shadow-xs ring-1 ring-teal-400'
                     : 'bg-white text-teal-900 hover:bg-teal-100 border border-teal-200'
                 }`}
               >
-                <span>🫙 테라리움</span>
+                <span>🫙 테라</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'terrarium' ? 'bg-teal-900 text-teal-100' : 'bg-teal-100 text-teal-800'}`}>
                   {stickerSubCounts.terrarium || 0}
                 </span>
@@ -4259,13 +4259,13 @@ export default function Home() {
 
               <button
                 onClick={() => handleSelectStickerSubTab('vivarium')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
                   selectedStickerSubTab === 'vivarium'
                     ? 'bg-emerald-700 text-white shadow-xs ring-1 ring-emerald-400'
                     : 'bg-white text-emerald-950 hover:bg-emerald-100 border border-emerald-200'
                 }`}
               >
-                <span>🦎 비바리움</span>
+                <span>🦎 비바</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'vivarium' ? 'bg-emerald-900 text-emerald-100' : 'bg-emerald-100 text-emerald-800'}`}>
                   {stickerSubCounts.vivarium || 0}
                 </span>
@@ -4273,13 +4273,13 @@ export default function Home() {
 
               <button
                 onClick={() => handleSelectStickerSubTab('saltaquarium')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
                   selectedStickerSubTab === 'saltaquarium'
                     ? 'bg-cyan-700 text-white shadow-xs ring-1 ring-cyan-400'
                     : 'bg-white text-cyan-950 hover:bg-cyan-100 border border-cyan-200'
                 }`}
               >
-                <span>🪸 해수어항</span>
+                <span>🪸 해수</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'saltaquarium' ? 'bg-cyan-900 text-cyan-100' : 'bg-cyan-100 text-cyan-800'}`}>
                   {stickerSubCounts.saltaquarium || 0}
                 </span>
@@ -4287,34 +4287,47 @@ export default function Home() {
 
               <button
                 onClick={() => handleSelectStickerSubTab('freshaquarium')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
                   selectedStickerSubTab === 'freshaquarium'
                     ? 'bg-blue-700 text-white shadow-xs ring-1 ring-blue-400'
                     : 'bg-white text-blue-950 hover:bg-blue-100 border border-blue-200'
                 }`}
               >
-                <span>🐠 열대어어항</span>
+                <span>🐠 담수</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'freshaquarium' ? 'bg-blue-900 text-blue-100' : 'bg-blue-100 text-blue-800'}`}>
                   {stickerSubCounts.freshaquarium || 0}
                 </span>
               </button>
 
-              {(dynamicSeasonalRecommendations.length > 0 ? dynamicSeasonalRecommendations : SEASONAL_RECOMMENDATIONS).map((season) => (
-                <button
-                  key={season.seasonId}
-                  onClick={() => handleSelectStickerSubTab(season.seasonId)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
-                    selectedStickerSubTab === season.seasonId
-                      ? 'bg-rose-700 text-white shadow-xs ring-1 ring-rose-400'
-                      : 'bg-white text-rose-950 hover:bg-rose-100 border border-rose-200'
-                  }`}
-                >
-                  <span>{season.icon} {season.title.split(' ')[1] || season.seasonId}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === season.seasonId ? 'bg-rose-900 text-rose-100' : 'bg-rose-100 text-rose-800'}`}>
-                    {stickerSubCounts[season.seasonId] || 0}
-                  </span>
-                </button>
-              ))}
+              {(dynamicSeasonalRecommendations.length > 0 ? dynamicSeasonalRecommendations : SEASONAL_RECOMMENDATIONS).map((season) => {
+                const shortSeasonName = 
+                  season.seasonId === 'halloween' ? '할로윈' :
+                  season.seasonId === 'thanksgiving' ? '추수' :
+                  season.seasonId === 'christmas' ? '성탄' :
+                  season.seasonId === 'valentines' ? '발렌타인' :
+                  season.seasonId === 'stpatrick' ? '성패트릭' :
+                  season.seasonId === 'easter' ? '부활절' :
+                  season.seasonId === 'mothersday' ? '마더스' :
+                  season.seasonId === 'newyear' ? '새해' :
+                  (season.title.split(' ')[1] || season.seasonId);
+
+                return (
+                  <button
+                    key={season.seasonId}
+                    onClick={() => handleSelectStickerSubTab(season.seasonId)}
+                    className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                      selectedStickerSubTab === season.seasonId
+                        ? 'bg-rose-700 text-white shadow-xs ring-1 ring-rose-400'
+                        : 'bg-white text-rose-950 hover:bg-rose-100 border border-rose-200'
+                    }`}
+                  >
+                    <span>{season.icon} {shortSeasonName}</span>
+                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === season.seasonId ? 'bg-rose-900 text-rose-100' : 'bg-rose-100 text-rose-800'}`}>
+                      {stickerSubCounts[season.seasonId] || 0}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Creative Fabrica Bundle Designer Tags Quick Bar */}
@@ -4346,10 +4359,10 @@ export default function Home() {
                     setCopiedCFTabNotice(true);
                     setTimeout(() => setCopiedCFTabNotice(false), 2000);
                   }}
-                  className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-3 py-1.5 rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
+                  className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-2.5 py-1.5 rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
                 >
                   <span>📋</span>
-                  <span>{copiedCFTabNotice ? '✓ CF 태그 복사완료!' : `이 팩의 CF 태그 일괄 복사 (45개)`}</span>
+                  <span>{copiedCFTabNotice ? '✓ 복사완료!' : `CF 태그 복사 (45개)`}</span>
                 </button>
               </div>
             )}
@@ -5969,24 +5982,24 @@ export default function Home() {
                       }
                     }}
                     disabled={isExportingBundle}
-                    className="bg-teal-700 hover:bg-teal-800 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-teal-600 cursor-pointer disabled:cursor-not-allowed"
+                    className="bg-teal-700 hover:bg-teal-800 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-teal-600 cursor-pointer disabled:cursor-not-allowed"
                     title="[1단계] Etsy 상품 등록 시 '1번 대표 사진'으로 올릴 고화질 마스터 표지를 다운로드합니다."
                   >
                     <span className="bg-teal-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-teal-200">1단계</span>
                     <span>🖼️</span>
-                    <span>마스터 표지 다운로드</span>
+                    <span>표지 다운로드</span>
                   </button>
 
                   {/* 2단계: A4 인쇄용 시트 (Etsy 추가 사진 2~3번용 목업) */}
                   <button
                     onClick={() => handleGenerateAndOpenA4Sheet(packStickers, 'transparent')}
                     disabled={a4SheetLoading || isExportingBundle || packStickers.length === 0}
-                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-indigo-500 cursor-pointer disabled:cursor-not-allowed"
+                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-indigo-500 cursor-pointer disabled:cursor-not-allowed"
                     title="[2단계] Etsy 상품 등록 시 '추가 사진(2~3번)'으로 올려 구매자에게 A4 출력 구성을 보여주는 인쇄용 시트를 다운로드합니다."
                   >
                     <span className="bg-indigo-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-indigo-200">2단계</span>
                     <span>🖨️</span>
-                    <span>A4 인쇄용 시트 ({packStickers.length > 20 ? '2장 세트' : '1장'})</span>
+                    <span>A4 시트 ({packStickers.length > 20 ? '2장' : '1장'})</span>
                   </button>
 
                   {/* 3단계: 전체 ZIP 파일 일괄 다운로드 (Etsy 20MB 분할 vs CF 단일 통합) */}
@@ -5994,7 +6007,7 @@ export default function Home() {
                     <button
                       onClick={() => downloadBatchSession([selectedPackCover, ...packStickers], `${selectedPackCover.topic || 'Sticker_Pack'}_Bundle`, { splitForEtsy: true })}
                       disabled={isExportingBundle || packStickers.length === 0}
-                      className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-800 disabled:opacity-90 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-emerald-500 cursor-pointer disabled:cursor-wait"
+                      className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-800 disabled:opacity-90 text-white font-extrabold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-emerald-500 cursor-pointer disabled:cursor-wait"
                       title="[Etsy 전용] Etsy 파일 20MB 제한을 통과하도록 20MB 이하 분할 ZIP으로 자동 다운로드합니다."
                     >
                       <span className="bg-emerald-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-emerald-200">
@@ -6008,7 +6021,7 @@ export default function Home() {
                       <span>
                         {isExportingBundle 
                           ? (exportBundleProgress ? exportBundleProgress.message : 'ZIP 압축 생성 중...') 
-                          : (packStickers.length > 20 ? `Etsy 20MB 분할 다운로드 (${packStickers.length}종)` : `이 팩 전체 ${packStickers.length}종 ZIP 다운로드`)}
+                          : (packStickers.length > 20 ? `Etsy 분할 다운 (${packStickers.length}종)` : `전체 ZIP 다운 (${packStickers.length}종)`)}
                       </span>
                     </button>
 
@@ -6021,7 +6034,7 @@ export default function Home() {
                       >
                         <span className="bg-teal-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-teal-200">CF용</span>
                         <span>📁</span>
-                        <span>단일 통합 ZIP</span>
+                        <span>단일 ZIP</span>
                       </button>
                     )}
                   </div>
