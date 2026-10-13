@@ -8,11 +8,12 @@
 export interface EtsySeoData {
   title: string;
   charCount: number;
+  wordCount: number;
   tags: string[];
   description: string;
 }
 
-// English Category Names & Keywords Dictionary
+// English Category Names & Keywords Dictionary (Optimized for Etsy's 14-Word & Objective Keyword Rules)
 const CATEGORY_SEO_DICT: Record<string, {
   name: string;
   bundleKeywords: string[];
@@ -22,12 +23,11 @@ const CATEGORY_SEO_DICT: Record<string, {
   halloween: {
     name: 'Halloween Spooky Cute',
     bundleKeywords: [
-      'Cute Halloween Stickers PNG Bundle',
-      'Spooky Kawaii Clipart',
-      'Ghost Pumpkin Cauldron Potion Die Cut',
-      'Commercial Use Printable Cricut'
+      'Halloween Stickers PNG Bundle',
+      'Ghost Pumpkin Cauldron Clipart',
+      'Autumn Party Die Cut'
     ],
-    singleKeywords: ['Cute Halloween Sticker PNG', 'Spooky Kawaii Clipart', 'Die Cut Digital Download', 'Printable Cricut'],
+    singleKeywords: ['Halloween Sticker PNG', 'Ghost Pumpkin Clipart', 'Autumn Holiday Die Cut'],
     descriptionHighlights: [
       '🎃 Spooky cute Halloween illustrations (Ghosts, Pumpkins, Witch Cauldrons, Magic Potions, Black Cats & Bats)',
       '✨ Pastel goth & kawaii aesthetic suitable for all ages',
@@ -37,12 +37,11 @@ const CATEGORY_SEO_DICT: Record<string, {
   terrarium: {
     name: 'Succulent Terrarium Plants',
     bundleKeywords: [
-      'Cute Succulent Terrarium Stickers PNG Bundle',
-      'Kawaii Glass Jar Cactus Clipart',
-      'Aesthetic Botanical Plants Die Cut',
-      'Commercial Use Printable Cricut'
+      'Succulent Terrarium Stickers PNG Bundle',
+      'Glass Jar Cactus Clipart',
+      'Botanical Plants Die Cut'
     ],
-    singleKeywords: ['Cute Succulent Terrarium Sticker PNG', 'Kawaii Plant Clipart', 'Die Cut Digital Download', 'Printable Cricut'],
+    singleKeywords: ['Succulent Terrarium Sticker PNG', 'Glass Jar Cactus Clipart', 'Botanical Plant Die Cut'],
     descriptionHighlights: [
       '🌱 Cozy botanical terrariums, miniature glass jars, and teacup succulent gardens',
       '🌿 Lush indoor greenery, pastel pots, and relaxing cottagecore vibes',
@@ -52,12 +51,11 @@ const CATEGORY_SEO_DICT: Record<string, {
   vivarium: {
     name: 'Vivarium Reptile & Amphibian Friends',
     bundleKeywords: [
-      'Cute Vivarium Friends Stickers PNG Bundle',
-      'Kawaii Tree Frog Gecko Chameleon Clipart',
-      'Terrarium Pet Habitat Die Cut',
-      'Commercial Use Printable Cricut'
+      'Vivarium Habitat Stickers PNG Bundle',
+      'Tree Frog Gecko Chameleon Clipart',
+      'Reptile Pet Die Cut'
     ],
-    singleKeywords: ['Cute Vivarium Friend Sticker PNG', 'Kawaii Reptile Clipart', 'Die Cut Digital Download', 'Printable Cricut'],
+    singleKeywords: ['Vivarium Habitat Sticker PNG', 'Tree Frog Gecko Clipart', 'Reptile Pet Die Cut'],
     descriptionHighlights: [
       '🦎 Charming vivarium pets (Baby Geckos, Chameleons, Tiny Tree Frogs, and Salamanders)',
       '🌿 Natural mossy logs, jungle foliage, and healthy above-water habitats',
@@ -67,12 +65,11 @@ const CATEGORY_SEO_DICT: Record<string, {
   saltaquarium: {
     name: 'Saltwater Reef Aquarium',
     bundleKeywords: [
-      'Cute Saltwater Aquarium Stickers PNG Bundle',
-      'Kawaii Clownfish Coral Reef Clipart',
-      'Ocean Marine Animals Die Cut',
-      'Commercial Use Printable Cricut'
+      'Saltwater Aquarium Stickers PNG Bundle',
+      'Clownfish Coral Reef Clipart',
+      'Marine Animals Die Cut'
     ],
-    singleKeywords: ['Cute Reef Aquarium Sticker PNG', 'Kawaii Saltwater Fish Clipart', 'Die Cut Digital Download', 'Printable Cricut'],
+    singleKeywords: ['Saltwater Aquarium Sticker PNG', 'Coral Reef Clipart', 'Ocean Animal Die Cut'],
     descriptionHighlights: [
       '🐠 Vibrant saltwater reef tanks (Clownfish, Blue Tang, Sea Anemones, Seahorses & Sea Turtles)',
       '🌊 Bright marine ecosystems with glowing corals and aquatic flora',
@@ -82,12 +79,11 @@ const CATEGORY_SEO_DICT: Record<string, {
   freshaquarium: {
     name: 'Freshwater Planted Aquarium',
     bundleKeywords: [
-      'Cute Freshwater Aquarium Stickers PNG Bundle',
-      'Kawaii Betta Guppy Fish Clipart',
-      'Planted Tank Aquatic Die Cut',
-      'Commercial Use Printable Cricut'
+      'Freshwater Aquarium Stickers PNG Bundle',
+      'Betta Guppy Fish Clipart',
+      'Planted Tank Die Cut'
     ],
-    singleKeywords: ['Cute Freshwater Aquarium Sticker PNG', 'Kawaii Betta Fish Clipart', 'Die Cut Digital Download', 'Printable Cricut'],
+    singleKeywords: ['Freshwater Aquarium Sticker PNG', 'Betta Fish Clipart', 'Planted Tank Die Cut'],
     descriptionHighlights: [
       '🐟 Peaceful freshwater tanks (Betta Splendens, Guppies, Neon Tetras, Apple Snails & Shrimps)',
       '🌿 Lush aquascapes with driftwood, water lilies, and crystal-clear bubbling water',
@@ -97,12 +93,11 @@ const CATEGORY_SEO_DICT: Record<string, {
   christmas: {
     name: 'Cozy Christmas Holiday',
     bundleKeywords: [
-      'Cute Christmas Holiday Stickers PNG Bundle',
-      'Cozy Kawaii Winter Snowglobe Clipart',
-      'Santa Gingerbread Die Cut',
-      'Commercial Use Printable Cricut'
+      'Christmas Holiday Stickers PNG Bundle',
+      'Winter Snowglobe Clipart',
+      'Santa Gingerbread Die Cut'
     ],
-    singleKeywords: ['Cute Christmas Sticker PNG', 'Cozy Holiday Kawaii Clipart', 'Die Cut Digital Download', 'Printable Cricut'],
+    singleKeywords: ['Christmas Holiday Sticker PNG', 'Winter Snowglobe Clipart', 'Santa Holiday Die Cut'],
     descriptionHighlights: [
       '🎄 Whimsical holiday designs (Snowglobes, Gingerbread Men, Santa, Reindeer & Hot Cocoa)',
       '❄️ Warm winter aesthetic with festive sparkles and pastel holiday charm',
@@ -112,12 +107,11 @@ const CATEGORY_SEO_DICT: Record<string, {
   thanksgiving: {
     name: 'Autumn Harvest Thanksgiving',
     bundleKeywords: [
-      'Cute Autumn Thanksgiving Stickers PNG Bundle',
-      'Cozy Fall Harvest Pumpkin Spice Clipart',
-      'Turkey Leaves Die Cut',
-      'Commercial Use Printable Cricut'
+      'Thanksgiving Fall Stickers PNG Bundle',
+      'Harvest Pumpkin Spice Clipart',
+      'Turkey Leaves Die Cut'
     ],
-    singleKeywords: ['Cute Fall Harvest Sticker PNG', 'Autumn Thanksgiving Clipart', 'Die Cut Digital Download', 'Printable Cricut'],
+    singleKeywords: ['Thanksgiving Fall Sticker PNG', 'Harvest Pumpkin Clipart', 'Autumn Leaves Die Cut'],
     descriptionHighlights: [
       '🍂 Warm autumn vibes (Pumpkin Spice, Turkey, Acorns, Golden Fall Leaves & Warm Sweaters)',
       '🥧 Cozy harvest aesthetic celebrating gratitude, family gatherings, and cozy November days',
@@ -127,12 +121,11 @@ const CATEGORY_SEO_DICT: Record<string, {
   valentines: {
     name: 'Valentines Sweet Hearts',
     bundleKeywords: [
-      'Cute Valentines Day Stickers PNG Bundle',
-      'Kawaii Heart Pastel Love Clipart',
-      'Cupid Sweets Die Cut',
-      'Commercial Use Printable Cricut'
+      'Valentines Day Stickers PNG Bundle',
+      'Heart Love Potion Clipart',
+      'Cupid Sweets Die Cut'
     ],
-    singleKeywords: ['Cute Valentines Sticker PNG', 'Pastel Love Clipart', 'Die Cut Digital Download', 'Printable Cricut'],
+    singleKeywords: ['Valentines Day Sticker PNG', 'Heart Love Clipart', 'Romantic Sweets Die Cut'],
     descriptionHighlights: [
       '💖 Romantic pastel hearts, love letters, chocolate boxes, and adorable animal sweethearts',
       '💌 Sweet Valentine aesthetics for scrapbooking, couples gifts, and Galentines celebrations'
@@ -141,12 +134,11 @@ const CATEGORY_SEO_DICT: Record<string, {
   easter: {
     name: 'Spring Easter Bunny',
     bundleKeywords: [
-      'Cute Easter Bunny Stickers PNG Bundle',
-      'Kawaii Spring Pastel Egg Clipart',
-      'Floral Chick Die Cut',
-      'Commercial Use Printable Cricut'
+      'Easter Bunny Stickers PNG Bundle',
+      'Spring Floral Egg Clipart',
+      'Pastel Chick Die Cut'
     ],
-    singleKeywords: ['Cute Easter Bunny Sticker PNG', 'Spring Pastel Egg Clipart', 'Die Cut Digital Download', 'Printable Cricut'],
+    singleKeywords: ['Easter Bunny Sticker PNG', 'Spring Floral Egg Clipart', 'Pastel Chick Die Cut'],
     descriptionHighlights: [
       '🐰 Fluffy baby bunnies, pastel decorated eggs, yellow chicks, and fresh spring wildflowers'
     ]
@@ -154,14 +146,25 @@ const CATEGORY_SEO_DICT: Record<string, {
   stpatrick: {
     name: 'St Patricks Lucky Shamrocks',
     bundleKeywords: [
-      'Cute St Patricks Day Stickers PNG Bundle',
-      'Kawaii Lucky Clover Pot of Gold Clipart',
-      'Irish Green Die Cut',
-      'Commercial Use Printable Cricut'
+      'St Patricks Day Stickers PNG Bundle',
+      'Lucky Clover Gold Clipart',
+      'Irish Festival Die Cut'
     ],
-    singleKeywords: ['Cute St Patricks Sticker PNG', 'Lucky Shamrock Clipart', 'Die Cut Digital Download', 'Printable Cricut'],
+    singleKeywords: ['St Patricks Day Sticker PNG', 'Lucky Clover Clipart', 'Irish Festival Die Cut'],
     descriptionHighlights: [
       '🍀 Four-leaf clovers, glittering pots of gold, cute rainbows, and lucky charms'
+    ]
+  },
+  mothersday: {
+    name: 'Mothers Day Floral Gifts',
+    bundleKeywords: [
+      'Mothers Day Stickers PNG Bundle',
+      'Floral Teacup Rose Clipart',
+      'Greeting Card Die Cut'
+    ],
+    singleKeywords: ['Mothers Day Sticker PNG', 'Floral Teacup Rose Clipart', 'Greeting Card Die Cut'],
+    descriptionHighlights: [
+      '💐 Vintage floral teacups, carnation mason jars, peony blooms, and mother-baby animal warmth'
     ]
   }
 };
@@ -170,25 +173,25 @@ const CATEGORY_SEO_DICT: Record<string, {
 const KO_EN_TRANSLATE: [RegExp, string][] = [
   [/물약|플라스크/i, 'Magic Potion Flask'],
   [/호박|잭오랜턴|펌킨/i, 'Pumpkin Jack O Lantern'],
-  [/유령|고스트/i, 'Cute Ghost'],
+  [/유령|고스트/i, 'Spooky Ghost'],
   [/가마솥/i, 'Witch Cauldron'],
   [/마녀.*모자/i, 'Witch Hat'],
   [/빗자루/i, 'Magic Broomstick'],
   [/흑고양이|검은.*고양이/i, 'Black Cat'],
-  [/고양이/i, 'Cute Kitten Cat'],
+  [/고양이/i, 'Kitten Cat'],
   [/박쥐/i, 'Baby Bat Wings'],
   [/해골|스컬/i, 'Skeleton Skull'],
   [/거미|거미줄/i, 'Spider Web'],
   [/사탕|캔디/i, 'Halloween Candy'],
   [/롤리팝/i, 'Lollipop Sweets'],
-  [/미라/i, 'Cute Mummy'],
+  [/미라/i, 'Spooky Mummy'],
   [/늑대인간/i, 'Baby Werewolf'],
   [/다육|선인장/i, 'Succulent Cactus'],
   [/테라리움/i, 'Terrarium Glass Jar'],
   [/비바리움/i, 'Vivarium Habitat'],
-  [/개구리/i, 'Tiny Tree Frog'],
+  [/개구리/i, 'Tree Frog'],
   [/도마뱀|게코/i, 'Gecko Lizard'],
-  [/카멜레온/i, 'Cute Chameleon'],
+  [/카멜레온/i, 'Chameleon Lizard'],
   [/스노우볼/i, 'Winter Snowglobe'],
   [/크리스마스/i, 'Christmas Holiday'],
   [/추수감사절/i, 'Thanksgiving Harvest'],
@@ -198,15 +201,15 @@ const KO_EN_TRANSLATE: [RegExp, string][] = [
   [/구피/i, 'Guppy Fish'],
   [/달팽이|스네일/i, 'Apple Snail'],
   [/새우/i, 'Cherry Shrimp'],
-  [/강아지/i, 'Cute Puppy Dog'],
-  [/토끼/i, 'Baby Bunny Rabbit'],
+  [/강아지/i, 'Puppy Dog'],
+  [/토끼/i, 'Bunny Rabbit'],
   [/레서판다/i, 'Red Panda'],
-  [/햄스터/i, 'Cute Hamster'],
+  [/햄스터/i, 'Hamster Pet'],
   [/수달/i, 'Sea Otter Pup']
 ];
 
 function translateKoItemToEnglish(koreanText: string): string {
-  if (!koreanText) return 'Cute Artwork';
+  if (!koreanText) return 'Artwork';
   
   // Clean brackets and prefixes
   const clean = koreanText
@@ -224,22 +227,56 @@ function translateKoItemToEnglish(koreanText: string): string {
   const engWords = clean.replace(/[^a-zA-Z0-9\s]/g, '').trim();
   if (engWords.length > 3) return engWords;
 
-  return 'Cute Illustration';
+  return 'Illustration';
 }
 
-function truncateToEtsyLimit(title: string, maxLen = 138): string {
-  if (title.length <= maxLen) return title;
-  const parts = title.split(', ');
-  let result = '';
+/**
+ * Enforces Etsy's strict title guidelines:
+ * 1. Strictly 14 words or less (Etsy tip: "Consider using 14 words or less")
+ * 2. Strictly removes subjective words (Etsy tip: "Try moving subjective words to the description: 'cute'")
+ *    Subjective words filtered out: cute, kawaii, lovely, beautiful, pretty, sweet, aesthetic, adorable
+ * 3. Keeps length under 140 chars while maintaining high-value search intent.
+ */
+export function sanitizeAndEnforceEtsyTitle(rawTitle: string, maxWords = 13, maxChars = 138): string {
+  // 1. Strip subjective adjectives
+  const cleaned = rawTitle
+    .replace(/\b(cute|kawaii|lovely|beautiful|pretty|aesthetic|adorable|sweet|spooky cute)\b/gi, '')
+    .replace(/\s+/g, ' ')
+    .replace(/,\s*,/g, ',')
+    .replace(/^[\s,]+|[\s,]+$/g, '')
+    .trim();
+
+  // 2. Enforce 14 words or less (target <= maxWords)
+  const parts = cleaned.split(/,\s*/);
+  const selectedParts: string[] = [];
+  let currentWordCount = 0;
+
   for (const part of parts) {
-    const candidate = result ? `${result}, ${part}` : part;
-    if (candidate.length <= maxLen) {
-      result = candidate;
+    const trimmed = part.trim();
+    if (!trimmed) continue;
+    const wordsInPart = trimmed.split(/\s+/).filter(Boolean).length;
+    if (currentWordCount + wordsInPart <= maxWords) {
+      selectedParts.push(trimmed);
+      currentWordCount += wordsInPart;
     } else {
       break;
     }
   }
-  return result || title.slice(0, maxLen).trim();
+
+  let result = selectedParts.join(', ');
+
+  // If result is empty or too short, truncate words directly
+  if (!result || result.split(/\s+/).filter(Boolean).length < 4) {
+    const words = cleaned.split(/\s+/).filter(Boolean).slice(0, maxWords);
+    result = words.join(' ');
+  }
+
+  // Ensure character limit
+  if (result.length > maxChars) {
+    result = result.slice(0, maxChars).trim().replace(/,$/, '');
+  }
+
+  return result;
 }
 
 /**
@@ -247,10 +284,12 @@ function truncateToEtsyLimit(title: string, maxLen = 138): string {
  */
 export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
   if (!design) {
+    const fallbackTitle = 'Digital Stickers PNG Bundle, Clipart Die Cut Download';
     return {
-      title: 'Cute Digital Stickers PNG Bundle, Kawaii Clipart Die Cut Download',
-      charCount: 68,
-      tags: ['digital stickers', 'kawaii clipart', 'cricut cut file', 'png download'],
+      title: fallbackTitle,
+      charCount: fallbackTitle.length,
+      wordCount: fallbackTitle.split(/\s+/).filter(Boolean).length,
+      tags: ['digital stickers', 'clipart bundle', 'cricut cut file', 'png download'],
       description: 'High-quality digital download.'
     };
   }
@@ -299,33 +338,34 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
   let finalTags: string[] = [];
 
   if (isPod) {
-    // 1. POD T-Shirt Apparel Mode
+    // 1. POD T-Shirt Apparel Mode (Target 11-13 words, NO subjective adjectives)
     let cleanTopic = translateKoItemToEnglish(titleRaw || topicRaw)
-      .replace(/^(vintage|cute|aesthetic)\s+/i, '')
+      .replace(/^(vintage|cute|aesthetic|kawaii)\s+/i, '')
       .replace(/\s+(t-shirt|tshirt|shirt|tee)\b/ig, '')
       .trim();
     if (!cleanTopic) cleanTopic = 'Graphic Art';
 
-    finalTitle = truncateToEtsyLimit(
-      `Vintage Cute ${cleanTopic} T-Shirt Design PNG, Aesthetic Retro Graphic Tee Clipart, Commercial Use DTG Sublimation Apparel Digital Download`
+    finalTitle = sanitizeAndEnforceEtsyTitle(
+      `${cleanTopic} T-Shirt Design PNG, Retro Graphic Tee Clipart, DTG Sublimation Apparel Digital Download`,
+      13
     );
     finalTags = [
       'graphic tee png', 'sublimation design', 'dtg t shirt art', 'vintage apparel',
-      'cute animal shirt', 'retro aesthetic', 'clipart download', 'commercial use',
-      'aesthetic t shirt', 'trending graphic', 'cottagecore tee', 'digital download', 'merch design'
+      'animal shirt png', 'retro graphic tee', 'clipart download', 'commercial use',
+      't shirt design', 'trending graphic', 'digital download', 'merch design', 'dtg printing'
     ];
   } else if (isBundle) {
-    // 2. Sticker Pack / Bundle Mode (e.g. 20-Pack or 40-Pack)
+    // 2. Sticker Pack / Bundle Mode (Target 12-13 words, NO subjective words like 'cute' or 'kawaii')
     const keywords = [...themeInfo.bundleKeywords];
-    keywords[0] = `${count} ${keywords[0].replace(/^\d+\s*/, '')}`; // Ensure accurate count
+    keywords[0] = `${count} ${keywords[0].replace(/^\d+\s*/, '')}`; // e.g. "40 Saltwater Aquarium Stickers PNG Bundle"
     const joined = keywords.join(', ');
-    finalTitle = truncateToEtsyLimit(joined);
+    finalTitle = sanitizeAndEnforceEtsyTitle(joined, 13);
 
     finalTags = [
       `${subKey} stickers`.slice(0, 20),
       'digital sticker pack'.slice(0, 20),
       'cricut stickers png'.slice(0, 20),
-      'kawaii clipart bundle'.slice(0, 20),
+      'clipart bundle set'.slice(0, 20),
       'printable sticker a4'.slice(0, 20),
       'commercial use png'.slice(0, 20),
       'die cut sticker set'.slice(0, 20),
@@ -337,20 +377,22 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
       `${count} sticker bundle`.slice(0, 20)
     ];
   } else {
-    // 3. Single Standalone Sticker Mode
+    // 3. Single Standalone Sticker Mode (Target 10-12 words, NO subjective words)
     let enItemName = translateKoItemToEnglish(titleRaw || topicRaw)
-      .replace(/^(cute|kawaii)\s+/i, '')
+      .replace(/^(cute|kawaii|sweet|pretty)\s+/i, '')
       .replace(/\s+sticker\b/i, '')
       .trim();
     if (!enItemName) enItemName = 'Artwork';
 
-    finalTitle = truncateToEtsyLimit(
-      `Cute ${enItemName} Sticker PNG, ${themeInfo.name} Kawaii Clipart, Die Cut Digital Download, Commercial Use Printable Cricut`
+    const cleanTheme = (themeInfo.name || '').replace(/\b(cute|kawaii|spooky cute)\b/gi, '').trim();
+
+    finalTitle = sanitizeAndEnforceEtsyTitle(
+      `${enItemName} Sticker PNG, ${cleanTheme} Clipart, Printable Die Cut Digital Download`,
+      12
     );
     finalTags = [
       `${enItemName.toLowerCase().slice(0, 16)} sticker`,
       `${subKey} sticker`.slice(0, 20),
-      'kawaii clipart png',
       'cricut cut file',
       'die cut sticker',
       'printable sticker',
@@ -359,8 +401,9 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
       'commercial use png',
       'digital download',
       'hydroflask decal',
-      'aesthetic clipart',
-      '300 dpi transparent'
+      'art clipart png',
+      '300 dpi transparent',
+      'instant download'
     ];
   }
 
@@ -440,6 +483,7 @@ Thank you for visiting and supporting independent digital creators! Happy crafti
   return {
     title: finalTitle,
     charCount: finalTitle.length,
+    wordCount: finalTitle.split(/\s+/).filter(Boolean).length,
     tags: finalTags,
     description
   };

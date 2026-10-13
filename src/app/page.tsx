@@ -4648,6 +4648,9 @@ export default function Home() {
                               <div className="flex items-center gap-1.5">
                                 <span className="text-base">📝</span>
                                 <span className="text-xs font-black text-indigo-950 uppercase tracking-wider">Etsy 영문 제목 (SEO Title)</span>
+                                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full border border-emerald-300">
+                                  ✓ {etsySeo.wordCount}단어 (14단어 이하 준수)
+                                </span>
                                 <span className="text-[10px] bg-indigo-200 text-indigo-900 font-extrabold px-2 py-0.5 rounded-full">
                                   {etsySeo.charCount}/140자
                                 </span>
@@ -6148,8 +6151,11 @@ export default function Home() {
                           {/* 1. Etsy English Title */}
                           <div className="bg-white rounded-xl border border-indigo-100 p-3 shadow-2xs">
                             <div className="flex items-center justify-between gap-2 mb-1.5 flex-wrap">
-                              <div className="flex items-center gap-1.5">
+                              <div className="flex items-center gap-1.5 flex-wrap">
                                 <span className="text-xs font-black text-indigo-950">① Etsy Listing Title (영문 제목)</span>
+                                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full border border-emerald-300">
+                                  ✓ {packSeo.wordCount}단어 (14단어 이하 준수)
+                                </span>
                                 <span className="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">
                                   {packSeo.charCount}/140자
                                 </span>
