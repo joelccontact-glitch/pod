@@ -8,7 +8,7 @@ export const config = {
     // - _next/image (이미지 최적화)
     // - favicon.ico (파비콘)
     // - api/run-agent (Vercel Cron)
-    // - api/etsy-webhook (Webhook)
-    "/((?!api/auth|api/run-agent|api/etsy-webhook|_next/static|_next/image|favicon.ico).*)"
+    // - api/designs/image (Public image serving for Pinterest/external embed)
+    "/((?!api/auth|api/run-agent|api/etsy-webhook|api/designs/image|_next/static|_next/image|favicon.ico).*)"
   ]
 };
