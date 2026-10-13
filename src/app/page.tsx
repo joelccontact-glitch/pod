@@ -402,6 +402,64 @@ export default function Home() {
   const [etsyShopUrl, setEtsyShopUrl] = useState<string>('');
   const [currentListingUrl, setCurrentListingUrl] = useState<string>('');
   const [copiedPinterestDescNotice, setCopiedPinterestDescNotice] = useState(false);
+  const [copiedTitleNotice, setCopiedTitleNotice] = useState(false);
+  const [copiedLinkNotice, setCopiedLinkNotice] = useState(false);
+  const [copiedImageNotice, setCopiedImageNotice] = useState(false);
+  const [copiedMockupNotice, setCopiedMockupNotice] = useState<string | null>(null);
+
+  const handleCopyImageToClipboard = async (imgUrl: string) => {
+    try {
+      setCopiedImageNotice(true);
+      setTimeout(() => setCopiedImageNotice(false), 2500);
+
+      // In browser, create canvas and write PNG blob to clipboard for direct Ctrl+V pasting
+      const res = await fetch(imgUrl);
+      const blob = await res.blob();
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      const objUrl = URL.createObjectURL(blob);
+      img.src = objUrl;
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+      });
+
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('No canvas context');
+      ctx.drawImage(img, 0, 0);
+
+      canvas.toBlob(async (pngBlob) => {
+        if (pngBlob && navigator.clipboard && window.ClipboardItem) {
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({ 'image/png': pngBlob })
+            ]);
+            alert('🖼️ 이미지가 클립보드에 복사되었습니다!\n핀터레스트 "핀 만들기" 화면에서 [Ctrl + V]를 누르면 사진이 바로 꽂힙니다.');
+          } catch (e) {
+            // fallback download
+            const a = document.createElement('a');
+            a.href = imgUrl;
+            a.download = 'pinterest_pin_image.jpg';
+            a.click();
+          }
+        } else {
+          const a = document.createElement('a');
+          a.href = imgUrl;
+          a.download = 'pinterest_pin_image.jpg';
+          a.click();
+        }
+      }, 'image/png');
+    } catch (err) {
+      console.warn('Image clipboard copy error:', err);
+      const a = document.createElement('a');
+      a.href = imgUrl;
+      a.download = 'pinterest_pin_image.jpg';
+      a.click();
+    }
+  };
 
   const handleUpdateEtsyListingUrl = (newUrl: string) => {
     setCurrentListingUrl(newUrl);
@@ -6561,7 +6619,7 @@ export default function Home() {
                   const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
                   return (
                     <>
-                      {/* 📌 Pinterest 핀 원클릭 즉시 등록 마케팅 바 */}
+                      {/* 📌 Pinterest 비즈니스 핀 등록 마케팅 바 */}
                       <div className="mb-4 bg-gradient-to-r from-rose-50 via-red-50 to-pink-50 border-2 border-red-200 rounded-2xl p-4 shadow-sm">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
                           <div className="flex items-center gap-2.5">
@@ -6569,33 +6627,34 @@ export default function Home() {
                               P
                             </div>
                             <div>
-                              <h4 className="text-sm font-black text-red-950 flex items-center gap-2">
-                                <span>Pinterest 핀 원클릭 즉시 등록</span>
+                              <h4 className="text-sm font-black text-red-950 flex items-center gap-2 flex-wrap">
+                                <span>Pinterest 비즈니스 핀 등록 허브</span>
                                 <span className="text-[10px] bg-red-600 text-white font-extrabold px-2 py-0.5 rounded-full shadow-2xs">
                                   Etsy 외부 유입 극대화
                                 </span>
                               </h4>
                               <p className="text-[11px] text-red-800 mt-0.5">
-                                표지 이미지 + 최적화 영문 제목 + 13개 해시태그 + 내 Etsy 링크가 자동 채워진 핀 생성 팝업이 즉시 열립니다.
+                                미국 바이어 70%가 사용하는 핀터레스트에 공식 비즈니스 핀(제목 볼드 + 본문 + Etsy 링크 직결)을 등록하세요.
                               </p>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <button
-                              type="button"
-                              onClick={() => handleShareToPinterest()}
-                              className="w-full sm:w-auto bg-[#E60023] hover:bg-[#ad081b] active:scale-95 text-white font-black text-xs sm:text-sm py-2.5 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-red-200"
-                              title="클릭 시 핀터레스트 핀 생성 화면이 자동으로 채워져 팝업으로 열립니다."
+                            <a
+                              href="https://www.pinterest.com/pin-creation-tool/"
+                              target="_blank"
+                              rel="noreferrer"
+                              className="w-full sm:w-auto bg-[#E60023] hover:bg-[#ad081b] active:scale-95 text-white font-black text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-red-200"
+                              title="Pinterest의 공식 핀 생성 페이지(핀 빌더)를 새 창으로 엽니다"
                             >
-                              <span>📌</span>
-                              <span>Pinterest 핀 즉시 등록</span>
-                            </button>
+                              <span>🚀</span>
+                              <span>Pinterest 핀 만들기 열기</span>
+                            </a>
                           </div>
                         </div>
 
-                        {/* Etsy Link Input & Helper */}
-                        <div className="bg-white/95 rounded-xl p-2.5 border border-red-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-xs">
+                        {/* Etsy Link Input Bar */}
+                        <div className="bg-white/95 rounded-xl p-2.5 border border-red-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-xs mb-3">
                           <div className="flex items-center gap-1.5 shrink-0 text-red-900 font-bold">
                             <span>🔗 내 Etsy 링크:</span>
                           </div>
@@ -6603,23 +6662,115 @@ export default function Home() {
                             type="url"
                             value={currentListingUrl}
                             onChange={(e) => handleUpdateEtsyListingUrl(e.target.value)}
-                            placeholder="Etsy 상품 URL 또는 상점 URL 입력 (예: https://www.etsy.com/shop/내상점명)"
+                            placeholder="Etsy 상품 URL 입력 (예: https://www.etsy.com/listing/4592885054/...)"
                             className="flex-1 bg-red-50/40 border border-red-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-hidden focus:ring-1 focus:ring-red-400 placeholder-gray-400 font-mono"
                           />
                           <button
                             type="button"
                             onClick={() => {
-                              const hashTags = (packSeo.tags || []).map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, '')).filter(t => t.length > 2).slice(0, 8).join(' ');
-                              const text = `${packSeo.title}\n\n✨ ${packStickers.length || 40} Cute Die-Cut Digital Stickers Bundle.\n👉 Shop on Etsy: ${currentListingUrl || etsyShopUrl || 'https://www.etsy.com'}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller`;
-                              handleCopy(text);
-                              setCopiedPinterestDescNotice(true);
-                              setTimeout(() => setCopiedPinterestDescNotice(false), 2000);
+                              const linkToCopy = currentListingUrl || etsyShopUrl || '';
+                              if (!linkToCopy) {
+                                alert('먼저 Etsy 상품 링크를 입력해주세요.');
+                                return;
+                              }
+                              handleCopy(linkToCopy);
+                              setCopiedLinkNotice(true);
+                              setTimeout(() => setCopiedLinkNotice(false), 2000);
                             }}
                             className="bg-red-100 hover:bg-red-200 text-red-800 font-bold px-3 py-1.5 rounded-lg transition-colors shrink-0 flex items-center justify-center gap-1 cursor-pointer"
-                            title="핀터레스트 맞춤 설명문(해시태그 포함)을 클립보드에 복사합니다"
+                            title="Etsy 링크를 클립보드에 복사합니다"
                           >
-                            <span>{copiedPinterestDescNotice ? '✓ 복사완료!' : '📋 핀 설명 복사'}</span>
+                            <span>{copiedLinkNotice ? '✓ 링크 복사됨!' : '🔗 링크 복사'}</span>
                           </button>
+                        </div>
+
+                        {/* 🏆 Mode A: 정품 비즈니스 핀 원클릭 복사 키트 (15초 완성, 권장) */}
+                        <div className="bg-white rounded-xl p-3 border border-red-200 shadow-2xs space-y-2.5">
+                          <div className="flex items-center justify-between gap-2 flex-wrap">
+                            <span className="text-xs font-black text-red-950 flex items-center gap-1.5">
+                              <span className="bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded">강력 추천</span>
+                              <span>🏆 정식 비즈니스 핀 복사 키트 (15초 완성 - 타이핑 0번)</span>
+                            </span>
+                            <span className="text-[11px] text-gray-500 font-medium">
+                              비바리움처럼 제목 볼드 & Etsy 직결 링크 완벽 지원
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5">
+                            {/* 1. 이미지 복사 */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const coverUrl = selectedPackCover?.image_url;
+                                if (coverUrl) handleCopyImageToClipboard(coverUrl);
+                              }}
+                              className="bg-stone-900 hover:bg-black text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                              title="표지 이미지를 클립보드에 복사합니다. 핀 만들기 화면에서 Ctrl+V를 누르세요."
+                            >
+                              <span>🖼️</span>
+                              <span>{copiedImageNotice ? '✓ 복사완료!' : '1. 표지 복사'}</span>
+                            </button>
+
+                            {/* 2. 제목 복사 */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleCopy(packSeo.title);
+                                setCopiedTitleNotice(true);
+                                setTimeout(() => setCopiedTitleNotice(false), 2000);
+                              }}
+                              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                              title="영문 최적화 제목을 복사합니다. 핀 만들기 화면의 제목 칸에 Ctrl+V 하세요."
+                            >
+                              <span>📋</span>
+                              <span>{copiedTitleNotice ? '✓ 복사완료!' : '2. 제목 복사'}</span>
+                            </button>
+
+                            {/* 3. 설명 복사 */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const hashTags = (packSeo.tags || []).map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, '')).filter(t => t.length > 2).slice(0, 8).join(' ');
+                                const text = `${packSeo.title}\n\n✨ ${packStickers.length || 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Planners & Cricut.\n👉 Shop on Etsy: ${currentListingUrl || etsyShopUrl || 'https://www.etsy.com'}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller`;
+                                handleCopy(text);
+                                setCopiedPinterestDescNotice(true);
+                                setTimeout(() => setCopiedPinterestDescNotice(false), 2000);
+                              }}
+                              className="bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                              title="상세설명과 해시태그를 복사합니다. 핀 만들기 화면의 설명 칸에 Ctrl+V 하세요."
+                            >
+                              <span>📝</span>
+                              <span>{copiedPinterestDescNotice ? '✓ 복사완료!' : '3. 설명 복사'}</span>
+                            </button>
+
+                            {/* 4. 링크 복사 */}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const linkToCopy = currentListingUrl || etsyShopUrl || 'https://www.etsy.com';
+                                handleCopy(linkToCopy);
+                                setCopiedLinkNotice(true);
+                                setTimeout(() => setCopiedLinkNotice(false), 2000);
+                              }}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                              title="Etsy 상품 링크를 복사합니다. 핀 만들기 화면의 링크 칸에 Ctrl+V 하세요."
+                            >
+                              <span>🔗</span>
+                              <span>{copiedLinkNotice ? '✓ 복사완료!' : '4. 링크 복사'}</span>
+                            </button>
+                          </div>
+
+                          <div className="flex items-center justify-between text-[11px] text-gray-500 pt-1 border-t border-gray-100 flex-wrap gap-1">
+                            <span>💡 순서: <strong>[🚀 핀 만들기 열기]</strong> 클릭 ➔ 핀터레스트 화면에서 <strong>1~4번 각각 Ctrl+V</strong> 붙여넣기 ➔ 15초 끝!</span>
+                            <button
+                              type="button"
+                              onClick={() => handleShareToPinterest()}
+                              className="text-red-700 hover:text-red-900 font-bold underline cursor-pointer text-[11px]"
+                              title="웹 공유 팝업으로 즉시 저장 (단, 핀터레스트 공유 API 특성상 제목 필드가 비워질 수 있음)"
+                            >
+                              ⚡ 초간편 3초 팝업 등록 &gt;
+                            </button>
+                          </div>
                         </div>
                       </div>
 
@@ -7177,11 +7328,34 @@ export default function Home() {
                               <span>📥</span>
                               <span>고화질 다운로드 (JPG)</span>
                             </button>
+
+                            {/* 🏆 정품 비즈니스 핀 복사 키트 (15초 완성, 권장) */}
+                            <button
+                              onClick={() => {
+                                handleCopyImageToClipboard(mockup.dataUrl);
+                                const customTitle = `${selectedPackCover?.title || 'Cute Stickers'} - ${mockup.title}`;
+                                const targetLink = currentListingUrl || etsyShopUrl || 'https://www.etsy.com';
+                                const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
+                                const hashTags = (packSeo.tags || []).map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, '')).filter(t => t.length > 2).slice(0, 8).join(' ');
+                                const copyText = `[제목]\n${customTitle}\n\n[설명]\n${customTitle}\n\n✨ Cute Die-Cut Digital Stickers Bundle for GoodNotes & Planners.\n👉 Shop on Etsy: ${targetLink}\n\n${hashTags}\n\n[링크]\n${targetLink}`;
+                                handleCopy(copyText);
+                                setCopiedMockupNotice(mockup.id);
+                                setTimeout(() => setCopiedMockupNotice(null), 3000);
+                                window.open('https://www.pinterest.com/pin-creation-tool/', '_blank');
+                              }}
+                              className="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                              title="목업 사진을 복사하고 Pinterest 핀 만들기 화면을 새 창으로 엽니다. Pinterest 화면에서 Ctrl+V를 누르세요."
+                            >
+                              <span>🚀</span>
+                              <span>{copiedMockupNotice === mockup.id ? '✓ 사진복사됨! Pinterest 이동' : '🏆 정품 핀 복사 키트 (권장)'}</span>
+                            </button>
+
+                            {/* ⚡ 초간편 3초 팝업 등록 */}
                             <button
                               onClick={() => handleShareMockupToPinterest(mockup)}
                               disabled={sharingMockupId === mockup.id}
                               className="w-full bg-[#E60023] hover:bg-[#ad081b] disabled:opacity-60 active:scale-95 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:cursor-wait"
-                              title="이 테마의 Etsy 링크와 함께 Pinterest 핀을 바로 등록합니다"
+                              title="웹 공유 팝업으로 즉시 저장합니다"
                             >
                               {sharingMockupId === mockup.id ? (
                                 <>
@@ -7191,7 +7365,7 @@ export default function Home() {
                               ) : (
                                 <>
                                   <span>📌</span>
-                                  <span>Pinterest 핀 즉시 등록</span>
+                                  <span>초간편 3초 팝업 등록</span>
                                 </>
                               )}
                             </button>
