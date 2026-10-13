@@ -6094,7 +6094,7 @@ export default function Home() {
                   >
                     <span className="bg-indigo-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-indigo-200">2단계</span>
                     <span>🖨️</span>
-                    <span>A4 시트 ({packStickers.length > 20 ? '2장' : '1장'})</span>
+                    <span>A4 시트 ({packStickers.length > 20 ? '2장' : '화이트/투명'})</span>
                   </button>
 
                   {/* 3단계: 전체 ZIP 파일 일괄 다운로드 (Etsy 20MB 분할 vs CF 단일 통합) */}
