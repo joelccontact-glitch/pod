@@ -17,11 +17,41 @@ export function clearImageCache(id?: string) {
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    const type = searchParams.get('type');
+    const url = new URL(request.url);
+    const { searchParams } = url;
+    let id = searchParams.get('id');
+    let type = searchParams.get('type');
     const v = searchParams.get('v');
     const nocache = searchParams.get('nocache') === 'true' || searchParams.has('_t');
+
+    // Extract info from filename if present in path (e.g. /api/designs/image/cozy-cover_ipad_planner.jpg)
+    const pathname = url.pathname;
+    const filenamePart = pathname.substring(pathname.lastIndexOf('/') + 1);
+
+    if (filenamePart && filenamePart !== 'route' && filenamePart !== 'image') {
+      const cleanFilename = filenamePart.replace(/\.jpg$|\.jpeg$|\.png$/i, '');
+
+      // Pattern 1: mockup-[type].jpg (e.g. mockup-ipad_planner.jpg)
+      if (!type && cleanFilename.startsWith('mockup-')) {
+        type = cleanFilename.replace(/^mockup-/, '');
+      }
+
+      // Pattern 2: [coverId]_[mockupType].jpg
+      if (cleanFilename.includes('_')) {
+        const lastUnderscore = cleanFilename.lastIndexOf('_');
+        const possibleType = cleanFilename.substring(lastUnderscore + 1);
+        if (['ipad_planner', 'print_craft', 'phone_journal'].includes(possibleType)) {
+          if (!type) type = possibleType;
+          if (!id) id = cleanFilename.substring(0, lastUnderscore);
+        }
+      }
+
+      // Pattern 3: direct doc id
+      if (!id && cleanFilename !== 'sticker-cover' && !cleanFilename.startsWith('master-cover')) {
+        id = cleanFilename;
+      }
+    }
+
     if (!id) return new NextResponse('Missing id', { status: 400 });
 
     const filename = type ? `mockup-${type}.jpg` : 'sticker-cover.jpg';
@@ -51,8 +81,16 @@ export async function GET(request: Request) {
     let imageUrl: string | undefined;
     if (type) {
       const doc = await db.collection('mockups').doc(`${id}_${type}`).get();
-      if (!doc.exists) return new NextResponse('Mockup not found', { status: 404 });
-      imageUrl = doc.data()?.image_url;
+      if (doc.exists) {
+        imageUrl = doc.data()?.image_url;
+      } else {
+        const directDoc = await db.collection('mockups').doc(id).get();
+        if (directDoc.exists) {
+          imageUrl = directDoc.data()?.image_url;
+        } else {
+          return new NextResponse('Mockup not found', { status: 404 });
+        }
+      }
     } else {
       const doc = await db.collection('designs').doc(id).get();
       if (!doc.exists) return new NextResponse('Not found', { status: 404 });

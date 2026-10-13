@@ -479,6 +479,45 @@ export default function Home() {
     }
   };
 
+  const createPinterestOptimizedDataUrl = async (originalDataUrl: string): Promise<string> => {
+    return new Promise((resolve) => {
+      if (!originalDataUrl || !originalDataUrl.startsWith('data:image/')) {
+        resolve(originalDataUrl);
+        return;
+      }
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const maxDim = 1200;
+        let w = img.naturalWidth || img.width || 1200;
+        let h = img.naturalHeight || img.height || 1200;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.85));
+        } else {
+          resolve(originalDataUrl);
+        }
+      };
+      img.onerror = () => resolve(originalDataUrl);
+      img.src = originalDataUrl;
+    });
+  };
+
   const handleShareMockupToPinterest = async (mockup: LifestyleMockupResult) => {
     if (!selectedPackCover) return;
 
@@ -512,24 +551,35 @@ export default function Home() {
     try {
       setSharingMockupId(mockup.id);
 
-      // Save mockup canvas dataUrl to backend so Pinterest scraper can fetch it via HTTP GET
-      if (mockup.dataUrl && mockup.dataUrl.startsWith('data:')) {
-        await fetch('/api/designs/save-mockup', {
+      // 1. Client-side optimize mockup image to 1200px max (~200KB) to guarantee staying well under Firestore 1MB limit
+      let uploadDataUrl = mockup.dataUrl;
+      if (uploadDataUrl && uploadDataUrl.startsWith('data:image/')) {
+        uploadDataUrl = await createPinterestOptimizedDataUrl(uploadDataUrl);
+      }
+
+      // 2. Save mockup canvas dataUrl to backend so Pinterest scraper can fetch it via HTTP GET
+      if (uploadDataUrl && uploadDataUrl.startsWith('data:')) {
+        const saveRes = await fetch('/api/designs/save-mockup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             coverId: selectedPackCover.id,
             mockupType: mockup.id,
-            dataUrl: mockup.dataUrl
+            dataUrl: uploadDataUrl
           })
         });
+        const saveJson = await saveRes.json();
+        if (!saveRes.ok || !saveJson.success) {
+          throw new Error(saveJson.error || '목업 이미지 서버 저장에 실패했습니다.');
+        }
       }
 
       const baseUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
         ? window.location.origin
         : 'https://pod-ebon.vercel.app';
 
-      const mediaUrl = `${baseUrl}/api/designs/image/mockup-${mockup.id}.jpg?id=${selectedPackCover.id}&type=${mockup.id}&v=${Date.now()}`;
+      // Use coverId_mockupType in the path so Pinterest scraper can fetch it with or without query params
+      const mediaUrl = `${baseUrl}/api/designs/image/${selectedPackCover.id}_${mockup.id}.jpg?id=${selectedPackCover.id}&type=${mockup.id}&v=${Date.now()}`;
       const customTitle = `${selectedPackCover.title || 'Cute Stickers'} - ${mockup.title}`;
 
       let demoContext = 'Digital Planner & Lifestyle demonstration';
@@ -551,10 +601,10 @@ export default function Home() {
       const description = `${customTitle}\n\n📸 [Lifestyle Demo] ${demoContext}.\n✨ ${packStickers.length > 0 ? packStickers.length : 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Digital Planners & Crafts.\nHigh resolution 300DPI PNG files with transparent backgrounds + printable sheet.\n\n👉 Shop this pack on Etsy: ${targetLink}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller #clipart`;
 
       handleShareToPinterest(mediaUrl, customTitle, description, popup);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sharing mockup to Pinterest:', error);
       if (popup && !popup.closed) popup.close();
-      alert('목업 이미지를 Pinterest로 전송하는 중 오류가 발생했습니다.');
+      alert('목업 이미지를 Pinterest로 전송하는 중 오류가 발생했습니다: ' + (error?.message || error));
     } finally {
       setSharingMockupId(null);
     }
