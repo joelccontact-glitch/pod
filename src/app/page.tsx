@@ -416,7 +416,14 @@ export default function Home() {
     }
   };
 
-  const handleShareToPinterest = (customMediaUrl?: string, customTitle?: string) => {
+  const [sharingMockupId, setSharingMockupId] = useState<string | null>(null);
+
+  const handleShareToPinterest = (
+    customMediaUrl?: string,
+    customTitle?: string,
+    customDesc?: string,
+    existingPopup?: Window | null
+  ) => {
     if (!selectedPackCover) return;
 
     let targetLink = (currentListingUrl || etsyShopUrl || '').trim();
@@ -425,7 +432,10 @@ export default function Home() {
         '📌 핀을 클릭했을 때 구매자가 이동할 Etsy 상품 링크(또는 상점 주소)를 입력해 주세요:\n(한 번 입력하시면 자동 저장되어 다음부터는 바로 적용됩니다)',
         'https://www.etsy.com/shop/'
       );
-      if (!inputUrl || !inputUrl.trim()) return;
+      if (!inputUrl || !inputUrl.trim()) {
+        if (existingPopup && !existingPopup.closed) existingPopup.close();
+        return;
+      }
       targetLink = inputUrl.trim();
       handleUpdateEtsyListingUrl(targetLink);
     }
@@ -449,7 +459,7 @@ export default function Home() {
       .slice(0, 8)
       .join(' ');
 
-    const description = `${title}\n\n✨ ${packStickers.length > 0 ? packStickers.length : 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Digital Planners & Crafts.\nHigh resolution 300DPI PNG files with transparent backgrounds + printable sheet.\n\n👉 Shop on Etsy: ${targetLink}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller #clipart`;
+    const description = customDesc || `${title}\n\n✨ ${packStickers.length > 0 ? packStickers.length : 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Digital Planners & Crafts.\nHigh resolution 300DPI PNG files with transparent backgrounds + printable sheet.\n\n👉 Shop on Etsy: ${targetLink}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller #clipart`;
 
     const pinUrl = `https://www.pinterest.com/pin/create/button/?url=${encodeURIComponent(targetLink)}&media=${encodeURIComponent(mediaUrl)}&description=${encodeURIComponent(description)}`;
 
@@ -458,11 +468,96 @@ export default function Home() {
     const left = typeof window !== 'undefined' && window.screen.width ? (window.screen.width - width) / 2 : 100;
     const top = typeof window !== 'undefined' && window.screen.height ? (window.screen.height - height) / 2 : 100;
 
-    window.open(
-      pinUrl,
+    if (existingPopup && !existingPopup.closed) {
+      existingPopup.location.href = pinUrl;
+    } else {
+      window.open(
+        pinUrl,
+        'pinterest_pin_share',
+        `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no,location=no,status=no,scrollbars=yes`
+      );
+    }
+  };
+
+  const handleShareMockupToPinterest = async (mockup: LifestyleMockupResult) => {
+    if (!selectedPackCover) return;
+
+    let targetLink = (currentListingUrl || etsyShopUrl || '').trim();
+    if (!targetLink) {
+      const inputUrl = prompt(
+        '📌 핀을 클릭했을 때 구매자가 이동할 Etsy 상품 링크(또는 상점 주소)를 입력해 주세요:\n(한 번 입력하시면 자동 저장되어 다음부터는 바로 적용됩니다)',
+        'https://www.etsy.com/shop/'
+      );
+      if (!inputUrl || !inputUrl.trim()) return;
+      targetLink = inputUrl.trim();
+      handleUpdateEtsyListingUrl(targetLink);
+    }
+
+    const width = 760;
+    const height = 660;
+    const left = typeof window !== 'undefined' && window.screen.width ? (window.screen.width - width) / 2 : 100;
+    const top = typeof window !== 'undefined' && window.screen.height ? (window.screen.height - height) / 2 : 100;
+
+    const popup = window.open(
+      'about:blank',
       'pinterest_pin_share',
       `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no,location=no,status=no,scrollbars=yes`
     );
+    if (popup) {
+      try {
+        popup.document.write('<div style="font-family:system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:80vh;text-align:center;padding:24px;"><div style="font-size:42px;margin-bottom:12px;">📌</div><h2 style="font-size:20px;font-weight:bold;color:#E60023;margin:0 0 8px 0;">Pinterest 연결 중...</h2><p style="color:#666;font-size:14px;margin:0;line-height:1.5;">실물 시연 목업 이미지를 Pinterest 핀 규격으로 준비하고 있습니다.<br/>잠시만 기다려주시면 핀 생성 화면으로 자동 이동합니다.</p></div>');
+      } catch (e) {}
+    }
+
+    try {
+      setSharingMockupId(mockup.id);
+
+      // Save mockup canvas dataUrl to backend so Pinterest scraper can fetch it via HTTP GET
+      if (mockup.dataUrl && mockup.dataUrl.startsWith('data:')) {
+        await fetch('/api/designs/save-mockup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            coverId: selectedPackCover.id,
+            mockupType: mockup.id,
+            dataUrl: mockup.dataUrl
+          })
+        });
+      }
+
+      const baseUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
+        ? window.location.origin
+        : 'https://pod-ebon.vercel.app';
+
+      const mediaUrl = `${baseUrl}/api/designs/image/mockup-${mockup.id}.jpg?id=${selectedPackCover.id}&type=${mockup.id}&v=${Date.now()}`;
+      const customTitle = `${selectedPackCover.title || 'Cute Stickers'} - ${mockup.title}`;
+
+      let demoContext = 'Digital Planner & Lifestyle demonstration';
+      if (mockup.id === 'ipad_planner') {
+        demoContext = 'Realistic iPad & GoodNotes digital planning demonstration with cute die-cut stickers';
+      } else if (mockup.id === 'print_craft') {
+        demoContext = 'Printed & cut DIY sticker craft demonstration';
+      } else if (mockup.id === 'phone_journal') {
+        demoContext = 'Laptop & phone case aesthetic sticker decoration demonstration';
+      }
+
+      const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
+      const hashTags = (packSeo.tags || [])
+        .map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, ''))
+        .filter(t => t.length > 2)
+        .slice(0, 8)
+        .join(' ');
+
+      const description = `${customTitle}\n\n📸 [Lifestyle Demo] ${demoContext}.\n✨ ${packStickers.length > 0 ? packStickers.length : 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Digital Planners & Crafts.\nHigh resolution 300DPI PNG files with transparent backgrounds + printable sheet.\n\n👉 Shop this pack on Etsy: ${targetLink}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller #clipart`;
+
+      handleShareToPinterest(mediaUrl, customTitle, description, popup);
+    } catch (error) {
+      console.error('Error sharing mockup to Pinterest:', error);
+      if (popup && !popup.closed) popup.close();
+      alert('목업 이미지를 Pinterest로 전송하는 중 오류가 발생했습니다.');
+    } finally {
+      setSharingMockupId(null);
+    }
   };
 
   // A4 Printable Sticker Sheet Modal & States (Supports Multi-Page e.g. 40 items = 2 Sheets)
@@ -7033,12 +7128,22 @@ export default function Home() {
                               <span>고화질 다운로드 (JPG)</span>
                             </button>
                             <button
-                              onClick={() => handleShareToPinterest(undefined, `${selectedPackCover?.title || 'Cute Stickers'} - ${mockup.title}`)}
-                              className="w-full bg-[#E60023] hover:bg-[#ad081b] active:scale-95 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                              onClick={() => handleShareMockupToPinterest(mockup)}
+                              disabled={sharingMockupId === mockup.id}
+                              className="w-full bg-[#E60023] hover:bg-[#ad081b] disabled:opacity-60 active:scale-95 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:cursor-wait"
                               title="이 테마의 Etsy 링크와 함께 Pinterest 핀을 바로 등록합니다"
                             >
-                              <span>📌</span>
-                              <span>Pinterest 핀 즉시 등록</span>
+                              {sharingMockupId === mockup.id ? (
+                                <>
+                                  <span className="animate-spin text-xs">⏳</span>
+                                  <span>Pinterest 준비 중...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <span>📌</span>
+                                  <span>Pinterest 핀 즉시 등록</span>
+                                </>
+                              )}
                             </button>
                           </div>
                         </div>

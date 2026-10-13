@@ -19,11 +19,13 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const type = searchParams.get('type');
     const v = searchParams.get('v');
     const nocache = searchParams.get('nocache') === 'true' || searchParams.has('_t');
     if (!id) return new NextResponse('Missing id', { status: 400 });
 
-    const cacheKey = v ? `${id}_${v}` : id;
+    const filename = type ? `mockup-${type}.jpg` : 'sticker-cover.jpg';
+    const cacheKey = type ? `${id}_${type}${v ? `_${v}` : ''}` : (v ? `${id}_${v}` : id);
 
     // 1. Check in-memory cache first (0 Firestore reads!)
     if (!nocache) {
@@ -33,7 +35,7 @@ export async function GET(request: Request) {
           headers: {
             'Content-Type': cached.mimeType,
             'Content-Length': cached.buffer.length.toString(),
-            'Content-Disposition': 'inline; filename="sticker-cover.jpg"',
+            'Content-Disposition': `inline; filename="${filename}"`,
             'Access-Control-Allow-Origin': '*',
             'Cache-Control': v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400',
           },
@@ -46,11 +48,16 @@ export async function GET(request: Request) {
     }
 
     // 2. Fetch from Firestore only if not cached
-    const doc = await db.collection('designs').doc(id).get();
-    if (!doc.exists) return new NextResponse('Not found', { status: 404 });
-
-    const data = doc.data();
-    const imageUrl = data?.image_url;
+    let imageUrl: string | undefined;
+    if (type) {
+      const doc = await db.collection('mockups').doc(`${id}_${type}`).get();
+      if (!doc.exists) return new NextResponse('Mockup not found', { status: 404 });
+      imageUrl = doc.data()?.image_url;
+    } else {
+      const doc = await db.collection('designs').doc(id).get();
+      if (!doc.exists) return new NextResponse('Not found', { status: 404 });
+      imageUrl = doc.data()?.image_url;
+    }
 
     if (!imageUrl) {
       return NextResponse.redirect('https://placehold.co/800x800?text=No+Image');
@@ -75,7 +82,7 @@ export async function GET(request: Request) {
             headers: {
               'Content-Type': contentType,
               'Content-Length': buffer.length.toString(),
-              'Content-Disposition': 'inline; filename="sticker-cover.jpg"',
+              'Content-Disposition': `inline; filename="${filename}"`,
               'Access-Control-Allow-Origin': '*',
               'Cache-Control': nocache ? 'no-store, no-cache, must-revalidate' : (v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400'),
             },
@@ -105,7 +112,7 @@ export async function GET(request: Request) {
       headers: {
         'Content-Type': mimeType,
         'Content-Length': buffer.length.toString(),
-        'Content-Disposition': 'inline; filename="sticker-cover.jpg"',
+        'Content-Disposition': `inline; filename="${filename}"`,
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': nocache ? 'no-store, no-cache, must-revalidate' : (v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400'),
       },
