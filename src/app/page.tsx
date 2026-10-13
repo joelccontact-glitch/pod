@@ -6511,11 +6511,18 @@ export default function Home() {
                     </button>
                   </div>
 
-                  {/* Pinterest 핀 원클릭 즉시 등록 버튼 */}
+                  {/* Pinterest 핀 등록 키트 바로가기 버튼 */}
                   <button
-                    onClick={() => handleShareToPinterest()}
+                    onClick={() => {
+                      const el = document.getElementById('pinterest-marketing-hub');
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth' });
+                      } else {
+                        window.open('https://www.pinterest.com/pin-creation-tool/', '_blank');
+                      }
+                    }}
                     className="bg-[#E60023] hover:bg-[#ad081b] active:scale-95 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer hover:shadow-red-200"
-                    title="Pinterest에 표지 이미지와 Etsy 링크를 원클릭으로 핀 등록합니다"
+                    title="Pinterest 비즈니스 핀 등록 키트로 바로 이동합니다"
                   >
                     <span>📌</span>
                     <span>Pinterest 핀 등록</span>
@@ -6620,7 +6627,7 @@ export default function Home() {
                   return (
                     <>
                       {/* 📌 Pinterest 비즈니스 핀 등록 마케팅 바 */}
-                      <div className="mb-4 bg-gradient-to-r from-rose-50 via-red-50 to-pink-50 border-2 border-red-200 rounded-2xl p-4 shadow-sm">
+                      <div id="pinterest-marketing-hub" className="mb-4 bg-gradient-to-r from-rose-50 via-red-50 to-pink-50 border-2 border-red-200 rounded-2xl p-4 shadow-sm">
                         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
                           <div className="flex items-center gap-2.5">
                             <div className="w-10 h-10 rounded-xl bg-[#E60023] text-white flex items-center justify-center font-black text-xl shadow-sm shrink-0">
@@ -6788,16 +6795,9 @@ export default function Home() {
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between text-[11px] text-gray-500 pt-1 border-t border-gray-100 flex-wrap gap-1">
+                          <div className="text-[11px] text-gray-500 pt-1 border-t border-gray-100 flex items-center justify-between">
                             <span>💡 순서: <strong>[🚀 핀 만들기 열기]</strong> 클릭 ➔ 핀터레스트 화면에서 <strong>1~4번 각각 Ctrl+V</strong> 붙여넣기 ➔ 15초 끝!</span>
-                            <button
-                              type="button"
-                              onClick={() => handleShareToPinterest()}
-                              className="text-red-700 hover:text-red-900 font-bold underline cursor-pointer text-[11px]"
-                              title="웹 공유 팝업으로 즉시 저장 (단, 핀터레스트 공유 API 특성상 제목 필드가 비워질 수 있음)"
-                            >
-                              ⚡ 초간편 3초 팝업 등록 &gt;
-                            </button>
+                            <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">✓ 공식 비즈니스 핀 규격</span>
                           </div>
                         </div>
                       </div>
@@ -7357,10 +7357,10 @@ export default function Home() {
                               <span>고화질 다운로드 (JPG)</span>
                             </button>
 
-                            {/* 🏆 정품 비즈니스 핀 복사 키트 (15초 완성, 권장) */}
+                            {/* 📌 정품 비즈니스 핀 등록 */}
                             <button
                               onClick={() => {
-                                handleCopyImageToClipboard(mockup.dataUrl);
+                                handleDownloadSingleMockup(mockup);
                                 const customTitle = `${selectedPackCover?.title || 'Cute Stickers'} - ${mockup.title}`;
                                 const targetLink = currentListingUrl || etsyShopUrl || 'https://www.etsy.com';
                                 const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
@@ -7371,31 +7371,11 @@ export default function Home() {
                                 setTimeout(() => setCopiedMockupNotice(null), 3000);
                                 window.open('https://www.pinterest.com/pin-creation-tool/', '_blank');
                               }}
-                              className="w-full bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                              title="목업 사진을 복사하고 Pinterest 핀 만들기 화면을 새 창으로 엽니다. Pinterest 화면에서 Ctrl+V를 누르세요."
+                              className="w-full bg-[#E60023] hover:bg-[#ad081b] active:scale-95 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                              title="목업 사진을 다운로드하고 핀터레스트 핀 만들기 화면을 새 창으로 엽니다"
                             >
                               <span>🚀</span>
-                              <span>{copiedMockupNotice === mockup.id ? '✓ 사진복사됨! Pinterest 이동' : '🏆 정품 핀 복사 키트 (권장)'}</span>
-                            </button>
-
-                            {/* ⚡ 초간편 3초 팝업 등록 */}
-                            <button
-                              onClick={() => handleShareMockupToPinterest(mockup)}
-                              disabled={sharingMockupId === mockup.id}
-                              className="w-full bg-[#E60023] hover:bg-[#ad081b] disabled:opacity-60 active:scale-95 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:cursor-wait"
-                              title="웹 공유 팝업으로 즉시 저장합니다"
-                            >
-                              {sharingMockupId === mockup.id ? (
-                                <>
-                                  <span className="animate-spin text-xs">⏳</span>
-                                  <span>Pinterest 준비 중...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <span>📌</span>
-                                  <span>초간편 3초 팝업 등록</span>
-                                </>
-                              )}
+                              <span>{copiedMockupNotice === mockup.id ? '✓ 사진저장 & 정보복사됨!' : '📌 Pinterest 핀 등록'}</span>
                             </button>
                           </div>
                         </div>
