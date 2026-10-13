@@ -195,7 +195,7 @@ export function buildEnforced2DVectorPrompt(rawPrompt: string, spellingInstructi
   const typographySection = spellingInstruction ? ` ${spellingInstruction}` : '';
   
   if (isStickerDetected) {
-    return `Square 1:1 ratio 2D vector graphic cute die-cut sticker illustration of ${cleaned}.${typographySection} Crisp thick die-cut white border around the entire design. Centered on a pure solid white background (#FFFFFF). STRICT NEGATIVE: Absolutely NO t-shirt, NO clothing, NO collar neckline, NO shirt outlines, NO mockups, NO apparel. Standalone sticker art only.`;
+    return `Square 1:1 ratio 2D vector graphic cute die-cut sticker illustration of ${cleaned}.${typographySection} STRICT SINGLE SUBJECT: EXACTLY ONE single centered subject on canvas. Absolutely NO multiple characters, NO duplicate side-by-side figures, NO 3-in-a-row layout, NO sticker sheet collage. Crisp thick die-cut white border around the entire design. Centered on a pure solid white background (#FFFFFF). STRICT NEGATIVE: Absolutely NO t-shirt, NO clothing, NO collar neckline, NO shirt outlines, NO mockups, NO apparel. Standalone single sticker art only.`;
   }
   
   return `Square 1:1 ratio 2D vector graphic t-shirt graphic illustration of ${cleaned}.${typographySection} Isolated cute adorable animal artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`;
@@ -267,12 +267,12 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
   }
 
   const googleModels = [
-    'gemini-3.1-flash-image',
     'gemini-2.5-flash-image',
+    'gemini-3.1-flash-image',
     'gemini-3.1-flash-image-preview',
   ];
 
-  // 1. Primary: Direct Google Native Gemini Image Models (gemini-3.1-flash-image & gemini-2.5-flash-image)
+  // 1. Primary: Direct Google Native Gemini Image Models (gemini-2.5-flash-image & gemini-3.1-flash-image)
   if (apiKey) {
     for (const modelName of googleModels) {
       try {
@@ -307,7 +307,7 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
   // 2. Fallback: High Precision Flux.1 Engine via Pollinations
   try {
     console.log(`🎨 Falling back to High Precision Flux.1 AI Engine...`);
-    const cleanPrompt = prompt.length > 500 ? prompt.substring(0, 500) : prompt;
+    const cleanPrompt = (prompt.length > 450 ? prompt.substring(0, 450) : prompt) + ', single isolated centered sticker, no duplicates, no pattern, no repetition, pure white background';
     const seed = Math.floor(Math.random() * 1000000);
     const encodedPrompt = encodeURIComponent(cleanPrompt);
     const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;

@@ -20,10 +20,11 @@ export interface StickerPreset {
 }
 
 export const STICKER_RULES_PROMPT_SUFFIX = `CRITICAL STICKER RULES:
-1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
-2. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
-3. Any brand or catchphrase text MUST be drawn in an elegant, cute, hand-drawn script font with colors matching the design palette.
-4. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
+1. STRICT SINGLE SUBJECT MANDATE: MUST feature EXACTLY ONE single centered subject/character. Absolutely NO multiple characters, NO duplicate side-by-side copies, NO trios, NO repeated pattern, NO sticker sheet collage. EXACTLY ONE single isolated sticker in the center.
+2. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
+3. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
+4. Any brand or catchphrase text MUST be drawn in an elegant, cute, hand-drawn script font with colors matching the design palette.
+5. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration, square 1:1 ratio.`;
 
 /**
  * Formats a master cover title so that the count (e.g. 20종, 40종) dynamically reflects
