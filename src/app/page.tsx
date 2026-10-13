@@ -33,7 +33,6 @@ import {
 import JSZip from 'jszip';
 import { createCompositeMasterCover } from '@/lib/master-cover-builder';
 import { generateA4StickerSheet, generateA4StickerSheets, generateA4StickerSheetsPair } from '@/lib/sticker-sheet-builder';
-import { generateCreativeFabricaTags, formatCFTagsForClipboard } from '@/lib/creative-fabrica-tags';
 import { extractStandaloneStickerFromTank } from '@/lib/standalone-extractor';
 import { createVesselStickerFromStandalone } from '@/lib/vessel-housing-builder';
 import { generateEtsySeo } from '@/lib/etsy-seo-generator';
@@ -228,9 +227,6 @@ export default function Home() {
   const [isSeasonalRadarExpanded, setIsSeasonalRadarExpanded] = useState(true); // Expanded by default
   const [expandedStrategySeasonIds, setExpandedStrategySeasonIds] = useState<string[]>([]);
   const [copiedTagsSeasonId, setCopiedTagsSeasonId] = useState<string | null>(null);
-  const [copiedCFSeasonId, setCopiedCFSeasonId] = useState<string | null>(null);
-  const [copiedCFTagsNotice, setCopiedCFTagsNotice] = useState(false);
-  const [copiedCFTabNotice, setCopiedCFTabNotice] = useState(false);
   const [copiedEtsyTitleNotice, setCopiedEtsyTitleNotice] = useState(false);
   const [copiedEtsyDescNotice, setCopiedEtsyDescNotice] = useState(false);
   const [copiedPackTitleNotice, setCopiedPackTitleNotice] = useState(false);
@@ -3711,29 +3707,9 @@ export default function Home() {
                                           setCopiedTagsSeasonId(season.seasonId);
                                           setTimeout(() => setCopiedTagsSeasonId(null), 2000);
                                         }}
-                                        className="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-1.5 py-0.5 rounded border border-indigo-200 transition-colors flex items-center gap-1 cursor-pointer"
+                                        className="text-[10px] bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded border border-indigo-200 transition-colors flex items-center gap-1 cursor-pointer"
                                       >
-                                        <span>{copiedTagsSeasonId === season.seasonId ? '✓ 완료' : '📋 Etsy태그'}</span>
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => {
-                                          const cfTags = generateCreativeFabricaTags({
-                                            title: season.title,
-                                            topic: season.bestSellerReason,
-                                            tags: season.pricingStrategy.etsyTags,
-                                            categoryOrSub: season.seasonId,
-                                            maxTags: 45
-                                          });
-                                          if (navigator.clipboard) {
-                                            navigator.clipboard.writeText(formatCFTagsForClipboard(cfTags));
-                                          }
-                                          setCopiedCFSeasonId(season.seasonId);
-                                          setTimeout(() => setCopiedCFSeasonId(null), 2000);
-                                        }}
-                                        className="text-[10px] bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded border border-emerald-300 transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
-                                      >
-                                        <span>{copiedCFSeasonId === season.seasonId ? '✓ 완료' : '🎨 CF태그'}</span>
+                                        <span>{copiedTagsSeasonId === season.seasonId ? '✓ 완료' : '📋 13태그 복사'}</span>
                                       </button>
                                     </div>
                                   </div>
@@ -4330,42 +4306,6 @@ export default function Home() {
               })}
             </div>
 
-            {/* Creative Fabrica Bundle Designer Tags Quick Bar */}
-            {isStickerMode && selectedStickerSubTab !== 'all' && (
-              <div className="mt-3 pt-2.5 border-t border-teal-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 bg-white/70 p-2.5 rounded-xl border border-teal-200/50 shadow-2xs">
-                <div className="flex items-center gap-2">
-                  <span className="text-base sm:text-lg">🎨</span>
-                  <div>
-                    <h4 className="text-xs font-extrabold text-teal-950 flex items-center gap-1.5 flex-wrap">
-                      <span>Creative Fabrica 상품 등록 지원</span>
-                      <span className="bg-emerald-600 text-white text-[9.5px] px-2 py-0.2 rounded-full font-bold">CF Designer Tags</span>
-                    </h4>
-                    <p className="text-[11px] text-teal-800 mt-0.5">
-                      현재 선택된 <strong className="underline font-bold text-teal-950">{selectedStickerSubTab}</strong> 번들 팩 전용 40~45개 Designer Tags를 원클릭으로 복사합니다.
-                    </p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const cfTags = generateCreativeFabricaTags({
-                      title: `${selectedStickerSubTab} sticker pack bundle`,
-                      categoryOrSub: selectedStickerSubTab,
-                      maxTags: 45
-                    });
-                    if (navigator.clipboard) {
-                      navigator.clipboard.writeText(formatCFTagsForClipboard(cfTags));
-                    }
-                    setCopiedCFTabNotice(true);
-                    setTimeout(() => setCopiedCFTabNotice(false), 2000);
-                  }}
-                  className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-2.5 py-1.5 rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer shrink-0"
-                >
-                  <span>📋</span>
-                  <span>{copiedCFTabNotice ? '✓ 복사완료!' : `CF 태그 복사 (45개)`}</span>
-                </button>
-              </div>
-            )}
           </div>
         )}
 
@@ -4613,13 +4553,6 @@ export default function Home() {
                 <div className="p-5 sm:p-8 overflow-y-auto flex-1 custom-scrollbar">
                   {activeTab === 'info' && (() => {
                     const currentActiveDesign = previewDesign || selectedDesign;
-                    const cfDetailTags = currentActiveDesign ? generateCreativeFabricaTags({
-                      title: currentActiveDesign.title,
-                      topic: currentActiveDesign.topic,
-                      tags: currentActiveDesign.tags,
-                      categoryOrSub: currentActiveDesign.sticker_sub || currentActiveDesign.design_type,
-                      maxTags: 45
-                    }) : [];
                     const etsySeo = currentActiveDesign ? generateEtsySeo(currentActiveDesign) : null;
 
                     return (
@@ -4701,80 +4634,7 @@ export default function Home() {
                               {copiedEtsyDescNotice ? '✓ 영문 설명 복사완료!' : '📋 Etsy 영문 상세설명 복사'}
                             </button>
                           )}
-                          <button 
-                            onClick={() => {
-                              handleCopy(formatCFTagsForClipboard(cfDetailTags));
-                              setCopiedCFTagsNotice(true);
-                              setTimeout(() => setCopiedCFTagsNotice(false), 2000);
-                            }} 
-                            className="text-xs sm:text-sm bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-300 px-3.5 py-1.5 rounded-full font-bold transition-colors flex items-center gap-1 shadow-2xs cursor-pointer"
-                          >
-                            <span>🎨</span>
-                            <span>{copiedCFTagsNotice ? '✓ CF Designer Tags 복사완료!' : `CF Designer Tags (${cfDetailTags.length}개) 복사`}</span>
-                          </button>
                         </div>
-
-                        <div className="space-y-6">
-                          <div>
-                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Topic</h4>
-                            <p className="text-gray-700 bg-gray-50 px-4 py-3 rounded-xl text-sm border border-gray-100">{currentActiveDesign?.topic}</p>
-                          </div>
-                          <div>
-                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Art Style (바탕 화풍)</h4>
-                            <p className="text-purple-700 bg-purple-50/80 px-4 py-3 rounded-xl text-sm border border-purple-100 font-semibold flex items-center gap-2">
-                              <span className="text-base">🎨</span>
-                              <span>{getStyleDisplayName(currentActiveDesign)}</span>
-                            </p>
-                          </div>
-                          <div>
-                            <div className="flex items-center justify-between mb-2">
-                              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Etsy SEO Tags (13개)</h4>
-                              <span className="text-[10px] text-gray-400">Etsy 입점용 핵심 태그</span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {currentActiveDesign?.tags?.map((tag: string, i: number) => (
-                                <span key={i} className="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full border border-blue-100">{tag}</span>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* 🎨 Creative Fabrica Designer Tags Section */}
-                          <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl space-y-2.5">
-                            <div className="flex items-center justify-between gap-2 flex-wrap">
-                              <div className="flex items-center gap-2">
-                                <span className="text-base">🎨</span>
-                                <h4 className="text-xs font-extrabold text-emerald-950 uppercase tracking-wider">
-                                  Creative Fabrica Designer Tags ({cfDetailTags.length}개)
-                                </h4>
-                                <span className="text-[9.5px] bg-emerald-600 text-white font-bold px-2 py-0.5 rounded-full">CF 추천 태그</span>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  handleCopy(formatCFTagsForClipboard(cfDetailTags));
-                                  setCopiedCFTagsNotice(true);
-                                  setTimeout(() => setCopiedCFTagsNotice(false), 2000);
-                                }}
-                                className="text-xs bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-3 py-1.5 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
-                              >
-                                <span>📋</span>
-                                <span>{copiedCFTagsNotice ? '✓ 복사완료!' : 'CF 태그 일괄 복사'}</span>
-                              </button>
-                            </div>
-                            <p className="text-[11px] text-emerald-800/90 leading-relaxed">
-                              Creative Fabrica 상품 등록 시 <strong>Designer tags</strong> 입력창에 쉼표(,) 구분으로 그대로 붙여넣을 수 있는 대량 롱테일 키워드입니다.
-                            </p>
-                            <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scrollbar pt-1">
-                              {cfDetailTags.map((tag: string, i: number) => (
-                                <span 
-                                  key={i} 
-                                  className="text-[11px] bg-white text-emerald-900 border border-emerald-300 hover:border-emerald-500 px-2 py-0.5 rounded-lg font-medium shadow-2xs transition-colors"
-                                >
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
 
                           {/* 📄 Etsy 영문 상세설명 (Listing Description) 전문 섹션 */}
                           {etsySeo && (
@@ -4852,7 +4712,6 @@ export default function Home() {
                               </button>
                             </div>
                           </div>
-                        </div>
                       </>
                     );
                   })()}
@@ -6014,7 +5873,7 @@ export default function Home() {
                       title="[Etsy 전용] Etsy 파일 20MB 제한을 통과하도록 20MB 이하 분할 ZIP으로 자동 다운로드합니다."
                     >
                       <span className="bg-emerald-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-emerald-200">
-                        {packStickers.length > 20 ? 'Etsy용' : '3단계'}
+                        3단계
                       </span>
                       {isExportingBundle ? (
                         <span className="animate-spin inline-block">⏳</span>
@@ -6027,19 +5886,6 @@ export default function Home() {
                           : (packStickers.length > 20 ? `Etsy 분할 다운 (${packStickers.length}종)` : `전체 ZIP 다운 (${packStickers.length}종)`)}
                       </span>
                     </button>
-
-                    {packStickers.length > 20 && (
-                      <button
-                        onClick={() => downloadBatchSession([selectedPackCover, ...packStickers], `${selectedPackCover.topic || 'Sticker_Pack'}_Bundle`, { splitForEtsy: false })}
-                        disabled={isExportingBundle || packStickers.length === 0}
-                        className="bg-teal-700 hover:bg-teal-800 disabled:bg-teal-900 disabled:opacity-90 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-all flex items-center gap-1.5 border border-teal-600 cursor-pointer disabled:cursor-wait"
-                        title="[Creative Fabrica / 구글드라이브 보관용] 전체 40종을 1개의 단일 대용량 ZIP 파일로 다운로드합니다."
-                      >
-                        <span className="bg-teal-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-teal-200">CF용</span>
-                        <span>📁</span>
-                        <span>단일 ZIP</span>
-                      </button>
-                    )}
                   </div>
 
                   {/* 부가 도구: 표지 편집 및 삭제 */}
