@@ -3936,15 +3936,17 @@ export default function Home() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center gap-2">
-                    <button
-                      onClick={() => handleBatchGenerateSeries(`${selectedStickerSeriesTab}_both`)}
-                      disabled={isBatchGenerating}
-                      className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold py-2 px-3 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-purple-500 whitespace-nowrap"
-                      title="메인 세트 20종 + 단독 낱개 20종 = 총 41장 및 A4 2장 시트 동시 생성"
-                    >
-                      <span>🔥</span>
-                      <span>40종 동시 생성</span>
-                    </button>
+                    {!['dessert20', 'socialbattery20', 'hangul20', 'booktok20'].includes(selectedStickerSeriesTab) && (
+                      <button
+                        onClick={() => handleBatchGenerateSeries(`${selectedStickerSeriesTab}_both`)}
+                        disabled={isBatchGenerating}
+                        className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold py-2 px-3 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-purple-500 whitespace-nowrap cursor-pointer disabled:opacity-50"
+                        title="메인 세트 20종 + 단독 낱개 20종 = 총 41장 및 A4 2장 시트 동시 생성"
+                      >
+                        <span>🔥</span>
+                        <span>40종 동시 생성</span>
+                      </button>
+                    )}
 
                     <button
                       onClick={() => handleBatchGenerateSeries(selectedStickerSeriesTab)}
