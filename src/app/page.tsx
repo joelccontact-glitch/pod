@@ -205,6 +205,33 @@ const getPresetSeriesList = (tab: string): StickerPreset[] => {
   return tab.includes('standalone') ? pack.standaloneSeries : pack.vesselSeries;
 };
 
+const getPackSeriesPresets = (coverDesign: any): StickerPreset[] => {
+  if (!coverDesign) return [];
+  const presetId = (coverDesign.stickerPresetId || coverDesign.id || '').toLowerCase();
+  const sub = (coverDesign.sticker_sub || '').toLowerCase();
+  const title = (coverDesign.title || coverDesign.topic || '').toLowerCase();
+
+  if (presetId.includes('dessert') || sub === 'dessert' || title.includes('디저트')) return DESSERT_20_SERIES;
+  if (presetId.includes('socialbattery') || presetId.includes('social-battery') || sub === 'socialbattery' || title.includes('사회적 배터리')) return SOCIAL_BATTERY_20_SERIES;
+  if (presetId.includes('hangul') || sub === 'hangul' || title.includes('한글')) return HANGUL_20_SERIES;
+  if (presetId.includes('booktok') || sub === 'booktok' || title.includes('북톡') || title.includes('독서')) return BOOKTOK_20_SERIES;
+  if (presetId.includes('terrarium') || sub === 'terrarium' || title.includes('테라리움')) return TERRARIUM_20_SERIES;
+  if (presetId.includes('vivarium') || sub === 'vivarium' || title.includes('비바리움')) return VIVARIUM_20_SERIES;
+  if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium') || sub === 'saltaquarium' || title.includes('해수어')) return SALT_AQUARIUM_20_SERIES;
+  if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium') || sub === 'freshaquarium' || title.includes('열대어')) return FRESH_AQUARIUM_20_SERIES;
+  if (presetId.includes('christmas') || sub === 'christmas' || title.includes('크리스마스')) return CHRISTMAS_20_SERIES;
+  if (presetId.includes('halloween') || sub === 'halloween' || title.includes('할로윈')) return HALLOWEEN_20_SERIES;
+  if (presetId.includes('thanksgiving') || sub === 'thanksgiving' || title.includes('추수감사절')) return THANKSGIVING_20_SERIES;
+
+  if (sub) {
+    try {
+      const seasonalPack = getSeasonalPackPresets(sub);
+      if (seasonalPack?.vesselSeries && seasonalPack.vesselSeries.length > 0) return seasonalPack.vesselSeries;
+    } catch (e) {}
+  }
+  return [];
+};
+
 export default function Home() {
   const { data: session } = useSession();
   const [designs, setDesigns] = useState<any[]>([]);
@@ -1020,6 +1047,109 @@ export default function Home() {
       console.error('Error fetching pack stickers:', e);
     } finally {
       setLoadingPackStickers(false);
+    }
+  };
+
+  const [isFillingMissing, setIsFillingMissing] = useState(false);
+
+  const handleFillMissingPackStickers = async (missingList: StickerPreset[]) => {
+    if (!selectedPackCover || missingList.length === 0) return;
+    setIsFillingMissing(true);
+
+    const coverCategory = getDesignCategoryKey(selectedPackCover);
+    const subKey = selectedPackCover.sticker_sub || coverCategory;
+    let addedCount = 0;
+    const newlyAddedStickers: any[] = [];
+
+    try {
+      for (let i = 0; i < missingList.length; i++) {
+        const preset = missingList[i];
+        let genData = null;
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            const res = await fetch('/api/designs/from-image', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                imageBase64: '',
+                prompt: preset.prompt,
+                title: preset.name,
+                isPreview: true,
+                styleId: selectedStyleId,
+                catchphrase: '',
+                autoPhrase: false
+              })
+            });
+            const data = await res.json();
+            if (data.success && data.data?.image_url) {
+              genData = data;
+              break;
+            }
+          } catch (e) {
+            console.warn(`Attempt ${attempt} failed for missing preset ${preset.name}:`, e);
+          }
+          if (attempt < 3) await new Promise(r => setTimeout(r, 2000));
+        }
+
+        if (genData?.data?.image_url) {
+          const compressedUrl = await compressImageForFirestore(genData.data.image_url, 800000);
+          const newDoc = {
+            ...genData.data,
+            image_url: compressedUrl,
+            title: preset.name,
+            topic: preset.name,
+            stickerPresetId: preset.id,
+            sticker_sub: subKey,
+            design_type: 'sticker',
+            is_deleted: false,
+            created_at: selectedPackCover.created_at || new Date().toISOString()
+          };
+
+          await fetch('/api/designs/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: genData.data.id,
+              designData: newDoc
+            })
+          });
+
+          newlyAddedStickers.push(newDoc);
+          addedCount++;
+        }
+      }
+
+      if (addedCount > 0) {
+        invalidateClientPoolCache();
+        const updatedStickers = [...packStickers, ...newlyAddedStickers];
+        setPackStickers(updatedStickers);
+
+        const newTotalCount = updatedStickers.length;
+        const currentTitle = selectedPackCover.title || selectedPackCover.topic || '';
+        const correctedTitle = formatCoverTitleWithCount(currentTitle, newTotalCount);
+        if (correctedTitle !== currentTitle) {
+          setSelectedPackCover((prev: any) => prev ? { ...prev, title: correctedTitle, topic: correctedTitle } : prev);
+          setDesigns(prev => prev.map(d => d.id === selectedPackCover.id ? { ...d, title: correctedTitle, topic: correctedTitle } : d));
+          fetch('/api/designs/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: selectedPackCover.id,
+              updates: { title: correctedTitle, topic: correctedTitle }
+            })
+          }).catch(console.error);
+        }
+
+        alert(`✨ 누락되었던 스티커 ${addedCount}종이 성공적으로 생성되어 팩에 추가되었습니다! (총 ${newTotalCount}종 완성)`);
+        await fetchDesigns(page, false, undefined, undefined, true);
+      } else {
+        alert('스티커 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+      }
+    } catch (e: any) {
+      console.error('Error filling missing stickers:', e);
+      alert('누락 스티커 채우기 중 오류: ' + (e.message || String(e)));
+    } finally {
+      setIsFillingMissing(false);
     }
   };
 
@@ -2860,6 +2990,37 @@ export default function Home() {
 
     let coverDocData: any = null;
 
+    const generateWithRetry = async (prompt: string, title: string, maxAttempts: number = 3) => {
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const res = await fetch('/api/designs/from-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageBase64: '',
+              prompt,
+              title,
+              isPreview: true,
+              styleId: selectedStyleId,
+              catchphrase: '',
+              autoPhrase: false
+            })
+          });
+          const data = await res.json();
+          if (data.success && data.data?.image_url) {
+            return data;
+          }
+          console.warn(`[Batch Retry] Attempt ${attempt}/${maxAttempts} for "${title}" non-success:`, data?.error);
+        } catch (err) {
+          console.warn(`[Batch Retry] Attempt ${attempt}/${maxAttempts} for "${title}" network error:`, err);
+        }
+        if (attempt < maxAttempts) {
+          await new Promise(r => setTimeout(r, 2000 * attempt));
+        }
+      }
+      return null;
+    };
+
     for (let i = 0; i < targetPresets.length; i++) {
       const isCover = i === 0;
 
@@ -2877,21 +3038,8 @@ export default function Home() {
         });
 
         try {
-          const res = await fetch('/api/designs/from-image', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              imageBase64: '',
-              prompt: itemPrompt,
-              title: itemName,
-              isPreview: true,
-              styleId: selectedStyleId,
-              catchphrase: '',
-              autoPhrase: false
-            })
-          });
-          const data = await res.json();
-          if (data.success && data.data) {
+          const data = await generateWithRetry(itemPrompt, itemName, 3);
+          if (data && data.success && data.data) {
             const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
             coverDocData = {
               ...data.data,
@@ -2935,21 +3083,8 @@ export default function Home() {
       });
 
       try {
-        const res = await fetch('/api/designs/from-image', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            imageBase64: '',
-            prompt: vesselPreset.prompt,
-            title: vesselPreset.name,
-            isPreview: true,
-            styleId: selectedStyleId,
-            catchphrase: '',
-            autoPhrase: false
-          })
-        });
-        const data = await res.json();
-        if (data.success && data.data?.image_url) {
+        const data = await generateWithRetry(vesselPreset.prompt, vesselPreset.name, 3);
+        if (data && data.success && data.data?.image_url) {
           const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
           await fetch('/api/designs/save', {
             method: 'POST',
@@ -2984,21 +3119,8 @@ export default function Home() {
         });
 
         try {
-          const res = await fetch('/api/designs/from-image', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              imageBase64: '',
-              prompt: standalonePreset.prompt,
-              title: standalonePreset.name,
-              isPreview: true,
-              styleId: selectedStyleId,
-              catchphrase: '',
-              autoPhrase: false
-            })
-          });
-          const data = await res.json();
-          if (data.success && data.data?.image_url) {
+          const data = await generateWithRetry(standalonePreset.prompt, standalonePreset.name, 3);
+          if (data && data.success && data.data?.image_url) {
             const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
             await fetch('/api/designs/save', {
               method: 'POST',
@@ -5694,6 +5816,64 @@ export default function Home() {
                 </button>
               </div>
 
+              {/* Missing Stickers Detection & 1-Click Recovery Banner */}
+              {(() => {
+                const allSeriesPresets = getPackSeriesPresets(selectedPackCover);
+                const expectedStickers = allSeriesPresets.slice(1);
+                const missingPresets = expectedStickers.filter(preset => {
+                  return !packStickers.some((s: any) => {
+                    if (s.stickerPresetId && s.stickerPresetId === preset.id) return true;
+                    const sTitle = (s.title || '').toLowerCase();
+                    const pName = preset.name.toLowerCase();
+                    const coreName = preset.affinityObject ? preset.affinityObject.toLowerCase() : '';
+                    if (coreName && sTitle.includes(coreName)) return true;
+                    const cleanP = pName.replace(/\[.*?\]/g, '').trim();
+                    const cleanS = sTitle.replace(/\[.*?\]/g, '').trim();
+                    return cleanS === cleanP || (cleanP.length > 3 && cleanS.includes(cleanP));
+                  });
+                });
+
+                if (expectedStickers.length === 0 || missingPresets.length === 0) return null;
+
+                return (
+                  <div className="bg-amber-500/20 border-b-2 border-amber-400 p-3 sm:px-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-950 shrink-0">
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xl shrink-0">⚠️</span>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs sm:text-sm font-extrabold text-amber-950">
+                            스티커 {expectedStickers.length}종 중 {missingPresets.length}개가 누락되었습니다! (현재 {packStickers.length}종)
+                          </span>
+                          <span className="text-[10px] bg-amber-500 text-white font-black px-2 py-0.5 rounded-full">
+                            표지 이미지(20+)와 일치 필요
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-amber-900 mt-0.5 font-medium">
+                          누락된 항목: {missingPresets.map(p => p.name.replace(/\[.*?\]/g, '').trim()).slice(0, 3).join(', ')}{missingPresets.length > 3 ? ' 외' : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleFillMissingPackStickers(missingPresets)}
+                      disabled={isFillingMissing}
+                      className="bg-amber-600 hover:bg-amber-700 disabled:bg-amber-800 text-white font-black text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 shrink-0 border border-amber-500 cursor-pointer disabled:cursor-wait"
+                    >
+                      {isFillingMissing ? (
+                        <>
+                          <span className="animate-spin inline-block">⏳</span>
+                          <span>누락 스티커 자동 보충 중...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>⚡</span>
+                          <span>누락 스티커 {missingPresets.length}개 즉시 채우기 ({expectedStickers.length}종 완성)</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                );
+              })()}
+
               {/* Action Toolbar */}
               <div className="p-3 sm:p-4 bg-teal-50/90 border-b border-teal-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
                 <div className="flex items-center gap-2">
@@ -5796,7 +5976,26 @@ export default function Home() {
                     </button>
                   </div>
 
-                  {/* 부가 도구: 표지 편집 및 삭제 */}
+                  {/* 부가 도구: 표지 AI 재생성, 표지 편집 및 삭제 */}
+                  <button
+                    onClick={() => handleRegenerateMasterCover(selectedPackCover, packStickers.length)}
+                    disabled={isRegeneratingCover || isExportingBundle}
+                    className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer disabled:cursor-wait"
+                    title="현재 스티커 개수 및 최신 스타일에 맞춰 마스터 표지를 AI로 다시 생성합니다."
+                  >
+                    {isRegeneratingCover ? (
+                      <>
+                        <span className="animate-spin inline-block">⏳</span>
+                        <span>표지 AI 재생성 중...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>✨</span>
+                        <span>표지 AI 재생성</span>
+                      </>
+                    )}
+                  </button>
+
                   <button
                     onClick={() => {
                       setSelectedDesign(selectedPackCover);
