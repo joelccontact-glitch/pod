@@ -706,20 +706,7 @@ export default function Home() {
         setSelectedDesign((prev: any) => prev ? { ...prev, ...freshData } : prev);
       }
 
-      // Automatically trigger download of the newly generated composite cover
-      try {
-        const a = document.createElement('a');
-        a.href = compositeDataUrl;
-        const coverTheme = getCleanEnglishThemeName(coverDesign.sticker_sub, selectedStickerSeriesTab, adjustedTitle);
-        a.download = `00_Master_Cover_${coverTheme}_100Percent_Real_Stickers_300DPI.png`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      } catch (dlErr) {
-        console.error('Auto download error:', dlErr);
-      }
-
-      alert(`✨ 실제 ${targetCount}종 스티커 100% 실물 일치 마스터 표지 합성이 완료되었습니다!\n(총 ${targetCount}종 스티커가 표지에 자동 배치되었으며 다운로드가 시작되었습니다)`);
+      alert(`✨ 실제 ${targetCount}종 스티커 100% 실물 일치 마스터 표지 합성이 완료되었습니다!`);
       await fetchDesigns(page, false, undefined, undefined, true);
     } catch (e: any) {
       console.error('Error creating composite master cover:', e);
@@ -3038,32 +3025,6 @@ export default function Home() {
       }
     }
 
-    // ✨ AUTOMATION: Automatically synthesize 100% real sticker composite cover upon completion!
-    if (coverDocData) {
-      setBatchProgress({
-        current: totalExpectedCount,
-        total: totalExpectedCount,
-        label: `✨ 실물 스티커 100% 일치 마스터 표지 자동 합성 중...`,
-        packTitle: packName
-      });
-
-      try {
-        const poolRes = await fetch(`/api/designs?limit=1000&type=sticker&subType=${subKey}&nocache=true`);
-        const poolData = await poolRes.json();
-        if (poolData.success && Array.isArray(poolData.data)) {
-          const freshCover = poolData.data.find((d: any) => d.id === coverDocData.id || isCoverDesign(d)) || coverDocData;
-          const freshStickers = poolData.data
-            .filter((d: any) => d.id !== freshCover.id && !isCoverDesign(d))
-            .slice(0, totalStickerItems);
-
-          if (freshStickers.length > 0) {
-            await handleGenerateRealCompositeCover(freshCover, freshStickers);
-          }
-        }
-      } catch (autoCoverErr) {
-        console.error('Failed to auto generate composite cover after batch:', autoCoverErr);
-      }
-    }
 
     invalidateClientPoolCache();
     setIsBatchGenerating(false);
