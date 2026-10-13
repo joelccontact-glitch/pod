@@ -3872,31 +3872,31 @@ export default function Home() {
                     <button
                       onClick={() => handleBatchGenerateSeries(`${selectedStickerSeriesTab}_both`)}
                       disabled={isBatchGenerating}
-                      className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-purple-500"
-                      title="메인 테마 세트 20종 생성 후, AI 비전으로 각 이미지에서 단일 낱개 스티커 20종을 1:1 자동 추출하여 총 41장 및 A4 2장 시트를 동시 생성합니다"
+                      className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold py-2 px-3 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-purple-500 whitespace-nowrap"
+                      title="메인 세트 20종 + 단독 낱개 20종 = 총 41장 및 A4 2장 시트 동시 생성"
                     >
                       <span>🔥</span>
-                      <span>[세트 + 1:1맞춤 낱개 40종] 동시 생성</span>
+                      <span>40종 동시 생성</span>
                     </button>
 
                     <button
                       onClick={() => handleBatchGenerateSeries(selectedStickerSeriesTab)}
                       disabled={isBatchGenerating}
-                      className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3.5 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600 whitespace-nowrap"
+                      className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold py-2 px-3 rounded-xl shadow transition-colors flex items-center justify-center gap-1 border border-emerald-600 whitespace-nowrap"
                       title="선택된 팩 20종(표지 1장 + 스티커 20종 = 총 21장) 자동 일괄 연속 생성"
                     >
                       <span>⚡️</span>
-                      <span>[{getStickerSeriesTitle(selectedStickerSeriesTab).split(' ')[1] || '스티커'}] (20종) 일괄 생성</span>
+                      <span>20종 일괄 생성</span>
                     </button>
 
                     <button
                       onClick={handleExportZIPBundle}
-                  disabled={isExportingBundle || designs.length === 0}
-                  className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold py-2 px-4 rounded-xl shadow transition-colors flex items-center justify-center gap-1.5 shrink-0"
-                >
-                  <span>📦</span>
-                  <span>{isExportingBundle ? 'ZIP 번들 패키징 중...' : '디지털 PNG 패키지(ZIP) 일괄 다운로드'}</span>
-                </button>
+                      disabled={isExportingBundle || designs.length === 0}
+                      className="w-full sm:w-auto bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold py-2 px-3 rounded-xl shadow transition-colors flex items-center justify-center gap-1.5 shrink-0 whitespace-nowrap"
+                    >
+                      <span>📦</span>
+                      <span>{isExportingBundle ? 'ZIP 패키징 중...' : '전체 ZIP 다운로드'}</span>
+                    </button>
                   </div>
                 </div>
 
