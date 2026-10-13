@@ -669,6 +669,157 @@ export const FRESH_AQUARIUM_STANDALONE_20_SERIES: StickerPreset[] = [
   }) as unknown as StickerPreset[]
 ];
 
+export const BOOKTOK_20_SERIES: StickerPreset[] = [
+  {
+    id: 'booktok-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 북톡 & 코지 리딩 20종 스티커 팩 대표 커버 표지',
+    animal: 'Cozy Book Club Cover',
+    animalValue: '',
+    affinityObject: 'Cozy Book Club Cover',
+    theme: 'BookTok Reading 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 북톡 & 코지 리딩 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE COZY READING & BOOK CLUB STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are large individual die-cut sticker samples of cute reading kittens with round glasses, baby bear with pastel Kindle, cozy book stack with hot cocoa mug, bunny with giant ribbon bookmark, late-night reading red panda, 5-star book review badge, reading journal TBR jar, and bookish floral teacups arranged artistically across the white background. STRICT NO GLASS TANKS: Absolutely NO fish tanks, NO terrarium jars. ONLY standalone adorable bookworm animals, books, kindle devices, and cozy reading accessories. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      {
+        name: '안경 쓴 독서광 아기 고양이',
+        desc: '포근한 스웨터와 금테 안경을 쓰고 책에 빠져든 아기 고양이 스티커',
+        phrase: 'Just One More Chapter',
+        detail: 'standalone cute fluffy baby calico kitten wearing a chunky knitted sweater and tiny round gold reading glasses, curling up cozily and reading a thick open hardcover book. Floating warm yellow sparkle accents'
+      },
+      {
+        name: '파스텔 킨들 & 아기 곰',
+        desc: '라벤더 킨들을 꼭 쥐고 침대에 엎드려 독서하는 아기 곰 스티커',
+        phrase: 'In My Reading Era',
+        detail: 'standalone cute chubby baby brown bear lying happily on its tummy, holding a pastel lavender Kindle e-reader with tiny heart stickers on the back'
+      },
+      {
+        name: '감성 책탑과 핫초코 머그잔',
+        desc: '파스텔톤 양장본 책 5권과 마시멜로 핫초코 머그잔 스티커',
+        phrase: 'Cozy Reader',
+        detail: 'standalone aesthetic stack of five pastel colored hardcover novels with floral embossed spines, topped with a cozy steaming hot chocolate mug with mini marshmallows'
+      },
+      {
+        name: '리본 북마크 토끼',
+        desc: '거대한 새틴 리본 책갈피를 안고 있는 아기 토끼 스티커',
+        phrase: 'Lost in Pages',
+        detail: 'standalone adorable baby bunny with floppy ears, wearing a soft pastel knit cardigan, hugging a giant satin ribbon bookmark with tiny dried flower charms'
+      },
+      {
+        name: '밤샘 독서 레서판다',
+        desc: '스탠드 조명 아래서 밤샘 독서하는 후드티 레서판다 스티커',
+        phrase: 'Late Night Book Club',
+        detail: 'standalone cute baby red panda wearing an oversized hoodie, sitting cozy under a warm vintage reading desk lamp, eagerly turning pages of an open book with glowing curiosity'
+      },
+      {
+        name: '커피 & 오픈 북 플랫레이',
+        desc: '라떼아트 커피잔과 압화 꽃잎이 어우러진 오픈 북 스티커',
+        phrase: 'Coffee & Chapters',
+        detail: 'standalone flat lay aesthetic illustration of an open vintage novel with deckled paper edges, beside a ceramic coffee cup with heart latte art, dried pressed wildflowers, and a fountain pen'
+      },
+      {
+        name: '별점 5점 뱃지 리딩 트래커',
+        desc: '빛나는 황금 별 5개와 월계수 리딩 저널 뱃지 스티커',
+        phrase: '5-Star Read',
+        detail: 'standalone glowing golden 5-star rating book review badge with five sparkling yellow stars, a feather quill, and delicate laurel leaf wreath'
+      },
+      {
+        name: '체크 담요 덮은 아기 강아지',
+        desc: '타탄체크 담요를 덮고 책 베개를 벤 아기 골든리트리버 스티커',
+        phrase: 'Bookworm Puppy',
+        detail: 'standalone fluffy golden retriever puppy curled up cozily under a soft tartan plaid fleece blanket, resting its head on a stack of books like a pillow'
+      },
+      {
+        name: '독서 중 방해금지 팻말',
+        desc: '데이지 꽃과 담쟁이 넝쿨이 감긴 독서 팻말 스티커',
+        phrase: "Do Not Disturb, I'm Reading",
+        detail: 'standalone charming rustic pastel wooden signpost surrounded by daisies and ivy vines with cute decorative ribbon'
+      },
+      {
+        name: '창가 빗소리 햄스터',
+        desc: '비 내리는 창가에서 미니 책을 읽는 아기 햄스터 스티커',
+        phrase: 'Rainy Day Read',
+        detail: 'standalone tiny chubby baby hamster sitting on a rainy cottage windowsill with soft raindrops on glass, wrapped in a mini scarf, nibbling a sunflower seed cookie while reading a tiny miniature book'
+      },
+      {
+        name: 'TBR 읽을 책 유리병',
+        desc: '읽고 싶은 책 목록 쪽지가 가득 찬 감성 메이슨 자 스티커',
+        phrase: 'My TBR Jar',
+        detail: 'standalone cute vintage glass mason jar tied with a rustic twine bow, filled with colorful pastel folded paper scrolls labeled with book titles'
+      },
+      {
+        name: '슬로우 리딩 나무늘보',
+        desc: '나뭇가지에 거꾸로 매달려 여유롭게 책 읽는 나무늘보 스티커',
+        phrase: 'Reading at My Own Pace',
+        detail: 'standalone sweet baby sloth wearing round spectacles, hanging lazily upside down from a leafy tree branch, holding an open paperback and reading in peace'
+      },
+      {
+        name: '판타지 소설 요정 펭귄',
+        desc: '마법 고서적과 별빛을 뿜는 아기 황제펭귄 스티커',
+        phrase: 'Living in a Fantasy',
+        detail: 'standalone cute baby emperor penguin chick wearing a tiny starry wizard hat, holding a glowing magical fantasy spellbook with floating sparkles and stars'
+      },
+      {
+        name: '빈티지 파스텔 북 카트',
+        desc: '책과 몬스테라 화분이 실린 3단 이동식 책 수레 스티커',
+        phrase: 'TBR Cart',
+        detail: 'standalone vintage pastel pink 3-tier rolling utility book cart neatly packed with colorful romance and fantasy books, cascading trailing pothos plant, and a scented candle'
+      },
+      {
+        name: '책 냄새 맡는 아기 사슴',
+        desc: '새 책을 펼쳐 들고 향기를 음미하는 아기 꽃사슴 스티커',
+        phrase: 'The Smell of Books',
+        detail: 'standalone gentle baby fawn with white spots, wearing a soft floral collar, holding an open vintage book close and closing eyes peacefully to smell the paper pages'
+      },
+      {
+        name: '독서 친구 고양이와 티팟',
+        desc: '플로럴 티팟과 찻잔 옆에 웅크리고 잠든 아기 치즈 고양이 스티커',
+        phrase: 'Tea & Paperbacks',
+        detail: 'standalone sleeping ginger tabby kitten curled up happily next to a vintage English floral porcelain teapot and matching teacup on a saucer with chamomile blossoms'
+      },
+      {
+        name: '킨들 걸 하트 핑거스트랩',
+        desc: '파스텔 킨들과 하트 그립톡을 쥔 손 스티커',
+        phrase: 'Kindle Girlie',
+        detail: 'standalone aesthetic hand with pastel manicure holding a sage green e-reader Kindle with a heart-shaped popsockets grip and cute bookish deco stickers'
+      },
+      {
+        name: '책에 파묻힌 아기 고슴도치',
+        desc: '동화책 속에서 고개를 쏙 내민 털모자 아기 고슴도치 스티커',
+        phrase: 'Cozy Little Reader',
+        detail: 'standalone tiny baby hedgehog wearing a cozy knitted beanie, peeking out playfully from inside an open oversized fairy tale book surrounded by autumn leaves and acorns'
+      },
+      {
+        name: '로맨스 소설 하트 오픈 북',
+        desc: '책장이 하트 모양으로 접힌 감성 오픈 북 스티커',
+        phrase: 'Hopeless Book Romantic',
+        detail: 'standalone romantic open paperback book with the inner pages folded neatly into a 3D heart shape, surrounded by floating pink rose petals and tiny sparkles'
+      },
+      {
+        name: '북클럽 공식 멤버십 뱃지',
+        desc: '로즈골드 왁스 실링 메달 북클럽 뱃지 스티커',
+        phrase: 'Official Book Club Member',
+        detail: 'standalone vintage round wax seal medal badge in pastel rose gold, featuring an embossed open book and laurel leaves with ribbon tails'
+      }
+    ][i];
+
+    return {
+      id: `booktok-20-pack-${num}`,
+      name: `📚 [북톡 독서 ${num}/20] ${items.name}`,
+      animal: 'BookTok Reading 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'BookTok Reading 20 Pack',
+      phrase: items.phrase,
+      description: items.desc,
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    };
+  }) as unknown as StickerPreset[]
+];
+
 export function buildStickerPrompt(
   animalName: string,
   affinityObject: string,
@@ -681,4 +832,5 @@ export function buildStickerPrompt(
 }
 
 export * from './seasonal-sticker-prompts';
+
 

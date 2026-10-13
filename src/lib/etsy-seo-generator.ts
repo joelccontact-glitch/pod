@@ -90,6 +90,20 @@ const CATEGORY_SEO_DICT: Record<string, {
       '🫧 Perfect for fishkeeping hobbyists, aquarists, hydro flasks, and digital journals'
     ]
   },
+  booktok: {
+    name: 'Cozy Book Club & Kindle Reading',
+    bundleKeywords: [
+      'BookTok Stickers PNG Bundle',
+      'Kindle Girlie Reading Clipart',
+      'Cozy Bookworm Die Cut'
+    ],
+    singleKeywords: ['BookTok Sticker PNG', 'Kindle Girlie Clipart', 'Cozy Bookworm Die Cut'],
+    descriptionHighlights: [
+      '📚 Cozy book lovers & booktok aesthetic (Cute Reading Animals, Pastels, Kindle & Reading Nooks)',
+      '☕ Perfect for Kindle clear cases, GoodNotes digital reading journals, book trackers & planners',
+      '✨ Warm, aesthetic hand-drawn illustrations for hopeless romantics, bookworms & fantasy readers'
+    ]
+  },
   christmas: {
     name: 'Cozy Christmas Holiday',
     bundleKeywords: [
@@ -205,7 +219,13 @@ const KO_EN_TRANSLATE: [RegExp, string][] = [
   [/토끼/i, 'Bunny Rabbit'],
   [/레서판다/i, 'Red Panda'],
   [/햄스터/i, 'Hamster Pet'],
-  [/수달/i, 'Sea Otter Pup']
+  [/수달/i, 'Sea Otter Pup'],
+  [/북톡|독서|책/i, 'Book Club Reading'],
+  [/킨들/i, 'Kindle Reader'],
+  [/책탑/i, 'Book Stack'],
+  [/책갈피/i, 'Bookmark Ribbon'],
+  [/북\s*카트/i, 'Book Cart'],
+  [/뱃지/i, 'Bookish Badge']
 ];
 
 function translateKoItemToEnglish(koreanText: string): string {

@@ -85,6 +85,7 @@ export async function GET(request: Request) {
       vivarium: 0,
       saltaquarium: 0,
       freshaquarium: 0,
+      booktok: 0,
       christmas: 0,
       halloween: 0,
       thanksgiving: 0,
@@ -185,6 +186,8 @@ export async function GET(request: Request) {
             stickerSub = 'vivarium';
           } else if (presetId.startsWith('terrarium')) {
             stickerSub = 'terrarium';
+          } else if (presetId.startsWith('booktok')) {
+            stickerSub = 'booktok';
           } 
           // Priority 2: Explicit Title & Topic Matching (HIGHEST DETERMINISTIC INTENT)
           else if (
@@ -222,6 +225,11 @@ export async function GET(request: Request) {
             topic.includes('테라리움') || topic.includes('terrarium')
           ) {
             stickerSub = 'terrarium';
+          } else if (
+            title.includes('북톡') || title.includes('독서') || title.includes('booktok') || title.includes('book club') ||
+            topic.includes('북톡') || topic.includes('booktok')
+          ) {
+            stickerSub = 'booktok';
           }
           // Priority 3: Keyword / Prompt text matching (Fallback when title has no explicit series tag)
           else if (
@@ -252,6 +260,10 @@ export async function GET(request: Request) {
             text.includes('freshaquarium') || text.includes('freshwater') || text.includes('열대어어항') || text.includes('열대어 어항') || text.includes('열대어') || text.includes('betta') || text.includes('guppy') || text.includes('neon tetra') || text.includes('angelfish') || text.includes('goldfish') || text.includes('오토싱') || text.includes('애플 스네일') || text.includes('어항')
           ) {
             stickerSub = 'freshaquarium';
+          } else if (
+            text.includes('booktok') || text.includes('북톡') || text.includes('kindle girlie') || text.includes('book club') || text.includes('킨들') || text.includes('cozy reader')
+          ) {
+            stickerSub = 'booktok';
           } else {
             stickerSub = 'other';
           }

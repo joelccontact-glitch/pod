@@ -289,6 +289,12 @@ export async function createCompositeMasterCover(
     ribbonColor = '#0F766E';
     ribbonFold = '#042F2E';
     ribbonOutline = '#0A1E1C';
+  } else if (subType === 'booktok' || optTitle.includes('booktok') || optTitle.includes('북톡') || optTitle.includes('독서')) {
+    seriesTitle = 'COZY BOOK CLUB';
+    titleColor = '#831843';
+    ribbonColor = '#BE185D';
+    ribbonFold = '#500724';
+    ribbonOutline = '#300416';
   } else {
     if (options.title) {
       const cleanT = options.title.replace(/[0-9+]+| (cute|stickers?|bundle|png|digital|download) /gi, '').trim();

@@ -21,6 +21,7 @@ import {
   HALLOWEEN_STANDALONE_20_SERIES,
   THANKSGIVING_20_SERIES,
   THANKSGIVING_STANDALONE_20_SERIES,
+  BOOKTOK_20_SERIES,
   SEASONAL_RECOMMENDATIONS,
   getDynamicSeasonalStickerRecommendations,
   getSeasonalPackPresets,
@@ -132,6 +133,7 @@ const getDesignCategoryKey = (d: any): string => {
   if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium')) return 'saltaquarium';
   if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium')) return 'freshaquarium';
   if (presetId.includes('terrarium')) return 'terrarium';
+  if (presetId.includes('booktok') || presetId.includes('reading')) return 'booktok';
 
   const title = (d.title || d.topic || '').toLowerCase();
   if (title.includes('크리스마스') || title.includes('스노우볼') || title.includes('christmas')) return 'christmas';
@@ -145,11 +147,13 @@ const getDesignCategoryKey = (d: any): string => {
   if (title.includes('해수어항') || title.includes('saltaquarium') || title.includes('salt aquarium')) return 'saltaquarium';
   if (title.includes('열대어') || title.includes('freshaquarium') || title.includes('fresh aquarium')) return 'freshaquarium';
   if (title.includes('테라리움') || title.includes('terrarium')) return 'terrarium';
+  if (title.includes('북톡') || title.includes('독서') || title.includes('booktok') || title.includes('book club') || title.includes('kindle')) return 'booktok';
 
   return 'other';
 };
 
 const getStickerSeriesTitle = (tab: string) => {
+  if (tab.startsWith('booktok20')) return '📚 북톡 & 코지 리딩 20종 스티커 팩';
   if (tab.startsWith('terrarium20')) return tab.includes('standalone') ? '🪴 테라리움 단일 식물 20종 스티커 팩' : '🫙 테라리움 세트 완성 20종 스티커 팩';
   if (tab.startsWith('vivarium20')) return tab.includes('standalone') ? '🦎 비바리움 단일 동물 20종 스티커 팩' : '🦎 비바리움 세트 완성 20종 스티커 팩';
   if (tab.startsWith('saltaquarium20')) return tab.includes('standalone') ? '🐠 해수어 단일 어류 20종 스티커 팩' : '🪸 해수어항 세트 완성 20종 스티커 팩';
@@ -165,6 +169,7 @@ const getStickerSeriesTitle = (tab: string) => {
 };
 
 const getPresetSeriesList = (tab: string): StickerPreset[] => {
+  if (tab === 'booktok20') return BOOKTOK_20_SERIES;
   if (tab === 'terrarium20') return TERRARIUM_20_SERIES;
   if (tab === 'terrarium20_standalone') return TERRARIUM_STANDALONE_20_SERIES;
   if (tab === 'vivarium20') return VIVARIUM_20_SERIES;
@@ -211,6 +216,7 @@ export default function Home() {
     vivarium: 0,
     saltaquarium: 0,
     freshaquarium: 0,
+    booktok: 0,
     christmas: 0,
     halloween: 0,
     thanksgiving: 0
@@ -237,6 +243,7 @@ export default function Home() {
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<
+    | 'booktok20'
     | 'terrarium20'
     | 'terrarium20_standalone'
     | 'vivarium20'
@@ -251,7 +258,7 @@ export default function Home() {
     | 'halloween20_standalone'
     | 'thanksgiving20'
     | 'thanksgiving20_standalone'
-  >('terrarium20');
+  >('booktok20');
   const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-20-pack-1');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
   const [exportBundleProgress, setExportBundleProgress] = useState<{ current: number; total: number; message: string } | null>(null);
@@ -330,6 +337,7 @@ export default function Home() {
     if (raw.includes('vivarium')) return 'Vivarium';
     if (raw.includes('saltaquarium') || raw.includes('salt_aquarium')) return 'SaltAquarium';
     if (raw.includes('freshaquarium') || raw.includes('fresh_aquarium')) return 'FreshAquarium';
+    if (raw.includes('booktok') || raw.includes('reading') || raw.includes('book_club')) return 'BookTok';
 
     const topicLower = (topic || '').toLowerCase();
     if (topicLower.includes('halloween') || topicLower.includes('할로윈')) return 'Halloween';
@@ -343,6 +351,7 @@ export default function Home() {
     if (topicLower.includes('vivarium') || topicLower.includes('비바리움')) return 'Vivarium';
     if (topicLower.includes('해수어')) return 'SaltAquarium';
     if (topicLower.includes('열대어') || topicLower.includes('담수')) return 'FreshAquarium';
+    if (topicLower.includes('북톡') || topicLower.includes('독서') || topicLower.includes('booktok')) return 'BookTok';
 
     const clean = (topic || tabKey || '')
       .replace(/[^a-zA-Z0-9\s_-]/g, '')
@@ -480,6 +489,9 @@ export default function Home() {
         if (p) basePrompt = p.prompt;
       } else if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium') || sub === 'freshaquarium') {
         const p = FRESH_AQUARIUM_20_SERIES.find(s => s.id === 'fresh-aquarium-20-pack-cover');
+        if (p) basePrompt = p.prompt;
+      } else if (presetId.includes('booktok') || sub === 'booktok') {
+        const p = BOOKTOK_20_SERIES.find(s => s.id === 'booktok-20-pack-cover');
         if (p) basePrompt = p.prompt;
       } else if (sub) {
         try {
@@ -2535,10 +2547,13 @@ export default function Home() {
 
   const handleExportZIPBundle = async () => {
     const currentTab = selectedStickerSeriesTab;
-    let bundleName = 'Terrarium_20_Stickers_Bundle';
-    let seriesTitle = '[테라리움 완성 세트 (20종)]';
+    let bundleName = 'BookTok_20_Stickers_Bundle';
+    let seriesTitle = '[북톡 & 코지 리딩 (20종)]';
 
-    if (currentTab === 'vivarium20') {
+    if (currentTab === 'terrarium20') {
+      bundleName = 'Terrarium_20_Stickers_Bundle';
+      seriesTitle = '[테라리움 완성 세트 (20종)]';
+    } else if (currentTab === 'vivarium20') {
       bundleName = 'Vivarium_20_Stickers_Bundle';
       seriesTitle = '[비바리움 완성 세트 (20종)]';
     } else if (currentTab === 'saltaquarium20') {
@@ -2576,7 +2591,9 @@ export default function Home() {
         const textToScan = `${d.title || ''} ${d.prompt || ''} ${d.topic || ''} ${d.feedback_applied || ''}`.toLowerCase();
         const sub = d.sticker_sub;
 
-        if (currentTab === 'terrarium20') {
+        if (currentTab === 'booktok20') {
+          return sub === 'booktok' || presetId.startsWith('booktok') || textToScan.includes('booktok') || textToScan.includes('북톡') || textToScan.includes('독서');
+        } else if (currentTab === 'terrarium20') {
           return sub === 'terrarium' || presetId.startsWith('terrarium') || textToScan.includes('terrarium') || textToScan.includes('테라리움');
         } else if (currentTab === 'vivarium20') {
           return sub === 'vivarium' || presetId.startsWith('vivarium') || textToScan.includes('vivarium') || textToScan.includes('비바리움');
@@ -2719,10 +2736,15 @@ export default function Home() {
     let targetStandalonePresets = TERRARIUM_STANDALONE_20_SERIES;
     let isBothMode = packType.endsWith('_both');
     const baseType = packType.replace('_both', '');
-    let packName = '[테라리움 완성 세트 20종 팩]';
-    let subKey = 'terrarium';
+    let packName = '[북톡 & 코지 리딩 20종 스티커 팩]';
+    let subKey = 'booktok';
 
-    if (baseType.startsWith('terrarium')) {
+    if (baseType.startsWith('booktok')) {
+      targetPresets = BOOKTOK_20_SERIES;
+      targetStandalonePresets = BOOKTOK_20_SERIES;
+      packName = '[북톡 & 코지 리딩 20종 스티커 팩]';
+      subKey = 'booktok';
+    } else if (baseType.startsWith('terrarium')) {
       targetPresets = baseType.includes('standalone') ? TERRARIUM_STANDALONE_20_SERIES : TERRARIUM_20_SERIES;
       targetStandalonePresets = TERRARIUM_STANDALONE_20_SERIES;
       packName = isBothMode ? '[테라리움 어항세트 + 단일식물 40종 1:1 맞춤 팩]' : (baseType.includes('standalone') ? '[테라리움 단일 식물/오브제 20종 팩]' : '[테라리움 완성 세트 20종 팩]');
@@ -3895,6 +3917,16 @@ export default function Home() {
                 </label>
                 <div className="flex flex-wrap items-center gap-1 bg-teal-100/70 p-1 rounded-xl">
                   <button
+                    onClick={() => setSelectedStickerSeriesTab('booktok20')}
+                    className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
+                      selectedStickerSeriesTab === 'booktok20'
+                        ? 'bg-rose-700 text-white shadow-sm ring-1 ring-rose-400'
+                        : 'text-rose-950 hover:bg-rose-200/50'
+                    }`}
+                  >
+                    📚 북톡 독서
+                  </button>
+                  <button
                     onClick={() => setSelectedStickerSeriesTab('terrarium20')}
                     className={`px-2 py-1 text-[11px] font-bold rounded-lg transition-all ${
                       selectedStickerSeriesTab === 'terrarium20'
@@ -4272,6 +4304,20 @@ export default function Home() {
                 <span>🐠 담수</span>
                 <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'freshaquarium' ? 'bg-blue-900 text-blue-100' : 'bg-blue-100 text-blue-800'}`}>
                   {stickerSubCounts.freshaquarium || 0}
+                </span>
+              </button>
+
+              <button
+                onClick={() => handleSelectStickerSubTab('booktok')}
+                className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all shrink-0 flex items-center gap-1 ${
+                  selectedStickerSubTab === 'booktok'
+                    ? 'bg-rose-700 text-white shadow-xs ring-1 ring-rose-400'
+                    : 'bg-white text-rose-950 hover:bg-rose-100 border border-rose-200'
+                }`}
+              >
+                <span>📚 북톡</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${selectedStickerSubTab === 'booktok' ? 'bg-rose-900 text-rose-100' : 'bg-rose-100 text-rose-800'}`}>
+                  {stickerSubCounts.booktok || 0}
                 </span>
               </button>
 
