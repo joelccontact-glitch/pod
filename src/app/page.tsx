@@ -40,6 +40,7 @@ import { generateA4StickerSheet, generateA4StickerSheets, generateA4StickerSheet
 import { extractStandaloneStickerFromTank } from '@/lib/standalone-extractor';
 import { createVesselStickerFromStandalone } from '@/lib/vessel-housing-builder';
 import { generateEtsySeo } from '@/lib/etsy-seo-generator';
+import { generateAllLifestyleMockups, LifestyleMockupResult } from '@/lib/lifestyle-mockup-builder';
 
 // Client-side cache for high-frequency design pool queries to eliminate redundant Firestore reads (95%+ reduction)
 let clientPoolCache: { data: any[]; timestamp: number } | null = null;
@@ -436,6 +437,84 @@ export default function Home() {
       setA4SheetLoading(false);
     }
   };
+
+  // Lifestyle Mockups (Etsy Photos 2~4 & Pinterest Pins) Modal & States
+  const [isLifestyleModalOpen, setIsLifestyleModalOpen] = useState(false);
+  const [lifestyleMockups, setLifestyleMockups] = useState<LifestyleMockupResult[]>([]);
+  const [lifestyleLoading, setLifestyleLoading] = useState(false);
+  const [lifestyleProgress, setLifestyleProgress] = useState<{ current: number; total: number; message: string }>({ current: 0, total: 0, message: '' });
+
+  const handleOpenLifestyleMockups = async (stickersToUse?: any[], shuffle: boolean = false) => {
+    let list = (stickersToUse && stickersToUse.length > 0) ? [...stickersToUse] : [...packStickers];
+    if (!list || list.length === 0) {
+      alert('목업을 생성할 스티커가 없습니다.');
+      return;
+    }
+
+    if (shuffle) {
+      // Shuffle stickers for fresh visual combinations
+      list = [...list].sort(() => Math.random() - 0.5);
+    }
+
+    setIsLifestyleModalOpen(true);
+    setLifestyleLoading(true);
+    setLifestyleProgress({ current: 0, total: 4, message: '실물 시연 목업 3종 생성 준비 중...' });
+
+    try {
+      const themeName = getCleanEnglishThemeName(
+        selectedPackCover?.sticker_sub,
+        selectedStickerSeriesTab,
+        selectedPackCover?.topic || selectedPackCover?.title || 'Sticker'
+      );
+      const results = await generateAllLifestyleMockups(list, themeName, (current, total, message) => {
+        setLifestyleProgress({ current, total, message });
+      });
+      setLifestyleMockups(results);
+    } catch (e: any) {
+      console.error('Failed to generate lifestyle mockups:', e);
+      alert('실물 시연 목업 생성 중 오류가 발생했습니다: ' + (e?.message || String(e)));
+    } finally {
+      setLifestyleLoading(false);
+    }
+  };
+
+  const handleDownloadSingleMockup = (mockup: LifestyleMockupResult) => {
+    const a = document.createElement('a');
+    a.href = mockup.dataUrl;
+    a.download = mockup.filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  const handleDownloadAllMockupsZip = async () => {
+    if (lifestyleMockups.length === 0) return;
+    try {
+      const zip = new JSZip();
+      for (const m of lifestyleMockups) {
+        const base64Data = m.dataUrl.split(',')[1];
+        zip.file(m.filename, base64Data, { base64: true });
+      }
+      const blob = await zip.generateAsync({
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: { level: 9 },
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const theme = getCleanEnglishThemeName(selectedPackCover?.sticker_sub, selectedStickerSeriesTab, selectedPackCover?.topic || selectedPackCover?.title || 'Sticker');
+      a.download = `02_Lifestyle_Mockups_3Pack_${theme}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Failed to download mockups zip:', e);
+      alert('목업 ZIP 압축 중 오류가 발생했습니다.');
+    }
+  };
+
 
   const getCleanEnglishThemeName = (subKey?: string, tabKey?: string, topic?: string): string => {
     const raw = (subKey || tabKey || '').toLowerCase();
@@ -6107,16 +6186,28 @@ export default function Home() {
                     <span>표지 다운로드</span>
                   </button>
 
-                  {/* 2단계: A4 인쇄용 시트 (Etsy 추가 사진 2~3번용 목업) */}
+                  {/* 2단계: 실물 시연 목업 3종 (Etsy 2~4번 사진 & Pinterest 핀용) */}
+                  <button
+                    onClick={() => handleOpenLifestyleMockups(packStickers)}
+                    disabled={lifestyleLoading || isExportingBundle || packStickers.length === 0}
+                    className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 border border-violet-500 cursor-pointer disabled:cursor-not-allowed hover:shadow-indigo-300/50 hover:scale-[1.02]"
+                    title="[2단계] Etsy 2~4번 보조 사진 및 Pinterest 핀으로 올릴 고화질(2048px) 실물 시연 목업 3종(다이어리/노트북/텀블러)을 자동 생성 및 다운로드합니다."
+                  >
+                    <span className="bg-violet-950/60 px-1.5 py-0.5 rounded text-[11px] font-black text-violet-200">2단계</span>
+                    <span>📸</span>
+                    <span>실물 시연 목업 3종</span>
+                  </button>
+
+                  {/* A4 인쇄용 시트 (Etsy 추가 사진 5번용 목업) */}
                   <button
                     onClick={() => handleGenerateAndOpenA4Sheet(packStickers, 'white')}
                     disabled={a4SheetLoading || isExportingBundle || packStickers.length === 0}
-                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-indigo-500 cursor-pointer disabled:cursor-not-allowed"
-                    title="[2단계] Etsy 상품 등록 시 '추가 사진(2~3번)'으로 올려 구매자에게 A4 출력 구성을 보여주는 인쇄용 시트를 다운로드합니다."
+                    className="bg-slate-700 hover:bg-slate-800 disabled:bg-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-md transition-colors flex items-center gap-1.5 border border-slate-600 cursor-pointer disabled:cursor-not-allowed"
+                    title="Etsy 상품 등록 시 '추가 사진(5번)'으로 올려 구매자에게 A4 출력 구성을 보여주는 인쇄용 시트를 확인합니다."
                   >
-                    <span className="bg-indigo-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-indigo-200">2단계</span>
+                    <span className="bg-slate-900/60 px-1.5 py-0.5 rounded text-[11px] font-black text-slate-200">A4 시트</span>
                     <span>🖨️</span>
-                    <span>A4 시트 (상품 사진용)</span>
+                    <span>인쇄용 시트</span>
                   </button>
 
                   {/* 3단계: 전체 ZIP 파일 일괄 다운로드 (Etsy 20MB 분할 vs CF 단일 통합) */}
@@ -6219,15 +6310,16 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* 하단 친절한 Etsy 등록 3단계 안내 가이드 배너 */}
-                <div className="mt-3 bg-gradient-to-r from-amber-50 to-emerald-50 border border-emerald-200 text-stone-800 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-2xs">
-                  <div className="flex items-start sm:items-center gap-2 text-xs font-semibold leading-relaxed">
+                {/* 하단 친절한 Etsy 등록 4단계 안내 가이드 배너 */}
+                <div className="mt-3 bg-gradient-to-r from-amber-50 via-violet-50 to-emerald-50 border border-indigo-200 text-stone-800 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 shadow-2xs">
+                  <div className="flex items-start sm:items-center gap-2 text-xs font-semibold leading-relaxed flex-wrap">
                     <span className="text-base shrink-0">💡</span>
                     <span>
-                      <strong className="text-amber-950 font-black">Etsy 간편 등록 3단계:</strong>{' '}
-                      <span className="inline-block bg-teal-100 text-teal-900 px-1.5 py-0.5 rounded font-black mr-1">1단계</span> <strong>마스터 표지</strong>(대표 사진) ➔{' '}
-                      <span className="inline-block bg-indigo-100 text-indigo-900 px-1.5 py-0.5 rounded font-black mr-1">2단계</span> <strong>A4 시트</strong>(추가 사진 목업) ➔{' '}
-                      <span className="inline-block bg-emerald-100 text-emerald-950 px-1.5 py-0.5 rounded font-black mr-1">3단계</span> <strong>전체 ZIP</strong>(크리컷용 투명 + 일반 프린터용 화이트 A4 시트 2종 모두 자동 포함!)을 <strong>Digital files</strong>에 업로드!
+                      <strong className="text-amber-950 font-black">Etsy 상품 등록 필수 순서:</strong>{' '}
+                      <span className="inline-block bg-teal-100 text-teal-900 px-1.5 py-0.5 rounded font-black mr-1">1단계</span> <strong>마스터 표지</strong>(1번 대표 사진) ➔{' '}
+                      <span className="inline-block bg-violet-100 text-violet-900 px-1.5 py-0.5 rounded font-black mr-1">2단계</span> <strong>실물 시연 목업 3종</strong>(2~4번 연출 사진 & Pinterest 핀) ➔{' '}
+                      <span className="inline-block bg-slate-200 text-slate-800 px-1.5 py-0.5 rounded font-black mr-1">A4 시트</span> <strong>인쇄용 시트</strong>(5번 사진) ➔{' '}
+                      <span className="inline-block bg-emerald-100 text-emerald-950 px-1.5 py-0.5 rounded font-black mr-1">3단계</span> <strong>전체 ZIP</strong>을 <strong>Digital files</strong>에 업로드!
                     </span>
                   </div>
                 </div>
@@ -6642,6 +6734,174 @@ export default function Home() {
                 </span>
                 <button
                   onClick={() => setIsA4SheetModalOpen(false)}
+                  className="text-xs text-gray-600 hover:text-gray-900 font-bold px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 📸 Lifestyle Mockups (Etsy Photos 2~4 & Pinterest Pins) Modal */}
+        {isLifestyleModalOpen && (
+          <div className="fixed inset-0 bg-black/80 z-[80] flex items-center justify-center p-2 sm:p-4 md:p-6 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl max-w-6xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-violet-100">
+              {/* Modal Header */}
+              <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-violet-50 via-indigo-50 to-pink-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white flex items-center justify-center text-xl shadow-md shrink-0">
+                    📸
+                  </div>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-extrabold text-gray-900 flex items-center gap-2 flex-wrap">
+                      <span>실제 활용 시연 라이프스타일 목업 3종</span>
+                      <span className="text-[10px] bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-2 py-0.5 rounded-full font-bold">2048 × 2048 px 초고화질</span>
+                    </h3>
+                    <p className="text-xs text-gray-600 mt-0.5">
+                      다이어리, 맥북 상판, 텀블러에 스티커를 실제로 붙인 듯한 자연스러운 다이컷 그림자 연출 컷입니다.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsLifestyleModalOpen(false)}
+                  className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-gray-500 hover:text-gray-900 flex items-center justify-center text-lg font-bold shadow-xs transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Etsy & Pinterest Tip Banner */}
+              <div className="bg-gradient-to-r from-amber-50 to-violet-50 px-4 py-2.5 border-b border-violet-200 text-xs text-stone-800 flex items-center gap-2">
+                <span className="text-base shrink-0">📌</span>
+                <span className="leading-relaxed">
+                  <strong>Etsy & Pinterest 활용 필수 팁:</strong> Etsy 상품 등록 시 1번 대표 표지 다음인 <strong>2~4번 추가 사진</strong>으로 업로드하세요! 또한 Pinterest에 핀으로 발행하면 구매 의도가 높은 미국 다꾸·플래너 타깃 유저들의 대규모 외부 유입을 유도할 수 있습니다.
+                </span>
+              </div>
+
+              {/* Action Bar */}
+              <div className="px-4 sm:px-6 py-3 bg-stone-50 border-b border-gray-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-black text-violet-950 bg-violet-100 border border-violet-200 px-3 py-1.5 rounded-xl shadow-2xs">
+                    ✨ 고화질 실물 시연 세트 (총 3장)
+                  </span>
+                  <span className="text-[11px] text-gray-500 font-medium">
+                    (상세 팝업에서 일일이 맞출 필요 없이, 원클릭으로 3종이 자동 완성됩니다)
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    onClick={() => handleOpenLifestyleMockups(packStickers, true)}
+                    disabled={lifestyleLoading || packStickers.length === 0}
+                    className="bg-white hover:bg-gray-100 disabled:bg-gray-200 text-gray-700 font-bold text-xs sm:text-sm py-2 px-3 rounded-xl border border-gray-300 shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed"
+                    title="스티커 배치 순서를 무작위로 섞어 새로운 조합으로 다시 합성합니다"
+                  >
+                    <span>🎲</span>
+                    <span>스티커 순서 셔플</span>
+                  </button>
+
+                  <button
+                    onClick={handleDownloadAllMockupsZip}
+                    disabled={lifestyleLoading || lifestyleMockups.length === 0}
+                    className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-400 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed hover:scale-[1.02]"
+                    title="3장의 고화질 목업 이미지를 ZIP 파일로 한 번에 다운로드합니다"
+                  >
+                    <span>📦</span>
+                    <span>3종 한 번에 ZIP 다운로드</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Main Content Area */}
+              <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-stone-100/60">
+                {lifestyleLoading ? (
+                  <div className="flex flex-col items-center justify-center min-h-[380px] py-12 space-y-4 max-w-sm mx-auto text-center">
+                    <div className="w-14 h-14 border-4 border-violet-200 border-t-violet-600 rounded-full animate-spin"></div>
+                    <div>
+                      <p className="text-sm font-extrabold text-gray-800">{lifestyleProgress.message || '실물 시연 목업 생성 중...'}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        스티커의 배경을 정밀 투명화하고 부드러운 다이컷 그림자를 계산하여 2048px 캔버스에 합성하고 있습니다.
+                      </p>
+                    </div>
+                    {lifestyleProgress.total > 0 && (
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-violet-500 to-indigo-600 h-2.5 rounded-full transition-all duration-300"
+                          style={{ width: `${Math.round((lifestyleProgress.current / lifestyleProgress.total) * 100)}%` }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                ) : lifestyleMockups.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    {lifestyleMockups.map((mockup, idx) => (
+                      <div
+                        key={mockup.id}
+                        className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-md hover:shadow-xl transition-all duration-200 flex flex-col group"
+                      >
+                        {/* Image Preview */}
+                        <div className="relative aspect-square w-full bg-stone-100 overflow-hidden cursor-pointer" onClick={() => window.open(mockup.dataUrl, '_blank')}>
+                          <img
+                            src={mockup.dataUrl}
+                            alt={mockup.title}
+                            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
+                          />
+                          <div className="absolute top-2.5 left-2.5 bg-black/70 backdrop-blur-xs text-white text-[11px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                            <span>{idx === 0 ? '📖' : idx === 1 ? '💻' : '🥤'}</span>
+                            <span>{idx === 0 ? '다이어리 컷' : idx === 1 ? '맥북 상판 컷' : '텀블러 데스크 컷'}</span>
+                          </div>
+                          <div className="absolute bottom-2.5 right-2.5 bg-white/90 text-stone-700 text-[10px] font-bold px-2 py-0.5 rounded-md shadow-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                            클릭하여 확대 🔍
+                          </div>
+                        </div>
+
+                        {/* Card Info & Download */}
+                        <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                          <div>
+                            <h4 className="text-sm font-extrabold text-gray-900 leading-tight">
+                              {mockup.title}
+                            </h4>
+                            <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                              {mockup.description}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                              <span className="text-[10px] font-bold bg-violet-100 text-violet-800 px-2 py-0.5 rounded">
+                                Etsy {idx + 2}번 사진 추천
+                              </span>
+                              <span className="text-[10px] font-bold bg-pink-100 text-pink-800 px-2 py-0.5 rounded">
+                                📌 Pinterest 핀 추천
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            onClick={() => handleDownloadSingleMockup(mockup)}
+                            className="w-full bg-stone-900 hover:bg-black text-white font-extrabold text-xs py-2.5 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                          >
+                            <span>📥</span>
+                            <span>고화질 다운로드 (JPG)</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-400 py-16">
+                    <p className="text-sm font-medium">생성된 목업이 없습니다.</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer Note */}
+              <div className="px-5 py-3 bg-stone-100 border-t border-gray-200 text-xs text-gray-600 flex flex-wrap items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <span>💡</span>
+                  <span>Etsy는 상품 사진이 많을수록 검색 점수를 높게 부여합니다. 이 3종 목업을 함께 업로드하면 구매 전환율과 검색 랭킹이 동시에 올라갑니다.</span>
+                </span>
+                <button
+                  onClick={() => setIsLifestyleModalOpen(false)}
                   className="text-xs text-gray-600 hover:text-gray-900 font-bold px-3 py-1 rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   닫기
