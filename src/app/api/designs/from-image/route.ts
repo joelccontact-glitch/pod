@@ -187,7 +187,21 @@ export async function POST(req: Request) {
 
     let stickerSub: string | null = null;
     if (isSticker) {
-      if (lowerScan.includes('fresh-aquarium') || lowerScan.includes('freshaquarium') || lowerScan.includes('열대어어항') || lowerScan.includes('열대어 어항') || lowerScan.includes('freshwater')) {
+      if (lowerScan.includes('dessert') || lowerScan.includes('디저트')) {
+        stickerSub = 'dessert';
+      } else if (lowerScan.includes('socialbattery') || lowerScan.includes('social-battery') || lowerScan.includes('사회적 배터리')) {
+        stickerSub = 'socialbattery';
+      } else if (lowerScan.includes('hangul') || lowerScan.includes('한글')) {
+        stickerSub = 'hangul';
+      } else if (lowerScan.includes('booktok') || lowerScan.includes('북톡') || lowerScan.includes('kindle') || lowerScan.includes('킨들') || lowerScan.includes('독서')) {
+        stickerSub = 'booktok';
+      } else if (lowerScan.includes('christmas') || lowerScan.includes('크리스마스')) {
+        stickerSub = 'christmas';
+      } else if (lowerScan.includes('halloween') || lowerScan.includes('할로윈')) {
+        stickerSub = 'halloween';
+      } else if (lowerScan.includes('thanksgiving') || lowerScan.includes('추수감사절')) {
+        stickerSub = 'thanksgiving';
+      } else if (lowerScan.includes('fresh-aquarium') || lowerScan.includes('freshaquarium') || lowerScan.includes('열대어어항') || lowerScan.includes('열대어 어항') || lowerScan.includes('freshwater')) {
         stickerSub = 'freshaquarium';
       } else if (lowerScan.includes('salt-aquarium') || lowerScan.includes('saltaquarium') || lowerScan.includes('해수어항') || lowerScan.includes('해수 어항') || lowerScan.includes('saltwater')) {
         stickerSub = 'saltaquarium';
@@ -196,7 +210,7 @@ export async function POST(req: Request) {
       } else if (lowerScan.includes('terrarium') || lowerScan.includes('테라리움')) {
         stickerSub = 'terrarium';
       } else {
-        stickerSub = 'freshaquarium';
+        stickerSub = 'booktok';
       }
     }
 
