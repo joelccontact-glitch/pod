@@ -462,14 +462,28 @@ export default function Home() {
   };
 
   const handleUpdateEtsyListingUrl = (newUrl: string) => {
-    setCurrentListingUrl(newUrl);
+    const trimmed = newUrl.trim();
+    setCurrentListingUrl(trimmed);
     if (typeof window !== 'undefined') {
       if (selectedPackCover?.id) {
-        localStorage.setItem(`etsy_listing_url_${selectedPackCover.id}`, newUrl);
+        localStorage.setItem(`etsy_listing_url_${selectedPackCover.id}`, trimmed);
+        // Persist to Firestore design document so it's permanently stored across devices & reloads
+        try {
+          fetch('/api/designs/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: selectedPackCover.id,
+              updates: { etsy_listing_url: trimmed }
+            })
+          }).catch(err => console.warn('Failed to sync etsy_listing_url to Firestore:', err));
+        } catch (e) {
+          // Ignore background sync errors
+        }
       }
-      if (newUrl.includes('etsy.com/shop/') || newUrl.includes('etsy.me/')) {
-        setEtsyShopUrl(newUrl);
-        localStorage.setItem('user_etsy_shop_url', newUrl);
+      if (trimmed.includes('etsy.com/shop/') || trimmed.includes('etsy.me/')) {
+        setEtsyShopUrl(trimmed);
+        localStorage.setItem('user_etsy_shop_url', trimmed);
       }
     }
   };
@@ -1374,8 +1388,10 @@ export default function Home() {
     if (typeof window !== 'undefined') {
       const savedShop = localStorage.getItem('user_etsy_shop_url') || '';
       setEtsyShopUrl(savedShop);
-      const savedListing = localStorage.getItem(`etsy_listing_url_${coverDesign.id}`) || savedShop;
-      setCurrentListingUrl(savedListing);
+      const firestoreListing = coverDesign.etsy_listing_url || '';
+      const localListing = localStorage.getItem(`etsy_listing_url_${coverDesign.id}`) || '';
+      const savedListing = firestoreListing || localListing;
+      setCurrentListingUrl(savedListing || '');
     }
 
     try {
@@ -6661,34 +6677,64 @@ export default function Home() {
                         </div>
 
                         {/* Etsy Link Input Bar */}
-                        <div className="bg-white/95 rounded-xl p-2.5 border border-red-100 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 text-xs mb-3">
-                          <div className="flex items-center gap-1.5 shrink-0 text-red-900 font-bold">
-                            <span>🔗 내 Etsy 링크:</span>
+                        <div className="bg-white/95 rounded-xl p-3 border border-red-200 flex flex-col gap-2 text-xs mb-3 shadow-2xs">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                            <div className="flex items-center gap-1.5 shrink-0 text-red-900 font-bold">
+                              <span>🔗 이 상품의 Etsy 상세 링크:</span>
+                            </div>
+                            <input
+                              type="url"
+                              value={currentListingUrl}
+                              onChange={(e) => handleUpdateEtsyListingUrl(e.target.value)}
+                              placeholder="Etsy 상품 상세 URL 입력 (예: https://www.etsy.com/listing/4592885054/...)"
+                              className="flex-1 bg-red-50/40 border border-red-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-hidden focus:ring-1 focus:ring-red-400 placeholder-gray-400 font-mono"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                let linkToCopy = (currentListingUrl || '').trim();
+                                if (!linkToCopy || !linkToCopy.includes('/listing/')) {
+                                  const prompted = prompt(
+                                    '📌 Etsy에 리스팅 등록 완료 후 생성된 개별 상품 상세 링크를 입력해 주세요:\n(예: https://www.etsy.com/listing/4592885054/...)\n\n입력하시면 자동 저장되어 바이어가 핀을 누르면 이 상품으로 바로 직결됩니다!',
+                                    linkToCopy || 'https://www.etsy.com/listing/'
+                                  );
+                                  if (prompted && prompted.trim() && prompted.trim() !== 'https://www.etsy.com/listing/') {
+                                    linkToCopy = prompted.trim();
+                                    handleUpdateEtsyListingUrl(linkToCopy);
+                                  } else if (!linkToCopy) {
+                                    linkToCopy = etsyShopUrl || 'https://www.etsy.com';
+                                  }
+                                }
+                                handleCopy(linkToCopy);
+                                setCopiedLinkNotice(true);
+                                setTimeout(() => setCopiedLinkNotice(false), 2000);
+                              }}
+                              className="bg-red-100 hover:bg-red-200 text-red-800 font-bold px-3 py-1.5 rounded-lg transition-colors shrink-0 flex items-center justify-center gap-1 cursor-pointer"
+                              title="Etsy 상품 링크를 클립보드에 복사합니다"
+                            >
+                              <span>{copiedLinkNotice ? '✓ 링크 복사됨!' : '🔗 링크 복사'}</span>
+                            </button>
                           </div>
-                          <input
-                            type="url"
-                            value={currentListingUrl}
-                            onChange={(e) => handleUpdateEtsyListingUrl(e.target.value)}
-                            placeholder="Etsy 상품 URL 입력 (예: https://www.etsy.com/listing/4592885054/...)"
-                            className="flex-1 bg-red-50/40 border border-red-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-hidden focus:ring-1 focus:ring-red-400 placeholder-gray-400 font-mono"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const linkToCopy = currentListingUrl || etsyShopUrl || '';
-                              if (!linkToCopy) {
-                                alert('먼저 Etsy 상품 링크를 입력해주세요.');
-                                return;
-                              }
-                              handleCopy(linkToCopy);
-                              setCopiedLinkNotice(true);
-                              setTimeout(() => setCopiedLinkNotice(false), 2000);
-                            }}
-                            className="bg-red-100 hover:bg-red-200 text-red-800 font-bold px-3 py-1.5 rounded-lg transition-colors shrink-0 flex items-center justify-center gap-1 cursor-pointer"
-                            title="Etsy 링크를 클립보드에 복사합니다"
-                          >
-                            <span>{copiedLinkNotice ? '✓ 링크 복사됨!' : '🔗 링크 복사'}</span>
-                          </button>
+
+                          {/* 링크 상태 가이드 안내 */}
+                          <div className="text-[11px] pt-1 border-t border-red-100">
+                            {currentListingUrl && currentListingUrl.includes('/listing/') ? (
+                              <span className="text-emerald-700 font-bold flex items-center gap-1">
+                                <span>✅ 상품 상세 직결 링크 등록됨</span>
+                                <span className="font-normal text-emerald-600">(바이어가 핀 클릭 시 이 상품 상세 페이지로 바로 이동하여 즉시 구매 가능!)</span>
+                              </span>
+                            ) : currentListingUrl && currentListingUrl.includes('/shop/') ? (
+                              <span className="text-amber-800 font-bold flex items-center gap-1">
+                                <span>⚠️ 상점 메인 링크 상태</span>
+                                <span className="font-normal text-amber-700">(Etsy에 방금 올리신 개별 상품 링크 <strong>https://www.etsy.com/listing/...</strong> 로 입력을 강력 추천합니다)</span>
+                              </span>
+                            ) : (
+                              <span className="text-rose-700 font-bold flex items-center gap-1">
+                                <span>⚠️ 상품 상세 링크 미등록</span>
+                                <span className="font-normal text-rose-600">(Etsy에 이 스티커 상품을 등록하신 후, 해당 상품 상세 URL을 여기에 붙여넣어 주세요)</span>
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {/* 🏆 Mode A: 정품 비즈니스 핀 원클릭 복사 키트 (15초 완성, 권장) */}
@@ -6763,7 +6809,19 @@ export default function Home() {
                             <button
                               type="button"
                               onClick={() => {
-                                const linkToCopy = currentListingUrl || etsyShopUrl || 'https://www.etsy.com';
+                                let linkToCopy = (currentListingUrl || '').trim();
+                                if (!linkToCopy || !linkToCopy.includes('/listing/')) {
+                                  const prompted = prompt(
+                                    '📌 Etsy에 리스팅 등록 완료 후 발급된 개별 상품 상세 URL을 입력해주세요:\n(예: https://www.etsy.com/listing/4592885054/...)\n\n입력하시면 자동 저장되어 바이어가 핀을 누르면 이 상품으로 바로 직결됩니다!',
+                                    linkToCopy || 'https://www.etsy.com/listing/'
+                                  );
+                                  if (prompted && prompted.trim() && prompted.trim() !== 'https://www.etsy.com/listing/') {
+                                    linkToCopy = prompted.trim();
+                                    handleUpdateEtsyListingUrl(linkToCopy);
+                                  } else if (!linkToCopy) {
+                                    linkToCopy = etsyShopUrl || 'https://www.etsy.com';
+                                  }
+                                }
                                 handleCopy(linkToCopy);
                                 setCopiedLinkNotice(true);
                                 setTimeout(() => setCopiedLinkNotice(false), 2000);
