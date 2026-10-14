@@ -87,20 +87,20 @@ const CATEGORY_SEO_DICT: Record<string, {
     descriptionHighlights: [
       '🐟 Peaceful freshwater tanks (Betta Splendens, Guppies, Neon Tetras, Apple Snails & Shrimps)',
       '🌿 Lush aquascapes with driftwood, water lilies, and crystal-clear bubbling water',
-      '🫧 Perfect for fishkeeping hobbyists, aquarists, hydro flasks, and digital journals'
+      '🫧 Perfect for fishkeeping hobbyists, aquarists, water bottles, and digital journals'
     ]
   },
   booktok: {
-    name: 'Cozy Book Club & Kindle Reading',
+    name: 'Cozy Book Club & Reading',
     bundleKeywords: [
-      'BookTok Stickers PNG Bundle',
-      'Kindle Girlie Reading Clipart',
+      'Book Club Stickers PNG Bundle',
+      'Bookish Girlie Reading Clipart',
       'Cozy Bookworm Die Cut'
     ],
-    singleKeywords: ['BookTok Sticker PNG', 'Kindle Girlie Clipart', 'Cozy Bookworm Die Cut'],
+    singleKeywords: ['Book Club Sticker PNG', 'Bookish Reading Clipart', 'Cozy Bookworm Die Cut'],
     descriptionHighlights: [
-      '📚 Cozy book lovers & booktok aesthetic (Cute Reading Animals, Pastels, Kindle & Reading Nooks)',
-      '☕ Perfect for Kindle clear cases, GoodNotes digital reading journals, book trackers & planners',
+      '📚 Cozy book lovers & bookish aesthetic (Cute Reading Animals, Pastels, E-Readers & Reading Nooks)',
+      '☕ Perfect for e-reader clear cases, digital reading journals, book trackers & planners',
       '✨ Warm, aesthetic hand-drawn illustrations for hopeless romantics, bookworms & fantasy readers'
     ]
   },
@@ -115,7 +115,7 @@ const CATEGORY_SEO_DICT: Record<string, {
     descriptionHighlights: [
       '🥞 Mouthwatering sweet desserts & pastries (Soufflé Pancakes, Croissants, Boba, Shortcake & Mochi Donuts)',
       '🍓 Kawaii aesthetic bakery treats paired with adorable cozy animal companions',
-      '🧁 Ideal for bullet journals, recipe scrapbooks, GoodNotes planners, and water bottle decals'
+      '🧁 Ideal for bullet journals, recipe scrapbooks, digital planners, and water bottle decals'
     ]
   },
   socialbattery: {
@@ -128,7 +128,7 @@ const CATEGORY_SEO_DICT: Record<string, {
     singleKeywords: ['Social Battery Sticker PNG', 'Introvert Humor Clipart', 'Low Battery Die Cut'],
     descriptionHighlights: [
       '🔋 Relatable introvert & mental health humor (1% Battery Sloth, Overstimulated Hamster & Blanket Burritos)',
-      '☕ Perfect self-care and burnout normalization stickers for laptops, Stanley tumblers, and iPads',
+      '☕ Perfect self-care and burnout normalization stickers for laptops, insulated tumblers, and iPads',
       '💜 Funny, empathetic designs for homebodies, students, and exhausted professionals'
     ]
   },
@@ -263,7 +263,7 @@ const KO_EN_TRANSLATE: [RegExp, string][] = [
   [/햄스터/i, 'Hamster Pet'],
   [/수달/i, 'Sea Otter Pup'],
   [/북톡|독서|책/i, 'Book Club Reading'],
-  [/킨들/i, 'Kindle Reader'],
+  [/킨들/i, 'E-Reader Tablet'],
   [/책탑/i, 'Book Stack'],
   [/책갈피/i, 'Bookmark Ribbon'],
   [/북\s*카트/i, 'Book Cart'],
@@ -365,7 +365,7 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
       title: fallbackTitle,
       charCount: fallbackTitle.length,
       wordCount: fallbackTitle.split(/\s+/).filter(Boolean).length,
-      tags: ['digital stickers', 'clipart bundle', 'cricut cut file', 'png download'],
+      tags: ['digital stickers', 'clipart bundle', 'craft cut file', 'png download'],
       description: 'High-quality digital download.'
     };
   }
@@ -402,8 +402,8 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
 
   const themeInfo = CATEGORY_SEO_DICT[subKey] || {
     name: 'Cute Kawaii',
-    bundleKeywords: ['Cute Stickers PNG Bundle', 'Kawaii Clipart Set', 'Aesthetic Die Cut Digital Download', 'Commercial Use Cricut'],
-    singleKeywords: ['Cute Sticker PNG', 'Kawaii Clipart', 'Die Cut Digital Download', 'Printable Cricut'],
+    bundleKeywords: ['Cute Stickers PNG Bundle', 'Kawaii Clipart Set', 'Aesthetic Die Cut Digital Download', 'Commercial Craft Cut'],
+    singleKeywords: ['Cute Sticker PNG', 'Kawaii Clipart', 'Die Cut Digital Download', 'Printable Cut File'],
     descriptionHighlights: ['✨ Cute and aesthetic digital illustrations crafted with vibrant colors and crisp details.']
   };
 
@@ -440,15 +440,15 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
     finalTags = [
       `${subKey} stickers`.slice(0, 20),
       'digital sticker pack'.slice(0, 20),
-      'cricut stickers png'.slice(0, 20),
+      'craft cut files png'.slice(0, 20),
       'clipart bundle set'.slice(0, 20),
       'printable sticker a4'.slice(0, 20),
       'commercial use png'.slice(0, 20),
       'die cut sticker set'.slice(0, 20),
       'planner stickers png'.slice(0, 20),
-      'goodnotes sticker'.slice(0, 20),
+      'digital planner png'.slice(0, 20),
       'scrapbooking clipart'.slice(0, 20),
-      'hydroflask decal'.slice(0, 20),
+      'water bottle decal'.slice(0, 20),
       '300 dpi transparent'.slice(0, 20),
       `${count} sticker bundle`.slice(0, 20)
     ];
@@ -469,14 +469,14 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
     finalTags = [
       `${enItemName.toLowerCase().slice(0, 16)} sticker`,
       `${subKey} sticker`.slice(0, 20),
-      'cricut cut file',
+      'craft cut file',
       'die cut sticker',
       'printable sticker',
       'planner sticker png',
-      'goodnotes sticker',
+      'digital planner png',
       'commercial use png',
       'digital download',
-      'hydroflask decal',
+      'water bottle decal',
       'art clipart png',
       '300 dpi transparent',
       'instant download'
@@ -499,7 +499,7 @@ This instant digital download bundle includes premium, professionally crafted tr
 ${isPod ? `• 1 High-Resolution Transparent PNG File (300 DPI, 4500x5400px print-ready at native POD scale)
 • Perfect for Direct-to-Garment (DTG), Sublimation, Screen Printing, Posters & Mugs
 • Commercial Use Included` : (isBundle ? `• ${count} Individual High-Resolution Transparent PNG Files (300 DPI, 2000px+ with crisp die-cut white outline)
-• ${numSheets} Printable A4 Sticker Sheet${numSheets > 1 ? 's' : ''} (Transparent PNG for Cricut & Silhouette Print-Then-Cut)
+• ${numSheets} Printable A4 Sticker Sheet${numSheets > 1 ? 's' : ''} (Transparent PNG for craft cutting machines & Print-Then-Cut)
 • ${numSheets} Printable A4 Sticker Sheet${numSheets > 1 ? 's' : ''} (Solid White Background for easy hand scissors cutting)
 • 1 Master Collection Cover Artwork (300 DPI high-resolution)` : `• 1 Individual High-Resolution Transparent PNG File (300 DPI, 2000px+ with crisp die-cut white outline)
 • Commercial Use & Personal Crafting Use Included`)}
@@ -514,19 +514,17 @@ ${themeInfo.descriptionHighlights.join('\n')}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✂️ COMPATIBILITY & SOFTWARE:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-These high-quality PNG files work seamlessly with:
-• Cricut Design Space
-• Silhouette Studio (Basic, Designer & Business Editions)
-• GoodNotes, Notability & iPad Digital Planners
-• Procreate, Photoshop, Illustrator, CorelDraw, Inkscape & Canva
-• Brother ScanNCut & laser craft cutters
-• Standard Home Inkjet / Laser Printers
+These high-quality PNG files work seamlessly with popular crafting software:
+• Electronic craft cutting software & vinyl cutters (Print-Then-Cut compatible)
+• Digital note-taking & digital planner apps for tablets
+• Graphic design editors (Photoshop, Illustrator, Procreate, Canva & Inkscape)
+• Standard Home Inkjet & Laser Printers
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 PERFECT FOR:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 • Die-cut stickers, planner stickers, bullet journals & scrapbooking
-• Water bottle, laptop, phone case, tumbler & Kindle decals
+• Water bottle, laptop, phone case, tumbler & e-reader decals
 • Greeting cards, party favors, invitations & gift tags
 • POD merchandise: T-shirts, tote bags, hoodies, mugs, and pillows
 • DIY vinyl projects, embroidery mockups, and resin crafts

@@ -730,7 +730,7 @@ export function getSeasonalPricingStrategy(holidayId: string, koreanName: string
         ],
         etsyTags: [
           'Christmas Stickers', 'Winter Snowglobe', 'Digital Planner PNG', 'Printable Sticker Sheet',
-          'Cricut Cut Files', 'Holiday Clipart', 'Cozy Christmas', 'GoodNotes Stickers',
+          'Craft Cut Files', 'Holiday Clipart', 'Cozy Christmas', 'Digital Planner Stickers',
           'Gift Tag Printable', 'Spooky Free Christmas', 'Xmas Scrapbooking', 'A4 Sticker Sheet', 'Cute Xmas Decals'
         ],
         highlightTip: '10~11월에 등록하여 조기 리뷰를 쌓아두면 12월 1~2주 차 연말 폭풍 구매 기간에 일매출 1위를 달성합니다.'
@@ -748,8 +748,8 @@ export function getSeasonalPricingStrategy(holidayId: string, koreanName: string
         ],
         etsyTags: [
           'Thanksgiving Stickers', 'Fall Harvest Clipart', 'Cozy Autumn Planner', 'Printable Sticker Sheet',
-          'Pumpkin Clipart', 'Gratitude Journal', 'Autumn Scrapbook', 'Cricut Fall Stickers',
-          'Digital Planner PNG', 'Cozy Season Decals', 'Harvest Jar PNG', 'GoodNotes Autumn', 'Cute Turkey Clipart'
+          'Pumpkin Clipart', 'Gratitude Journal', 'Autumn Scrapbook', 'Fall Craft Cut Files',
+          'Digital Planner PNG', 'Cozy Season Decals', 'Harvest Jar PNG', 'Autumn Planner Deco', 'Cute Turkey Clipart'
         ],
         highlightTip: '미국인들의 라이프스타일 키워드인 "Cozy Autumn"을 제목과 태그 첫머리에 배치하면 노출이 200% 증가합니다.'
       };
@@ -766,8 +766,8 @@ export function getSeasonalPricingStrategy(holidayId: string, koreanName: string
         ],
         etsyTags: [
           'Pastel Halloween', 'Spooky Cute Stickers', 'Ghost Clipart PNG', 'Halloween Printable',
-          'Goodie Bag Labels', 'Digital Planner PNG', 'Cricut Halloween', 'Cute Pumpkin Decals',
-          'Trick or Treat', 'Kawaii Spooky', 'GoodNotes Stickers', 'A4 Halloween Sheet', 'Boba Ghost Sticker'
+          'Goodie Bag Labels', 'Digital Planner PNG', 'Halloween Cut Files', 'Cute Pumpkin Decals',
+          'Trick or Treat', 'Kawaii Spooky', 'Digital Planner Stickers', 'A4 Halloween Sheet', 'Boba Ghost Sticker'
         ],
         highlightTip: '9월 중순부터 10월 첫째 주까지 학교 및 홈파티 구디백 라벨용 대량 인쇄 수요가 최고조에 달합니다.'
       };
@@ -784,10 +784,10 @@ export function getSeasonalPricingStrategy(holidayId: string, koreanName: string
         ],
         etsyTags: [
           'Valentine Stickers', 'Cute Couple Clipart', 'Love Potion PNG', 'Valentine Printable',
-          'Pink Aesthetic Decal', 'Galentines Gift', 'Cricut Valentine', 'Digital Planner PNG',
-          'Heart Clipart', 'GoodNotes Stickers', 'Romantic Scrapbook', 'A4 Valentine Sheet', 'Sweetheart Stickers'
+          'Pink Aesthetic Decal', 'Galentines Gift', 'Valentine Cut Files', 'Digital Planner PNG',
+          'Heart Clipart', 'Digital Planner Stickers', 'Romantic Scrapbook', 'A4 Valentine Sheet', 'Sweetheart Stickers'
         ],
-        highlightTip: '1월 둘째 주부터 초콜릿/쿠키 베이킹 선물 라벨 및 굿노트 다이어리 데코용으로 검색량이 급증합니다.'
+        highlightTip: '1월 둘째 주부터 초콜릿/쿠키 베이킹 선물 라벨 및 다이어리 데코용으로 검색량이 급증합니다.'
       };
     case 'stpatrick':
       return {
@@ -802,8 +802,8 @@ export function getSeasonalPricingStrategy(holidayId: string, koreanName: string
         ],
         etsyTags: [
           'St Patricks Day', 'Lucky Clover PNG', 'Irish Festival Decal', 'Printable Sticker Sheet',
-          'Pot of Gold Clipart', 'Teacher Stickers', 'Classroom Rewards', 'GoodNotes St Patrick',
-          'Cricut Lucky Cut', 'Green Aesthetic', 'March Planner PNG', 'A4 Irish Sheet', 'Leprechaun Stickers'
+          'Pot of Gold Clipart', 'Teacher Stickers', 'Classroom Rewards', 'St Patrick Planner',
+          'Lucky Craft Cut Files', 'Green Aesthetic', 'March Planner PNG', 'A4 Irish Sheet', 'Leprechaun Stickers'
         ],
         highlightTip: '미국 학교 교사들의 교실 행사 스티커 수요가 높으므로 "Classroom Printable" 키워드를 공략하세요.'
       };
@@ -820,8 +820,8 @@ export function getSeasonalPricingStrategy(holidayId: string, koreanName: string
         ],
         etsyTags: [
           'Easter Stickers', 'Spring Bunny Clipart', 'Easter Basket Tag', 'Pastel Easter Eggs',
-          'Printable Sticker Sheet', 'Digital Planner PNG', 'Spring Garden Decals', 'Cricut Easter Cut',
-          'GoodNotes Easter', 'Cute Bunny Stickers', 'Floral Terrarium', 'A4 Easter Sheet', 'Kids Easter Printable'
+          'Printable Sticker Sheet', 'Digital Planner PNG', 'Spring Garden Decals', 'Easter Craft Cut Files',
+          'Easter Planner PNG', 'Cute Bunny Stickers', 'Floral Terrarium', 'A4 Easter Sheet', 'Kids Easter Printable'
         ],
         highlightTip: '부활절 바구니 선물 태그 및 유아 놀이용 스티커로 인쇄 수요가 매우 높아 A4 시트 강조가 핵심입니다.'
       };
@@ -839,7 +839,7 @@ export function getSeasonalPricingStrategy(holidayId: string, koreanName: string
         etsyTags: [
           'Mothers Day Stickers', 'Floral Teacup PNG', 'Gift Tag Printable', 'Mom Card Clipart',
           'Vintage Rose Decal', 'Handmade Card Decor', 'Printable Sticker Sheet', 'Digital Planner PNG',
-          'Cricut Floral Cut', 'GoodNotes Mothers Day', 'Elegant Floral PNG', 'A4 Flower Sheet', 'Thank You Mom Tag'
+          'Floral Craft Cut Files', 'Mothers Day Planner', 'Elegant Floral PNG', 'A4 Flower Sheet', 'Thank You Mom Tag'
         ],
         highlightTip: '5월 첫째 주 선물 준비 직전인 4월 중순에 감사 카드 제작용 다운로드가 폭발하므로 3월 말 등록 권장.'
       };
@@ -848,15 +848,15 @@ export function getSeasonalPricingStrategy(holidayId: string, koreanName: string
         suggestedPrice: '$3.50',
         originalPrice: '$7.00 (50% 런칭 세일 권장)',
         bundleOffer: '3팩 번들 $8.90 업셀링',
-        targetAudience: `${koreanName} 시즌 선물 포장 및 굿노트/다이어리 꾸미기 유저`,
+        targetAudience: `${koreanName} 시즌 선물 포장 및 다이어리 꾸미기 유저`,
         salesTactics: [
           '정가 $7.00에 런칭 기념 50% 세일($3.50)로 Etsy 노출 알고리즘 우대 획득.',
-          'A4 인쇄용 시트 2장과 굿노트 디지털 플래너 적용 컷을 썸네일 2~3번에 필수 배치.',
+          'A4 인쇄용 시트 2장과 디지털 플래너 적용 컷을 썸네일 2~3번에 필수 배치.',
           '시즌 개막 4~6주 전 등록하여 사전 인덱싱 및 구매자 찜(Favorite) 확보.'
         ],
         etsyTags: [
-          `${koreanName} Stickers`, 'Digital Planner PNG', 'Printable Sticker Sheet', 'Cricut Cut Files',
-          'GoodNotes Stickers', 'Cute Clipart Pack', 'A4 Printable Sheet', 'Seasonal Decals',
+          `${koreanName} Stickers`, 'Digital Planner PNG', 'Printable Sticker Sheet', 'Craft Cut Files',
+          'Digital Planner Stickers', 'Cute Clipart Pack', 'A4 Printable Sheet', 'Seasonal Decals',
           'Aesthetic Planner', 'Scrapbooking PNG', 'Instant Download', 'Sticker Bundle', 'Planner Accessories'
         ],
         highlightTip: `${koreanName} 시즌 검색 트렌드가 시작되기 전 미리 리스팅하여 리뷰를 축적하세요.`

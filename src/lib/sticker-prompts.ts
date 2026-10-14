@@ -680,7 +680,7 @@ export const BOOKTOK_20_SERIES: StickerPreset[] = [
     theme: 'BookTok Reading 20 Pack Cover',
     phrase: '',
     description: 'Etsy 판매용 20종 북톡 & 코지 리딩 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
-    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE COZY READING & BOOK CLUB STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are large individual die-cut sticker samples of cute reading kittens with round glasses, baby bear with pastel Kindle, cozy book stack with hot cocoa mug, bunny with giant ribbon bookmark, late-night reading red panda, 5-star book review badge, reading journal TBR jar, and bookish floral teacups arranged artistically across the white background. STRICT NO GLASS TANKS: Absolutely NO fish tanks, NO terrarium jars. ONLY standalone adorable bookworm animals, books, kindle devices, and cozy reading accessories. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE COZY READING & BOOK CLUB STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. Surrounding the text are large individual die-cut sticker samples of cute reading kittens with round glasses, baby bear with pastel e-reader, cozy book stack with hot cocoa mug, bunny with giant ribbon bookmark, late-night reading red panda, 5-star book review badge, reading journal TBR jar, and bookish floral teacups arranged artistically across the white background. STRICT NO GLASS TANKS: Absolutely NO fish tanks, NO terrarium jars. ONLY standalone adorable bookworm animals, books, e-reader devices, and cozy reading accessories. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
   },
   ...Array.from({ length: 20 }, (_, i) => {
     const num = i + 1;
@@ -692,10 +692,10 @@ export const BOOKTOK_20_SERIES: StickerPreset[] = [
         detail: 'standalone cute fluffy baby calico kitten wearing a chunky knitted sweater and tiny round gold reading glasses, curling up cozily and reading a thick open hardcover book. Floating warm yellow sparkle accents'
       },
       {
-        name: '파스텔 킨들 & 아기 곰',
-        desc: '라벤더 킨들을 꼭 쥐고 침대에 엎드려 독서하는 아기 곰 스티커',
+        name: '파스텔 e-리더기 & 아기 곰',
+        desc: '라벤더 e-리더기를 꼭 쥐고 침대에 엎드려 독서하는 아기 곰 스티커',
         phrase: 'In My Reading Era',
-        detail: 'standalone cute chubby baby brown bear lying happily on its tummy, holding a pastel lavender Kindle e-reader with tiny heart stickers on the back'
+        detail: 'standalone cute chubby baby brown bear lying happily on its tummy, holding a pastel lavender e-reader tablet with tiny heart stickers on the back'
       },
       {
         name: '감성 책탑과 핫초코 머그잔',
@@ -782,10 +782,10 @@ export const BOOKTOK_20_SERIES: StickerPreset[] = [
         detail: 'standalone sleeping ginger tabby kitten curled up happily next to a vintage English floral porcelain teapot and matching teacup on a saucer with chamomile blossoms'
       },
       {
-        name: '킨들 걸 하트 핑거스트랩',
-        desc: '파스텔 킨들과 하트 그립톡을 쥔 손 스티커',
-        phrase: 'Kindle Girlie',
-        detail: 'standalone aesthetic hand with pastel manicure holding a sage green e-reader Kindle with a heart-shaped popsockets grip and cute bookish deco stickers'
+        name: '북클럽 걸 하트 폰그립',
+        desc: '파스텔 e-리더기와 하트 그립을 쥔 손 스티커',
+        phrase: 'Bookish Girlie',
+        detail: 'standalone aesthetic hand with pastel manicure holding a sage green e-reader tablet with a heart-shaped phone grip and cute bookish deco stickers'
       },
       {
         name: '책에 파묻힌 아기 고슴도치',

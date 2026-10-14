@@ -6806,7 +6806,7 @@ export default function Home() {
                                   type="button"
                                   onClick={() => {
                                     const hashTags = (packSeo.tags || []).map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, '')).filter(t => t.length > 2).slice(0, 8).join(' ');
-                                    const text = `${packSeo.title}\n\n✨ ${packStickers.length || 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Planners & Cricut.\n👉 Shop on Etsy: ${currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop'}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller`;
+                                    const text = `${packSeo.title}\n\n✨ ${packStickers.length || 40} Cute Die-Cut Digital Stickers Bundle for Digital Planners, Journals & Craft Cutters.\n👉 Shop on Etsy: ${currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop'}\n\n${hashTags} #stickers #digitalstickers #digitalplanner #planneraddict #etsyseller`;
                                     handleCopy(text);
                                     setCopiedPinterestDescNotice(true);
                                     setTimeout(() => setCopiedPinterestDescNotice(false), 2000);
