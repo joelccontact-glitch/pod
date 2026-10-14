@@ -85,14 +85,14 @@ const MOCKUP_CONFIGS: MockupTemplateConfig[] = [
     description: '아이폰 투명 케이스 뒷면과 책상 위 줄노트에 일상 소품으로 스티커를 부착한 컷',
     recommendedUse: 'Etsy 4번 사진 (Everyday Lifestyle) & Pinterest 라이프스타일 핀',
     slots: [
-      // 1. Center back of iPhone inside transparent case
+      // 1. Center back of iPhone inside transparent case (Main Hero Placement)
       { xPct: 0.630, yPct: 0.580, sizePct: 0.145, tiltDeg: 0, shadowBlur: 8, shadowAlpha: 0.24, shadowOffsetY: 3 },
-      // 2. Top area of open lined notebook on the left
-      { xPct: 0.220, yPct: 0.660, sizePct: 0.170, tiltDeg: -8, shadowBlur: 8, shadowAlpha: 0.20, shadowOffsetY: 4 },
-      // 3. Lower area of open lined notebook
-      { xPct: 0.370, yPct: 0.830, sizePct: 0.155, tiltDeg: 6, shadowBlur: 8, shadowAlpha: 0.20, shadowOffsetY: 4 },
-      // 4. Soft decorative placement on desk near coffee coaster
-      { xPct: 0.430, yPct: 0.320, sizePct: 0.130, tiltDeg: -12, shadowBlur: 10, shadowAlpha: 0.22, shadowOffsetY: 5 },
+      // 2. Open lined notebook - Left page (Upper area)
+      { xPct: 0.180, yPct: 0.610, sizePct: 0.145, tiltDeg: -6, shadowBlur: 7, shadowAlpha: 0.18, shadowOffsetY: 3 },
+      // 3. Open lined notebook - Left page (Lower area)
+      { xPct: 0.170, yPct: 0.810, sizePct: 0.140, tiltDeg: 5, shadowBlur: 7, shadowAlpha: 0.18, shadowOffsetY: 3 },
+      // 4. Open lined notebook - Right page (Clean placement, safe from gold pen)
+      { xPct: 0.410, yPct: 0.740, sizePct: 0.150, tiltDeg: -4, shadowBlur: 7, shadowAlpha: 0.18, shadowOffsetY: 3 },
     ],
   },
 ];
