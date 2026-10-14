@@ -582,6 +582,39 @@ export default function Home() {
     });
   };
 
+  const getMockupEnglishSeo = (mockup: LifestyleMockupResult, cover: any, packCount: number) => {
+    const packSeo = generateEtsySeo(cover, packCount);
+    // Extract primary English base title (segment before comma or fallback)
+    const baseTitle = (packSeo.title || 'Cute Stickers PNG Bundle').split(',')[0].trim();
+
+    let demoTitleSuffix = 'Lifestyle Demonstration';
+    let demoContext = 'Digital Planner & Lifestyle demonstration';
+
+    if (mockup.id === 'ipad_planner') {
+      demoTitleSuffix = 'iPad GoodNotes Digital Planning Demo';
+      demoContext = 'Realistic iPad & GoodNotes digital planning demonstration with cute die-cut stickers';
+    } else if (mockup.id === 'print_craft') {
+      demoTitleSuffix = 'Printed DIY Sticker Sheet & Craft Demo';
+      demoContext = 'Printed & cut DIY sticker craft demonstration';
+    } else if (mockup.id === 'phone_journal') {
+      demoTitleSuffix = 'Aesthetic Laptop & Phone Case Decor Demo';
+      demoContext = 'Laptop & phone case aesthetic sticker decoration demonstration';
+    }
+
+    const title = `${baseTitle} - ${demoTitleSuffix}`;
+    const hashTags = (packSeo.tags || [])
+      .map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, ''))
+      .filter(t => t.length > 2)
+      .slice(0, 8)
+      .join(' ');
+
+    const targetLink = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
+    const countText = packCount > 0 ? packCount : 20;
+    const description = `${title}\n\n📸 [Lifestyle Demo] ${demoContext}.\n✨ ${countText} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Planners & Cricut.\nHigh resolution 300DPI PNG files with transparent backgrounds + printable sheet.\n\n👉 Shop on Etsy: ${targetLink}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller #clipart`;
+
+    return { title, description, targetLink };
+  };
+
   const handleShareMockupToPinterest = async (mockup: LifestyleMockupResult) => {
     if (!selectedPackCover) return;
 
@@ -635,27 +668,9 @@ export default function Home() {
 
       // Use coverId_mockupType in the path so Pinterest scraper can fetch it with or without query params
       const mediaUrl = `${baseUrl}/api/designs/image/${selectedPackCover.id}_${mockup.id}.jpg?id=${selectedPackCover.id}&type=${mockup.id}&v=${Date.now()}`;
-      const customTitle = `${selectedPackCover.title || 'Cute Stickers'} - ${mockup.title}`;
+      const seoData = getMockupEnglishSeo(mockup, selectedPackCover, packStickers.length);
 
-      let demoContext = 'Digital Planner & Lifestyle demonstration';
-      if (mockup.id === 'ipad_planner') {
-        demoContext = 'Realistic iPad & GoodNotes digital planning demonstration with cute die-cut stickers';
-      } else if (mockup.id === 'print_craft') {
-        demoContext = 'Printed & cut DIY sticker craft demonstration';
-      } else if (mockup.id === 'phone_journal') {
-        demoContext = 'Laptop & phone case aesthetic sticker decoration demonstration';
-      }
-
-      const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
-      const hashTags = (packSeo.tags || [])
-        .map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, ''))
-        .filter(t => t.length > 2)
-        .slice(0, 8)
-        .join(' ');
-
-      const description = `${customTitle}\n\n📸 [Lifestyle Demo] ${demoContext}.\n✨ ${packStickers.length > 0 ? packStickers.length : 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Digital Planners & Crafts.\nHigh resolution 300DPI PNG files with transparent backgrounds + printable sheet.\n\n👉 Shop this pack on Etsy: ${targetLink}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller #clipart`;
-
-      handleShareToPinterest(mediaUrl, customTitle, description, popup);
+      handleShareToPinterest(mediaUrl, seoData.title, seoData.description, popup);
     } catch (error: any) {
       console.error('Error sharing mockup to Pinterest:', error);
       if (popup && !popup.closed) popup.close();
@@ -7409,13 +7424,13 @@ export default function Home() {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    const customTitle = `${selectedPackCover?.title || 'Cute Stickers'} - ${mockup.title}`;
-                                    handleCopy(customTitle);
+                                    const seoData = getMockupEnglishSeo(mockup, selectedPackCover, packStickers.length);
+                                    handleCopy(seoData.title);
                                     setCopiedMockupNotice(`${mockup.id}_title`);
                                     setTimeout(() => setCopiedMockupNotice(null), 2000);
                                   }}
                                   className="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold py-1.5 px-1 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
-                                  title="목업 핀 제목을 복사합니다. 핀 화면의 제목 칸에 Ctrl+V 하세요."
+                                  title="목업 영문 핀 제목을 복사합니다. 핀 화면의 제목 칸에 Ctrl+V 하세요."
                                 >
                                   <span>📋</span>
                                   <span>{copiedMockupNotice === `${mockup.id}_title` ? '✓ 복사됨' : '2. 제목'}</span>
@@ -7425,25 +7440,13 @@ export default function Home() {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    const customTitle = `${selectedPackCover?.title || 'Cute Stickers'} - ${mockup.title}`;
-                                    let demoContext = 'Digital Planner & Lifestyle demonstration';
-                                    if (mockup.id === 'ipad_planner') {
-                                      demoContext = 'Realistic iPad & GoodNotes digital planning demonstration with cute die-cut stickers';
-                                    } else if (mockup.id === 'print_craft') {
-                                      demoContext = 'Printed & cut DIY sticker craft demonstration';
-                                    } else if (mockup.id === 'phone_journal') {
-                                      demoContext = 'Laptop & phone case aesthetic sticker decoration demonstration';
-                                    }
-                                    const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
-                                    const hashTags = (packSeo.tags || []).map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, '')).filter(t => t.length > 2).slice(0, 8).join(' ');
-                                    const targetLink = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
-                                    const description = `${customTitle}\n\n📸 [Lifestyle Demo] ${demoContext}.\n✨ ${packStickers.length > 0 ? packStickers.length : 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Planners & Cricut.\nHigh resolution 300DPI PNG files with transparent backgrounds + printable sheet.\n\n👉 Shop on Etsy: ${targetLink}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller #clipart`;
-                                    handleCopy(description);
+                                    const seoData = getMockupEnglishSeo(mockup, selectedPackCover, packStickers.length);
+                                    handleCopy(seoData.description);
                                     setCopiedMockupNotice(`${mockup.id}_desc`);
                                     setTimeout(() => setCopiedMockupNotice(null), 2000);
                                   }}
                                   className="bg-violet-600 hover:bg-violet-700 text-white text-[11px] font-bold py-1.5 px-1 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
-                                  title="목업 상세설명 및 해시태그를 복사합니다. 핀 화면의 설명 칸에 Ctrl+V 하세요."
+                                  title="목업 영문 상세설명 및 해시태그를 복사합니다. 핀 화면의 설명 칸에 Ctrl+V 하세요."
                                 >
                                   <span>📝</span>
                                   <span>{copiedMockupNotice === `${mockup.id}_desc` ? '✓ 복사됨' : '3. 설명'}</span>
@@ -7453,8 +7456,8 @@ export default function Home() {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    const targetLink = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
-                                    handleCopy(targetLink);
+                                    const seoData = getMockupEnglishSeo(mockup, selectedPackCover, packStickers.length);
+                                    handleCopy(seoData.targetLink);
                                     setCopiedMockupNotice(`${mockup.id}_link`);
                                     setTimeout(() => setCopiedMockupNotice(null), 2000);
                                   }}
