@@ -7294,6 +7294,17 @@ export default function Home() {
                     <span>📦</span>
                     <span>3종 한 번에 ZIP 다운로드</span>
                   </button>
+
+                  <a
+                    href="https://www.pinterest.com/pin-creation-tool/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="bg-[#E60023] hover:bg-[#ad081b] active:scale-95 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer hover:scale-[1.02]"
+                    title="Pinterest의 공식 핀 생성 페이지(핀 빌더)를 새 창으로 엽니다"
+                  >
+                    <span>🚀</span>
+                    <span>Pinterest 핀 만들기 열기</span>
+                  </a>
                 </div>
               </div>
 
@@ -7359,35 +7370,106 @@ export default function Home() {
                             </div>
                           </div>
 
-                          <div className="space-y-1.5">
-                            <button
-                              onClick={() => handleDownloadSingleMockup(mockup)}
-                              className="w-full bg-stone-900 hover:bg-black text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                            >
-                              <span>📥</span>
-                              <span>고화질 다운로드 (JPG)</span>
-                            </button>
-
-                            {/* 📌 정품 비즈니스 핀 등록 */}
+                          <div className="space-y-2 pt-2 border-t border-gray-100">
+                            {/* 1. 고화질 다운로드 */}
                             <button
                               onClick={() => {
                                 handleDownloadSingleMockup(mockup);
-                                const customTitle = `${selectedPackCover?.title || 'Cute Stickers'} - ${mockup.title}`;
-                                const targetLink = currentListingUrl || etsyShopUrl || 'https://www.etsy.com';
-                                const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
-                                const hashTags = (packSeo.tags || []).map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, '')).filter(t => t.length > 2).slice(0, 8).join(' ');
-                                const copyText = `[제목]\n${customTitle}\n\n[설명]\n${customTitle}\n\n✨ Cute Die-Cut Digital Stickers Bundle for GoodNotes & Planners.\n👉 Shop on Etsy: ${targetLink}\n\n${hashTags}\n\n[링크]\n${targetLink}`;
-                                handleCopy(copyText);
-                                setCopiedMockupNotice(mockup.id);
-                                setTimeout(() => setCopiedMockupNotice(null), 3000);
-                                window.open('https://www.pinterest.com/pin-creation-tool/', '_blank');
+                                setCopiedMockupNotice(`${mockup.id}_img`);
+                                setTimeout(() => setCopiedMockupNotice(null), 2000);
                               }}
-                              className="w-full bg-[#E60023] hover:bg-[#ad081b] active:scale-95 text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                              title="목업 사진을 다운로드하고 핀터레스트 핀 만들기 화면을 새 창으로 엽니다"
+                              className="w-full bg-stone-900 hover:bg-black text-white font-extrabold text-xs py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                              title="목업 사진을 다운로드합니다"
                             >
-                              <span>🚀</span>
-                              <span>{copiedMockupNotice === mockup.id ? '✓ 사진저장 & 정보복사됨!' : '📌 Pinterest 핀 등록'}</span>
+                              <span>📥</span>
+                              <span>{copiedMockupNotice === `${mockup.id}_img` ? '✓ 다운로드 완료!' : '1. 목업 사진 다운로드'}</span>
                             </button>
+
+                            {/* 📌 Pinterest 핀 등록 키트 */}
+                            <div className="bg-red-50/70 rounded-xl p-2.5 border border-red-200 space-y-2">
+                              <div className="flex items-center justify-between gap-1">
+                                <span className="text-[11px] font-black text-red-950 flex items-center gap-1">
+                                  <span>📌</span>
+                                  <span>Pinterest 핀 등록 키트</span>
+                                </span>
+                                <a
+                                  href="https://www.pinterest.com/pin-creation-tool/"
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="bg-[#E60023] hover:bg-[#ad081b] active:scale-95 text-white text-[10px] font-black px-2 py-0.5 rounded-md shadow-2xs flex items-center gap-1 cursor-pointer transition-all"
+                                  title="Pinterest의 공식 핀 생성 페이지를 새 창으로 엽니다"
+                                >
+                                  <span>🚀</span>
+                                  <span>핀 만들기 창</span>
+                                </a>
+                              </div>
+
+                              <div className="grid grid-cols-3 gap-1">
+                                {/* 2. 제목 복사 */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const customTitle = `${selectedPackCover?.title || 'Cute Stickers'} - ${mockup.title}`;
+                                    handleCopy(customTitle);
+                                    setCopiedMockupNotice(`${mockup.id}_title`);
+                                    setTimeout(() => setCopiedMockupNotice(null), 2000);
+                                  }}
+                                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold py-1.5 px-1 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                                  title="목업 핀 제목을 복사합니다. 핀 화면의 제목 칸에 Ctrl+V 하세요."
+                                >
+                                  <span>📋</span>
+                                  <span>{copiedMockupNotice === `${mockup.id}_title` ? '✓ 복사됨' : '2. 제목'}</span>
+                                </button>
+
+                                {/* 3. 설명 복사 */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const customTitle = `${selectedPackCover?.title || 'Cute Stickers'} - ${mockup.title}`;
+                                    let demoContext = 'Digital Planner & Lifestyle demonstration';
+                                    if (mockup.id === 'ipad_planner') {
+                                      demoContext = 'Realistic iPad & GoodNotes digital planning demonstration with cute die-cut stickers';
+                                    } else if (mockup.id === 'print_craft') {
+                                      demoContext = 'Printed & cut DIY sticker craft demonstration';
+                                    } else if (mockup.id === 'phone_journal') {
+                                      demoContext = 'Laptop & phone case aesthetic sticker decoration demonstration';
+                                    }
+                                    const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
+                                    const hashTags = (packSeo.tags || []).map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, '')).filter(t => t.length > 2).slice(0, 8).join(' ');
+                                    const targetLink = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
+                                    const description = `${customTitle}\n\n📸 [Lifestyle Demo] ${demoContext}.\n✨ ${packStickers.length > 0 ? packStickers.length : 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Planners & Cricut.\nHigh resolution 300DPI PNG files with transparent backgrounds + printable sheet.\n\n👉 Shop on Etsy: ${targetLink}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller #clipart`;
+                                    handleCopy(description);
+                                    setCopiedMockupNotice(`${mockup.id}_desc`);
+                                    setTimeout(() => setCopiedMockupNotice(null), 2000);
+                                  }}
+                                  className="bg-violet-600 hover:bg-violet-700 text-white text-[11px] font-bold py-1.5 px-1 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                                  title="목업 상세설명 및 해시태그를 복사합니다. 핀 화면의 설명 칸에 Ctrl+V 하세요."
+                                >
+                                  <span>📝</span>
+                                  <span>{copiedMockupNotice === `${mockup.id}_desc` ? '✓ 복사됨' : '3. 설명'}</span>
+                                </button>
+
+                                {/* 4. 링크 복사 */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const targetLink = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
+                                    handleCopy(targetLink);
+                                    setCopiedMockupNotice(`${mockup.id}_link`);
+                                    setTimeout(() => setCopiedMockupNotice(null), 2000);
+                                  }}
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold py-1.5 px-1 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                                  title="Etsy 상점 링크를 복사합니다. 핀 화면의 링크 칸에 Ctrl+V 하세요."
+                                >
+                                  <span>🔗</span>
+                                  <span>{copiedMockupNotice === `${mockup.id}_link` ? '✓ 복사됨' : '4. 링크'}</span>
+                                </button>
+                              </div>
+
+                              <p className="text-[10px] text-stone-500 text-center leading-tight pt-0.5">
+                                💡 <strong>1.사진</strong> 드래그 ➔ <strong>2~4번</strong> 클릭 후 핀 창에 <strong>Ctrl+V</strong> 붙여넣기
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
