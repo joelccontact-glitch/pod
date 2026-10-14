@@ -50,15 +50,13 @@ const MOCKUP_CONFIGS: MockupTemplateConfig[] = [
     recommendedUse: 'Etsy 2번 사진 (In-Action Spread) & Pinterest 다꾸 핀',
     slots: [
       // 1. Right side "Notes" box on iPad screen (Main hero sticker)
-      { xPct: 0.580, yPct: 0.505, sizePct: 0.155, tiltDeg: -2, shadowBlur: 6, shadowAlpha: 0.18, shadowOffsetY: 3 },
-      // 2. Left side WED/THU planner grid cell
-      { xPct: 0.410, yPct: 0.560, sizePct: 0.125, tiltDeg: 4, shadowBlur: 6, shadowAlpha: 0.18, shadowOffsetY: 3 },
-      // 3. Left side MON top grid cell
-      { xPct: 0.440, yPct: 0.415, sizePct: 0.115, tiltDeg: -3, shadowBlur: 5, shadowAlpha: 0.16, shadowOffsetY: 2 },
+      { xPct: 0.580, yPct: 0.510, sizePct: 0.145, tiltDeg: 0, shadowBlur: 6, shadowAlpha: 0.18, shadowOffsetY: 3 },
+      // 2. Left side MON/TUE planner grid cell (Cleanly below Weekly Plan header)
+      { xPct: 0.420, yPct: 0.435, sizePct: 0.115, tiltDeg: -3, shadowBlur: 5, shadowAlpha: 0.16, shadowOffsetY: 2 },
+      // 3. Left side WED/THU planner grid cell
+      { xPct: 0.410, yPct: 0.585, sizePct: 0.120, tiltDeg: 4, shadowBlur: 6, shadowAlpha: 0.18, shadowOffsetY: 3 },
       // 4. Right side To-Do / Checklist bottom space
-      { xPct: 0.585, yPct: 0.770, sizePct: 0.120, tiltDeg: 3, shadowBlur: 6, shadowAlpha: 0.18, shadowOffsetY: 3 },
-      // 5. Aesthetic placement on top-left book cover outside iPad
-      { xPct: 0.210, yPct: 0.210, sizePct: 0.135, tiltDeg: -8, shadowBlur: 10, shadowAlpha: 0.24, shadowOffsetY: 5 },
+      { xPct: 0.585, yPct: 0.770, sizePct: 0.120, tiltDeg: 2, shadowBlur: 6, shadowAlpha: 0.18, shadowOffsetY: 3 },
     ],
   },
   {
