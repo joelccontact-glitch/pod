@@ -350,7 +350,8 @@ export default function Home() {
   const [copiedPackTitleNotice, setCopiedPackTitleNotice] = useState(false);
   const [copiedPackDescNotice, setCopiedPackDescNotice] = useState(false);
   const [copiedPackTagsNotice, setCopiedPackTagsNotice] = useState(false);
-  const [isPackSeoExpanded, setIsPackSeoExpanded] = useState(true);
+  const [isPinterestHubExpanded, setIsPinterestHubExpanded] = useState(false); // Collapsed by default
+  const [isPackSeoExpanded, setIsPackSeoExpanded] = useState(false); // Collapsed by default
   const [isDetailDescExpanded, setIsDetailDescExpanded] = useState(false);
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
@@ -1380,6 +1381,8 @@ export default function Home() {
   const handleOpenPackDetail = async (coverDesign: any) => {
     setSelectedPackCover(coverDesign);
     setIsPackDetailModalOpen(true);
+    setIsPinterestHubExpanded(false);
+    setIsPackSeoExpanded(false);
     setLoadingPackStickers(true);
     setPackStickers([]);
 
@@ -6528,18 +6531,36 @@ export default function Home() {
                   {/* Pinterest 핀 등록 키트 바로가기 버튼 */}
                   <button
                     onClick={() => {
-                      const el = document.getElementById('pinterest-marketing-hub');
-                      if (el) {
-                        el.scrollIntoView({ behavior: 'smooth' });
-                      } else {
-                        window.open('https://www.pinterest.com/pin-creation-tool/', '_blank');
-                      }
+                      setIsPinterestHubExpanded(true);
+                      setTimeout(() => {
+                        const el = document.getElementById('pinterest-marketing-hub');
+                        if (el) {
+                          el.scrollIntoView({ behavior: 'smooth' });
+                        } else {
+                          window.open('https://www.pinterest.com/pin-creation-tool/', '_blank');
+                        }
+                      }, 50);
                     }}
                     className="bg-[#E60023] hover:bg-[#ad081b] active:scale-95 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer hover:shadow-red-200"
-                    title="Pinterest 비즈니스 핀 등록 키트로 바로 이동합니다"
+                    title="Pinterest 비즈니스 핀 등록 키트를 펼치고 바로 이동합니다"
                   >
                     <span>📌</span>
                     <span>Pinterest 핀 등록</span>
+                  </button>
+
+                  {/* 모바일 최적화: 개별 스티커 세부 목록 바로가기 퀵점프 버튼 */}
+                  <button
+                    onClick={() => {
+                      const el = document.getElementById('pack-stickers-grid-section');
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
+                    className="bg-teal-700 hover:bg-teal-800 active:scale-95 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer border border-teal-600"
+                    title="개별 스티커 세부 목록으로 바로 스크롤 이동합니다"
+                  >
+                    <span>🎨</span>
+                    <span>스티커 목록 ({packStickers.length}종)</span>
                   </button>
 
                   {/* 부가 도구: 표지 AI 재생성, 표지 편집 및 삭제 */}
@@ -6634,16 +6655,19 @@ export default function Home() {
               </div>
 
               {/* Grid Content Section */}
-              <div className="p-4 sm:p-6 overflow-y-auto flex-1 bg-stone-50">
+              <div id="pack-detail-scroll-container" className="p-3 sm:p-6 overflow-y-auto flex-1 bg-stone-50 overscroll-contain [-webkit-overflow-scrolling:touch] custom-scrollbar scroll-smooth relative">
                 {/* 📝 Etsy 상품 등록용 영문 정보 (SEO Title, Description, Tags) 카드 */}
                 {(() => {
                   const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
                   return (
                     <>
                       {/* 📌 Pinterest 비즈니스 핀 등록 마케팅 바 */}
-                      <div id="pinterest-marketing-hub" className="mb-4 bg-gradient-to-r from-rose-50 via-red-50 to-pink-50 border-2 border-red-200 rounded-2xl p-4 shadow-sm">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-3">
-                          <div className="flex items-center gap-2.5">
+                      <div id="pinterest-marketing-hub" className="mb-4 bg-gradient-to-r from-rose-50 via-red-50 to-pink-50 border-2 border-red-200 rounded-2xl p-3.5 sm:p-4 shadow-sm transition-all">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                          <div 
+                            className="flex items-center gap-2.5 cursor-pointer select-none flex-1"
+                            onClick={() => setIsPinterestHubExpanded(!isPinterestHubExpanded)}
+                          >
                             <div className="w-10 h-10 rounded-xl bg-[#E60023] text-white flex items-center justify-center font-black text-xl shadow-sm shrink-0">
                               P
                             </div>
@@ -6660,177 +6684,191 @@ export default function Home() {
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
                             <a
                               href="https://www.pinterest.com/pin-creation-tool/"
                               target="_blank"
                               rel="noreferrer"
-                              className="w-full sm:w-auto bg-[#E60023] hover:bg-[#ad081b] active:scale-95 text-white font-black text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer hover:shadow-red-200"
+                              className="bg-[#E60023] hover:bg-[#ad081b] active:scale-95 text-white font-black text-xs py-2 px-3 rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer hover:shadow-red-200 shrink-0"
                               title="Pinterest의 공식 핀 생성 페이지(핀 빌더)를 새 창으로 엽니다"
                             >
                               <span>🚀</span>
-                              <span>Pinterest 핀 만들기 열기</span>
+                              <span>핀 만들기 열기</span>
                             </a>
+                            <button
+                              type="button"
+                              onClick={() => setIsPinterestHubExpanded(!isPinterestHubExpanded)}
+                              className="text-xs text-red-800 hover:text-red-950 font-bold px-3 py-2 rounded-xl border border-red-200 bg-white transition-colors cursor-pointer shadow-2xs shrink-0"
+                            >
+                              {isPinterestHubExpanded ? '접기 ▲' : '도구 펼치기 ▼'}
+                            </button>
                           </div>
                         </div>
 
-                        {/* Etsy Link Input Bar */}
-                        <div className="bg-white/95 rounded-xl p-3 border border-red-200 flex flex-col gap-2 text-xs mb-3 shadow-2xs">
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                            <div className="flex items-center gap-1.5 shrink-0 text-red-900 font-bold">
-                              <span>🔗 핀 연결 링크:</span>
+                        {isPinterestHubExpanded && (
+                          <div className="mt-3 space-y-3 pt-2 border-t border-red-200/70">
+                            {/* Etsy Link Input Bar */}
+                            <div className="bg-white/95 rounded-xl p-3 border border-red-200 flex flex-col gap-2 text-xs shadow-2xs">
+                              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                <div className="flex items-center gap-1.5 shrink-0 text-red-900 font-bold">
+                                  <span>🔗 핀 연결 링크:</span>
+                                </div>
+                                <input
+                                  type="url"
+                                  value={currentListingUrl}
+                                  onChange={(e) => handleUpdateEtsyListingUrl(e.target.value)}
+                                  placeholder="https://www.etsy.com/shop/LittlePawsStudioShop"
+                                  className="flex-1 bg-red-50/40 border border-red-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-hidden focus:ring-1 focus:ring-red-400 placeholder-gray-400 font-mono"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const linkToCopy = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
+                                    handleCopy(linkToCopy);
+                                    setCopiedLinkNotice(true);
+                                    setTimeout(() => setCopiedLinkNotice(false), 2000);
+                                  }}
+                                  className="bg-red-100 hover:bg-red-200 text-red-800 font-bold px-3 py-1.5 rounded-lg transition-colors shrink-0 flex items-center justify-center gap-1 cursor-pointer"
+                                  title="Etsy 상품/상점 링크를 클립보드에 복사합니다"
+                                >
+                                  <span>{copiedLinkNotice ? '✓ 링크 복사됨!' : '🔗 링크 복사'}</span>
+                                </button>
+                              </div>
+
+                              {/* 링크 상태 가이드 안내 */}
+                              <div className="text-[11px] pt-1 border-t border-red-100">
+                                {currentListingUrl && currentListingUrl.includes('/listing/') ? (
+                                  <span className="text-emerald-700 font-bold flex items-center gap-1">
+                                    <span>✅ 개별 상품 상세 직결 링크 등록됨</span>
+                                    <span className="font-normal text-emerald-600">(바이어가 핀 클릭 시 이 상품 상세 페이지로 즉시 구매 가능!)</span>
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-600 flex items-center gap-1">
+                                    <span>💡 기본 대표 샵 링크(LittlePawsStudioShop)가 복사됩니다. 특정 상품 개별 URL을 연결하고 싶으실 때만 위 칸에 입력해주세요.</span>
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <input
-                              type="url"
-                              value={currentListingUrl}
-                              onChange={(e) => handleUpdateEtsyListingUrl(e.target.value)}
-                              placeholder="https://www.etsy.com/shop/LittlePawsStudioShop"
-                              className="flex-1 bg-red-50/40 border border-red-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-hidden focus:ring-1 focus:ring-red-400 placeholder-gray-400 font-mono"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const linkToCopy = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
-                                handleCopy(linkToCopy);
-                                setCopiedLinkNotice(true);
-                                setTimeout(() => setCopiedLinkNotice(false), 2000);
-                              }}
-                              className="bg-red-100 hover:bg-red-200 text-red-800 font-bold px-3 py-1.5 rounded-lg transition-colors shrink-0 flex items-center justify-center gap-1 cursor-pointer"
-                              title="Etsy 상품/상점 링크를 클립보드에 복사합니다"
-                            >
-                              <span>{copiedLinkNotice ? '✓ 링크 복사됨!' : '🔗 링크 복사'}</span>
-                            </button>
-                          </div>
 
-                          {/* 링크 상태 가이드 안내 */}
-                          <div className="text-[11px] pt-1 border-t border-red-100">
-                            {currentListingUrl && currentListingUrl.includes('/listing/') ? (
-                              <span className="text-emerald-700 font-bold flex items-center gap-1">
-                                <span>✅ 개별 상품 상세 직결 링크 등록됨</span>
-                                <span className="font-normal text-emerald-600">(바이어가 핀 클릭 시 이 상품 상세 페이지로 즉시 구매 가능!)</span>
-                              </span>
-                            ) : (
-                              <span className="text-gray-600 flex items-center gap-1">
-                                <span>💡 기본 대표 샵 링크(LittlePawsStudioShop)가 복사됩니다. 특정 상품 개별 URL을 연결하고 싶으실 때만 위 칸에 입력해주세요.</span>
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                            {/* 🏆 Mode A: 정품 비즈니스 핀 원클릭 복사 키트 (15초 완성, 권장) */}
+                            <div className="bg-white rounded-xl p-3 border border-red-200 shadow-2xs space-y-2.5">
+                              <div className="flex items-center justify-between gap-2 flex-wrap">
+                                <span className="text-xs font-black text-red-950 flex items-center gap-1.5">
+                                  <span className="bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded">강력 추천</span>
+                                  <span>🏆 정식 비즈니스 핀 복사 키트 (15초 완성 - 타이핑 0번)</span>
+                                </span>
+                                <span className="text-[11px] text-gray-500 font-medium">
+                                  비바리움처럼 제목 볼드 & Etsy 직결 링크 완벽 지원
+                                </span>
+                              </div>
 
-                        {/* 🏆 Mode A: 정품 비즈니스 핀 원클릭 복사 키트 (15초 완성, 권장) */}
-                        <div className="bg-white rounded-xl p-3 border border-red-200 shadow-2xs space-y-2.5">
-                          <div className="flex items-center justify-between gap-2 flex-wrap">
-                            <span className="text-xs font-black text-red-950 flex items-center gap-1.5">
-                              <span className="bg-red-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded">강력 추천</span>
-                              <span>🏆 정식 비즈니스 핀 복사 키트 (15초 완성 - 타이핑 0번)</span>
-                            </span>
-                            <span className="text-[11px] text-gray-500 font-medium">
-                              비바리움처럼 제목 볼드 & Etsy 직결 링크 완벽 지원
-                            </span>
-                          </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5">
+                                {/* 1. 이미지 다운로드 */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const coverUrl = selectedPackCover?.image_url;
+                                    if (!coverUrl) return;
+                                    const cleanTheme = (selectedPackCover.topic || selectedPackCover.title || 'Stickers').replace(/[^a-zA-Z0-9_-]/g, '_');
+                                    const a = document.createElement('a');
+                                    a.href = coverUrl;
+                                    a.download = `00_Pinterest_Cover_${cleanTheme}.jpg`;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    a.remove();
+                                    setCopiedImageNotice(true);
+                                    setTimeout(() => setCopiedImageNotice(false), 2000);
+                                  }}
+                                  className="bg-stone-900 hover:bg-black text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                                  title="핀터레스트 업로드용 표지 사진을 즉시 다운로드합니다. (핀 만들기 화면에 드래그&드롭)"
+                                >
+                                  <span>📥</span>
+                                  <span>{copiedImageNotice ? '✓ 다운로드됨!' : '1. 사진 다운로드'}</span>
+                                </button>
 
-                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-0.5">
-                            {/* 1. 이미지 다운로드 */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const coverUrl = selectedPackCover?.image_url;
-                                if (!coverUrl) return;
-                                const cleanTheme = (selectedPackCover.topic || selectedPackCover.title || 'Stickers').replace(/[^a-zA-Z0-9_-]/g, '_');
-                                const a = document.createElement('a');
-                                a.href = coverUrl;
-                                a.download = `00_Pinterest_Cover_${cleanTheme}.jpg`;
-                                document.body.appendChild(a);
-                                a.click();
-                                a.remove();
-                                setCopiedImageNotice(true);
-                                setTimeout(() => setCopiedImageNotice(false), 2000);
-                              }}
-                              className="bg-stone-900 hover:bg-black text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                              title="핀터레스트 업로드용 표지 사진을 즉시 다운로드합니다. (핀 만들기 화면에 드래그&드롭)"
-                            >
-                              <span>📥</span>
-                              <span>{copiedImageNotice ? '✓ 다운로드됨!' : '1. 사진 다운로드'}</span>
-                            </button>
+                                {/* 2. 제목 복사 */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleCopy(packSeo.title);
+                                    setCopiedTitleNotice(true);
+                                    setTimeout(() => setCopiedTitleNotice(false), 2000);
+                                  }}
+                                  className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                                  title="영문 최적화 제목을 복사합니다. 핀 만들기 화면의 제목 칸에 Ctrl+V 하세요."
+                                >
+                                  <span>📋</span>
+                                  <span>{copiedTitleNotice ? '✓ 복사완료!' : '2. 제목 복사'}</span>
+                                </button>
 
-                            {/* 2. 제목 복사 */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                handleCopy(packSeo.title);
-                                setCopiedTitleNotice(true);
-                                setTimeout(() => setCopiedTitleNotice(false), 2000);
-                              }}
-                              className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                              title="영문 최적화 제목을 복사합니다. 핀 만들기 화면의 제목 칸에 Ctrl+V 하세요."
-                            >
-                              <span>📋</span>
-                              <span>{copiedTitleNotice ? '✓ 복사완료!' : '2. 제목 복사'}</span>
-                            </button>
+                                {/* 3. 설명 복사 */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const hashTags = (packSeo.tags || []).map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, '')).filter(t => t.length > 2).slice(0, 8).join(' ');
+                                    const text = `${packSeo.title}\n\n✨ ${packStickers.length || 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Planners & Cricut.\n👉 Shop on Etsy: ${currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop'}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller`;
+                                    handleCopy(text);
+                                    setCopiedPinterestDescNotice(true);
+                                    setTimeout(() => setCopiedPinterestDescNotice(false), 2000);
+                                  }}
+                                  className="bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                                  title="상세설명과 해시태그를 복사합니다. 핀 만들기 화면의 설명 칸에 Ctrl+V 하세요."
+                                >
+                                  <span>📝</span>
+                                  <span>{copiedPinterestDescNotice ? '✓ 복사완료!' : '3. 설명 복사'}</span>
+                                </button>
 
-                            {/* 3. 설명 복사 */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const hashTags = (packSeo.tags || []).map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, '')).filter(t => t.length > 2).slice(0, 8).join(' ');
-                                const text = `${packSeo.title}\n\n✨ ${packStickers.length || 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Planners & Cricut.\n👉 Shop on Etsy: ${currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop'}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller`;
-                                handleCopy(text);
-                                setCopiedPinterestDescNotice(true);
-                                setTimeout(() => setCopiedPinterestDescNotice(false), 2000);
-                              }}
-                              className="bg-violet-600 hover:bg-violet-700 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                              title="상세설명과 해시태그를 복사합니다. 핀 만들기 화면의 설명 칸에 Ctrl+V 하세요."
-                            >
-                              <span>📝</span>
-                              <span>{copiedPinterestDescNotice ? '✓ 복사완료!' : '3. 설명 복사'}</span>
-                            </button>
+                                {/* 4. 링크 복사 */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const linkToCopy = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
+                                    handleCopy(linkToCopy);
+                                    setCopiedLinkNotice(true);
+                                    setTimeout(() => setCopiedLinkNotice(false), 2000);
+                                  }}
+                                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                                  title="Etsy 상점/상품 링크를 복사합니다. 핀 만들기 화면의 링크 칸에 Ctrl+V 하세요."
+                                >
+                                  <span>🔗</span>
+                                  <span>{copiedLinkNotice ? '✓ 복사완료!' : '4. 링크 복사'}</span>
+                                </button>
+                              </div>
 
-                            {/* 4. 링크 복사 */}
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const linkToCopy = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
-                                handleCopy(linkToCopy);
-                                setCopiedLinkNotice(true);
-                                setTimeout(() => setCopiedLinkNotice(false), 2000);
-                              }}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                              title="Etsy 상점/상품 링크를 복사합니다. 핀 만들기 화면의 링크 칸에 Ctrl+V 하세요."
-                            >
-                              <span>🔗</span>
-                              <span>{copiedLinkNotice ? '✓ 복사완료!' : '4. 링크 복사'}</span>
-                            </button>
-                          </div>
+                              {/* 친절한 3단계 가이드 박스 */}
+                              <div className="bg-stone-50 rounded-xl p-2.5 border border-gray-200 text-xs space-y-1">
+                                <div className="font-extrabold text-stone-900 flex items-center gap-1.5 text-[11px]">
+                                  <span>📌</span>
+                                  <span>정품 비즈니스 핀 등록 3단계 (좌측 비바리움과 100% 동일):</span>
+                                </div>
+                                <div className="text-[11px] text-stone-600 space-y-0.5 leading-relaxed pl-1">
+                                  <p>
+                                    <strong>①</strong> <strong>[1. 사진 다운로드]</strong> 클릭 ➔ 상단 <strong>[🚀 핀 만들기 열기]</strong> 클릭
+                                  </p>
+                                  <p>
+                                    <strong>②</strong> 핀터레스트 왼쪽 큰 점선 네모 박스에 <strong>방금 다운로드된 사진 끌어다 놓기(드래그)</strong>
+                                  </p>
+                                  <p>
+                                    <strong>③</strong> <strong>[2. 제목]</strong>, <strong>[3. 설명]</strong>, <strong>[4. 링크]</strong> 순서대로 클릭하여 우측 칸들에 <strong>Ctrl+V</strong> 붙여넣기 ➔ <strong>[게시]</strong> 끝!
+                                  </p>
+                                </div>
+                              </div>
 
-                          {/* 친절한 3단계 가이드 박스 */}
-                          <div className="bg-stone-50 rounded-xl p-2.5 border border-gray-200 text-xs space-y-1">
-                            <div className="font-extrabold text-stone-900 flex items-center gap-1.5 text-[11px]">
-                              <span>📌</span>
-                              <span>정품 비즈니스 핀 등록 3단계 (좌측 비바리움과 100% 동일):</span>
-                            </div>
-                            <div className="text-[11px] text-stone-600 space-y-0.5 leading-relaxed pl-1">
-                              <p>
-                                <strong>①</strong> <strong>[1. 사진 다운로드]</strong> 클릭 ➔ 상단 <strong>[🚀 핀 만들기 열기]</strong> 클릭
-                              </p>
-                              <p>
-                                <strong>②</strong> 핀터레스트 왼쪽 큰 점선 네모 박스에 <strong>방금 다운로드된 사진 끌어다 놓기(드래그)</strong>
-                              </p>
-                              <p>
-                                <strong>③</strong> <strong>[2. 제목]</strong>, <strong>[3. 설명]</strong>, <strong>[4. 링크]</strong> 순서대로 클릭하여 우측 칸들에 <strong>Ctrl+V</strong> 붙여넣기 ➔ <strong>[게시]</strong> 끝!
-                              </p>
+                              <div className="text-[11px] text-gray-500 pt-1 border-t border-gray-100 flex items-center justify-between">
+                                <span>💡 순서: <strong>[🚀 핀 만들기 열기]</strong> 클릭 ➔ 핀터레스트 화면에서 <strong>1~4번 각각 Ctrl+V</strong> 붙여넣기 ➔ 15초 끝!</span>
+                                <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">✓ 공식 비즈니스 핀 규격</span>
+                              </div>
                             </div>
                           </div>
-
-                          <div className="text-[11px] text-gray-500 pt-1 border-t border-gray-100 flex items-center justify-between">
-                            <span>💡 순서: <strong>[🚀 핀 만들기 열기]</strong> 클릭 ➔ 핀터레스트 화면에서 <strong>1~4번 각각 Ctrl+V</strong> 붙여넣기 ➔ 15초 끝!</span>
-                            <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">✓ 공식 비즈니스 핀 규격</span>
-                          </div>
-                        </div>
+                        )}
                       </div>
 
-                      <div className="mb-5 bg-gradient-to-r from-blue-50/90 via-indigo-50/80 to-teal-50/90 border-2 border-indigo-200 rounded-2xl p-4 shadow-sm">
-                      <div className="flex items-center justify-between gap-2 flex-wrap mb-2.5">
-                        <div className="flex items-center gap-2">
+                      <div className="mb-5 bg-gradient-to-r from-blue-50/90 via-indigo-50/80 to-teal-50/90 border-2 border-indigo-200 rounded-2xl p-3.5 sm:p-4 shadow-sm transition-all">
+                      <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                        <div 
+                          className="flex items-center gap-2 cursor-pointer select-none flex-1"
+                          onClick={() => setIsPackSeoExpanded(!isPackSeoExpanded)}
+                        >
                           <span className="text-xl shrink-0">📝</span>
                           <div>
                             <h4 className="text-sm font-black text-indigo-950 flex items-center gap-2">
@@ -6950,13 +6988,29 @@ export default function Home() {
                     <p className="text-xs text-gray-500">마스터 썸네일 단독 항목이거나 스티커 작성을 완료해 주세요.</p>
                   </div>
                 ) : (
-                  <div>
-                    <h4 className="text-xs font-extrabold text-teal-950 uppercase tracking-wider mb-3 flex items-center justify-between">
-                      <span>🎨 개별 스티커 세부 목록 ({packStickers.length}종)</span>
-                      <span className="text-[11px] text-teal-700 font-normal">개별 항목 클릭 시 수정 / 목업 편집 모달 열림</span>
-                    </h4>
+                  <div id="pack-stickers-grid-section" className="scroll-mt-4 pt-1">
+                    <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                      <h4 className="text-xs sm:text-sm font-extrabold text-teal-950 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🎨</span>
+                        <span>개별 스티커 세부 목록 ({packStickers.length}종)</span>
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[11px] text-teal-700 font-medium hidden sm:inline">개별 항목 클릭 시 수정/목업</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const container = document.getElementById('pack-detail-scroll-container');
+                            if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          className="text-[11px] bg-teal-100 hover:bg-teal-200 text-teal-900 font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1 shadow-2xs"
+                        >
+                          <span>↑</span>
+                          <span>상단 툴바로</span>
+                        </button>
+                      </div>
+                    </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-4">
                       {packStickers.map((sticker, idx) => (
                         <div
                           key={sticker.id || idx}
@@ -6991,7 +7045,7 @@ export default function Home() {
                           </div>
 
                           {/* Title & Actions */}
-                          <div className="p-2.5 flex flex-col justify-between flex-1 gap-2">
+                          <div className="p-2 sm:p-2.5 flex flex-col justify-between flex-1 gap-2">
                             <div>
                               <h5 className="text-xs font-bold text-gray-800 line-clamp-1">
                                 {sticker.title || sticker.topic || `Sticker #${idx + 1}`}
@@ -7008,7 +7062,7 @@ export default function Home() {
                                     e.stopPropagation();
                                     handleGenerateStandaloneFromTank(sticker);
                                   }}
-                                  className="w-full bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold text-[10px] py-1 rounded-lg transition-colors flex items-center justify-center gap-0.5"
+                                  className="w-full bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 font-bold text-[10px] py-1.5 rounded-lg transition-colors flex items-center justify-center gap-0.5 active:scale-95 cursor-pointer"
                                   title="이 어항 이미지에서 주요 대상만 AI 비전으로 1:1 맞춤 낱개 스티커 추출 생성"
                                 >
                                   <span>✨</span>
@@ -7033,7 +7087,7 @@ export default function Home() {
                                        a.click();
                                     }
                                   }}
-                                  className="w-full bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 font-bold text-[10px] py-1 rounded-lg transition-colors flex items-center justify-center gap-0.5"
+                                  className="w-full bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 font-bold text-[10px] py-1.5 rounded-lg transition-colors flex items-center justify-center gap-0.5 active:scale-95 cursor-pointer"
                                   title="300DPI 고화질 PNG 다운로드"
                                 >
                                   <span>📥</span>
@@ -7047,7 +7101,7 @@ export default function Home() {
                                   handleMoveToTrash([sticker.id]);
                                   setPackStickers(prev => prev.filter(s => s.id !== sticker.id));
                                 }}
-                                className="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-[11px] py-1 rounded-lg transition-colors flex items-center justify-center gap-1"
+                                className="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-[11px] py-1.5 rounded-lg transition-colors flex items-center justify-center gap-1 active:scale-95 cursor-pointer"
                                 title="삭제함으로 이동"
                               >
                                 <span>🗑️</span>
@@ -7058,6 +7112,36 @@ export default function Home() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* 모바일/PC 스크롤 편의 플로팅 퀵 버튼 (스티커가 4개 이상일 때) */}
+                {packStickers.length > 4 && (
+                  <div className="sticky bottom-3 right-3 ml-auto w-fit z-20 flex items-center gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-lg border border-teal-200 mt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const container = document.getElementById('pack-detail-scroll-container');
+                        if (container) container.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="bg-stone-800 hover:bg-black text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                      title="모달 맨 위 툴바로 스크롤"
+                    >
+                      <span>↑</span>
+                      <span>맨위로</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const el = document.getElementById('pack-stickers-grid-section');
+                        if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow-xs transition-all flex items-center gap-1 cursor-pointer active:scale-95"
+                      title="스티커 세부 목록 시작 위치로 스크롤"
+                    >
+                      <span>🎨</span>
+                      <span>스티커 목록</span>
+                    </button>
                   </div>
                 )}
               </div>
