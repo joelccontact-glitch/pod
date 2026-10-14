@@ -462,7 +462,11 @@ export default function Home() {
   };
 
   const handleUpdateEtsyListingUrl = (newUrl: string) => {
-    const trimmed = newUrl.trim();
+    let trimmed = newUrl.trim();
+    // Auto-clean internal tracking query parameters from Etsy listing URL (e.g. ?sr_prefetch=...&ref=...)
+    if (trimmed.includes('etsy.com/listing/') && trimmed.includes('?')) {
+      trimmed = trimmed.split('?')[0];
+    }
     setCurrentListingUrl(trimmed);
     if (typeof window !== 'undefined') {
       if (selectedPackCover?.id) {
