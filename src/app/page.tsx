@@ -502,19 +502,7 @@ export default function Home() {
   ) => {
     if (!selectedPackCover) return;
 
-    let targetLink = (currentListingUrl || etsyShopUrl || '').trim();
-    if (!targetLink) {
-      const inputUrl = prompt(
-        '📌 핀을 클릭했을 때 구매자가 이동할 Etsy 상품 링크(또는 상점 주소)를 입력해 주세요:\n(한 번 입력하시면 자동 저장되어 다음부터는 바로 적용됩니다)',
-        'https://www.etsy.com/shop/'
-      );
-      if (!inputUrl || !inputUrl.trim()) {
-        if (existingPopup && !existingPopup.closed) existingPopup.close();
-        return;
-      }
-      targetLink = inputUrl.trim();
-      handleUpdateEtsyListingUrl(targetLink);
-    }
+    const targetLink = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
 
     const baseUrl = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1'
       ? window.location.origin
@@ -597,16 +585,7 @@ export default function Home() {
   const handleShareMockupToPinterest = async (mockup: LifestyleMockupResult) => {
     if (!selectedPackCover) return;
 
-    let targetLink = (currentListingUrl || etsyShopUrl || '').trim();
-    if (!targetLink) {
-      const inputUrl = prompt(
-        '📌 핀을 클릭했을 때 구매자가 이동할 Etsy 상품 링크(또는 상점 주소)를 입력해 주세요:\n(한 번 입력하시면 자동 저장되어 다음부터는 바로 적용됩니다)',
-        'https://www.etsy.com/shop/'
-      );
-      if (!inputUrl || !inputUrl.trim()) return;
-      targetLink = inputUrl.trim();
-      handleUpdateEtsyListingUrl(targetLink);
-    }
+    const targetLink = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
 
     const width = 760;
     const height = 660;
@@ -1390,12 +1369,12 @@ export default function Home() {
     setPackStickers([]);
 
     if (typeof window !== 'undefined') {
-      const savedShop = localStorage.getItem('user_etsy_shop_url') || '';
+      const savedShop = localStorage.getItem('user_etsy_shop_url') || 'https://www.etsy.com/shop/LittlePawsStudioShop';
       setEtsyShopUrl(savedShop);
       const firestoreListing = coverDesign.etsy_listing_url || '';
       const localListing = localStorage.getItem(`etsy_listing_url_${coverDesign.id}`) || '';
-      const savedListing = firestoreListing || localListing;
-      setCurrentListingUrl(savedListing || '');
+      const savedListing = firestoreListing || localListing || savedShop;
+      setCurrentListingUrl(savedListing);
     }
 
     try {
@@ -6684,37 +6663,25 @@ export default function Home() {
                         <div className="bg-white/95 rounded-xl p-3 border border-red-200 flex flex-col gap-2 text-xs mb-3 shadow-2xs">
                           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                             <div className="flex items-center gap-1.5 shrink-0 text-red-900 font-bold">
-                              <span>🔗 이 상품의 Etsy 상세 링크:</span>
+                              <span>🔗 핀 연결 링크:</span>
                             </div>
                             <input
                               type="url"
                               value={currentListingUrl}
                               onChange={(e) => handleUpdateEtsyListingUrl(e.target.value)}
-                              placeholder="Etsy 상품 상세 URL 입력 (예: https://www.etsy.com/listing/4592885054/...)"
+                              placeholder="https://www.etsy.com/shop/LittlePawsStudioShop"
                               className="flex-1 bg-red-50/40 border border-red-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-800 focus:outline-hidden focus:ring-1 focus:ring-red-400 placeholder-gray-400 font-mono"
                             />
                             <button
                               type="button"
                               onClick={() => {
-                                let linkToCopy = (currentListingUrl || '').trim();
-                                if (!linkToCopy || !linkToCopy.includes('/listing/')) {
-                                  const prompted = prompt(
-                                    '📌 Etsy에 리스팅 등록 완료 후 생성된 개별 상품 상세 링크를 입력해 주세요:\n(예: https://www.etsy.com/listing/4592885054/...)\n\n입력하시면 자동 저장되어 바이어가 핀을 누르면 이 상품으로 바로 직결됩니다!',
-                                    linkToCopy || 'https://www.etsy.com/listing/'
-                                  );
-                                  if (prompted && prompted.trim() && prompted.trim() !== 'https://www.etsy.com/listing/') {
-                                    linkToCopy = prompted.trim();
-                                    handleUpdateEtsyListingUrl(linkToCopy);
-                                  } else if (!linkToCopy) {
-                                    linkToCopy = etsyShopUrl || 'https://www.etsy.com';
-                                  }
-                                }
+                                const linkToCopy = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
                                 handleCopy(linkToCopy);
                                 setCopiedLinkNotice(true);
                                 setTimeout(() => setCopiedLinkNotice(false), 2000);
                               }}
                               className="bg-red-100 hover:bg-red-200 text-red-800 font-bold px-3 py-1.5 rounded-lg transition-colors shrink-0 flex items-center justify-center gap-1 cursor-pointer"
-                              title="Etsy 상품 링크를 클립보드에 복사합니다"
+                              title="Etsy 상품/상점 링크를 클립보드에 복사합니다"
                             >
                               <span>{copiedLinkNotice ? '✓ 링크 복사됨!' : '🔗 링크 복사'}</span>
                             </button>
@@ -6724,18 +6691,12 @@ export default function Home() {
                           <div className="text-[11px] pt-1 border-t border-red-100">
                             {currentListingUrl && currentListingUrl.includes('/listing/') ? (
                               <span className="text-emerald-700 font-bold flex items-center gap-1">
-                                <span>✅ 상품 상세 직결 링크 등록됨</span>
-                                <span className="font-normal text-emerald-600">(바이어가 핀 클릭 시 이 상품 상세 페이지로 바로 이동하여 즉시 구매 가능!)</span>
-                              </span>
-                            ) : currentListingUrl && currentListingUrl.includes('/shop/') ? (
-                              <span className="text-amber-800 font-bold flex items-center gap-1">
-                                <span>⚠️ 상점 메인 링크 상태</span>
-                                <span className="font-normal text-amber-700">(Etsy에 방금 올리신 개별 상품 링크 <strong>https://www.etsy.com/listing/...</strong> 로 입력을 강력 추천합니다)</span>
+                                <span>✅ 개별 상품 상세 직결 링크 등록됨</span>
+                                <span className="font-normal text-emerald-600">(바이어가 핀 클릭 시 이 상품 상세 페이지로 즉시 구매 가능!)</span>
                               </span>
                             ) : (
-                              <span className="text-rose-700 font-bold flex items-center gap-1">
-                                <span>⚠️ 상품 상세 링크 미등록</span>
-                                <span className="font-normal text-rose-600">(Etsy에 이 스티커 상품을 등록하신 후, 해당 상품 상세 URL을 여기에 붙여넣어 주세요)</span>
+                              <span className="text-gray-600 flex items-center gap-1">
+                                <span>💡 기본 대표 샵 링크(LittlePawsStudioShop)가 복사됩니다. 특정 상품 개별 URL을 연결하고 싶으실 때만 위 칸에 입력해주세요.</span>
                               </span>
                             )}
                           </div>
@@ -6797,7 +6758,7 @@ export default function Home() {
                               type="button"
                               onClick={() => {
                                 const hashTags = (packSeo.tags || []).map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, '')).filter(t => t.length > 2).slice(0, 8).join(' ');
-                                const text = `${packSeo.title}\n\n✨ ${packStickers.length || 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Planners & Cricut.\n👉 Shop on Etsy: ${currentListingUrl || etsyShopUrl || 'https://www.etsy.com'}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller`;
+                                const text = `${packSeo.title}\n\n✨ ${packStickers.length || 40} Cute Die-Cut Digital Stickers Bundle for GoodNotes, Planners & Cricut.\n👉 Shop on Etsy: ${currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop'}\n\n${hashTags} #stickers #digitalstickers #goodnotes #digitalplanning #etsyseller`;
                                 handleCopy(text);
                                 setCopiedPinterestDescNotice(true);
                                 setTimeout(() => setCopiedPinterestDescNotice(false), 2000);
@@ -6813,25 +6774,13 @@ export default function Home() {
                             <button
                               type="button"
                               onClick={() => {
-                                let linkToCopy = (currentListingUrl || '').trim();
-                                if (!linkToCopy || !linkToCopy.includes('/listing/')) {
-                                  const prompted = prompt(
-                                    '📌 Etsy에 리스팅 등록 완료 후 발급된 개별 상품 상세 URL을 입력해주세요:\n(예: https://www.etsy.com/listing/4592885054/...)\n\n입력하시면 자동 저장되어 바이어가 핀을 누르면 이 상품으로 바로 직결됩니다!',
-                                    linkToCopy || 'https://www.etsy.com/listing/'
-                                  );
-                                  if (prompted && prompted.trim() && prompted.trim() !== 'https://www.etsy.com/listing/') {
-                                    linkToCopy = prompted.trim();
-                                    handleUpdateEtsyListingUrl(linkToCopy);
-                                  } else if (!linkToCopy) {
-                                    linkToCopy = etsyShopUrl || 'https://www.etsy.com';
-                                  }
-                                }
+                                const linkToCopy = (currentListingUrl || etsyShopUrl || 'https://www.etsy.com/shop/LittlePawsStudioShop').trim();
                                 handleCopy(linkToCopy);
                                 setCopiedLinkNotice(true);
                                 setTimeout(() => setCopiedLinkNotice(false), 2000);
                               }}
                               className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2 px-2.5 rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                              title="Etsy 상품 링크를 복사합니다. 핀 만들기 화면의 링크 칸에 Ctrl+V 하세요."
+                              title="Etsy 상점/상품 링크를 복사합니다. 핀 만들기 화면의 링크 칸에 Ctrl+V 하세요."
                             >
                               <span>🔗</span>
                               <span>{copiedLinkNotice ? '✓ 복사완료!' : '4. 링크 복사'}</span>
