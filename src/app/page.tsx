@@ -206,34 +206,100 @@ const getPresetSeriesList = (tab: string): StickerPreset[] => {
   return tab.includes('standalone') ? pack.standaloneSeries : pack.vesselSeries;
 };
 
-const getPackSeriesPresets = (coverDesign: any): StickerPreset[] => {
-  if (!coverDesign) return [];
+export const isStickerStandalone = (item: any): boolean => {
+  if (!item) return false;
+  const title = (item.title || item.topic || '').toLowerCase();
+  const presetId = (item.stickerPresetId || item.id || '').toLowerCase();
+  const prompt = (item.prompt || '').toLowerCase();
+  return (
+    presetId.includes('standalone') ||
+    title.includes('단일') ||
+    title.includes('단독') ||
+    title.includes('낱개') ||
+    prompt.includes('standalone') ||
+    prompt.includes('pure standalone') ||
+    prompt.includes('strict no glass')
+  );
+};
+
+export interface PackPresetsInfo {
+  themeKey: string;
+  isSingleSeries20Theme: boolean;
+  vesselSeries: StickerPreset[] | null;
+  standaloneSeries: StickerPreset[] | null;
+}
+
+export const getPackPresetsInfo = (coverDesign: any): PackPresetsInfo => {
+  if (!coverDesign) {
+    return { themeKey: 'other', isSingleSeries20Theme: false, vesselSeries: null, standaloneSeries: null };
+  }
   const presetId = (coverDesign.stickerPresetId || coverDesign.id || '').toLowerCase();
   const sub = (coverDesign.sticker_sub || '').toLowerCase();
   const title = (coverDesign.title || coverDesign.topic || '').toLowerCase();
 
-  if (presetId.includes('dessert') || sub === 'dessert' || title.includes('디저트')) return DESSERT_20_SERIES;
-  if (presetId.includes('socialbattery') || presetId.includes('social-battery') || sub === 'socialbattery' || title.includes('사회적 배터리')) return SOCIAL_BATTERY_20_SERIES;
-  if (presetId.includes('hangul') || sub === 'hangul' || title.includes('한글')) return HANGUL_20_SERIES;
-  if (presetId.includes('booktok') || sub === 'booktok' || title.includes('북톡') || title.includes('독서')) return BOOKTOK_20_SERIES;
-  if (presetId.includes('terrarium') || sub === 'terrarium' || title.includes('테라리움')) return TERRARIUM_20_SERIES;
-  if (presetId.includes('vivarium') || sub === 'vivarium' || title.includes('비바리움')) return VIVARIUM_20_SERIES;
-  if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium') || sub === 'saltaquarium' || title.includes('해수어')) return SALT_AQUARIUM_20_SERIES;
-  if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium') || sub === 'freshaquarium' || title.includes('열대어')) return FRESH_AQUARIUM_20_SERIES;
-  if (presetId.includes('christmas') || sub === 'christmas' || title.includes('크리스마스')) return CHRISTMAS_20_SERIES;
-  if (presetId.includes('halloween') || sub === 'halloween' || title.includes('할로윈')) return HALLOWEEN_20_SERIES;
-  if (presetId.includes('thanksgiving') || sub === 'thanksgiving' || title.includes('추수감사절')) return THANKSGIVING_20_SERIES;
+  // 1. Single 20 themes (strictly 20-pack only, never 40-pack)
+  if (presetId.includes('dessert') || sub === 'dessert' || title.includes('디저트')) {
+    return { themeKey: 'dessert', isSingleSeries20Theme: true, vesselSeries: DESSERT_20_SERIES, standaloneSeries: null };
+  }
+  if (presetId.includes('socialbattery') || presetId.includes('social-battery') || sub === 'socialbattery' || title.includes('사회적 배터리')) {
+    return { themeKey: 'socialbattery', isSingleSeries20Theme: true, vesselSeries: SOCIAL_BATTERY_20_SERIES, standaloneSeries: null };
+  }
+  if (presetId.includes('hangul') || sub === 'hangul' || title.includes('한글')) {
+    return { themeKey: 'hangul', isSingleSeries20Theme: true, vesselSeries: HANGUL_20_SERIES, standaloneSeries: null };
+  }
+  if (presetId.includes('booktok') || sub === 'booktok' || title.includes('북톡') || title.includes('독서')) {
+    return { themeKey: 'booktok', isSingleSeries20Theme: true, vesselSeries: BOOKTOK_20_SERIES, standaloneSeries: null };
+  }
 
+  // 2. Dual-series themes (can be 40-pack with vessel + standalone, or 20-pack)
+  if (presetId.includes('terrarium') || sub === 'terrarium' || title.includes('테라리움')) {
+    return { themeKey: 'terrarium', isSingleSeries20Theme: false, vesselSeries: TERRARIUM_20_SERIES, standaloneSeries: TERRARIUM_STANDALONE_20_SERIES };
+  }
+  if (presetId.includes('vivarium') || sub === 'vivarium' || title.includes('비바리움')) {
+    return { themeKey: 'vivarium', isSingleSeries20Theme: false, vesselSeries: VIVARIUM_20_SERIES, standaloneSeries: VIVARIUM_STANDALONE_20_SERIES };
+  }
+  if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium') || sub === 'saltaquarium' || title.includes('해수어')) {
+    return { themeKey: 'saltaquarium', isSingleSeries20Theme: false, vesselSeries: SALT_AQUARIUM_20_SERIES, standaloneSeries: SALT_AQUARIUM_STANDALONE_20_SERIES };
+  }
+  if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium') || sub === 'freshaquarium' || title.includes('열대어')) {
+    return { themeKey: 'freshaquarium', isSingleSeries20Theme: false, vesselSeries: FRESH_AQUARIUM_20_SERIES, standaloneSeries: FRESH_AQUARIUM_STANDALONE_20_SERIES };
+  }
+  if (presetId.includes('christmas') || sub === 'christmas' || title.includes('크리스마스')) {
+    return { themeKey: 'christmas', isSingleSeries20Theme: false, vesselSeries: CHRISTMAS_20_SERIES, standaloneSeries: CHRISTMAS_STANDALONE_20_SERIES };
+  }
+  if (presetId.includes('halloween') || sub === 'halloween' || title.includes('할로윈')) {
+    return { themeKey: 'halloween', isSingleSeries20Theme: false, vesselSeries: HALLOWEEN_20_SERIES, standaloneSeries: HALLOWEEN_STANDALONE_20_SERIES };
+  }
+  if (presetId.includes('thanksgiving') || sub === 'thanksgiving' || title.includes('추수감사절')) {
+    return { themeKey: 'thanksgiving', isSingleSeries20Theme: false, vesselSeries: THANKSGIVING_20_SERIES, standaloneSeries: THANKSGIVING_STANDALONE_20_SERIES };
+  }
+
+  // 3. Other seasonal presets
   if (sub) {
     try {
       const seasonalPack = getSeasonalPackPresets(sub);
-      if (seasonalPack?.vesselSeries && seasonalPack.vesselSeries.length > 0) return seasonalPack.vesselSeries;
+      if (seasonalPack?.vesselSeries && seasonalPack.vesselSeries.length > 0) {
+        return {
+          themeKey: sub,
+          isSingleSeries20Theme: false,
+          vesselSeries: seasonalPack.vesselSeries,
+          standaloneSeries: seasonalPack.standaloneSeries || null
+        };
+      }
     } catch (e) {}
   }
-  return [];
+
+  return { themeKey: 'other', isSingleSeries20Theme: false, vesselSeries: null, standaloneSeries: null };
 };
 
-const matchStickerToPresetSlot = (item: any, presets: StickerPreset[]): number => {
+export const getPackSeriesPresets = (coverDesign: any): StickerPreset[] => {
+  const info = getPackPresetsInfo(coverDesign);
+  if (info.isSingleSeries20Theme) return info.vesselSeries || [];
+  if (isStickerStandalone(coverDesign)) return info.standaloneSeries || info.vesselSeries || [];
+  return info.vesselSeries || [];
+};
+
+export const matchStickerToPresetSlot = (item: any, presets: StickerPreset[]): number => {
   if (!item || !presets || presets.length <= 1) return -1;
   const stickerPresets = presets.slice(1); // 20 presets
 
@@ -243,13 +309,15 @@ const matchStickerToPresetSlot = (item: any, presets: StickerPreset[]): number =
   const itemPrompt = (item.prompt || '').toLowerCase();
   const fullText = `${itemTitle} ${itemPrompt} ${itemPresetId}`;
 
-  // 1. High priority: Check if title has numbered pattern e.g. "17/20" or "독서 17/20"
-  const titleNumMatch = itemTitle.match(/(?:독서|스티커|배터리|디저트|한글|\s|^)(\d{1,2})\s*\/\s*20/) || 
-                        itemTitle.match(/\[.*?(\d{1,2})\s*\/\s*20.*?\]/);
+  // 1. High priority: Check if title has numbered pattern e.g. "17/20", "17/40", or "[크리스마스 단일 17/20]"
+  const titleNumMatch = itemTitle.match(/(?:독서|스티커|배터리|디저트|한글|단일|단독|\s|^)(\d{1,2})\s*\/\s*(?:20|40)/) || 
+                        itemTitle.match(/\[.*?(\d{1,2})\s*\/\s*(?:20|40).*?\]/);
   if (titleNumMatch && titleNumMatch[1]) {
     const num = parseInt(titleNumMatch[1], 10);
     if (num >= 1 && num <= stickerPresets.length) {
       return num - 1;
+    } else if (num >= 21 && num <= 20 + stickerPresets.length) {
+      return num - 21;
     }
   }
 
@@ -297,6 +365,147 @@ const matchStickerToPresetSlot = (item: any, presets: StickerPreset[]): number =
   }
 
   return -1;
+};
+
+export const organizePackStickers = (matched: any[], coverDesign: any): { finalStickers: any[]; is40Pack: boolean; targetMax: number } => {
+  const packInfo = getPackPresetsInfo(coverDesign);
+  const titleLower = (coverDesign.title || coverDesign.topic || '').toLowerCase();
+  const promptLower = (coverDesign.prompt || '').toLowerCase();
+
+  const vesselMatched = matched.filter((d: any) => !isStickerStandalone(d));
+  const standaloneMatched = matched.filter((d: any) => isStickerStandalone(d));
+
+  // Determine if this is a 40-pack:
+  // Must NOT be a single-series 20 theme (booktok, dessert, socialbattery, hangul),
+  // AND either has 40 in title/prompt, has >=25 matched items, or has both vessel & standalone stickers!
+  const is40Pack = !packInfo.isSingleSeries20Theme && (
+    titleLower.includes('40종') ||
+    titleLower.includes('40') ||
+    promptLower.includes('40+') ||
+    matched.length >= 25 ||
+    (vesselMatched.length >= 5 && standaloneMatched.length >= 5)
+  );
+
+  const targetMax = is40Pack ? 40 : 20;
+
+  if (is40Pack && packInfo.vesselSeries && packInfo.standaloneSeries) {
+    const vesselPresets = packInfo.vesselSeries.slice(1);
+    const standalonePresets = packInfo.standaloneSeries.slice(1);
+
+    // 1. Sort & match Vessel stickers (Sheet 1: Slots 0..19)
+    vesselMatched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    const vesselBuckets = new Map<number, any[]>();
+    const vesselUnmatched: any[] = [];
+    for (const item of vesselMatched) {
+      const slot = matchStickerToPresetSlot(item, packInfo.vesselSeries);
+      if (slot >= 0 && slot < vesselPresets.length) {
+        if (!vesselBuckets.has(slot)) vesselBuckets.set(slot, []);
+        vesselBuckets.get(slot)!.push(item);
+      } else {
+        vesselUnmatched.push(item);
+      }
+    }
+    const vesselOrdered: any[] = [];
+    for (let i = 0; i < vesselPresets.length; i++) {
+      const b = vesselBuckets.get(i);
+      if (b && b.length > 0) vesselOrdered.push(b[0]);
+    }
+    for (const item of vesselUnmatched) {
+      if (vesselOrdered.length >= 20) break;
+      vesselOrdered.push(item);
+    }
+
+    // 2. Sort & match Standalone stickers (Sheet 2: Slots 0..19)
+    standaloneMatched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    const standaloneBuckets = new Map<number, any[]>();
+    const standaloneUnmatched: any[] = [];
+    for (const item of standaloneMatched) {
+      const slot = matchStickerToPresetSlot(item, packInfo.standaloneSeries);
+      if (slot >= 0 && slot < standalonePresets.length) {
+        if (!standaloneBuckets.has(slot)) standaloneBuckets.set(slot, []);
+        standaloneBuckets.get(slot)!.push(item);
+      } else {
+        standaloneUnmatched.push(item);
+      }
+    }
+    const standaloneOrdered: any[] = [];
+    for (let i = 0; i < standalonePresets.length; i++) {
+      const b = standaloneBuckets.get(i);
+      if (b && b.length > 0) standaloneOrdered.push(b[0]);
+    }
+    for (const item of standaloneUnmatched) {
+      if (standaloneOrdered.length >= 20) break;
+      standaloneOrdered.push(item);
+    }
+
+    const finalStickers = [...vesselOrdered, ...standaloneOrdered];
+    return { finalStickers, is40Pack: true, targetMax: 40 };
+  }
+
+  // 20-Pack processing
+  const activeSeries = packInfo.isSingleSeries20Theme
+    ? packInfo.vesselSeries
+    : ((isStickerStandalone(coverDesign) || vesselMatched.length === 0)
+        ? (packInfo.standaloneSeries || packInfo.vesselSeries)
+        : (packInfo.vesselSeries || packInfo.standaloneSeries));
+
+  if (activeSeries && activeSeries.length > 1) {
+    const expectedSlots = activeSeries.slice(1);
+    const slotBuckets = new Map<number, any[]>();
+    const unmatched: any[] = [];
+
+    matched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+
+    for (const item of matched) {
+      const slot = matchStickerToPresetSlot(item, activeSeries);
+      if (slot >= 0 && slot < expectedSlots.length) {
+        if (!slotBuckets.has(slot)) slotBuckets.set(slot, []);
+        slotBuckets.get(slot)!.push(item);
+      } else {
+        unmatched.push(item);
+      }
+    }
+
+    const slotOrdered: any[] = [];
+    for (let i = 0; i < expectedSlots.length; i++) {
+      const bucket = slotBuckets.get(i);
+      if (bucket && bucket.length > 0) {
+        slotOrdered.push(bucket[0]);
+      }
+    }
+    for (const item of unmatched) {
+      if (slotOrdered.length >= targetMax) break;
+      slotOrdered.push(item);
+    }
+
+    return { finalStickers: slotOrdered, is40Pack: false, targetMax: 20 };
+  }
+
+  // Fallback for non-series packs
+  matched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+  const deduplicatedStickers: any[] = [];
+  const seenKeys = new Set<string>();
+
+  for (const item of matched) {
+    const presetKey = (item.stickerPresetId || '').toLowerCase().trim();
+    const cleanName = (item.title || item.topic || '').replace(/\[.*?\]/g, '').trim().toLowerCase();
+    const uniqueKey = presetKey || cleanName;
+
+    if (uniqueKey && seenKeys.has(uniqueKey)) continue;
+    if (uniqueKey) seenKeys.add(uniqueKey);
+    deduplicatedStickers.push(item);
+    if (deduplicatedStickers.length >= targetMax) break;
+  }
+
+  deduplicatedStickers.sort((a: any, b: any) => {
+    const aStandalone = isStickerStandalone(a);
+    const bStandalone = isStickerStandalone(b);
+    if (!aStandalone && bStandalone) return -1;
+    if (aStandalone && !bStandalone) return 1;
+    return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+  });
+
+  return { finalStickers: deduplicatedStickers, is40Pack: false, targetMax: 20 };
 };
 
 export default function Home() {
@@ -1434,84 +1643,7 @@ export default function Home() {
           return isTimeMatched || (coverCategory !== 'other' && itemCategory === coverCategory);
         });
 
-        const is20PackTheme = ['booktok', 'dessert', 'socialbattery', 'hangul'].includes(coverCategory);
-        const titleLower = (coverDesign.title || coverDesign.topic || '').toLowerCase();
-        const is40Pack = !is20PackTheme && (titleLower.includes('40종') || titleLower.includes('40'));
-        const targetMax = is40Pack ? 40 : 20;
-
-        const seriesPresets = getPackSeriesPresets(coverDesign);
-        let finalStickers: any[] = [];
-
-        if (seriesPresets && seriesPresets.length > 1) {
-          const expectedSlots = seriesPresets.slice(1);
-          const slotBuckets = new Map<number, any[]>();
-          const unmatched: any[] = [];
-
-          // Sort by newest first to ensure the latest version of any regenerated sticker is chosen
-          matched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
-
-          for (const item of matched) {
-            const slot = matchStickerToPresetSlot(item, seriesPresets);
-            if (slot >= 0 && slot < expectedSlots.length) {
-              if (!slotBuckets.has(slot)) slotBuckets.set(slot, []);
-              slotBuckets.get(slot)!.push(item);
-            } else {
-              unmatched.push(item);
-            }
-          }
-
-          // Pick the latest 1 copy for each slot (Slot 0 ~ Slot N-1)
-          const slotOrdered: any[] = [];
-          for (let i = 0; i < expectedSlots.length; i++) {
-            const bucket = slotBuckets.get(i);
-            if (bucket && bucket.length > 0) {
-              slotOrdered.push(bucket[0]); // newest sticker for this slot
-            }
-          }
-
-          // If there are unmatched stickers and total is still under targetMax, append them
-          for (const item of unmatched) {
-            if (slotOrdered.length >= targetMax) break;
-            slotOrdered.push(item);
-          }
-
-          finalStickers = slotOrdered;
-        } else {
-          // Fallback for non-series packs
-          matched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
-          const deduplicatedStickers: any[] = [];
-          const seenKeys = new Set<string>();
-
-          for (const item of matched) {
-            const presetKey = (item.stickerPresetId || '').toLowerCase().trim();
-            const cleanName = (item.title || item.topic || '').replace(/\[.*?\]/g, '').trim().toLowerCase();
-            const uniqueKey = presetKey || cleanName;
-
-            if (uniqueKey && seenKeys.has(uniqueKey)) {
-              continue; // Skip duplicate instance
-            }
-            if (uniqueKey) seenKeys.add(uniqueKey);
-            deduplicatedStickers.push(item);
-            if (deduplicatedStickers.length >= targetMax) break;
-          }
-
-          finalStickers = deduplicatedStickers;
-
-          // Sort so that Main Tanks (Sheet 1) come first, and Standalone Objects (Sheet 2) come next
-          finalStickers.sort((a: any, b: any) => {
-            const aTitle = (a.title || a.prompt || '').toLowerCase();
-            const bTitle = (b.title || b.prompt || '').toLowerCase();
-            const aPreset = (a.stickerPresetId || '').toLowerCase();
-            const bPreset = (b.stickerPresetId || '').toLowerCase();
-
-            const isAStandalone = aTitle.includes('단일') || aTitle.includes('단독') || aPreset.includes('standalone');
-            const isBStandalone = bTitle.includes('단일') || bTitle.includes('단독') || bPreset.includes('standalone');
-
-            if (!isAStandalone && isBStandalone) return -1;
-            if (isAStandalone && !isBStandalone) return 1;
-            return new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
-          });
-        }
+        const { finalStickers } = organizePackStickers(matched, coverDesign);
 
         setPackStickers(finalStickers);
 
@@ -1612,36 +1744,7 @@ export default function Home() {
 
       if (addedCount > 0) {
         const combined = [...packStickers, ...newlyAddedStickers];
-        const seriesPresets = getPackSeriesPresets(selectedPackCover);
-        let updatedStickers = combined;
-
-        if (seriesPresets && seriesPresets.length > 1) {
-          const expectedSlots = seriesPresets.slice(1);
-          const slotBuckets = new Map<number, any[]>();
-          const unmatched: any[] = [];
-          combined.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
-
-          for (const item of combined) {
-            const slot = matchStickerToPresetSlot(item, seriesPresets);
-            if (slot >= 0 && slot < expectedSlots.length) {
-              if (!slotBuckets.has(slot)) slotBuckets.set(slot, []);
-              slotBuckets.get(slot)!.push(item);
-            } else {
-              unmatched.push(item);
-            }
-          }
-
-          const slotOrdered: any[] = [];
-          for (let i = 0; i < expectedSlots.length; i++) {
-            const bucket = slotBuckets.get(i);
-            if (bucket && bucket.length > 0) slotOrdered.push(bucket[0]);
-          }
-          for (const item of unmatched) {
-            if (slotOrdered.length >= 20) break;
-            slotOrdered.push(item);
-          }
-          updatedStickers = slotOrdered;
-        }
+        const { finalStickers: updatedStickers } = organizePackStickers(combined, selectedPackCover);
 
         setPackStickers(updatedStickers);
 
@@ -3335,11 +3438,17 @@ export default function Home() {
       if (covers.length > 0) {
         covers.forEach((cover, idx) => {
           const coverTime = new Date(cover.created_at || 0).getTime();
-          const batchStickers = pool.filter(d => {
+          const coverCategory = getDesignCategoryKey(cover);
+          const matchedStickers = pool.filter(d => {
             if (isCoverDesign(d)) return false;
+            if (d.design_type === 'pod' || d.is_mockup === true) return false;
+            const itemCategory = getDesignCategoryKey(d);
+            if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) return false;
             const itemTime = new Date(d.created_at || 0).getTime();
-            return Math.abs(itemTime - coverTime) <= 45 * 60 * 1000;
-          }).slice(0, 20);
+            return (coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000) ||
+                   (coverCategory !== 'other' && itemCategory === coverCategory);
+          });
+          const { finalStickers: batchStickers } = organizePackStickers(matchedStickers, cover);
 
           const dateObj = new Date(cover.created_at || Date.now());
           const formattedDate = dateObj.toLocaleDateString('ko-KR', {
@@ -3723,6 +3832,47 @@ export default function Home() {
         if (currentPage > newTotalPages && newTotalPages > 0) {
           setPage(newTotalPages);
         }
+
+        // Auto-heal any 40-pack master cover titles that were corrupted to "20종"
+        getCachedStickersPool().then(pool => {
+          if (pool && pool.length > 0) {
+            const covers = pool.filter(d => isCoverDesign(d));
+            covers.forEach(cover => {
+              const packInfo = getPackPresetsInfo(cover);
+              if (packInfo.isSingleSeries20Theme) return;
+              const currentTitle = cover.title || cover.topic || '';
+              if (!currentTitle.includes('20종')) return;
+
+              const coverCategory = getDesignCategoryKey(cover);
+              const coverTime = new Date(cover.created_at || 0).getTime();
+              const matched = pool.filter((d: any) => {
+                if (d.id === cover.id || isCoverDesign(d)) return false;
+                if (d.design_type === 'pod' || d.is_mockup === true) return false;
+                const itemCategory = getDesignCategoryKey(d);
+                if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) return false;
+                const itemTime = new Date(d.created_at || 0).getTime();
+                return (coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000) ||
+                       (coverCategory !== 'other' && itemCategory === coverCategory);
+              });
+
+              const { finalStickers, is40Pack } = organizePackStickers(matched, cover);
+              if (is40Pack && finalStickers.length >= 25) {
+                const correctedTitle = formatCoverTitleWithCount(currentTitle, finalStickers.length);
+                if (correctedTitle !== currentTitle) {
+                  setDesigns(prev => prev.map(d => d.id === cover.id ? { ...d, title: correctedTitle, topic: correctedTitle } : d));
+                  fetch('/api/designs/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      id: cover.id,
+                      updates: { title: correctedTitle, topic: correctedTitle }
+                    })
+                  }).catch(console.error);
+                }
+              }
+            });
+          }
+        }).catch(() => {});
       } else {
         setDbApiError(data.error || '데이터베이스 조회 중 오류가 발생했습니다.');
       }
@@ -6359,19 +6509,51 @@ export default function Home() {
 
               {/* Missing Stickers Detection & 1-Click Recovery Banner */}
               {(() => {
-                const allSeriesPresets = getPackSeriesPresets(selectedPackCover);
-                if (!allSeriesPresets || allSeriesPresets.length <= 1) return null;
-                const expectedStickers = allSeriesPresets.slice(1);
+                const packInfo = getPackPresetsInfo(selectedPackCover);
+                const titleLower = (selectedPackCover.title || selectedPackCover.topic || '').toLowerCase();
+                const promptLower = (selectedPackCover.prompt || '').toLowerCase();
+                const is40 = packStickers.length > 20 || (!packInfo.isSingleSeries20Theme && (
+                  titleLower.includes('40종') || titleLower.includes('40') || promptLower.includes('40+')
+                ));
 
-                const coveredSlotIndices = new Set<number>();
-                packStickers.forEach((s: any) => {
-                  const slot = matchStickerToPresetSlot(s, allSeriesPresets);
-                  if (slot >= 0 && slot < expectedStickers.length) {
-                    coveredSlotIndices.add(slot);
-                  }
-                });
+                let expectedStickers: StickerPreset[] = [];
+                let missingPresets: StickerPreset[] = [];
 
-                const missingPresets = expectedStickers.filter((_, idx) => !coveredSlotIndices.has(idx));
+                if (is40 && packInfo.vesselSeries && packInfo.standaloneSeries) {
+                  const vesselPresets = packInfo.vesselSeries.slice(1);
+                  const standalonePresets = packInfo.standaloneSeries.slice(1);
+                  expectedStickers = [...vesselPresets, ...standalonePresets];
+
+                  const coveredVesselSlots = new Set<number>();
+                  const coveredStandaloneSlots = new Set<number>();
+
+                  packStickers.forEach((s: any) => {
+                    if (isStickerStandalone(s)) {
+                      const slot = matchStickerToPresetSlot(s, packInfo.standaloneSeries!);
+                      if (slot >= 0 && slot < standalonePresets.length) coveredStandaloneSlots.add(slot);
+                    } else {
+                      const slot = matchStickerToPresetSlot(s, packInfo.vesselSeries!);
+                      if (slot >= 0 && slot < vesselPresets.length) coveredVesselSlots.add(slot);
+                    }
+                  });
+
+                  const missingVessel = vesselPresets.filter((_, idx) => !coveredVesselSlots.has(idx));
+                  const missingStandalone = standalonePresets.filter((_, idx) => !coveredStandaloneSlots.has(idx));
+                  missingPresets = [...missingVessel, ...missingStandalone];
+                } else {
+                  const activeSeries = packInfo.isSingleSeries20Theme
+                    ? packInfo.vesselSeries
+                    : (isStickerStandalone(selectedPackCover) ? (packInfo.standaloneSeries || packInfo.vesselSeries) : (packInfo.vesselSeries || packInfo.standaloneSeries));
+                  if (!activeSeries || activeSeries.length <= 1) return null;
+                  expectedStickers = activeSeries.slice(1);
+
+                  const coveredSlots = new Set<number>();
+                  packStickers.forEach((s: any) => {
+                    const slot = matchStickerToPresetSlot(s, activeSeries);
+                    if (slot >= 0 && slot < expectedStickers.length) coveredSlots.add(slot);
+                  });
+                  missingPresets = expectedStickers.filter((_, idx) => !coveredSlots.has(idx));
+                }
 
                 if (missingPresets.length === 0) return null;
 
@@ -6385,7 +6567,7 @@ export default function Home() {
                             스티커 {expectedStickers.length}종 중 {missingPresets.length}개가 누락되었습니다! (현재 {packStickers.length}종)
                           </span>
                           <span className="text-[10px] bg-amber-500 text-white font-black px-2 py-0.5 rounded-full">
-                            표지 이미지(20+)와 일치 필요
+                            표지 이미지({expectedStickers.length}+)와 일치 필요
                           </span>
                         </div>
                         <p className="text-[11px] text-amber-900 mt-0.5 font-medium">
