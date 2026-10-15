@@ -5,11 +5,16 @@ export const dynamic = 'force-dynamic';
 
 // In-memory cache for high-frequency image requests (saves thousands of Firestore reads!)
 const inMemoryImageCache = new Map<string, { buffer: Buffer; mimeType: string }>();
-const MAX_CACHE_ITEMS = 300;
+const MAX_CACHE_ITEMS = 1500;
 
 export function clearImageCache(id?: string) {
   if (id) {
     inMemoryImageCache.delete(id);
+    for (const key of inMemoryImageCache.keys()) {
+      if (key.startsWith(id)) {
+        inMemoryImageCache.delete(key);
+      }
+    }
   } else {
     inMemoryImageCache.clear();
   }
@@ -55,11 +60,12 @@ export async function GET(request: Request) {
     if (!id) return new NextResponse('Missing id', { status: 400 });
 
     const filename = type ? `mockup-${type}.jpg` : 'sticker-cover.jpg';
-    const cacheKey = type ? `${id}_${type}${v ? `_${v}` : ''}` : (v ? `${id}_${v}` : id);
+    const baseKey = type ? `${id}_${type}` : id;
+    const cacheKey = v ? `${baseKey}_${v}` : baseKey;
 
     // 1. Check in-memory cache first (0 Firestore reads!)
     if (!nocache) {
-      const cached = inMemoryImageCache.get(cacheKey);
+      const cached = inMemoryImageCache.get(cacheKey) || inMemoryImageCache.get(baseKey);
       if (cached) {
         return new NextResponse(new Uint8Array(cached.buffer), {
           headers: {
@@ -67,7 +73,7 @@ export async function GET(request: Request) {
             'Content-Length': cached.buffer.length.toString(),
             'Content-Disposition': `inline; filename="${filename}"`,
             'Access-Control-Allow-Origin': '*',
-            'Cache-Control': v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400',
+            'Cache-Control': 'public, max-age=31536000, immutable',
           },
         });
       }
@@ -79,22 +85,39 @@ export async function GET(request: Request) {
 
     // 2. Fetch from Firestore only if not cached
     let imageUrl: string | undefined;
-    if (type) {
-      const doc = await db.collection('mockups').doc(`${id}_${type}`).get();
-      if (doc.exists) {
-        imageUrl = doc.data()?.image_url;
-      } else {
-        const directDoc = await db.collection('mockups').doc(id).get();
-        if (directDoc.exists) {
-          imageUrl = directDoc.data()?.image_url;
+    try {
+      if (type) {
+        const doc = await db.collection('mockups').doc(`${id}_${type}`).get();
+        if (doc.exists) {
+          imageUrl = doc.data()?.image_url;
         } else {
-          return new NextResponse('Mockup not found', { status: 404 });
+          const directDoc = await db.collection('mockups').doc(id).get();
+          if (directDoc.exists) {
+            imageUrl = directDoc.data()?.image_url;
+          } else {
+            return new NextResponse('Mockup not found', { status: 404 });
+          }
         }
+      } else {
+        const doc = await db.collection('designs').doc(id).get();
+        if (!doc.exists) return new NextResponse('Not found', { status: 404 });
+        imageUrl = doc.data()?.image_url;
       }
-    } else {
-      const doc = await db.collection('designs').doc(id).get();
-      if (!doc.exists) return new NextResponse('Not found', { status: 404 });
-      imageUrl = doc.data()?.image_url;
+    } catch (dbErr: any) {
+      // If Firestore read fails (e.g. Quota Exceeded), check if we have any fallback in memory
+      const cachedFallback = inMemoryImageCache.get(baseKey) || inMemoryImageCache.get(id);
+      if (cachedFallback) {
+        return new NextResponse(new Uint8Array(cachedFallback.buffer), {
+          headers: {
+            'Content-Type': cachedFallback.mimeType,
+            'Content-Length': cachedFallback.buffer.length.toString(),
+            'Content-Disposition': `inline; filename="${filename}"`,
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'public, max-age=31536000, immutable',
+          },
+        });
+      }
+      throw dbErr;
     }
 
     if (!imageUrl) {
@@ -115,6 +138,7 @@ export async function GET(request: Request) {
             if (firstKey) inMemoryImageCache.delete(firstKey);
           }
           inMemoryImageCache.set(cacheKey, { buffer, mimeType: contentType });
+          inMemoryImageCache.set(baseKey, { buffer, mimeType: contentType });
 
           return new NextResponse(new Uint8Array(buffer), {
             headers: {
@@ -122,7 +146,7 @@ export async function GET(request: Request) {
               'Content-Length': buffer.length.toString(),
               'Content-Disposition': `inline; filename="${filename}"`,
               'Access-Control-Allow-Origin': '*',
-              'Cache-Control': nocache ? 'no-store, no-cache, must-revalidate' : (v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400'),
+              'Cache-Control': 'public, max-age=31536000, immutable',
             },
           });
         }
@@ -145,6 +169,7 @@ export async function GET(request: Request) {
       if (firstKey) inMemoryImageCache.delete(firstKey);
     }
     inMemoryImageCache.set(cacheKey, { buffer, mimeType });
+    inMemoryImageCache.set(baseKey, { buffer, mimeType });
 
     return new NextResponse(new Uint8Array(buffer), {
       headers: {
@@ -152,7 +177,7 @@ export async function GET(request: Request) {
         'Content-Length': buffer.length.toString(),
         'Content-Disposition': `inline; filename="${filename}"`,
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': nocache ? 'no-store, no-cache, must-revalidate' : (v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600, stale-while-revalidate=86400'),
+        'Cache-Control': 'public, max-age=31536000, immutable',
       },
     });
   } catch (error: any) {

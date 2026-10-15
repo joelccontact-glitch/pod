@@ -1,6 +1,6 @@
 import { db } from '@/lib/firebase-admin';
 import { NextResponse } from 'next/server';
-import { clearDesignsCache } from '../route';
+import { updateCachedDesign } from '../route';
 
 export async function POST(req: Request) {
   try {
@@ -11,14 +11,21 @@ export async function POST(req: Request) {
     }
 
     if (process.env.FIREBASE_PROJECT_ID) {
-      const nowIso = new Date().toISOString();
       const designRef = db.collection('designs').doc(id);
-      await designRef.set({
-        ...updates,
-        updated_at: nowIso
-      }, { merge: true });
-      clearDesignsCache();
-      return NextResponse.json({ success: true, updated_at: nowIso });
+      const payload: any = { ...updates };
+      
+      // Only bump updated_at if image changed or explicitly requested
+      // (prevents busting browser image cache for pure metadata/title/tag updates!)
+      if (updates.image_url || updates.forceTimestamp) {
+        payload.updated_at = new Date().toISOString();
+      }
+
+      await designRef.set(payload, { merge: true });
+      
+      // Update in-place in memory cache without wiping 1000 items!
+      updateCachedDesign(id, payload);
+
+      return NextResponse.json({ success: true, updated_at: payload.updated_at });
     }
 
     return NextResponse.json({ success: true });

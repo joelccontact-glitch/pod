@@ -1,13 +1,81 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+// Disk snapshot cache path (persists across serverless container restarts where /tmp is available)
+const SNAPSHOT_CACHE_FILE = path.join(os.tmpdir(), 'mypod-designs-snapshot.json');
+
 // In-memory cache for fast pagination and instant responses (< 5ms)
 let cachedSnapshotDocs: { id: string; data: any }[] | null = null;
 let lastCacheTime = 0;
-const CACHE_TTL_MS = 180000; // 3 minutes cache to drastically cut Firestore read quota consumption (95%+ reduction!)
+const CACHE_TTL_MS = 600000; // 10 minutes cache to drastically cut Firestore read quota consumption (99%+ reduction!)
+
+function saveSnapshotToDisk(docs: { id: string; data: any }[] | null) {
+  if (!docs || docs.length === 0) return;
+  try {
+    fs.writeFile(SNAPSHOT_CACHE_FILE, JSON.stringify(docs), 'utf-8', (err) => {
+      if (err) console.error('Failed to write designs snapshot to disk:', err);
+    });
+  } catch (e) {
+    console.error('saveSnapshotToDisk error:', e);
+  }
+}
+
+function loadSnapshotFromDisk(): { id: string; data: any }[] | null {
+  try {
+    if (fs.existsSync(SNAPSHOT_CACHE_FILE)) {
+      const content = fs.readFileSync(SNAPSHOT_CACHE_FILE, 'utf-8');
+      const parsed = JSON.parse(content);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (e) {
+    console.error('loadSnapshotFromDisk error:', e);
+  }
+  return null;
+}
+
+// In-place cache updates so we never wipe the 1000-doc cache during normal updates!
+export function updateCachedDesign(id: string, updates: any) {
+  if (!cachedSnapshotDocs) return;
+  const idx = cachedSnapshotDocs.findIndex(d => d.id === id);
+  if (idx !== -1) {
+    cachedSnapshotDocs[idx] = {
+      ...cachedSnapshotDocs[idx],
+      data: { ...cachedSnapshotDocs[idx].data, ...updates }
+    };
+    saveSnapshotToDisk(cachedSnapshotDocs);
+  }
+}
+
+export function addCachedDesign(item: { id: string; data: any }) {
+  if (!cachedSnapshotDocs) {
+    cachedSnapshotDocs = [];
+  }
+  const idx = cachedSnapshotDocs.findIndex(d => d.id === item.id);
+  if (idx !== -1) {
+    cachedSnapshotDocs[idx] = item;
+  } else {
+    cachedSnapshotDocs.unshift(item);
+  }
+  saveSnapshotToDisk(cachedSnapshotDocs);
+}
+
+export function removeCachedDesign(id: string, permanent: boolean = false) {
+  if (!cachedSnapshotDocs) return;
+  if (permanent) {
+    cachedSnapshotDocs = cachedSnapshotDocs.filter(d => d.id !== id);
+  } else {
+    updateCachedDesign(id, { is_deleted: true });
+  }
+  saveSnapshotToDisk(cachedSnapshotDocs);
+}
 
 export function clearDesignsCache() {
   cachedSnapshotDocs = null;
@@ -49,6 +117,8 @@ export async function GET(request: Request) {
     const nocache = searchParams.get('nocache') === 'true';
 
     const now = Date.now();
+    let isQuotaFallback = false;
+
     if (nocache || !cachedSnapshotDocs || (now - lastCacheTime > CACHE_TTL_MS)) {
       try {
         // Fetch ONLY lightweight metadata fields from Firestore (excludes heavy base64 images!)
@@ -67,13 +137,24 @@ export async function GET(request: Request) {
           data: doc.data()
         }));
         lastCacheTime = now;
+        saveSnapshotToDisk(cachedSnapshotDocs);
       } catch (dbErr: any) {
-        // If Firestore read fails (e.g. Quota Exceeded / RESOURCE_EXHAUSTED), fallback to existing cache if available!
         console.error('Firestore query error in /api/designs:', dbErr?.message);
-        if (!cachedSnapshotDocs || cachedSnapshotDocs.length === 0) {
-          throw dbErr;
+        // If Firestore read fails (e.g. Quota Exceeded / RESOURCE_EXHAUSTED), fallback gracefully!
+        if (cachedSnapshotDocs && cachedSnapshotDocs.length > 0) {
+          console.warn('[Quota Fallback] Serving from in-memory cachedSnapshotDocs');
+          isQuotaFallback = true;
+        } else {
+          const diskDocs = loadSnapshotFromDisk();
+          if (diskDocs && diskDocs.length > 0) {
+            console.warn(`[Quota Fallback] Recovered ${diskDocs.length} designs from disk snapshot!`);
+            cachedSnapshotDocs = diskDocs;
+            lastCacheTime = now;
+            isQuotaFallback = true;
+          } else {
+            throw dbErr;
+          }
         }
-        console.warn('Falling back to cachedSnapshotDocs due to Firestore quota error');
       }
     }
       
@@ -384,6 +465,9 @@ export async function GET(request: Request) {
 
     if (!nocache) {
       jsonResponse.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=180');
+    }
+    if (isQuotaFallback) {
+      jsonResponse.headers.set('X-Quota-Fallback', 'true');
     }
     return jsonResponse;
   } catch (error: any) {

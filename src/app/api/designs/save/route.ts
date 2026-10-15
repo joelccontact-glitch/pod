@@ -1,6 +1,6 @@
 import { db } from '@/lib/firebase-admin';
 import { NextResponse } from 'next/server';
-import { clearDesignsCache } from '../route';
+import { addCachedDesign } from '../route';
 import { clearImageCache } from '../image/route';
 
 export async function POST(req: Request) {
@@ -13,11 +13,12 @@ export async function POST(req: Request) {
 
     if (process.env.FIREBASE_PROJECT_ID) {
       const designRef = db.collection('designs').doc(id);
-      await designRef.set({
+      const fullDocData = {
         ...designData,
-        created_at: new Date().toISOString()
-      });
-      clearDesignsCache();
+        created_at: designData.created_at || new Date().toISOString()
+      };
+      await designRef.set(fullDocData);
+      addCachedDesign({ id, data: fullDocData });
       clearImageCache(id);
     }
 

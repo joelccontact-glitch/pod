@@ -42,31 +42,64 @@ import { createVesselStickerFromStandalone } from '@/lib/vessel-housing-builder'
 import { generateEtsySeo } from '@/lib/etsy-seo-generator';
 import { generateAllLifestyleMockups, LifestyleMockupResult } from '@/lib/lifestyle-mockup-builder';
 
-// Client-side cache for high-frequency design pool queries to eliminate redundant Firestore reads (95%+ reduction)
+// Client-side cache for high-frequency design pool queries to eliminate redundant Firestore reads (99%+ reduction)
 let clientPoolCache: { data: any[]; timestamp: number } | null = null;
-const CLIENT_POOL_TTL_MS = 180000; // 3 minutes
+const CLIENT_POOL_TTL_MS = 600000; // 10 minutes cache
+const SESSION_CACHE_KEY = 'mypod_stickers_pool_cache_v3';
 
 const getCachedStickersPool = async (forceRefresh = false): Promise<any[]> => {
   const now = Date.now();
+
+  // 1. Check in-memory variable
   if (!forceRefresh && clientPoolCache && (now - clientPoolCache.timestamp < CLIENT_POOL_TTL_MS)) {
     return clientPoolCache.data;
   }
+
+  // 2. Check sessionStorage if memory cache was lost (e.g. page navigation)
+  if (!forceRefresh && typeof window !== 'undefined') {
+    try {
+      const stored = sessionStorage.getItem(SESSION_CACHE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && Array.isArray(parsed.data) && (now - parsed.timestamp < CLIENT_POOL_TTL_MS)) {
+          clientPoolCache = parsed;
+          return parsed.data;
+        }
+      }
+    } catch {}
+  }
+
+  // If forceRefresh requested but last fetch was within 15 seconds, avoid hammering Firestore
+  if (forceRefresh && clientPoolCache && (now - clientPoolCache.timestamp < 15000)) {
+    return clientPoolCache.data;
+  }
+
   try {
     const res = await fetch(`/api/designs?limit=1000&type=sticker${forceRefresh ? `&nocache=true&_t=${now}` : ''}`);
     const data = await res.json();
     if (data.success && Array.isArray(data.data)) {
       clientPoolCache = { data: data.data, timestamp: now };
+      if (typeof window !== 'undefined') {
+        try {
+          sessionStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(clientPoolCache));
+        } catch {}
+      }
       return data.data;
     }
   } catch (e) {
     console.error('Failed to fetch stickers pool:', e);
     if (clientPoolCache) return clientPoolCache.data;
   }
-  return [];
+  return clientPoolCache?.data || [];
 };
 
 const invalidateClientPoolCache = () => {
   clientPoolCache = null;
+  if (typeof window !== 'undefined') {
+    try {
+      sessionStorage.removeItem(SESSION_CACHE_KEY);
+    } catch {}
+  }
 };
 
 export const isCoverDesign = (d: any): boolean => {
@@ -1472,7 +1505,7 @@ export default function Home() {
       }
 
       alert(`✨ 어항 본품 ${successCount}종에서 100% 실물 일치 독립 스티커 추출이 완료되었습니다!`);
-      await handleOpenPackDetail(selectedPackCover);
+      await handleOpenPackDetail(selectedPackCover, true);
       await fetchDesigns(page, false, undefined, undefined, true);
     } catch (e: any) {
       console.error('Error in handleExtractAllStandaloneFromTanks:', e);
@@ -1576,7 +1609,7 @@ export default function Home() {
       }
 
       alert(`✨ 독립 스티커 ${successCount}종에서 100% 실물 일치 어항/유리병 스티커 합성이 완료되었습니다!`);
-      await handleOpenPackDetail(selectedPackCover);
+      await handleOpenPackDetail(selectedPackCover, true);
       await fetchDesigns(page, false, undefined, undefined, true);
     } catch (e: any) {
       console.error('Error in handleBuildAllVesselsFromStandalone:', e);
@@ -1587,7 +1620,7 @@ export default function Home() {
     }
   };
 
-  const handleOpenPackDetail = async (coverDesign: any) => {
+  const handleOpenPackDetail = async (coverDesign: any, forceRefresh: boolean = false) => {
     setSelectedPackCover(coverDesign);
     setIsPackDetailModalOpen(true);
     setIsPinterestHubExpanded(false);
@@ -1605,7 +1638,7 @@ export default function Home() {
     }
 
     try {
-      const pool = await getCachedStickersPool(true);
+      const pool = await getCachedStickersPool(forceRefresh);
       if (pool && pool.length > 0) {
         const coverTime = new Date(coverDesign.created_at || 0).getTime();
         const coverCategory = getDesignCategoryKey(coverDesign);
@@ -3832,47 +3865,6 @@ export default function Home() {
         if (currentPage > newTotalPages && newTotalPages > 0) {
           setPage(newTotalPages);
         }
-
-        // Auto-heal any 40-pack master cover titles that were corrupted to "20종"
-        getCachedStickersPool().then(pool => {
-          if (pool && pool.length > 0) {
-            const covers = pool.filter(d => isCoverDesign(d));
-            covers.forEach(cover => {
-              const packInfo = getPackPresetsInfo(cover);
-              if (packInfo.isSingleSeries20Theme) return;
-              const currentTitle = cover.title || cover.topic || '';
-              if (!currentTitle.includes('20종')) return;
-
-              const coverCategory = getDesignCategoryKey(cover);
-              const coverTime = new Date(cover.created_at || 0).getTime();
-              const matched = pool.filter((d: any) => {
-                if (d.id === cover.id || isCoverDesign(d)) return false;
-                if (d.design_type === 'pod' || d.is_mockup === true) return false;
-                const itemCategory = getDesignCategoryKey(d);
-                if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) return false;
-                const itemTime = new Date(d.created_at || 0).getTime();
-                return (coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000) ||
-                       (coverCategory !== 'other' && itemCategory === coverCategory);
-              });
-
-              const { finalStickers, is40Pack } = organizePackStickers(matched, cover);
-              if (is40Pack && finalStickers.length >= 25) {
-                const correctedTitle = formatCoverTitleWithCount(currentTitle, finalStickers.length);
-                if (correctedTitle !== currentTitle) {
-                  setDesigns(prev => prev.map(d => d.id === cover.id ? { ...d, title: correctedTitle, topic: correctedTitle } : d));
-                  fetch('/api/designs/update', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      id: cover.id,
-                      updates: { title: correctedTitle, topic: correctedTitle }
-                    })
-                  }).catch(console.error);
-                }
-              }
-            });
-          }
-        }).catch(() => {});
       } else {
         setDbApiError(data.error || '데이터베이스 조회 중 오류가 발생했습니다.');
       }
@@ -6499,12 +6491,26 @@ export default function Home() {
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setIsPackDetailModalOpen(false)}
-                  className="text-teal-200 hover:text-white text-2xl font-bold w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0"
-                >
-                  ✕
-                </button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={async () => {
+                      if (selectedPackCover) {
+                        await handleOpenPackDetail(selectedPackCover, true);
+                      }
+                    }}
+                    title="스티커 팩 목록 새로고침"
+                    className="text-teal-200 hover:text-white text-xs bg-white/10 hover:bg-white/20 px-3 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border border-white/10"
+                  >
+                    <span className="text-sm">🔄</span>
+                    <span className="hidden sm:inline font-semibold">동기화</span>
+                  </button>
+                  <button
+                    onClick={() => setIsPackDetailModalOpen(false)}
+                    className="text-teal-200 hover:text-white text-2xl font-bold w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
 
               {/* Missing Stickers Detection & 1-Click Recovery Banner */}
