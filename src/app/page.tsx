@@ -552,9 +552,35 @@ export const organizePackStickers = (matched: any[], coverDesign: any): { finalS
 
 export default function Home() {
   const { data: session } = useSession();
-  const [designs, setDesigns] = useState<any[]>([]);
+  const [designs, setDesigns] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = sessionStorage.getItem('mypod_initial_page_data_v1');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && Array.isArray(parsed.data?.data) && (Date.now() - parsed.timestamp < 600000)) {
+            return parsed.data.data;
+          }
+        }
+      } catch {}
+    }
+    return [];
+  });
   const [loading, setLoading] = useState(false);
-  const [loadingInitial, setLoadingInitial] = useState(true);
+  const [loadingInitial, setLoadingInitial] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = sessionStorage.getItem('mypod_initial_page_data_v1');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && Array.isArray(parsed.data?.data) && (Date.now() - parsed.timestamp < 600000)) {
+            return false;
+          }
+        }
+      } catch {}
+    }
+    return true;
+  });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -603,7 +629,7 @@ export default function Home() {
 
   // Sticker & Digital PNG Pack States
   const [isStickerMode, setIsStickerMode] = useState(true);
-  const [isSeasonalRadarExpanded, setIsSeasonalRadarExpanded] = useState(true); // Expanded by default
+  const [isSeasonalRadarExpanded, setIsSeasonalRadarExpanded] = useState(false); // Collapsed by default
   const [expandedStrategySeasonIds, setExpandedStrategySeasonIds] = useState<string[]>([]);
   const [copiedTagsSeasonId, setCopiedTagsSeasonId] = useState<string | null>(null);
   const [copiedEtsyTitleNotice, setCopiedEtsyTitleNotice] = useState(false);
@@ -1643,9 +1669,11 @@ export default function Home() {
     setSelectedPackCover(coverDesign);
     setIsPackDetailModalOpen(true);
     setIsPinterestHubExpanded(false);
-    setIsPackSeoExpanded(false);
-    setLoadingPackStickers(true);
-    setPackStickers([]);
+    const hasWarmCache = !forceRefresh && clientPoolCache && clientPoolCache.data.length > 0;
+    if (!hasWarmCache) {
+      setLoadingPackStickers(true);
+      setPackStickers([]);
+    }
 
     if (typeof window !== 'undefined') {
       const savedShop = localStorage.getItem('user_etsy_shop_url') || 'https://www.etsy.com/shop/LittlePawsStudioShop';
@@ -2216,9 +2244,16 @@ export default function Home() {
   }, [activeTab, selectedDesign, originalEditImage]);
 
   // Load styles and upcoming seasons ONCE on initial mount (saves redundant Firestore reads)
+  // And pre-warm sticker pool cache in background after initial render so detail modals open in 0ms!
   useEffect(() => {
     fetchStyles();
     setActiveSeasonsList(getActiveUpcomingSeasons());
+
+    const prewarmTimer = setTimeout(() => {
+      getCachedStickersPool(false).catch(() => {});
+    }, 1200);
+
+    return () => clearTimeout(prewarmTimer);
   }, []);
 
   // Fetch designs only when page, tab, subtab, or debounced search keyword changes
@@ -3903,6 +3938,11 @@ export default function Home() {
       const data = await res.json();
       if (data.success) {
         galleryPageCache.set(cacheKey, { data, timestamp: now });
+        if (currentPage === 1 && selectedCategoryTab === 'sticker' && activeSub === 'all' && !activeSearch) {
+          try {
+            sessionStorage.setItem('mypod_initial_page_data_v1', JSON.stringify({ data, timestamp: now }));
+          } catch {}
+        }
         setDbApiError(null);
         setDesigns(data.data);
         const newTotalPages = data.totalPages || 1;
@@ -6504,13 +6544,13 @@ export default function Home() {
 
         {/* 🌟 Sticker 20-Pack Bundle Detail View Modal (마스터 썸네일 클릭 시 20종 전용 뷰어) */}
         {isPackDetailModalOpen && selectedPackCover && (
-          <div className="fixed inset-0 bg-black/70 z-[70] flex items-center justify-center p-3 sm:p-6 backdrop-blur-md">
-            <div className="bg-white rounded-3xl max-w-6xl w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-teal-200 animate-fadeIn">
+          <div className="fixed inset-0 bg-black/70 z-[70] flex items-center justify-center p-1.5 sm:p-6 backdrop-blur-md">
+            <div className="bg-white rounded-2xl sm:rounded-3xl max-w-6xl w-full max-h-[96vh] sm:max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-teal-200 animate-fadeIn">
               
-              {/* Modal Header */}
-              <div className="p-4 sm:p-6 bg-gradient-to-r from-teal-900 via-emerald-900 to-slate-900 text-white flex justify-between items-center shrink-0">
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/10 border border-white/20 overflow-hidden shrink-0 shadow-md">
+              {/* Modal Header (Compact & sleek on mobile, docked cleanly at top) */}
+              <div className="p-3 sm:p-5 bg-gradient-to-r from-teal-900 via-emerald-900 to-slate-900 text-white flex justify-between items-center shrink-0 shadow-sm z-20">
+                <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+                  <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-white/10 border border-white/20 overflow-hidden shrink-0 shadow-md">
                     <img 
                       src={selectedPackCover.image_url} 
                       alt={selectedPackCover.title} 
@@ -6518,22 +6558,22 @@ export default function Home() {
                     />
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <span className="bg-amber-400 text-amber-950 text-[10px] sm:text-xs font-extrabold px-2.5 py-0.5 rounded-full shadow-xs uppercase tracking-wider">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap mb-0.5 sm:mb-1">
+                      <span className="bg-amber-400 text-amber-950 text-[9px] sm:text-xs font-extrabold px-2 py-0.5 rounded-full shadow-xs uppercase tracking-wider">
                         🌟 마스터 썸네일 팩
                       </span>
-                      <span className="bg-teal-500/30 text-teal-200 text-[10px] sm:text-xs font-semibold px-2.5 py-0.5 rounded-full border border-teal-400/30">
+                      <span className="bg-teal-500/30 text-teal-200 text-[9px] sm:text-xs font-semibold px-2 py-0.5 rounded-full border border-teal-400/30">
                         {selectedPackCover.sticker_sub ? selectedPackCover.sticker_sub.toUpperCase() : 'STICKER PACK'}
                       </span>
                     </div>
-                    <h3 className="text-base sm:text-xl font-bold text-white truncate">
+                    <h3 className="text-xs sm:text-xl font-bold text-white truncate">
                       {formatCoverTitleWithCount(selectedPackCover.title || selectedPackCover.topic || 'Etsy 스티커 마스터 팩', packStickers.length)}
                     </h3>
-                    <p className="text-xs text-teal-200 mt-0.5 font-medium flex items-center gap-2">
-                      <span>📅 생성일: {new Date(selectedPackCover.created_at || Date.now()).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
-                      <span>•</span>
+                    <p className="text-[10px] sm:text-xs text-teal-200 mt-0.5 font-medium flex items-center gap-1.5 sm:gap-2">
+                      <span className="hidden xs:inline">📅 {new Date(selectedPackCover.created_at || Date.now()).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}</span>
+                      <span className="hidden xs:inline">•</span>
                       <span className="text-amber-300 font-bold">
-                        총 {1 + packStickers.length}장 (마스터 표지 1장 + 스티커 {packStickers.length}종)
+                        총 {1 + packStickers.length}장 (표지 1 + 스티커 {packStickers.length}종)
                       </span>
                     </p>
                   </div>
@@ -6547,21 +6587,23 @@ export default function Home() {
                       }
                     }}
                     title="스티커 팩 목록 새로고침"
-                    className="text-teal-200 hover:text-white text-xs bg-white/10 hover:bg-white/20 px-3 py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border border-white/10"
+                    className="text-teal-200 hover:text-white text-xs bg-white/10 hover:bg-white/20 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer border border-white/10"
                   >
                     <span className="text-sm">🔄</span>
                     <span className="hidden sm:inline font-semibold">동기화</span>
                   </button>
                   <button
                     onClick={() => setIsPackDetailModalOpen(false)}
-                    className="text-teal-200 hover:text-white text-2xl font-bold w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+                    className="text-teal-200 hover:text-white text-2xl font-bold w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
                   >
                     ✕
                   </button>
                 </div>
               </div>
 
-              {/* Missing Stickers Detection & 1-Click Recovery Banner */}
+              {/* UNIFIED SCROLL CONTAINER (모바일에서 상단 툴바와 스티커가 하나의 흐름으로 부드럽게 스크롤) */}
+              <div id="pack-detail-scroll-container" className="overflow-y-auto flex-1 bg-stone-50 overscroll-contain [-webkit-overflow-scrolling:touch] custom-scrollbar scroll-smooth flex flex-col">
+                {/* Missing Stickers Detection & 1-Click Recovery Banner */}
               {(() => {
                 const packInfo = getPackPresetsInfo(selectedPackCover);
                 const titleLower = (selectedPackCover.title || selectedPackCover.topic || '').toLowerCase();
@@ -6891,7 +6933,7 @@ export default function Home() {
               </div>
 
               {/* Grid Content Section */}
-              <div id="pack-detail-scroll-container" className="p-3 sm:p-6 overflow-y-auto flex-1 bg-stone-50 overscroll-contain [-webkit-overflow-scrolling:touch] custom-scrollbar scroll-smooth relative">
+              <div className="p-3 sm:p-6 flex-1 bg-stone-50 relative">
                 {/* 📝 Etsy 상품 등록용 영문 정보 (SEO Title, Description, Tags) 카드 */}
                 {(() => {
                   const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
@@ -7383,7 +7425,8 @@ export default function Home() {
               </div>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
         {/* 🖨️ A4 Printable Sticker Sheet Modal */}
         {isA4SheetModalOpen && (

@@ -52,6 +52,15 @@ export async function GET(req: Request) {
     const nocache = searchParams.get('nocache') === 'true';
     const now = Date.now();
 
+    // 0. Instant cold-start hydration from disk snapshot (1ms, 0 Firestore reads!)
+    if (!cachedStyles && !nocache) {
+      const diskStyles = loadStylesFromDisk();
+      if (diskStyles && diskStyles.length > 0) {
+        cachedStyles = diskStyles;
+        lastStylesCacheTime = now;
+      }
+    }
+
     if (!nocache && cachedStyles && (now - lastStylesCacheTime < STYLES_CACHE_TTL)) {
       const res = NextResponse.json({ success: true, data: cachedStyles });
       res.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');

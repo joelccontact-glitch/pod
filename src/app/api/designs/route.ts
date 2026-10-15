@@ -119,6 +119,15 @@ export async function GET(request: Request) {
     const now = Date.now();
     let isQuotaFallback = false;
 
+    // 0. Instant cold-start hydration from disk snapshot (1ms, 0 Firestore reads!)
+    if (!cachedSnapshotDocs && !nocache) {
+      const diskDocs = loadSnapshotFromDisk();
+      if (diskDocs && diskDocs.length > 0) {
+        cachedSnapshotDocs = diskDocs;
+        lastCacheTime = now;
+      }
+    }
+
     if (nocache || !cachedSnapshotDocs || (now - lastCacheTime > CACHE_TTL_MS)) {
       try {
         // Fetch ONLY lightweight metadata fields from Firestore (excludes heavy base64 images!)
