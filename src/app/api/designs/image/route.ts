@@ -1,7 +1,47 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 
 export const dynamic = 'force-dynamic';
+
+// Disk cache directory for images (survives memory resets)
+const DISK_IMG_DIR = path.join(os.tmpdir(), 'mypod-image-cache');
+
+function getDiskImagePath(key: string) {
+  const safeKey = key.replace(/[^a-zA-Z0-9_\-]/g, '_');
+  return path.join(DISK_IMG_DIR, `${safeKey}.dat`);
+}
+
+function saveImageToDisk(key: string, buffer: Buffer, mimeType: string) {
+  try {
+    if (!fs.existsSync(DISK_IMG_DIR)) {
+      fs.mkdirSync(DISK_IMG_DIR, { recursive: true });
+    }
+    const metaHeader = Buffer.from(mimeType + '\n', 'utf-8');
+    const combined = Buffer.concat([metaHeader, buffer]);
+    fs.writeFile(getDiskImagePath(key), combined, () => {});
+  } catch (e) {
+    // Non-critical disk write error
+  }
+}
+
+function loadImageFromDisk(key: string): { buffer: Buffer; mimeType: string } | null {
+  try {
+    const filePath = getDiskImagePath(key);
+    if (fs.existsSync(filePath)) {
+      const data = fs.readFileSync(filePath);
+      const newlineIdx = data.indexOf(10); // '\n'
+      if (newlineIdx !== -1) {
+        const mimeType = data.subarray(0, newlineIdx).toString('utf-8');
+        const buffer = data.subarray(newlineIdx + 1);
+        return { buffer, mimeType };
+      }
+    }
+  } catch (e) {}
+  return null;
+}
 
 // In-memory cache for high-frequency image requests (saves thousands of Firestore reads!)
 const inMemoryImageCache = new Map<string, { buffer: Buffer; mimeType: string }>();
@@ -15,6 +55,10 @@ export function clearImageCache(id?: string) {
         inMemoryImageCache.delete(key);
       }
     }
+    try {
+      const p = getDiskImagePath(id);
+      if (fs.existsSync(p)) fs.unlinkSync(p);
+    } catch {}
   } else {
     inMemoryImageCache.clear();
   }
@@ -63,7 +107,7 @@ export async function GET(request: Request) {
     const baseKey = type ? `${id}_${type}` : id;
     const cacheKey = v ? `${baseKey}_${v}` : baseKey;
 
-    // 1. Check in-memory cache first (0 Firestore reads!)
+    // 1. Check in-memory RAM cache first (0 Firestore reads!)
     if (!nocache) {
       const cached = inMemoryImageCache.get(cacheKey) || inMemoryImageCache.get(baseKey);
       if (cached) {
@@ -71,6 +115,21 @@ export async function GET(request: Request) {
           headers: {
             'Content-Type': cached.mimeType,
             'Content-Length': cached.buffer.length.toString(),
+            'Content-Disposition': `inline; filename="${filename}"`,
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'public, max-age=31536000, immutable',
+          },
+        });
+      }
+
+      // 2. Check disk file cache before hitting Firestore (< 1ms, 0 Firestore reads!)
+      const diskCached = loadImageFromDisk(cacheKey) || loadImageFromDisk(baseKey);
+      if (diskCached) {
+        inMemoryImageCache.set(baseKey, diskCached);
+        return new NextResponse(new Uint8Array(diskCached.buffer), {
+          headers: {
+            'Content-Type': diskCached.mimeType,
+            'Content-Length': diskCached.buffer.length.toString(),
             'Content-Disposition': `inline; filename="${filename}"`,
             'Access-Control-Allow-Origin': '*',
             'Cache-Control': 'public, max-age=31536000, immutable',
@@ -104,8 +163,8 @@ export async function GET(request: Request) {
         imageUrl = doc.data()?.image_url;
       }
     } catch (dbErr: any) {
-      // If Firestore read fails (e.g. Quota Exceeded), check if we have any fallback in memory
-      const cachedFallback = inMemoryImageCache.get(baseKey) || inMemoryImageCache.get(id);
+      // If Firestore read fails (e.g. Quota Exceeded), check if we have any fallback in memory or on disk
+      const cachedFallback = inMemoryImageCache.get(baseKey) || inMemoryImageCache.get(id) || loadImageFromDisk(baseKey) || loadImageFromDisk(id);
       if (cachedFallback) {
         return new NextResponse(new Uint8Array(cachedFallback.buffer), {
           headers: {
@@ -139,6 +198,7 @@ export async function GET(request: Request) {
           }
           inMemoryImageCache.set(cacheKey, { buffer, mimeType: contentType });
           inMemoryImageCache.set(baseKey, { buffer, mimeType: contentType });
+          saveImageToDisk(baseKey, buffer, contentType);
 
           return new NextResponse(new Uint8Array(buffer), {
             headers: {
@@ -170,6 +230,7 @@ export async function GET(request: Request) {
     }
     inMemoryImageCache.set(cacheKey, { buffer, mimeType });
     inMemoryImageCache.set(baseKey, { buffer, mimeType });
+    saveImageToDisk(baseKey, buffer, mimeType);
 
     return new NextResponse(new Uint8Array(buffer), {
       headers: {

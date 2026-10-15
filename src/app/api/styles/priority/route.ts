@@ -1,5 +1,6 @@
 import { db } from '@/lib/firebase-admin';
 import { NextResponse } from 'next/server';
+import { clearStylesCache } from '../list/route';
 
 export async function POST(req: Request) {
   try {
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
       await styleRef.update({ is_priority: false });
     }
 
+    clearStylesCache();
     return NextResponse.json({ success: true, data: { id, is_priority } });
   } catch (error: any) {
     console.error('Error updating style priority:', error);

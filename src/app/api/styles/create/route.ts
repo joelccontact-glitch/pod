@@ -2,6 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { db } from '@/lib/firebase-admin';
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
+import { clearStylesCache } from '../list/route';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
     if (process.env.FIREBASE_PROJECT_ID) {
       const styleRef = db.collection('styles').doc(styleId);
       await styleRef.set(styleData);
+      clearStylesCache();
     }
 
     return NextResponse.json({ success: true, data: styleData });

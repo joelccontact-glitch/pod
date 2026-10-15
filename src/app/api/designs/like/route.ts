@@ -1,5 +1,6 @@
 import { db } from '@/lib/firebase-admin';
 import { NextResponse } from 'next/server';
+import { updateCachedDesign } from '../route';
 
 export async function POST(req: Request) {
   try {
@@ -15,6 +16,7 @@ export async function POST(req: Request) {
 
     const designRef = db.collection('designs').doc(id);
     await designRef.update({ is_liked });
+    updateCachedDesign(id, { is_liked });
 
     return NextResponse.json({ success: true, data: { id, is_liked } });
   } catch (error: any) {

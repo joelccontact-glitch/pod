@@ -93,8 +93,17 @@ const getCachedStickersPool = async (forceRefresh = false): Promise<any[]> => {
   return clientPoolCache?.data || [];
 };
 
+// Client-side cache for gallery page queries (prevents re-fetching when paginating or switching back and forth)
+const galleryPageCache = new Map<string, { data: any; timestamp: number }>();
+const GALLERY_CACHE_TTL_MS = 300000; // 5 minutes client cache
+
+const clearGalleryPageCache = () => {
+  galleryPageCache.clear();
+};
+
 const invalidateClientPoolCache = () => {
   clientPoolCache = null;
+  clearGalleryPageCache();
   if (typeof window !== 'undefined') {
     try {
       sessionStorage.removeItem(SESSION_CACHE_KEY);
@@ -553,6 +562,16 @@ export default function Home() {
   const [dbApiError, setDbApiError] = useState<string | null>(null);
 
   const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [searchInput, setSearchInput] = useState<string>('');
+
+  // Debounce search input by 350ms to prevent hammering Firestore on every keystroke
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchKeyword(searchInput);
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(handler);
+  }, [searchInput]);
 
   // Main Category Tab State ('pod' | 'sticker' | 'all')
   const [selectedCategoryTab, setSelectedCategoryTab] = useState<'pod' | 'sticker' | 'all'>('sticker');
@@ -2196,10 +2215,15 @@ export default function Home() {
     };
   }, [activeTab, selectedDesign, originalEditImage]);
 
+  // Load styles and upcoming seasons ONCE on initial mount (saves redundant Firestore reads)
   useEffect(() => {
-    fetchDesigns(page);
     fetchStyles();
     setActiveSeasonsList(getActiveUpcomingSeasons());
+  }, []);
+
+  // Fetch designs only when page, tab, subtab, or debounced search keyword changes
+  useEffect(() => {
+    fetchDesigns(page);
   }, [page, selectedCategoryTab, selectedStickerSubTab, searchKeyword]);
 
   useEffect(() => {
@@ -3844,15 +3868,41 @@ export default function Home() {
   };
 
   const fetchDesigns = async (currentPage: number = 1, showSpinner: boolean = true, subOverride?: string, searchOverride?: string, forceNoCache: boolean = false) => {
+    const activeSub = subOverride !== undefined ? subOverride : selectedStickerSubTab;
+    const activeSearch = searchOverride !== undefined ? searchOverride : searchKeyword;
+    const onlyCoversParam = selectedCategoryTab === 'sticker' ? '&onlyCovers=true' : '';
+    const cacheKey = `${selectedCategoryTab}_${activeSub}_${activeSearch.trim()}_${currentPage}_${onlyCoversParam}`;
+    const now = Date.now();
+
+    // 1. Check client-side gallery page cache (instant 0ms response, 0 Firestore reads)
+    if (!forceNoCache) {
+      const cached = galleryPageCache.get(cacheKey);
+      if (cached && (now - cached.timestamp < GALLERY_CACHE_TTL_MS)) {
+        const cachedData = cached.data;
+        setDbApiError(null);
+        setDesigns(cachedData.data || []);
+        const newTotalPages = cachedData.totalPages || 1;
+        setTotalPages(newTotalPages);
+        setTotalCount(cachedData.total || 0);
+        if (cachedData.podCount !== undefined) setPodCount(cachedData.podCount);
+        if (cachedData.stickerCount !== undefined) setStickerCount(cachedData.stickerCount);
+        if (cachedData.stickerSubCounts !== undefined) setStickerSubCounts(cachedData.stickerSubCounts);
+        if (currentPage > newTotalPages && newTotalPages > 0) {
+          setPage(newTotalPages);
+        }
+        return;
+      }
+    } else {
+      galleryPageCache.clear();
+    }
+
     if (showSpinner) setLoadingInitial(true);
     try {
-      const activeSub = subOverride !== undefined ? subOverride : selectedStickerSubTab;
-      const activeSearch = searchOverride !== undefined ? searchOverride : searchKeyword;
-      const onlyCoversParam = selectedCategoryTab === 'sticker' ? '&onlyCovers=true' : '';
       const nocacheParam = forceNoCache ? '&nocache=true' : '';
       const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}&subType=${activeSub}&search=${encodeURIComponent(activeSearch.trim())}${onlyCoversParam}${nocacheParam}`);
       const data = await res.json();
       if (data.success) {
+        galleryPageCache.set(cacheKey, { data, timestamp: now });
         setDbApiError(null);
         setDesigns(data.data);
         const newTotalPages = data.totalPages || 1;
@@ -4936,20 +4986,18 @@ export default function Home() {
           <div className="relative w-full sm:w-auto sm:min-w-[240px] max-w-full">
             <input
               type="text"
-              value={searchKeyword}
-              onChange={(e) => {
-                setSearchKeyword(e.target.value);
-                setPage(1);
-              }}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               placeholder="🔍 키워드 검색 (예: 오리, 베타, 햄스터...)"
               className="w-full bg-gray-50 hover:bg-white focus:bg-white border border-gray-200 rounded-xl pl-8 pr-8 py-1.5 sm:py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs transition-colors text-gray-800"
             />
             <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs sm:text-sm pointer-events-none">
               🔍
             </span>
-            {searchKeyword && (
+            {searchInput && (
               <button
                 onClick={() => {
+                  setSearchInput('');
                   setSearchKeyword('');
                   setPage(1);
                 }}

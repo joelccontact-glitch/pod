@@ -390,7 +390,7 @@ export async function GET(request: Request) {
           podCount++;
         }
 
-        const versionTs = data.updated_at ? new Date(data.updated_at).getTime() : (data.created_at ? new Date(data.created_at).getTime() : Date.now());
+        const versionTs = data.updated_at ? new Date(data.updated_at).getTime() : (data.created_at ? new Date(data.created_at).getTime() : 0);
         
         // Exclude heavy raw base64 data string from list response to shrink payload from 10MB to 50KB!
         const { image_url: rawImg, ...restData } = data;

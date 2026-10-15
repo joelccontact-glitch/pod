@@ -1,5 +1,6 @@
 import { db } from '@/lib/firebase-admin';
 import { NextResponse } from 'next/server';
+import { clearStylesCache } from '../list/route';
 
 export async function POST(req: Request) {
   try {
@@ -15,6 +16,7 @@ export async function POST(req: Request) {
 
     const styleRef = db.collection('styles').doc(id);
     await styleRef.delete();
+    clearStylesCache();
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
