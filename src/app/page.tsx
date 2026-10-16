@@ -1380,8 +1380,15 @@ export default function Home() {
         const s = stickersToComposite[i];
         setHangulCompositeProgress({ current: i + 1, total: stickersToComposite.length });
 
-        // Match preset data using preset ID, title, topic, or index
-        const presetData = findHangulPresetData(s.stickerPresetId || s.title || s.topic || (i + 1));
+        // Match preset data using title number, preset ID, keyword, or loop index
+        let presetData = (s.title && s.title.includes('한글')) ? findHangulPresetData(s.title) : null;
+        if (!presetData) {
+          presetData = findHangulPresetData(s.stickerPresetId) 
+            || findHangulPresetData(s.title) 
+            || findHangulPresetData(s.topic) 
+            || findHangulPresetData(s.prompt) 
+            || findHangulPresetData(i + 1, i);
+        }
         if (!presetData) {
           console.warn(`[Hangul Batch] Preset not found for sticker: ${s.title}`);
           continue;
@@ -1432,7 +1439,9 @@ export default function Home() {
   ) => {
     if (!design || !design.image_url) return;
 
-    const presetData = findHangulPresetData(design.stickerPresetId || design.title || design.topic);
+    const presetData = (design.title && design.title.includes('한글'))
+      ? findHangulPresetData(design.title)
+      : (findHangulPresetData(design.stickerPresetId) || findHangulPresetData(design.title) || findHangulPresetData(design.topic));
     const targetPhrase = phrase || presetData?.phrase || '괜찮아';
     const targetSub = sub !== undefined ? sub : (presetData?.sub || "It's Okay");
     const targetColor = color || presetData?.themeColor || '#E11D48';
@@ -3957,7 +3966,7 @@ export default function Home() {
 
           // Auto-composite authentic 100% typo-free Korean Hangul typography & subtitle!
           if (isHangulPack && vesselPreset.id !== 'hangul-20-pack-cover') {
-            const hangulMeta = findHangulPresetData(vesselPreset.id);
+            const hangulMeta = findHangulPresetData(vesselPreset.id) || findHangulPresetData(vesselPreset.name) || findHangulPresetData(i);
             if (hangulMeta) {
               try {
                 stickerImgUrl = await compositeHangulTypography(data.data.image_url, {
@@ -5549,9 +5558,9 @@ export default function Home() {
                           );
                           if (!isHangulItem) return null;
 
-                          const presetData = findHangulPresetData(
-                            currentActiveDesign.stickerPresetId || currentActiveDesign.title || currentActiveDesign.topic
-                          );
+                          const presetData = (currentActiveDesign.title && currentActiveDesign.title.includes('한글'))
+                            ? findHangulPresetData(currentActiveDesign.title)
+                            : (findHangulPresetData(currentActiveDesign.stickerPresetId) || findHangulPresetData(currentActiveDesign.title) || findHangulPresetData(currentActiveDesign.topic));
 
                           return (
                             <div className="mb-4 p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 border-2 border-rose-300 rounded-2xl space-y-2 shadow-xs">
