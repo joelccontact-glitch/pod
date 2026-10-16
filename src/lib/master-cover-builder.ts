@@ -295,12 +295,12 @@ export async function createCompositeMasterCover(
     ribbonColor = '#BE185D';
     ribbonFold = '#500724';
     ribbonOutline = '#300416';
-  } else if (subType === 'dessert' || optTitle.includes('dessert') || optTitle.includes('디저트') || optTitle.includes('베이커리')) {
-    seriesTitle = 'SWEET DESSERT CAFE';
-    titleColor = '#C2410C';
-    ribbonColor = '#EA580C';
-    ribbonFold = '#7C2D12';
-    ribbonOutline = '#431407';
+  } else if (subType === 'dessert' || optTitle.includes('dessert') || optTitle.includes('디저트') || optTitle.includes('베이커리') || optTitle.includes('cafe') || optTitle.includes('카페')) {
+    seriesTitle = 'SWEET DESSERT & CAFÉ';
+    titleColor = '#BE185D'; // Sweet bold candy pink matching Etsy bestseller cover
+    ribbonColor = '#0D9488'; // Vibrant teal ribbon banner
+    ribbonFold = '#115E59';
+    ribbonOutline = '#042F2E';
   } else if (subType === 'socialbattery' || optTitle.includes('socialbattery') || optTitle.includes('배터리') || optTitle.includes('내향인')) {
     seriesTitle = 'INTROVERT & BATTERY';
     titleColor = '#6D28D9';
@@ -341,52 +341,94 @@ export async function createCompositeMasterCover(
     }
   }
 
-  // 24 BALANCED ANCHOR SLOTS DESIGNED TO ELIMINATE SPARSE VOIDS (Matches Etsy Bestseller Density)
-  // 1) Yellow Zone 1 (Above "[COUNT]+ CUTE"): Slots 5, 6, 7, 8, 9 fill the upper space seamlessly
-  //    - Slot 7 (x: 1500, y: 620) directly fills the center gap right above "40+ CUTE"
-  // 2) Yellow Zone 2 (Below Ribbon Banner): Slots 16, 17, 18 fill the lower space seamlessly
-  //    - Slot 17 (x: 1500, y: 2080) directly fills the center gap right under the ribbon banner
-  const ANCHOR_SLOTS = [
-    // --- 1. TOP PERIMETER ROW (5 slots) ---
-    { x: 380,  y: 340,  tilt: -11, scale: 0.88, isJar: true },
-    { x: 920,  y: 280,  tilt: 6,   scale: 0.84, isJar: false },
-    { x: 1500, y: 240,  tilt: -2,  scale: 0.88, isJar: true },
-    { x: 2080, y: 280,  tilt: 7,   scale: 0.84, isJar: false },
-    { x: 2620, y: 340,  tilt: -10, scale: 0.88, isJar: true },
+  // --- 20 DEDICATED SLOTS FOR ZERO-DUPLICATE 20-PACKS ---
+  // Guaranteed 1:1 mapping: Exactly 20 unique slots for 20 unique stickers.
+  // Center Zone (x: 600~2400, y: 920~1860) remains completely clear for title and ribbon.
+  // Spacing is balanced so die-cut stickers do not overlap each other.
+  const SLOTS_20 = [
+    // 1. TOP PERIMETER ROW (5 items)
+    { x: 380,  y: 350,  tilt: -10, scale: 0.84 },
+    { x: 920,  y: 280,  tilt: 6,   scale: 0.82 },
+    { x: 1500, y: 240,  tilt: -2,  scale: 0.84 },
+    { x: 2080, y: 280,  tilt: 7,   scale: 0.82 },
+    { x: 2620, y: 350,  tilt: -10, scale: 0.84 },
 
-    // --- 2. UPPER FILLER ARC - YELLOW ZONE 1 (5 slots directly above "40+ CUTE") ---
-    { x: 600,  y: 760,  tilt: -8,  scale: 0.82, isJar: false },
-    { x: 1080, y: 680,  tilt: 6,   scale: 0.82, isJar: false },
-    { x: 1500, y: 620,  tilt: -3,  scale: 0.84, isJar: false }, // ★ Fills yellow zone 1 directly above "40+ CUTE"
-    { x: 1920, y: 680,  tilt: -6,  scale: 0.82, isJar: false },
-    { x: 2400, y: 760,  tilt: 8,   scale: 0.82, isJar: false },
+    // 2. UPPER FILLER ARC (3 items - above "[COUNT]+ CUTE" title)
+    { x: 780,  y: 680,  tilt: -6,  scale: 0.80 },
+    { x: 1500, y: 620,  tilt: 2,   scale: 0.82 },
+    { x: 2220, y: 680,  tilt: 6,   scale: 0.80 },
 
-    // --- 3. LEFT FLANK (3 slots along outer left wall) ---
-    { x: 300,  y: 980,  tilt: 10,  scale: 0.88, isJar: true },
-    { x: 260,  y: 1520, tilt: -7,  scale: 0.88, isJar: true },
-    { x: 320,  y: 2060, tilt: 8,   scale: 0.88, isJar: true },
+    // 3. LEFT FLANK (2 items - along outer left wall)
+    { x: 320,  y: 1100, tilt: 8,   scale: 0.82 },
+    { x: 320,  y: 1880, tilt: -7,  scale: 0.82 },
 
-    // --- 4. RIGHT FLANK (3 slots along outer right wall) ---
-    { x: 2700, y: 980,  tilt: -9,  scale: 0.88, isJar: true },
-    { x: 2740, y: 1520, tilt: 7,   scale: 0.88, isJar: true },
-    { x: 2680, y: 2060, tilt: -10, scale: 0.88, isJar: true },
+    // 4. RIGHT FLANK (2 items - along outer right wall)
+    { x: 2680, y: 1100, tilt: -8,  scale: 0.82 },
+    { x: 2680, y: 1880, tilt: 7,   scale: 0.82 },
 
-    // --- 5. LOWER FILLER ROW - YELLOW ZONE 2 (3 slots directly under Ribbon Banner) ---
-    { x: 960,  y: 2100, tilt: -6,  scale: 0.84, isJar: false },
-    { x: 1500, y: 2080, tilt: 4,   scale: 0.86, isJar: false }, // ★ Fills yellow zone 2 directly under Ribbon Banner
-    { x: 2040, y: 2100, tilt: 6,   scale: 0.84, isJar: false },
+    // 5. LOWER FILLER ROW (3 items - below ribbon banner)
+    { x: 780,  y: 2140, tilt: -5,  scale: 0.80 },
+    { x: 1500, y: 2160, tilt: 3,   scale: 0.82 },
+    { x: 2220, y: 2140, tilt: 6,   scale: 0.80 },
 
-    // --- 6. BOTTOM PERIMETER ROW (5 slots) ---
-    { x: 520,  y: 2600, tilt: -8,  scale: 0.86, isJar: true },
-    { x: 1000, y: 2680, tilt: 5,   scale: 0.84, isJar: false },
-    { x: 1500, y: 2720, tilt: -3,  scale: 0.88, isJar: true },
-    { x: 2000, y: 2680, tilt: 6,   scale: 0.84, isJar: false },
-    { x: 2480, y: 2600, tilt: -8,  scale: 0.86, isJar: true },
+    // 6. BOTTOM PERIMETER ROW (5 items)
+    { x: 380,  y: 2620, tilt: -8,  scale: 0.84 },
+    { x: 920,  y: 2680, tilt: 5,   scale: 0.82 },
+    { x: 1500, y: 2720, tilt: -2,  scale: 0.84 },
+    { x: 2080, y: 2680, tilt: 6,   scale: 0.82 },
+    { x: 2620, y: 2620, tilt: -8,  scale: 0.84 },
   ];
 
-  // Intelligently distribute jars and standalone elements across the 24 slots
+  // 24 BALANCED ANCHOR SLOTS FOR LARGE 40-PACKS (OR JARS + STANDALONES)
+  const ANCHOR_SLOTS_LARGE = [
+    // --- 1. TOP PERIMETER ROW (5 slots) ---
+    { x: 380,  y: 340,  tilt: -11, scale: 0.86, isJar: true },
+    { x: 920,  y: 280,  tilt: 6,   scale: 0.82, isJar: false },
+    { x: 1500, y: 240,  tilt: -2,  scale: 0.86, isJar: true },
+    { x: 2080, y: 280,  tilt: 7,   scale: 0.82, isJar: false },
+    { x: 2620, y: 340,  tilt: -10, scale: 0.86, isJar: true },
+
+    // --- 2. UPPER FILLER ARC (5 slots directly above "40+ CUTE") ---
+    { x: 600,  y: 720,  tilt: -8,  scale: 0.80, isJar: false },
+    { x: 1080, y: 640,  tilt: 6,   scale: 0.80, isJar: false },
+    { x: 1500, y: 580,  tilt: -3,  scale: 0.82, isJar: false },
+    { x: 1920, y: 640,  tilt: -6,  scale: 0.80, isJar: false },
+    { x: 2400, y: 720,  tilt: 8,   scale: 0.80, isJar: false },
+
+    // --- 3. LEFT FLANK (3 slots along outer left wall) ---
+    { x: 300,  y: 980,  tilt: 10,  scale: 0.84, isJar: true },
+    { x: 260,  y: 1520, tilt: -7,  scale: 0.84, isJar: true },
+    { x: 320,  y: 2060, tilt: 8,   scale: 0.84, isJar: true },
+
+    // --- 4. RIGHT FLANK (3 slots along outer right wall) ---
+    { x: 2700, y: 980,  tilt: -9,  scale: 0.84, isJar: true },
+    { x: 2740, y: 1520, tilt: 7,   scale: 0.84, isJar: true },
+    { x: 2680, y: 2060, tilt: -10, scale: 0.84, isJar: true },
+
+    // --- 5. LOWER FILLER ROW (3 slots directly under Ribbon Banner) ---
+    { x: 960,  y: 2140, tilt: -6,  scale: 0.82, isJar: false },
+    { x: 1500, y: 2160, tilt: 4,   scale: 0.84, isJar: false },
+    { x: 2040, y: 2140, tilt: 6,   scale: 0.82, isJar: false },
+
+    // --- 6. BOTTOM PERIMETER ROW (5 slots) ---
+    { x: 520,  y: 2600, tilt: -8,  scale: 0.84, isJar: true },
+    { x: 1000, y: 2680, tilt: 5,   scale: 0.82, isJar: false },
+    { x: 1500, y: 2720, tilt: -3,  scale: 0.86, isJar: true },
+    { x: 2000, y: 2680, tilt: 6,   scale: 0.82, isJar: false },
+    { x: 2480, y: 2600, tilt: -8,  scale: 0.84, isJar: true },
+  ];
+
+  // Pick slot configuration and map real stickers
+  const isExact20 = stickers.length <= 20;
+  const activeSlots = isExact20 ? SLOTS_20 : ANCHOR_SLOTS_LARGE;
   const realStickersToRender: any[] = [];
-  if (stickers.length >= 28) {
+
+  if (isExact20) {
+    // 100% 1:1 mapping for 20-packs: ZERO duplication, exact 20 unique stickers
+    for (let i = 0; i < activeSlots.length && i < stickers.length; i++) {
+      realStickersToRender.push(stickers[i]);
+    }
+  } else if (stickers.length >= 28) {
     const half = Math.floor(stickers.length / 2);
     const jars = stickers.slice(0, half);
     const standalones = stickers.slice(half);
@@ -394,8 +436,8 @@ export async function createCompositeMasterCover(
     let jIdx = 0;
     let sIdx = 0;
 
-    for (let i = 0; i < ANCHOR_SLOTS.length; i++) {
-      const slot = ANCHOR_SLOTS[i];
+    for (let i = 0; i < activeSlots.length; i++) {
+      const slot = activeSlots[i] as any;
       if (slot.isJar) {
         realStickersToRender.push(jars[jIdx % jars.length]);
         jIdx++;
@@ -405,7 +447,7 @@ export async function createCompositeMasterCover(
       }
     }
   } else if (stickers.length > 0) {
-    for (let i = 0; i < ANCHOR_SLOTS.length; i++) {
+    for (let i = 0; i < activeSlots.length; i++) {
       realStickersToRender.push(stickers[i % stickers.length]);
     }
   }
@@ -448,7 +490,7 @@ export async function createCompositeMasterCover(
       const loadedImages = await Promise.all(loadPromises);
 
       // 4. Render Main Stickers with Die-Cut Shadows
-      const baseMaxDim = 780; // 780px base size creates cozy, rich coverage without encroaching center
+      const baseMaxDim = isExact20 ? 700 : 760; // 700px for 20-packs guarantees zero overlap & clean borders
 
       for (let i = 0; i < loadedImages.length; i++) {
         const img = loadedImages[i];
@@ -457,7 +499,7 @@ export async function createCompositeMasterCover(
         // Transparent PNG background removal (종이 사각 틀 제거)
         const transparentStickerCanvas = makeBackgroundTransparent(img);
 
-        const slot = ANCHOR_SLOTS[i % ANCHOR_SLOTS.length];
+        const slot = activeSlots[i % activeSlots.length];
         const targetDim = baseMaxDim * slot.scale;
 
         const aspect = img.width / img.height;

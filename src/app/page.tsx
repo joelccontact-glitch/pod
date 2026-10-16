@@ -6841,22 +6841,22 @@ export default function Home() {
                     <span>스티커 목록 ({packStickers.length}종)</span>
                   </button>
 
-                  {/* 부가 도구: 표지 AI 재생성, 표지 편집 및 삭제 */}
+                  {/* 부가 도구: 실제 20종 스티커 100% 일치 실물 마스터 표지 합성, 표지 편집 및 삭제 */}
                   <button
-                    onClick={() => handleRegenerateMasterCover(selectedPackCover, packStickers.length)}
-                    disabled={isRegeneratingCover || isExportingBundle}
-                    className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer disabled:cursor-wait"
-                    title="현재 스티커 개수 및 최신 스타일에 맞춰 마스터 표지를 AI로 다시 생성합니다."
+                    onClick={() => handleGenerateRealCompositeCover(selectedPackCover, packStickers)}
+                    disabled={isBuildingComposite || isExportingBundle}
+                    className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer disabled:cursor-wait"
+                    title="현재 팩에 생성되어 있는 실제 스티커 20종 이미지를 100% 그대로 배치하여 고객에게 거짓 없는 정직한 실물 일치 마스터 표지를 자동 합성합니다."
                   >
-                    {isRegeneratingCover ? (
+                    {isBuildingComposite ? (
                       <>
                         <span className="animate-spin inline-block">⏳</span>
-                        <span>표지 AI 재생성 중...</span>
+                        <span>실물 표지 합성 중...</span>
                       </>
                     ) : (
                       <>
                         <span>✨</span>
-                        <span>표지 AI 재생성</span>
+                        <span>실제 스티커로 표지 합성</span>
                       </>
                     )}
                   </button>
