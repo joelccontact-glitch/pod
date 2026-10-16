@@ -207,6 +207,12 @@ export const VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 5. STRICT BIOLOGICAL SURVIVAL & OPEN-AIR RULE FOR VIVARIUM: This is a DRY OR PALUDARIUM TERRESTRIAL LAND VIVARIUM (NOT an underwater fish tank). Air-breathing amphibians and reptiles (frogs, chameleons, geckos, salamanders) MUST be sitting/perched on land, moss, driftwood, or leaves in OPEN AIR ABOVE the water level. Absolutely NEVER submerge air-breathing animals underwater. Water level must be 0% or low bottom stream level (max 10-15%).
 6. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
 
+export const HANGUL_STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
+1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
+2. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
+3. STRICT NO TEXT RULE: Absolutely NO text, NO letters, NO words, NO typography, NO Hangul syllables, NO Korean characters, NO English words, NO signatures, NO labels anywhere in the image. Pure graphic cute character illustration art ONLY. All typography is composited via high-res vector typography in post-processing.
+4. Vector sticker aesthetic, high contrast, vibrant cute kawaii Korean aesthetic style.`;
+
 export const TERRARIUM_SERIES: StickerPreset[] = [
   // --- 1. VIVARIUM SERIES (Reptiles, Amphibians & Ecosystem Tanks) ---
   {
@@ -1180,8 +1186,8 @@ export const HANGUL_20_SERIES: StickerPreset[] = [
     prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF).
 CENTERED TITLE (MUST REMAIN CLEAR & UNOBSTRUCTED): Centered cute bold colorful script typography reading "20+ CUTE KOREAN HANGUL & BABY ANIMAL STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish pastel ribbon banner. CRITICAL: The central title and banner MUST remain completely unobstructed, open, and clearly legible with an ample margin around it—NO stickers encroaching, touching, or overlapping the text.
 STICKER ARRANGEMENT (DENSE YET NEATLY SEPARATED): A richly packed collage of 18-20 unique standalone die-cut sticker samples filling the perimeter of the canvas around the center title with minimal empty white gaps. CRITICAL NO OVERLAPPING: Individual stickers MUST NOT overlap, collide, or clip one another. Each sticker is completely isolated and neatly placed side-by-side with its own distinct thick crisp white die-cut border. STRICT NO DUPLICATES: Every single sticker is 100% unique in animal character, Hangul typography phrase, and pose with zero repetition.
-FEATURED UNIQUE STICKERS: Gwenchana (괜찮아) heart bunny, Daebak (대박) confetti red panda, Bling Bling (블링블링) sparkle kitten, Bungeoppang (붕어빵) snack bear, Fighting (화이팅) cheerleader hamster, Sim-kung (심쿵) heart arrow puppy, Haengbok (행복) clover otter, Kyeopta (귀엽다) cheek-poke piglet, Jal-jayo (잘자요) sleeping sloth on moon, Mukbang (먹방) tteokbokki duckling, Heung-haera (흥해라) party frog, Saranghae (사랑해) finger-heart fawn, Todak-todak (토닥토닥) hugging penguins, O-woon-wan (오운완) gym hedgehog, K-snack honey butter chip seal, Yakgwa cookie fox, Dalgona candy hippo, Banana milk cat, Chimaek fried chicken bear, and K-pop lightstick panda.
-STRICT NO GLASS TANKS: Pure standalone adorable Korean Hangul calligraphy stickers with cute baby animals and English subtitles ONLY. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+FEATURED UNIQUE STICKERS: Gwenchana (괜찮아) healing bunny with heart, Daebak (대박) confetti red panda, Sparkle Bling (반짝반짝) star kitten, Bungeoppang (붕어빵 냠냠) snack bear, Fighting (파이팅) cheerleader hamster, Saranghae (사랑해) plush heart otter, Kkul-kkul (쿨쿨) sleeping cloud sloth, Kongdak (콩닥콩닥) blushing fawn, Bbojjak (뽀짝) golden puppy with pink pawprints, Aigo (아이고) sighing pygmy hippo, Haengbok (행복해) clover piglet, Bungeoppang Hat (붕어빵 모자) penguin chick, Sim-kung (심쿵) heart-clutching chipmunk, Meong (멍~) spaced-out duckling, Healing (힐링) hot-spring hedgehog, Chaltteok (찰떡궁합) tteokbokki and tempura duo, Todak-todak (토닥토닥) comforting black bear, Kkuljam (꿀잠) sleep mask fox, Eussya-eussya (으쌰으쌰) workout red panda, and Choego-ya (최고야) thumbs-up puppy.
+STRICT NO GLASS TANKS: Pure standalone adorable Korean Hangul aesthetic stickers with cute baby animals ONLY. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
   },
   ...Array.from({ length: 20 }, (_, i) => {
     const num = i + 1;
@@ -1197,7 +1203,7 @@ STRICT NO GLASS TANKS: Pure standalone adorable Korean Hangul calligraphy sticke
         name: '대박 환호 레서판다',
         desc: '별가루를 뿌리며 환호하는 아기 레서판다 스티커',
         phrase: '대박',
-        sub: 'Daebak (Awesome!)',
+        sub: 'Daebak!',
         detail: 'excited cute baby red panda with sparkling big happy eyes, raising its paws and throwing colorful star confetti into the air'
       },
       {
@@ -1230,10 +1236,10 @@ STRICT NO GLASS TANKS: Pure standalone adorable Korean Hangul calligraphy sticke
       },
       {
         name: '쿨쿨 낮잠 나무늘보',
-        desc: '폭신한 구름 베개 위에서 침 흘리며 자는 나무늘보 스티커',
+        desc: '폭신한 구름 베개 위에서 평화롭게 자는 나무늘보 스티커',
         phrase: '쿨쿨',
         sub: 'Sleepy Zzz',
-        detail: 'sweet baby sloth sleeping deeply on a fluffy cloud pillow with floating "Zzz" bubble letters'
+        detail: 'sweet baby sloth sleeping deeply on a fluffy cloud pillow with peaceful resting expression and floating tiny golden sleep sparkles'
       },
       {
         name: '콩닥콩닥 수줍은 사슴',
@@ -1247,7 +1253,7 @@ STRICT NO GLASS TANKS: Pure standalone adorable Korean Hangul calligraphy sticke
         desc: '아장아장 걸어오는 아기 골든리트리버와 분홍 젤리 발자국',
         phrase: '뽀짝',
         sub: 'Tiny Steps',
-        detail: 'tiny golden retriever puppy waddling forward cheerfully, leaving a trail of pink paw print stamps behind'
+        detail: 'tiny golden retriever puppy waddling forward cheerfully, leaving a trail of cute pink paw print stamps behind'
       },
       {
         name: '아이고 머리짚는 피그미하마',
@@ -1279,10 +1285,10 @@ STRICT NO GLASS TANKS: Pure standalone adorable Korean Hangul calligraphy sticke
       },
       {
         name: '멍~ 멍때리는 아기 오리',
-        desc: '머리 위에 물음표를 띄우고 멍때리는 오리 스티커',
+        desc: '눈을 끔벅이며 멍때리는 귀여운 오리 스티커',
         phrase: '멍~',
         sub: 'Spaced Out',
-        detail: 'fluffy baby yellow duckling staring blankly into space with a translucent thought bubble with floating dots "..."'
+        detail: 'fluffy baby yellow duckling staring blankly into space with round curious kawaii eyes'
       },
       {
         name: '힐링 온천 목욕 고슴도치',
@@ -1337,7 +1343,7 @@ STRICT NO GLASS TANKS: Pure standalone adorable Korean Hangul calligraphy sticke
       theme: 'Korean Hangul 20 Pack',
       phrase: `${items.phrase} (${items.sub})`,
       description: items.desc,
-      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Bold cute rounded Korean Hangul typography text reads "${items.phrase}" with small cute English subtitle "${items.sub}". ${STICKER_RULES_PROMPT_SUFFIX}`
+      prompt: `A cute die-cut sticker design featuring an adorable standalone Korean aesthetic character: ${items.detail}. Pure cute character illustration with a thick crisp white die-cut border. STRICT NO TEXT RULE: Absolutely NO text, NO Hangul syllables, NO letters, NO words anywhere in the image. Pure graphic illustration art only. ${HANGUL_STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
     };
   }) as unknown as StickerPreset[]
 ];

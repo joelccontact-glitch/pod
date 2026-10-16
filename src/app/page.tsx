@@ -41,6 +41,7 @@ import { extractStandaloneStickerFromTank } from '@/lib/standalone-extractor';
 import { createVesselStickerFromStandalone } from '@/lib/vessel-housing-builder';
 import { generateEtsySeo } from '@/lib/etsy-seo-generator';
 import { generateAllLifestyleMockups, LifestyleMockupResult } from '@/lib/lifestyle-mockup-builder';
+import { HANGUL_20_DATA, findHangulPresetData, compositeHangulTypography } from '@/lib/hangul-composer';
 
 // Client-side cache for high-frequency design pool queries to eliminate redundant Firestore reads (99%+ reduction)
 let clientPoolCache: { data: any[]; timestamp: number } | null = null;
@@ -1352,6 +1353,126 @@ export default function Home() {
       alert('마스터 표지 재생성 중 오류가 발생했습니다: ' + (e.message || String(e)));
     } finally {
       setIsRegeneratingCover(false);
+    }
+  };
+
+  const [isCompositingHangul, setIsCompositingHangul] = useState(false);
+  const [hangulCompositeProgress, setHangulCompositeProgress] = useState({ current: 0, total: 0 });
+  const [isApplyingHangulSingle, setIsApplyingHangulSingle] = useState(false);
+
+  const handleBatchCompositeHangul = async (stickersToComposite: any[]) => {
+    if (!stickersToComposite || stickersToComposite.length === 0) {
+      alert('합성할 스티커가 없습니다.');
+      return;
+    }
+
+    const confirmed = confirm(
+      `한글 스티커 ${stickersToComposite.length}종 전체에 100% 오타 없는 정밀 한글 타이포(Google Jua 폰트) 및 영문 자막, 다이컷 테두리를 일괄 합성하시겠습니까?\n\nAI가 잘못 그린 글자(뵤작 등)나 텍스트 없는 원본 그림 위에 깨끗한 벡터 한글(뽀짝, 괜찮아, 대박 등)이 선명하게 합성되어 저장됩니다.`
+    );
+    if (!confirmed) return;
+
+    setIsCompositingHangul(true);
+    setHangulCompositeProgress({ current: 0, total: stickersToComposite.length });
+    let successCount = 0;
+
+    try {
+      for (let i = 0; i < stickersToComposite.length; i++) {
+        const s = stickersToComposite[i];
+        setHangulCompositeProgress({ current: i + 1, total: stickersToComposite.length });
+
+        // Match preset data using preset ID, title, topic, or index
+        const presetData = findHangulPresetData(s.stickerPresetId || s.title || s.topic || (i + 1));
+        if (!presetData) {
+          console.warn(`[Hangul Batch] Preset not found for sticker: ${s.title}`);
+          continue;
+        }
+
+        try {
+          const compositedDataUrl = await compositeHangulTypography(s.image_url, {
+            hangulText: presetData.phrase,
+            englishSub: presetData.sub,
+            themeColor: presetData.themeColor,
+            position: 'bottom-center'
+          });
+
+          const compressedUrl = await compressImageForFirestore(compositedDataUrl, 800000);
+
+          await fetch('/api/designs/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: s.id,
+              image_url: compressedUrl
+            })
+          });
+
+          s.image_url = compressedUrl;
+          successCount++;
+        } catch (itemErr) {
+          console.error(`Failed to composite Hangul for ${s.title}:`, itemErr);
+        }
+      }
+
+      invalidateClientPoolCache();
+      alert(`✨ 한글 스티커 ${successCount}종에 100% 오타 없는 정밀 한글 타이포(Jua 폰트) 및 다이컷 테두리 합성이 완료되었습니다!`);
+      await fetchDesigns(page, false);
+    } catch (err: any) {
+      alert('한글 타이포 일괄 합성 중 오류: ' + (err.message || String(err)));
+    } finally {
+      setIsCompositingHangul(false);
+    }
+  };
+
+  const handleApplyHangulTypography = async (
+    design: any,
+    phrase?: string,
+    sub?: string,
+    pos?: 'bottom-center' | 'bottom-right' | 'bottom-left' | 'top-center',
+    color?: string
+  ) => {
+    if (!design || !design.image_url) return;
+
+    const presetData = findHangulPresetData(design.stickerPresetId || design.title || design.topic);
+    const targetPhrase = phrase || presetData?.phrase || '괜찮아';
+    const targetSub = sub !== undefined ? sub : (presetData?.sub || "It's Okay");
+    const targetColor = color || presetData?.themeColor || '#E11D48';
+    const targetPos = pos || 'bottom-center';
+
+    setIsApplyingHangulSingle(true);
+    try {
+      const compositedUrl = await compositeHangulTypography(design.image_url, {
+        hangulText: targetPhrase,
+        englishSub: targetSub,
+        themeColor: targetColor,
+        position: targetPos
+      });
+
+      const compressed = await compressImageForFirestore(compositedUrl, 800000);
+
+      await fetch('/api/designs/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: design.id,
+          image_url: compressed
+        })
+      });
+
+      if (selectedDesign && selectedDesign.id === design.id) {
+        setSelectedDesign({ ...selectedDesign, image_url: compressed });
+      }
+      if (previewDesign && previewDesign.id === design.id) {
+        setPreviewDesign({ ...previewDesign, image_url: compressed });
+      }
+      setDesigns(prev => prev.map(d => d.id === design.id ? { ...d, image_url: compressed } : d));
+      invalidateClientPoolCache();
+
+      alert(`✨ '${targetPhrase}' 한글 타이포그래피 정밀 합성이 완료되었습니다!`);
+    } catch (err: any) {
+      console.error('Hangul typography application failed:', err);
+      alert('한글 타이포 합성 중 오류가 발생했습니다: ' + (err.message || String(err)));
+    } finally {
+      setIsApplyingHangulSingle(false);
     }
   };
 
@@ -3816,18 +3937,42 @@ export default function Home() {
       const vesselPreset = targetPresets[i];
       const standalonePreset = targetStandalonePresets[i] || targetPresets[i];
 
-      // 1. Generate Glorious Original AI Vessel/Tank Sticker
+      // 1. Generate Glorious Original AI Vessel/Tank Sticker or Hangul Sticker
+      const isHangulPack = subKey === 'hangul' || vesselPreset.id.startsWith('hangul-20-pack-');
+      const stageLabel = isHangulPack 
+        ? `${vesselPreset.name} (순수 캐릭터 AI 생성 및 한글 타이포 합성)` 
+        : `${vesselPreset.name} (화려한 어항 본품 AI 생성)`;
+
       setBatchProgress({
         current: isBothMode ? (i - 1) * 2 + 2 : i + 1,
         total: totalExpectedCount,
-        label: `${vesselPreset.name} (화려한 어항 본품 AI 생성)`,
+        label: stageLabel,
         packTitle: packName
       });
 
       try {
         const data = await generateWithRetry(vesselPreset.prompt, vesselPreset.name, 3);
         if (data && data.success && data.data?.image_url) {
-          const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
+          let stickerImgUrl = data.data.image_url;
+
+          // Auto-composite authentic 100% typo-free Korean Hangul typography & subtitle!
+          if (isHangulPack && vesselPreset.id !== 'hangul-20-pack-cover') {
+            const hangulMeta = findHangulPresetData(vesselPreset.id);
+            if (hangulMeta) {
+              try {
+                stickerImgUrl = await compositeHangulTypography(data.data.image_url, {
+                  hangulText: hangulMeta.phrase,
+                  englishSub: hangulMeta.sub,
+                  themeColor: hangulMeta.themeColor,
+                  position: 'bottom-center'
+                });
+              } catch (compErr) {
+                console.warn('[Auto Hangul Batch Error]:', compErr);
+              }
+            }
+          }
+
+          const compressedUrl = await compressImageForFirestore(stickerImgUrl, 800000);
           await fetch('/api/designs/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -3848,7 +3993,7 @@ export default function Home() {
           successCount++;
         }
       } catch (e) {
-        console.error(`Failed to generate vessel sticker for ${vesselPreset.name}:`, e);
+        console.error(`Failed to generate sticker for ${vesselPreset.name}:`, e);
       }
 
       // 2. If in both mode, generate clean standalone theme sticker (Zero crops, pure full-body single sticker!)
@@ -4132,7 +4277,24 @@ export default function Home() {
       });
       const data = await res.json();
       if (data.success) {
-        setUploadPreviewDesign(data.data);
+        let previewData = data.data;
+        if (selectedStickerPresetId && selectedStickerPresetId.startsWith('hangul-20-pack-') && selectedStickerPresetId !== 'hangul-20-pack-cover') {
+          const hangulMeta = findHangulPresetData(selectedStickerPresetId);
+          if (hangulMeta && previewData?.image_url) {
+            try {
+              const compUrl = await compositeHangulTypography(previewData.image_url, {
+                hangulText: hangulMeta.phrase,
+                englishSub: hangulMeta.sub,
+                themeColor: hangulMeta.themeColor,
+                position: 'bottom-center'
+              });
+              previewData = { ...previewData, image_url: compUrl };
+            } catch (compErr) {
+              console.warn('[Auto Hangul Single Error]:', compErr);
+            }
+          }
+        }
+        setUploadPreviewDesign(previewData);
       } else {
         alert('생성 실패: ' + data.error);
       }
@@ -5374,6 +5536,59 @@ export default function Home() {
                         )}
 
                         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">{currentActiveDesign?.title}</h2>
+
+                        {/* 🇰🇷 K-감성 한글 정밀 타이포 합성 배너 */}
+                        {(() => {
+                          if (!currentActiveDesign || isCoverDesign(currentActiveDesign)) return null;
+                          const isHangulItem = (
+                            currentActiveDesign.stickerPresetId?.startsWith('hangul-20-pack-') ||
+                            currentActiveDesign.sticker_sub === 'hangul' ||
+                            currentActiveDesign.title?.includes('한글') ||
+                            currentActiveDesign.title?.includes('K-감성') ||
+                            currentActiveDesign.topic?.includes('한글')
+                          );
+                          if (!isHangulItem) return null;
+
+                          const presetData = findHangulPresetData(
+                            currentActiveDesign.stickerPresetId || currentActiveDesign.title || currentActiveDesign.topic
+                          );
+
+                          return (
+                            <div className="mb-4 p-3.5 bg-gradient-to-r from-rose-50 to-pink-50 border-2 border-rose-300 rounded-2xl space-y-2 shadow-xs">
+                              <div className="flex items-center justify-between gap-2 flex-wrap">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-base">🇰🇷</span>
+                                  <span className="text-xs font-black text-rose-950 uppercase tracking-wider">K-한글 정밀 타이포 합성</span>
+                                  <span className="text-[10px] bg-rose-200 text-rose-900 font-extrabold px-2 py-0.5 rounded-full border border-rose-300">
+                                    {presetData?.phrase || '한글'} ({presetData?.sub || 'English'})
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => handleApplyHangulTypography(currentActiveDesign, presetData?.phrase, presetData?.sub, 'bottom-center', presetData?.themeColor)}
+                                  disabled={isApplyingHangulSingle}
+                                  className="text-xs bg-rose-600 hover:bg-rose-700 disabled:bg-gray-400 text-white font-bold px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 shadow-xs cursor-pointer disabled:cursor-wait"
+                                  title="AI가 잘못 그린 글자(뵤작 등)나 텍스트 없는 원본 그림 위에 오타 없는 벡터 한글(뽀짝, 괜찮아 등)과 영문 자막, 다이컷 테두리를 정밀 합성합니다."
+                                >
+                                  {isApplyingHangulSingle ? (
+                                    <>
+                                      <span className="animate-spin inline-block">⏳</span>
+                                      <span>타이포 합성 중...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span>✨</span>
+                                      <span>1클릭 타이포 즉시 합성</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                              <p className="text-[11px] text-rose-900/90 leading-relaxed font-medium">
+                                AI가 잘못 그린 글자(예: <strong>뵤작</strong>)나 텍스트 없는 캐릭터 그림 위에 <strong>Google Jua 폰트</strong>와 영문 서브타이틀, 두꺼운 흰색 다이컷 테두리를 <strong>오타 0%</strong>로 정밀 합성합니다.
+                              </p>
+                            </div>
+                          );
+                        })()}
                         
                         {/* 📝 Etsy 영문 SEO Title (140자 최적화) 배너 */}
                         {etsySeo && (
@@ -6841,10 +7056,32 @@ export default function Home() {
                     <span>스티커 목록 ({packStickers.length}종)</span>
                   </button>
 
+                  {/* 한글 팩 전용: 100% 오타 없는 정밀 한글 타이포 20종 일괄 합성 버튼 */}
+                  {selectedPackCover && getDesignCategoryKey(selectedPackCover) === 'hangul' && (
+                    <button
+                      onClick={() => handleBatchCompositeHangul(packStickers)}
+                      disabled={isCompositingHangul || isBuildingComposite || isExportingBundle}
+                      className="bg-rose-600 hover:bg-rose-700 disabled:bg-gray-400 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer disabled:cursor-wait"
+                      title="AI가 잘못 그린 글자(예: 뵤작)나 글자가 없는 원본 스티커 위에 Google Jua 폰트 정밀 한글 타이포와 영문 자막, 다이컷 테두리를 일괄 합성합니다."
+                    >
+                      {isCompositingHangul ? (
+                        <>
+                          <span className="animate-spin inline-block">⏳</span>
+                          <span>타이포 합성 중 ({hangulCompositeProgress.current}/{hangulCompositeProgress.total})...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>🇰🇷</span>
+                          <span>한글 20종 타이포 일괄 합성</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+
                   {/* 부가 도구: 실제 20종 스티커 100% 일치 실물 마스터 표지 합성, 표지 편집 및 삭제 */}
                   <button
                     onClick={() => handleGenerateRealCompositeCover(selectedPackCover, packStickers)}
-                    disabled={isBuildingComposite || isExportingBundle}
+                    disabled={isBuildingComposite || isExportingBundle || isCompositingHangul}
                     className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-bold text-xs sm:text-sm py-2 px-3 rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer disabled:cursor-wait"
                     title="현재 팩에 생성되어 있는 실제 스티커 20종 이미지를 100% 그대로 배치하여 고객에게 거짓 없는 정직한 실물 일치 마스터 표지를 자동 합성합니다."
                   >
