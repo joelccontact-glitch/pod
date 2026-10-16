@@ -114,7 +114,7 @@ export const HANGUL_20_DATA: HangulItemMetadata[] = [
     id: 'hangul-20-pack-10',
     name: '아이고 머리짚는 피그미하마',
     phrase: '아이고',
-    sub: 'Aigo!',
+    sub: 'Aigoo! (Oh Dear!)',
     themeColor: '#7C3AED', // Expressive deep purple
     secondaryColor: '#F5F3FF',
     description: '손으로 이마를 짚으며 억울해하는 피그미하마'

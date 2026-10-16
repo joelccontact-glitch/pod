@@ -1186,7 +1186,7 @@ export const HANGUL_20_SERIES: StickerPreset[] = [
     prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF).
 CENTERED TITLE (MUST REMAIN CLEAR & UNOBSTRUCTED): Centered cute bold colorful script typography reading "20+ CUTE KOREAN HANGUL & BABY ANIMAL STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish pastel ribbon banner. CRITICAL: The central title and banner MUST remain completely unobstructed, open, and clearly legible with an ample margin around it—NO stickers encroaching, touching, or overlapping the text.
 STICKER ARRANGEMENT (DENSE YET NEATLY SEPARATED): A richly packed collage of 18-20 unique standalone die-cut sticker samples filling the perimeter of the canvas around the center title with minimal empty white gaps. CRITICAL NO OVERLAPPING: Individual stickers MUST NOT overlap, collide, or clip one another. Each sticker is completely isolated and neatly placed side-by-side with its own distinct thick crisp white die-cut border. STRICT NO DUPLICATES: Every single sticker is 100% unique in animal character, Hangul typography phrase, and pose with zero repetition.
-FEATURED UNIQUE STICKERS: Gwenchana (괜찮아) healing bunny with heart, Daebak (대박) confetti red panda, Sparkle Bling (반짝반짝) star kitten, Bungeoppang (붕어빵 냠냠) snack bear, Fighting (파이팅) cheerleader hamster, Saranghae (사랑해) plush heart otter, Kkul-kkul (쿨쿨) sleeping cloud sloth, Kongdak (콩닥콩닥) blushing fawn, Bbojjak (뽀짝) golden puppy with pink pawprints, Aigo (아이고) sighing pygmy hippo, Haengbok (행복해) clover piglet, Bungeoppang Hat (붕어빵 모자) penguin chick, Sim-kung (심쿵) heart-clutching chipmunk, Meong (멍~) spaced-out duckling, Healing (힐링) hot-spring hedgehog, Chaltteok (찰떡궁합) tteokbokki and tempura duo, Todak-todak (토닥토닥) comforting black bear, Kkuljam (꿀잠) sleep mask fox, Eussya-eussya (으쌰으쌰) workout red panda, and Choego-ya (최고야) thumbs-up puppy.
+FEATURED UNIQUE STICKERS: Gwenchana (괜찮아) healing bunny with heart, Daebak (대박) confetti red panda, Sparkle Bling (반짝반짝) star kitten, Bungeoppang (붕어빵 냠냠) snack bear, Fighting (파이팅) cheerleader hamster, Saranghae (사랑해) plush heart otter, Kkul-kkul (쿨쿨) sleeping cloud sloth, Kongdak (콩닥콩닥) blushing fawn, Bbojjak (뽀짝) golden puppy with pink pawprints, Aigoo (아이고) sighing pygmy hippo, Haengbok (행복해) clover piglet, Bungeoppang Hat (붕어빵 모자) penguin chick, Sim-kung (심쿵) heart-clutching chipmunk, Meong (멍~) spaced-out duckling, Healing (힐링) hot-spring hedgehog, Chaltteok (찰떡궁합) tteokbokki and tempura duo, Todak-todak (토닥토닥) comforting black bear, Kkuljam (꿀잠) sleep mask fox, Eussya-eussya (으쌰으쌰) workout red panda, and Choego-ya (최고야) thumbs-up puppy.
 STRICT NO GLASS TANKS: Pure standalone adorable Korean Hangul aesthetic stickers with cute baby animals ONLY. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
   },
   ...Array.from({ length: 20 }, (_, i) => {
@@ -1259,7 +1259,7 @@ STRICT NO GLASS TANKS: Pure standalone adorable Korean Hangul aesthetic stickers
         name: '아이고 머리짚는 피그미하마',
         desc: '손으로 이마를 짚으며 억울해하는 피그미하마 스티커',
         phrase: '아이고',
-        sub: 'Aigo!',
+        sub: 'Aigoo! (Oh Dear!)',
         detail: 'chubby baby pygmy hippo with a comical overdramatic sigh, resting its tiny palm on its forehead'
       },
       {
