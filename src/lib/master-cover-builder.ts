@@ -15,16 +15,16 @@ export interface MasterCoverBuilderOptions {
 
 function makeBackgroundTransparent(img: HTMLImageElement): HTMLCanvasElement {
   const c = document.createElement('canvas');
-  c.width = img.naturalWidth || img.width || 800;
-  c.height = img.naturalHeight || img.height || 800;
+  const w = img.naturalWidth || img.width || 800;
+  const h = img.naturalHeight || img.height || 800;
+  c.width = w;
+  c.height = h;
   const ctx = c.getContext('2d');
   if (!ctx) return c;
 
-  ctx.drawImage(img, 0, 0, c.width, c.height);
-  const imgData = ctx.getImageData(0, 0, c.width, c.height);
+  ctx.drawImage(img, 0, 0, w, h);
+  const imgData = ctx.getImageData(0, 0, w, h);
   const data = imgData.data;
-  const w = c.width;
-  const h = c.height;
   const total = w * h;
 
   // Sample background color from 4 corners
@@ -67,11 +67,14 @@ function makeBackgroundTransparent(img: HTMLImageElement): HTMLCanvasElement {
   // Seed 4 outer edges for BFS Flood Fill
   for (let x = 0; x < w; x++) {
     if (isBg(x, 0)) { const idx = x; visited[idx] = 1; queue[tail++] = x; queue[tail++] = 0; }
-    if (isBg(x, h - 1)) { const idx = (h - 1) * w + x; visited[idx] = 1; queue[tail++] = x; queue[tail++] = h - 1; }
+    const bIdx = (h - 1) * w + x;
+    if (isBg(x, h - 1)) { visited[bIdx] = 1; queue[tail++] = x; queue[tail++] = h - 1; }
   }
   for (let y = 0; y < h; y++) {
-    if (isBg(0, y)) { const idx = y * w; visited[idx] = 1; queue[tail++] = 0; queue[tail++] = y; }
-    if (isBg(w - 1, y)) { const idx = y * w + w - 1; visited[idx] = 1; queue[tail++] = w - 1; queue[tail++] = y; }
+    const lIdx = y * w;
+    if (isBg(0, y)) { visited[lIdx] = 1; queue[tail++] = 0; queue[tail++] = y; }
+    const rIdx = y * w + w - 1;
+    if (isBg(w - 1, y)) { visited[rIdx] = 1; queue[tail++] = w - 1; queue[tail++] = y; }
   }
 
   // BFS flood-fill to clear outer paper background tile
@@ -100,7 +103,40 @@ function makeBackgroundTransparent(img: HTMLImageElement): HTMLCanvasElement {
     }
   }
 
+  // Find tight bounding box of real sticker content to eliminate giant empty outer paddings
+  let minX = w, minY = h, maxX = 0, maxY = 0;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const a = data[(y * w + x) * 4 + 3];
+      if (a > 10) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+
   ctx.putImageData(imgData, 0, 0);
+
+  // If bounding box found, crop tightly so the actual sticker artwork fills the canvas slot fully
+  if (minX < maxX && minY < maxY) {
+    const pad = 12; // 12px safe margin around die-cut border
+    const cropX = Math.max(0, minX - pad);
+    const cropY = Math.max(0, minY - pad);
+    const cropW = Math.min(w - cropX, (maxX - minX) + pad * 2);
+    const cropH = Math.min(h - cropY, (maxY - minY) + pad * 2);
+
+    const croppedCanvas = document.createElement('canvas');
+    croppedCanvas.width = cropW;
+    croppedCanvas.height = cropH;
+    const croppedCtx = croppedCanvas.getContext('2d');
+    if (croppedCtx) {
+      croppedCtx.drawImage(c, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+      return croppedCanvas;
+    }
+  }
+
   return c;
 }
 
@@ -341,42 +377,42 @@ export async function createCompositeMasterCover(
     }
   }
 
-  // --- 20 DEDICATED SLOTS FOR ZERO-DUPLICATE 20-PACKS ---
+  // --- 20 DEDICATED SLOTS FOR ZERO-DUPLICATE 20-PACKS (MASSIVE BESTSELLER SCALE) ---
   // Guaranteed 1:1 mapping: Exactly 20 unique slots for 20 unique stickers.
+  // Scaled up to 980px with tight auto-trimming to match the grand volume of the Etsy reference covers.
   // Center Zone (x: 600~2400, y: 920~1860) remains completely clear for title and ribbon.
-  // Spacing is balanced so die-cut stickers do not overlap each other.
   const SLOTS_20 = [
-    // 1. TOP PERIMETER ROW (5 items)
-    { x: 380,  y: 350,  tilt: -10, scale: 0.84 },
-    { x: 920,  y: 280,  tilt: 6,   scale: 0.82 },
-    { x: 1500, y: 240,  tilt: -2,  scale: 0.84 },
-    { x: 2080, y: 280,  tilt: 7,   scale: 0.82 },
-    { x: 2620, y: 350,  tilt: -10, scale: 0.84 },
+    // --- 1. TOP OUTER ARC (6 items across the top) ---
+    { x: 360,  y: 440,  tilt: -10, scale: 0.98 },
+    { x: 800,  y: 330,  tilt: 6,   scale: 0.96 },
+    { x: 1260, y: 280,  tilt: -3,  scale: 1.00 },
+    { x: 1740, y: 280,  tilt: 4,   scale: 1.00 },
+    { x: 2200, y: 330,  tilt: -6,  scale: 0.96 },
+    { x: 2640, y: 440,  tilt: 9,   scale: 0.98 },
 
-    // 2. UPPER FILLER ARC (3 items - above "[COUNT]+ CUTE" title)
-    { x: 780,  y: 680,  tilt: -6,  scale: 0.80 },
-    { x: 1500, y: 620,  tilt: 2,   scale: 0.82 },
-    { x: 2220, y: 680,  tilt: 6,   scale: 0.80 },
+    // --- 2. UPPER CENTER FILLER (1 item directly above title) ---
+    { x: 1500, y: 660,  tilt: 1,   scale: 1.02 },
 
-    // 3. LEFT FLANK (2 items - along outer left wall)
-    { x: 320,  y: 1100, tilt: 8,   scale: 0.82 },
-    { x: 320,  y: 1880, tilt: -7,  scale: 0.82 },
+    // --- 3. LEFT FLANK (2 items along outer left wall) ---
+    { x: 320,  y: 1040, tilt: 8,   scale: 0.98 },
+    { x: 320,  y: 1680, tilt: -7,  scale: 0.98 },
 
-    // 4. RIGHT FLANK (2 items - along outer right wall)
-    { x: 2680, y: 1100, tilt: -8,  scale: 0.82 },
-    { x: 2680, y: 1880, tilt: 7,   scale: 0.82 },
+    // --- 4. RIGHT FLANK (2 items along outer right wall) ---
+    { x: 2680, y: 1040, tilt: -8,  scale: 0.98 },
+    { x: 2680, y: 1680, tilt: 7,   scale: 0.98 },
 
-    // 5. LOWER FILLER ROW (3 items - below ribbon banner)
-    { x: 780,  y: 2140, tilt: -5,  scale: 0.80 },
-    { x: 1500, y: 2160, tilt: 3,   scale: 0.82 },
-    { x: 2220, y: 2140, tilt: 6,   scale: 0.80 },
+    // --- 5. LOWER FILLER ROW (2 items flanking below ribbon banner) ---
+    { x: 920,  y: 2080, tilt: -5,  scale: 0.98 },
+    { x: 2080, y: 2080, tilt: 5,   scale: 0.98 },
 
-    // 6. BOTTOM PERIMETER ROW (5 items)
-    { x: 380,  y: 2620, tilt: -8,  scale: 0.84 },
-    { x: 920,  y: 2680, tilt: 5,   scale: 0.82 },
-    { x: 1500, y: 2720, tilt: -2,  scale: 0.84 },
-    { x: 2080, y: 2680, tilt: 6,   scale: 0.82 },
-    { x: 2620, y: 2620, tilt: -8,  scale: 0.84 },
+    // --- 6. BOTTOM OUTER ARC (7 items across the bottom) ---
+    { x: 360,  y: 2260, tilt: 7,   scale: 0.96 },
+    { x: 2640, y: 2260, tilt: -7,  scale: 0.96 },
+    { x: 420,  y: 2680, tilt: -9,  scale: 0.98 },
+    { x: 960,  y: 2700, tilt: 5,   scale: 0.98 },
+    { x: 1500, y: 2660, tilt: -2,  scale: 1.04 },
+    { x: 2040, y: 2700, tilt: -5,  scale: 0.98 },
+    { x: 2580, y: 2680, tilt: 8,   scale: 0.98 },
   ];
 
   // 24 BALANCED ANCHOR SLOTS FOR LARGE 40-PACKS (OR JARS + STANDALONES)
@@ -489,8 +525,8 @@ export async function createCompositeMasterCover(
 
       const loadedImages = await Promise.all(loadPromises);
 
-      // 4. Render Main Stickers with Die-Cut Shadows
-      const baseMaxDim = isExact20 ? 700 : 760; // 700px for 20-packs guarantees zero overlap & clean borders
+      // 4. Render Main Stickers with Die-Cut Shadows (Massive Etsy Bestseller Scale)
+      const baseMaxDim = isExact20 ? 980 : 860; // 980px for 20-packs fills the canvas with grand presence
 
       for (let i = 0; i < loadedImages.length; i++) {
         const img = loadedImages[i];
