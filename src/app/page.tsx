@@ -41,7 +41,7 @@ import { extractStandaloneStickerFromTank } from '@/lib/standalone-extractor';
 import { createVesselStickerFromStandalone } from '@/lib/vessel-housing-builder';
 import { generateEtsySeo } from '@/lib/etsy-seo-generator';
 import { generateAllLifestyleMockups, LifestyleMockupResult } from '@/lib/lifestyle-mockup-builder';
-import { HANGUL_20_DATA, findHangulPresetData, compositeHangulTypography } from '@/lib/hangul-composer';
+import { HANGUL_20_DATA, findHangulPresetData, compositeHangulTypography, extractCleanBaseWithoutText } from '@/lib/hangul-composer';
 
 // Client-side cache for high-frequency design pool queries to eliminate redundant Firestore reads (99%+ reduction)
 let clientPoolCache: { data: any[]; timestamp: number } | null = null;
@@ -1359,6 +1359,7 @@ export default function Home() {
   const [isCompositingHangul, setIsCompositingHangul] = useState(false);
   const [hangulCompositeProgress, setHangulCompositeProgress] = useState({ current: 0, total: 0 });
   const [isApplyingHangulSingle, setIsApplyingHangulSingle] = useState(false);
+  const [isRegeneratingHangulSingle, setIsRegeneratingHangulSingle] = useState(false);
 
   const handleBatchCompositeHangul = async (stickersToComposite: any[]) => {
     if (!stickersToComposite || stickersToComposite.length === 0) {
@@ -1394,22 +1395,42 @@ export default function Home() {
           continue;
         }
 
+        const hasRaw = !!s.raw_image_url;
+        const sourceUrl = hasRaw ? s.raw_image_url : s.image_url;
+        const shouldClear = !hasRaw;
+
         try {
-          const compositedDataUrl = await compositeHangulTypography(s.image_url, {
+          const compositedDataUrl = await compositeHangulTypography(sourceUrl, {
             hangulText: presetData.phrase,
             englishSub: presetData.sub,
             themeColor: presetData.themeColor,
-            position: 'bottom-center'
+            position: 'bottom-center',
+            clearPreviousText: shouldClear
           });
 
           const compressedUrl = await compressImageForFirestore(compositedDataUrl, 800000);
+          const updates: any = {
+            image_url: compressedUrl,
+            updated_at: new Date().toISOString()
+          };
+
+          if (!hasRaw) {
+            try {
+              const cleanBaseUrl = await extractCleanBaseWithoutText(sourceUrl);
+              const compressedRaw = await compressImageForFirestore(cleanBaseUrl, 800000);
+              updates.raw_image_url = compressedRaw;
+              s.raw_image_url = compressedRaw;
+            } catch (rawErr) {
+              console.warn('[Raw Base Save Warn]:', rawErr);
+            }
+          }
 
           await fetch('/api/designs/update', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               id: s.id,
-              image_url: compressedUrl
+              updates
             })
           });
 
@@ -1435,9 +1456,10 @@ export default function Home() {
     phrase?: string,
     sub?: string,
     pos?: 'bottom-center' | 'bottom-right' | 'bottom-left' | 'top-center',
-    color?: string
+    color?: string,
+    forceClear: boolean = false
   ) => {
-    if (!design || !design.image_url) return;
+    if (!design || (!design.image_url && !design.raw_image_url)) return;
 
     const presetData = (design.title && design.title.includes('한글'))
       ? findHangulPresetData(design.title)
@@ -1449,39 +1471,175 @@ export default function Home() {
 
     setIsApplyingHangulSingle(true);
     try {
-      const compositedUrl = await compositeHangulTypography(design.image_url, {
+      // 🚨 CRITICAL: Always use clean raw_image_url if available!
+      // If raw_image_url is not present, enable clearPreviousText so any stacked or existing text is erased cleanly!
+      const hasRaw = !!design.raw_image_url;
+      const sourceImage = hasRaw ? design.raw_image_url : design.image_url;
+      const shouldClear = !hasRaw || forceClear;
+
+      const compositedUrl = await compositeHangulTypography(sourceImage, {
         hangulText: targetPhrase,
         englishSub: targetSub,
         themeColor: targetColor,
-        position: targetPos
+        position: targetPos,
+        clearPreviousText: shouldClear
       });
 
       const compressed = await compressImageForFirestore(compositedUrl, 800000);
+
+      const updates: any = {
+        image_url: compressed,
+        updated_at: new Date().toISOString()
+      };
+
+      if (!hasRaw) {
+        try {
+          const cleanBaseUrl = await extractCleanBaseWithoutText(sourceImage);
+          const compressedRaw = await compressImageForFirestore(cleanBaseUrl, 800000);
+          updates.raw_image_url = compressedRaw;
+        } catch (rawErr) {
+          console.warn('[Raw Base Save Warn]:', rawErr);
+        }
+      }
 
       await fetch('/api/designs/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: design.id,
-          image_url: compressed
+          updates
         })
       });
 
+      const updatedDesign = { ...design, ...updates };
+
       if (selectedDesign && selectedDesign.id === design.id) {
-        setSelectedDesign({ ...selectedDesign, image_url: compressed });
+        setSelectedDesign(updatedDesign);
       }
       if (previewDesign && previewDesign.id === design.id) {
-        setPreviewDesign({ ...previewDesign, image_url: compressed });
+        setPreviewDesign(updatedDesign);
       }
-      setDesigns(prev => prev.map(d => d.id === design.id ? { ...d, image_url: compressed } : d));
+      setDesigns(prev => prev.map(d => d.id === design.id ? updatedDesign : d));
+      setPackStickers(prev => prev.map(d => d.id === design.id ? updatedDesign : d));
       invalidateClientPoolCache();
 
-      alert(`✨ '${targetPhrase}' 한글 타이포그래피 정밀 합성이 완료되었습니다!`);
+      alert(`✨ '${targetPhrase}' (${targetSub}) 한글 타이포그래피 정밀 합성이 완료되었습니다!`);
     } catch (err: any) {
       console.error('Hangul typography application failed:', err);
       alert('한글 타이포 합성 중 오류가 발생했습니다: ' + (err.message || String(err)));
     } finally {
       setIsApplyingHangulSingle(false);
+    }
+  };
+
+  const handleRegenerateHangulSticker = async (design: any) => {
+    if (!design) return;
+    const presetData = (design.title && design.title.includes('한글'))
+      ? findHangulPresetData(design.title)
+      : (findHangulPresetData(design.stickerPresetId) || findHangulPresetData(design.title) || findHangulPresetData(design.topic));
+
+    const targetPhrase = presetData?.phrase || '한글';
+    const targetSub = presetData?.sub || 'Korean';
+    const targetColor = presetData?.themeColor || '#E11D48';
+
+    if (!confirm(`'${design.title || targetPhrase}' 캐릭터 일러스트를 AI로 새로 생성하고 100% 오타 없는 한글 타이포를 재합성하시겠습니까?\n(기존 글자가 겹친 경우 완벽히 새로운 순수 그림으로 교체됩니다)`)) {
+      return;
+    }
+
+    setIsRegeneratingHangulSingle(true);
+    try {
+      const seasonalPresets = getSeasonalPackPresets('hangul');
+      const matchedPreset = seasonalPresets?.vesselSeries.find((p: any) => 
+        p.id === design.stickerPresetId || 
+        (presetData && p.id === presetData.id) ||
+        (presetData && p.name.includes(presetData.phrase))
+      );
+
+      const promptToUse = matchedPreset?.prompt || design.prompt;
+      const titleToUse = matchedPreset?.name || design.title;
+
+      // 1. Generate clean AI illustration with strict no-text rule
+      let genResult: any = null;
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          const res = await fetch('/api/designs/from-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              imageBase64: '',
+              prompt: promptToUse,
+              title: titleToUse,
+              isPreview: true,
+              catchphrase: '',
+              autoPhrase: false
+            })
+          });
+          const json = await res.json();
+          if (json && json.success && json.data?.image_url) {
+            genResult = json;
+            break;
+          }
+        } catch (retryErr) {
+          console.warn(`[Hangul Regenerate Retry ${attempt}]:`, retryErr);
+        }
+        if (attempt < 3) {
+          await new Promise(r => setTimeout(r, 1500 * attempt));
+        }
+      }
+
+      if (!genResult || !genResult.success || !genResult.data?.image_url) {
+        throw new Error(genResult?.error || 'AI 이미지 생성에 실패했습니다.');
+      }
+
+      const rawAiUrl = genResult.data.image_url;
+      const compressedRawUrl = await compressImageForFirestore(rawAiUrl, 800000);
+
+      // 2. Composite Hangul typography onto clean AI character
+      const compositedUrl = await compositeHangulTypography(rawAiUrl, {
+        hangulText: targetPhrase,
+        englishSub: targetSub,
+        themeColor: targetColor,
+        position: 'bottom-center'
+      });
+
+      const compressedCompositedUrl = await compressImageForFirestore(compositedUrl, 800000);
+
+      // 3. Save updates to Firestore
+      const updates = {
+        image_url: compressedCompositedUrl,
+        raw_image_url: compressedRawUrl,
+        prompt: promptToUse,
+        title: titleToUse,
+        updated_at: new Date().toISOString()
+      };
+
+      await fetch('/api/designs/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: design.id,
+          updates
+        })
+      });
+
+      const updatedObj = { ...design, ...updates };
+
+      if (selectedDesign && selectedDesign.id === design.id) {
+        setSelectedDesign(updatedObj);
+      }
+      if (previewDesign && previewDesign.id === design.id) {
+        setPreviewDesign(updatedObj);
+      }
+      setDesigns(prev => prev.map(d => d.id === design.id ? updatedObj : d));
+      setPackStickers(prev => prev.map(d => d.id === design.id ? updatedObj : d));
+      invalidateClientPoolCache();
+
+      alert(`✨ '${targetPhrase}' (${targetSub}) 캐릭터 AI 원본 재생성 및 타이포 합성이 완료되었습니다!`);
+    } catch (err: any) {
+      console.error('Hangul sticker regeneration failed:', err);
+      alert('스티커 재생성 중 오류: ' + (err.message || String(err)));
+    } finally {
+      setIsRegeneratingHangulSingle(false);
     }
   };
 
@@ -3982,6 +4140,7 @@ export default function Home() {
           }
 
           const compressedUrl = await compressImageForFirestore(stickerImgUrl, 800000);
+          const compressedRawUrl = isHangulPack ? await compressImageForFirestore(data.data.image_url, 800000) : undefined;
           await fetch('/api/designs/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -3990,6 +4149,7 @@ export default function Home() {
               designData: {
                 ...data.data,
                 image_url: compressedUrl,
+                ...(compressedRawUrl ? { raw_image_url: compressedRawUrl } : {}),
                 title: vesselPreset.name,
                 topic: vesselPreset.name,
                 stickerPresetId: vesselPreset.id,
@@ -5572,28 +5732,50 @@ export default function Home() {
                                     {presetData?.phrase || '한글'} ({presetData?.sub || 'English'})
                                   </span>
                                 </div>
-                                <button
-                                  type="button"
-                                  onClick={() => handleApplyHangulTypography(currentActiveDesign, presetData?.phrase, presetData?.sub, 'bottom-center', presetData?.themeColor)}
-                                  disabled={isApplyingHangulSingle}
-                                  className="text-xs bg-rose-600 hover:bg-rose-700 disabled:bg-gray-400 text-white font-bold px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 shadow-xs cursor-pointer disabled:cursor-wait"
-                                  title="AI가 잘못 그린 글자(뵤작 등)나 텍스트 없는 원본 그림 위에 오타 없는 벡터 한글(뽀짝, 괜찮아 등)과 영문 자막, 다이컷 테두리를 정밀 합성합니다."
-                                >
-                                  {isApplyingHangulSingle ? (
-                                    <>
-                                      <span className="animate-spin inline-block">⏳</span>
-                                      <span>타이포 합성 중...</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span>✨</span>
-                                      <span>1클릭 타이포 즉시 합성</span>
-                                    </>
-                                  )}
-                                </button>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleApplyHangulTypography(currentActiveDesign, presetData?.phrase, presetData?.sub, 'bottom-center', presetData?.themeColor)}
+                                    disabled={isApplyingHangulSingle || isRegeneratingHangulSingle}
+                                    className="text-xs bg-rose-600 hover:bg-rose-700 disabled:bg-gray-400 text-white font-bold px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 shadow-xs cursor-pointer disabled:cursor-wait"
+                                    title="기존 글자나 겹친 오타를 자동으로 지우고 오타 없는 Google Jua 폰트 한글과 영문 서브타이틀, 다이컷 테두리를 정밀 재합성합니다."
+                                  >
+                                    {isApplyingHangulSingle ? (
+                                      <>
+                                        <span className="animate-spin inline-block">⏳</span>
+                                        <span>타이포 합성 중...</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span>✨</span>
+                                        <span>1클릭 타이포 즉시 합성</span>
+                                      </>
+                                    )}
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRegenerateHangulSticker(currentActiveDesign)}
+                                    disabled={isApplyingHangulSingle || isRegeneratingHangulSingle}
+                                    className="text-xs bg-white hover:bg-rose-50 text-rose-700 hover:text-rose-900 border border-rose-300 disabled:bg-gray-100 disabled:text-gray-400 font-bold px-2.5 py-1.5 rounded-xl transition-all flex items-center gap-1 shadow-2xs cursor-pointer disabled:cursor-wait"
+                                    title="글자 없는 순수한 아기 동물 일러스트를 AI로 새로 생성한 후 오타 없는 정밀 타이포를 100% 깨끗하게 합성합니다."
+                                  >
+                                    {isRegeneratingHangulSingle ? (
+                                      <>
+                                        <span className="animate-spin inline-block">🎨</span>
+                                        <span>AI 새로 생성 중...</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <span>🔄</span>
+                                        <span>캐릭터 새로 생성 & 합성</span>
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
                               </div>
                               <p className="text-[11px] text-rose-900/90 leading-relaxed font-medium">
-                                AI가 잘못 그린 글자(예: <strong>뵤작</strong>)나 텍스트 없는 캐릭터 그림 위에 <strong>Google Jua 폰트</strong>와 영문 서브타이틀, 두꺼운 흰색 다이컷 테두리를 <strong>오타 0%</strong>로 정밀 합성합니다.
+                                기존에 잘못 인쇄되거나 겹쳐진 글자를 <strong>하단 자동 클리어링</strong>으로 완벽히 제거한 뒤 <strong>Google Jua 폰트</strong>와 영문 서브타이틀(예: <strong>{presetData?.phrase || '한글'}</strong> · <strong>{presetData?.sub || 'English'}</strong>)을 <strong>오타 0%</strong>로 정밀 합성합니다.
                               </p>
                             </div>
                           );

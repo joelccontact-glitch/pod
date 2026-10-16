@@ -319,6 +319,8 @@ export interface HangulCompositeOptions {
   scale?: number; // default 1.0
   customX?: number; // percentage (0..100) or pixel
   customY?: number; // percentage (0..100) or pixel
+  clearPreviousText?: boolean; // When true, clears previous typography band with pure #FFFFFF before drawing to eliminate double/ghost text
+  clearFromRatio?: number; // Fallback ratio from top to clear (default: smart gap detection or 0.68)
 }
 
 /**
@@ -338,6 +340,89 @@ async function ensureHangulFontsLoaded() {
       console.warn('[HangulComposer] Font preloading notice:', e);
     }
   }
+}
+
+/**
+ * Clears any previously composited typography or bottom text from an image,
+ * restoring the clean baby animal illustration on pure solid white background (#FFFFFF).
+ */
+export async function extractCleanBaseWithoutText(
+  imageSource: string | HTMLImageElement | HTMLCanvasElement,
+  clearFromRatio?: number
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const processImage = (img: HTMLImageElement | HTMLCanvasElement) => {
+      try {
+        const w = img.width || 1024;
+        const h = img.height || 1024;
+
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('Failed to create canvas context in extractCleanBaseWithoutText'));
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, w, h);
+
+        let clearY = Math.round(h * (clearFromRatio || 0.68));
+
+        try {
+          const imgData = ctx.getImageData(0, 0, w, h).data;
+          const scanStart = Math.round(h * 0.52);
+          const scanEnd = Math.round(h * 0.80);
+          let bestGapY = -1;
+          let minNonWhiteInRow = 999999;
+
+          for (let y = scanStart; y < scanEnd; y += 2) {
+            let nonWhiteCount = 0;
+            for (let x = 0; x < w; x += 4) {
+              const idx = (y * w + x) * 4;
+              const r = imgData[idx];
+              const g = imgData[idx + 1];
+              const b = imgData[idx + 2];
+              if (r < 248 || g < 248 || b < 248) {
+                nonWhiteCount++;
+              }
+            }
+            if (nonWhiteCount < (w / 4) * 0.015) {
+              bestGapY = y;
+              break;
+            }
+            if (nonWhiteCount < minNonWhiteInRow) {
+              minNonWhiteInRow = nonWhiteCount;
+              bestGapY = y;
+            }
+          }
+
+          if (bestGapY > 0) {
+            clearY = bestGapY;
+          }
+        } catch {
+          // ignore
+        }
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, clearY, w, h - clearY);
+
+        resolve(canvas.toDataURL('image/png'));
+      } catch (e) {
+        reject(e);
+      }
+    };
+
+    if (typeof imageSource === 'string') {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => processImage(img);
+      img.onerror = () => reject(new Error('Failed to load imageSource in extractCleanBaseWithoutText'));
+      img.src = imageSource;
+    } else {
+      processImage(imageSource);
+    }
+  });
 }
 
 /**
@@ -375,6 +460,50 @@ export async function compositeHangulTypography(
 
         // 1. Draw base animal illustration
         ctx.drawImage(img, 0, 0, w, h);
+
+        // 1.5 Intelligently clear any previous typography zone if requested (prevents double/ghost text!)
+        if (options.clearPreviousText) {
+          try {
+            const imgData = ctx.getImageData(0, 0, w, h).data;
+            let clearY = Math.round(h * (options.clearFromRatio || 0.68));
+            const scanStart = Math.round(h * 0.52);
+            const scanEnd = Math.round(h * 0.80);
+            let bestGapY = -1;
+            let minNonWhiteInRow = 999999;
+
+            for (let y = scanStart; y < scanEnd; y += 2) {
+              let nonWhiteCount = 0;
+              for (let x = 0; x < w; x += 4) {
+                const idx = (y * w + x) * 4;
+                const r = imgData[idx];
+                const g = imgData[idx + 1];
+                const b = imgData[idx + 2];
+                if (r < 248 || g < 248 || b < 248) {
+                  nonWhiteCount++;
+                }
+              }
+              if (nonWhiteCount < (w / 4) * 0.015) {
+                bestGapY = y;
+                break;
+              }
+              if (nonWhiteCount < minNonWhiteInRow) {
+                minNonWhiteInRow = nonWhiteCount;
+                bestGapY = y;
+              }
+            }
+
+            if (bestGapY > 0) {
+              clearY = bestGapY;
+            }
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, clearY, w, h - clearY);
+          } catch {
+            const fallbackClearY = Math.round(h * (options.clearFromRatio || 0.68));
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, fallbackClearY, w, h - fallbackClearY);
+          }
+        }
 
         const hangul = (options.hangulText || '괜찮아').trim();
         const sub = (options.englishSub || "It's Okay").trim();
