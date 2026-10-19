@@ -195,7 +195,7 @@ export const AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 5. STRICT NO MAMMALS/BIRDS IN AQUARIUM RULE: Absolutely NO sea otters, NO penguins, NO mammals, NO birds, NO land/aerial animals inside or trapped in any aquarium tank or glass container. ONLY real marine/freshwater fish, seahorses, jellyfish, sea anemones, corals, aquatic snails, shrimps, and water plants.
 6. STRICT WATER-FILLED AQUARIUM RULE: Every aquarium tank MUST be visibly filled with translucent blue aquatic water, featuring a clear rippling water surface line near the top rim.
 7. STRICT BUBBLE POSITION RULE: All water bubbles MUST stay 100% INSIDE the aquatic water inside the aquarium tank. Absolutely NO floating water bubbles outside the glass tank or floating in the air above the rim.
-8. STRICT FRONT-FACING EYE-LEVEL VIEW RULE: Every aquarium tank MUST be shown from a straight-on front eye-level perspective with its wide flat front glass pane facing directly forward toward the viewer. ABSOLUTELY NEVER generate top-down high-angle birds-eye view, NEVER corner-facing diamond perspective, NEVER isometric diagonal angles where edges face forward. ABSOLUTELY NEVER generate round fish bowls, spherical globes, or cylindrical vases. The tank must have a clean rectangular or square flat front glass face with crisp bold black linework.
+8. TANK COMPOSITION RULE: Classic rectangular glass box aquarium drawn in a three-quarter front view: the large front glass panel faces the viewer and dominates the image, the camera is slightly above so the top rim and water surface are visible, and one narrow side panel is visible receding to the side in gentle perspective. NOT a flat 2D front-only view, NOT corner-facing diamond/isometric view, NOT top-down. NO round fish bowls, NO cylinders.
 9. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
 
 export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT;
@@ -431,7 +431,7 @@ STRICT NO LAND ANIMALS/MAMMALS/BIRDS RULE: Absolutely NO land animals, NO mammal
     theme: 'Saltwater Aquarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean front-facing glass saltwater marine aquarium tank with a flat front glass pane facing directly forward at eye-level, completely filled with clear aquatic water and a visible water surface line near the top rim. Flat front-facing perspective, NOT isometric, NOT high-angle, NOT corner-facing. Inside is a vibrant ${items.detail}. Intricate coral reef aquascape with glowing sea anemones, branching corals, and clean white sea sand. NO glass glare strips. Crisp bold black linework, flat vector colors. Crisp thick die-cut white border around the entire design. Centered on a pure solid white background (#FFFFFF). ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean rectangular glass saltwater marine aquarium tank in three-quarter front view (front panel facing viewer, top rim and one side panel visible), completely filled with clear aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT} Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`
   }
 }) as unknown as StickerPreset[]];
 
@@ -485,7 +485,7 @@ STRICT NO LAND ANIMALS/MAMMALS/BIRDS RULE: Absolutely NO land animals, NO mammal
     theme: 'Freshwater Aquarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean front-facing glass freshwater aquarium tank with a flat front glass pane facing directly forward at eye-level, completely filled with translucent blue aquatic water and a visible water surface line near the top rim. Flat front-facing perspective, NOT isometric, NOT high-angle, NOT corner-facing. Inside is a beautiful ${items.detail}. Intricate aquascape with lush aquatic moss, natural river driftwoods, and smooth gravel pebbles. NO glass glare strips. Crisp bold black linework, flat vector colors. Crisp thick die-cut white border around the entire design. Centered on a pure solid white background (#FFFFFF). ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean rectangular glass freshwater aquarium tank in three-quarter front view (front panel facing viewer, top rim and one side panel visible), completely filled with clear aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT} Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`
   }
 }) as unknown as StickerPreset[]];
 
