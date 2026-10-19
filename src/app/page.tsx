@@ -46,7 +46,7 @@ import { HANGUL_20_DATA, findHangulPresetData, compositeHangulTypography, extrac
 // Client-side cache for high-frequency design pool queries to eliminate redundant Firestore reads (99%+ reduction)
 let clientPoolCache: { data: any[]; timestamp: number } | null = null;
 const CLIENT_POOL_TTL_MS = 60000; // 1 minute cache
-const SESSION_CACHE_KEY = 'mypod_stickers_pool_cache_v5';
+const SESSION_CACHE_KEY = 'mypod_stickers_pool_cache_v6';
 
 const getCachedStickersPool = async (forceRefresh = false): Promise<any[]> => {
   const now = Date.now();
@@ -250,15 +250,42 @@ const getPresetSeriesList = (tab: string): StickerPreset[] => {
 
 export const isStickerStandalone = (item: any): boolean => {
   if (!item) return false;
-  const title = (item.title || item.topic || '').toLowerCase();
   const presetId = (item.stickerPresetId || item.id || '').toLowerCase();
+  const title = (item.title || item.topic || '').toLowerCase();
   const prompt = (item.prompt || '').toLowerCase();
+
+  // 1. If preset ID explicitly designates vessel vs standalone
+  if (presetId.includes('standalone')) return true;
+  if (presetId.includes('-20-pack-') && !presetId.includes('-standalone-')) return false;
+
+  // 2. Title checks
+  if (title.includes('단일') || title.includes('단독') || title.includes('낱개') || title.includes('standalone')) return true;
+  if (title.includes('🫙') || title.includes('어항') || title.includes('수조') || title.includes('스노우볼') || title.includes('세트')) return false;
+
+  // 3. Prompt checks
+  if (
+    prompt.includes('pure standalone') ||
+    prompt.includes('strict no glass') ||
+    prompt.includes('standalone plant') ||
+    prompt.includes('standalone fish') ||
+    prompt.includes('standalone animal') ||
+    prompt.includes('standalone object')
+  ) {
+    return true;
+  }
+  if (
+    prompt.includes('glass jar') ||
+    prompt.includes('mason jar') ||
+    prompt.includes('glass globe') ||
+    prompt.includes('aquarium') ||
+    prompt.includes('tank') ||
+    prompt.includes('snowglobe') ||
+    prompt.includes('teacup terrarium')
+  ) {
+    return false;
+  }
+
   return (
-    presetId.includes('standalone') ||
-    title.includes('단일') ||
-    title.includes('단독') ||
-    title.includes('낱개') ||
-    prompt.includes('standalone') ||
     prompt.includes('pure standalone') ||
     prompt.includes('strict no glass')
   );
