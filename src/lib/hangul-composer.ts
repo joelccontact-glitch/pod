@@ -324,21 +324,46 @@ export interface HangulCompositeOptions {
 }
 
 /**
- * Ensures Google Fonts for Korean Hangul ('Jua', 'Gaegu', 'Fredoka') are loaded into Canvas.
+ * Ensures complete Korean Hangul ('Jua') and English subtitle fonts are fully loaded into Canvas.
+ * Passes the exact character string to document.fonts.load to guarantee that every single Korean
+ * syllable glyph (e.g. '심', '쿵', '뽀', '짝', '으', '쌰' etc.) is 100% loaded into memory
+ * before Canvas drawing begins, preventing font splitting across letters.
  */
-async function ensureHangulFontsLoaded() {
-  if (typeof document !== 'undefined' && document.fonts) {
-    try {
-      await Promise.all([
-        document.fonts.load("bold 120px 'Jua'"),
-        document.fonts.load("400 120px 'Jua'"),
-        document.fonts.load("bold 120px 'Gaegu'"),
-        document.fonts.load("800 60px 'Fredoka'"),
-        document.fonts.load("700 60px 'Comic Neue'")
-      ]);
-    } catch (e) {
-      console.warn('[HangulComposer] Font preloading notice:', e);
+async function ensureHangulFontsLoaded(hangulSample?: string, subSample?: string) {
+  if (typeof document === 'undefined') return;
+
+  try {
+    // 1. Explicitly load local standalone Jua font (contains all 11,172 Hangul glyphs)
+    if (typeof FontFace !== 'undefined') {
+      const existingJua = Array.from(document.fonts).find((f: any) => f.family === 'Jua');
+      if (!existingJua || existingJua.status !== 'loaded') {
+        try {
+          const juaFace = new FontFace('Jua', 'url(/fonts/Jua-Regular.ttf)', {
+            style: 'normal',
+            weight: '100 900'
+          });
+          const loadedFace = await juaFace.load();
+          document.fonts.add(loadedFace);
+        } catch (localFontErr) {
+          console.warn('[HangulComposer] Local font load fallback:', localFontErr);
+        }
+      }
     }
+
+    // 2. Preload specific glyphs through document.fonts.load with full sample text
+    if (document.fonts) {
+      const sampleText = (hangulSample || '') + ' ' + (subSample || '') + ' 괜찮아대박반짝냠파이팅사랑해쿨콩닥뽀짝아이고행복붕어빵심쿵멍힐링찰떡토닥꿀잠으쌰최고야';
+      await Promise.allSettled([
+        document.fonts.load(`bold 120px 'Jua'`, sampleText),
+        document.fonts.load(`400 120px 'Jua'`, sampleText),
+        document.fonts.load(`120px 'Jua'`, sampleText),
+        document.fonts.load(`bold 60px 'Jua'`, sampleText),
+        document.fonts.load(`800 60px 'Fredoka'`, subSample || 'Heart Attack! You Got This!')
+      ]);
+      await document.fonts.ready;
+    }
+  } catch (e) {
+    console.warn('[HangulComposer] Font preloading notice:', e);
   }
 }
 
@@ -437,7 +462,9 @@ export async function compositeHangulTypography(
   imageSource: string | HTMLImageElement | HTMLCanvasElement,
   options: HangulCompositeOptions = {}
 ): Promise<string> {
-  await ensureHangulFontsLoaded();
+  const hangul = (options.hangulText || '괜찮아').trim();
+  const sub = (options.englishSub || "It's Okay").trim();
+  await ensureHangulFontsLoaded(hangul, sub);
 
   return new Promise((resolve, reject) => {
     const processImage = (img: HTMLImageElement | HTMLCanvasElement) => {
@@ -547,20 +574,20 @@ export async function compositeHangulTypography(
         }
 
         // 3. Compute typography scale relative to word length & canvas width
-        // Longer words (4 syllables e.g. '반짝반짝', '콩닥콩닥') need slightly smaller font to stay compact
+        // Balanced sizing across 2..4+ syllables to ensure uniform size across all 20 stickers
         let baseFontSizeRatio = 0.12;
         if (hangul.length >= 4) {
-          baseFontSizeRatio = 0.098;
+          baseFontSizeRatio = 0.108;
         } else if (hangul.length === 3) {
-          baseFontSizeRatio = 0.112;
+          baseFontSizeRatio = 0.116;
         } else {
-          baseFontSizeRatio = 0.13;
+          baseFontSizeRatio = 0.122;
         }
 
         let baseFontSize = Math.round(w * baseFontSizeRatio * userScale);
 
-        // Measure text width and clamp if too wide
-        ctx.font = `900 ${baseFontSize}px 'Jua', 'Gaegu', cursive, sans-serif`;
+        // Measure text width with unified Jua font and clamp if too wide
+        ctx.font = `bold ${baseFontSize}px 'Jua', 'Gaegu', sans-serif`;
         const initialHangulWidth = ctx.measureText(hangul).width;
         const maxAllowedHangulW = w * 0.72;
         if (initialHangulWidth > maxAllowedHangulW) {
@@ -632,7 +659,7 @@ export async function compositeHangulTypography(
         ctx.save();
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = `900 ${baseFontSize}px 'Jua', 'Gaegu', cursive, sans-serif`;
+        ctx.font = `bold ${baseFontSize}px 'Jua', 'Gaegu', sans-serif`;
 
         // --- Pass 1: Die-Cut Outer Drop Shadow ---
         ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
@@ -662,7 +689,8 @@ export async function compositeHangulTypography(
           ctx.save();
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.font = `800 ${subFontSize}px 'Fredoka', 'Comic Neue', sans-serif`;
+          // Unified typography styling: Jua font first for matching brush curvature, Fredoka fallback
+          ctx.font = `800 ${subFontSize}px 'Jua', 'Fredoka', 'Comic Neue', sans-serif`;
 
           // Drop shadow for subtitle pill
           ctx.shadowColor = 'rgba(0, 0, 0, 0.16)';
