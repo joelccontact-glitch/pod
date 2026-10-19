@@ -46,7 +46,7 @@ import { HANGUL_20_DATA, findHangulPresetData, compositeHangulTypography, extrac
 // Client-side cache for high-frequency design pool queries to eliminate redundant Firestore reads (99%+ reduction)
 let clientPoolCache: { data: any[]; timestamp: number } | null = null;
 const CLIENT_POOL_TTL_MS = 60000; // 1 minute cache
-const SESSION_CACHE_KEY = 'mypod_stickers_pool_cache_v6';
+const SESSION_CACHE_KEY = 'mypod_stickers_pool_cache_v7';
 
 const getCachedStickersPool = async (forceRefresh = false): Promise<any[]> => {
   const now = Date.now();
