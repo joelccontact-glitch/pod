@@ -1216,145 +1216,10 @@ export default function Home() {
 
   const handleRegenerateMasterCover = async (coverDesign: any, count?: number) => {
     if (!coverDesign) return;
-
-    setIsRegeneratingCover(true);
-    try {
-      // 1. Calculate actual sticker count in this pack
-      let targetCount = count && count > 0 ? count : 0;
-      if (!targetCount) {
-        if (packStickers && packStickers.length > 0) {
-          targetCount = packStickers.length;
-        } else {
-          const title = (coverDesign.title || coverDesign.topic || '').toLowerCase();
-          if (title.includes('40종') || title.includes('40')) {
-            targetCount = 40;
-          } else {
-            const coverCategory = getDesignCategoryKey(coverDesign);
-            const coverTime = new Date(coverDesign.created_at || 0).getTime();
-            const matched = designs.filter((d: any) => {
-              if (d.id === coverDesign.id || isCoverDesign(d)) return false;
-              const itemCategory = getDesignCategoryKey(d);
-              if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) return false;
-              const itemTime = new Date(d.created_at || 0).getTime();
-              return Math.abs(itemTime - coverTime) <= 120 * 60 * 1000;
-            });
-            targetCount = matched.length > 25 ? 40 : (matched.length > 0 ? matched.length : 20);
-          }
-        }
-      }
-      if (!targetCount) targetCount = 20;
-
-      let basePrompt = coverDesign.prompt || '';
-      const presetId = (coverDesign.stickerPresetId || coverDesign.id || '').toLowerCase();
-      const sub = coverDesign.sticker_sub;
-
-      if (presetId.includes('dessert') || sub === 'dessert') {
-        const p = DESSERT_20_SERIES.find(s => s.id === 'dessert-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      } else if (presetId.includes('socialbattery') || presetId.includes('social-battery') || sub === 'socialbattery') {
-        const p = SOCIAL_BATTERY_20_SERIES.find(s => s.id === 'social-battery-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      } else if (presetId.includes('hangul') || sub === 'hangul') {
-        const p = HANGUL_20_SERIES.find(s => s.id === 'hangul-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      } else if (presetId.includes('terrarium') || sub === 'terrarium') {
-        const p = TERRARIUM_20_SERIES.find(s => s.id === 'terrarium-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      } else if (presetId.includes('vivarium') || sub === 'vivarium') {
-        const p = VIVARIUM_20_SERIES.find(s => s.id === 'vivarium-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      } else if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium') || sub === 'saltaquarium') {
-        const p = SALT_AQUARIUM_20_SERIES.find(s => s.id === 'salt-aquarium-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      } else if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium') || sub === 'freshaquarium') {
-        const p = FRESH_AQUARIUM_20_SERIES.find(s => s.id === 'fresh-aquarium-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      } else if (presetId.includes('booktok') || sub === 'booktok') {
-        const p = BOOKTOK_20_SERIES.find(s => s.id === 'booktok-20-pack-cover');
-        if (p) basePrompt = p.prompt;
-      } else if (sub) {
-        try {
-          const seasonalPack = getSeasonalPackPresets(sub);
-          if (seasonalPack && seasonalPack.vesselSeries && seasonalPack.vesselSeries[0]) {
-            basePrompt = seasonalPack.vesselSeries[0].prompt;
-          }
-        } catch (e) {
-          // ignore
-        }
-      }
-
-      // Format prompt and title with real count!
-      const adjustedPrompt = formatCoverPromptWithCount(basePrompt, targetCount);
-      const adjustedTitle = formatCoverTitleWithCount(coverDesign.title || coverDesign.topic || '스티커 팩 대표 커버 표지', targetCount);
-
-      const res = await fetch('/api/designs/from-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageBase64: '',
-          prompt: adjustedPrompt,
-          title: adjustedTitle,
-          isPreview: true,
-          styleId: selectedStyleId,
-          catchphrase: '',
-          autoPhrase: false
-        })
-      });
-
-      const data = await res.json();
-      if (data.success && data.data?.image_url) {
-        const rawImageUrl = data.data.image_url;
-        const compressedUrl = await compressImageForFirestore(rawImageUrl, 800000);
-
-        const updates = {
-          image_url: compressedUrl,
-          prompt: adjustedPrompt,
-          title: adjustedTitle,
-          topic: adjustedTitle,
-          updated_at: new Date().toISOString()
-        };
-
-        const updateRes = await fetch('/api/designs/update', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: coverDesign.id,
-            updates
-          })
-        });
-
-        const updateData = await updateRes.json();
-        if (!updateRes.ok || !updateData.success) {
-          throw new Error(updateData.error || 'Firestore DB 업데이트 실패');
-        }
-
-        const freshTs = updateData.updated_at ? new Date(updateData.updated_at).getTime() : Date.now();
-        const freshImageUrl = `/api/designs/image?id=${coverDesign.id}&v=${freshTs}&_t=${Date.now()}`;
-
-        const freshData = {
-          ...updates,
-          updated_at: updateData.updated_at || updates.updated_at,
-          image_url: freshImageUrl
-        };
-
-        setSelectedPackCover((prev: any) => prev ? { ...prev, ...freshData } : prev);
-        setDesigns(prev => prev.map(d => d.id === coverDesign.id ? { ...d, ...freshData } : d));
-        if (selectedDesign?.id === coverDesign.id) {
-          setSelectedDesign((prev: any) => prev ? { ...prev, ...freshData } : prev);
-        }
-
-        alert(`✨ ${targetCount}종 최신 AI 마스터 표지가 성공적으로 재생성되었습니다!`);
-        await fetchDesigns(page, false, undefined, undefined, true);
-      } else {
-        alert('마스터 표지 생성 실패: ' + (data.error || '오류가 발생했습니다.'));
-      }
-    } catch (e: any) {
-      console.error('Error regenerating master cover:', e);
-      alert('마스터 표지 재생성 중 오류가 발생했습니다: ' + (e.message || String(e)));
-    } finally {
-      setIsRegeneratingCover(false);
-    }
+    // 100% 실물 스티커 일치 원칙: AI 텍스트 생성 대신 실제 스티커 기반 고화질(3000px) 캔버스 합성 엔진으로 통일
+    return handleGenerateRealCompositeCover(coverDesign, packStickers);
   };
+
 
   const [isCompositingHangul, setIsCompositingHangul] = useState(false);
   const [hangulCompositeProgress, setHangulCompositeProgress] = useState({ current: 0, total: 0 });
@@ -4019,6 +3884,7 @@ export default function Home() {
     let successCount = 0;
 
     let coverDocData: any = null;
+    const generatedStickersForCover: any[] = [];
 
     const generateWithRetry = async (prompt: string, title: string, maxAttempts: number = 3) => {
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -4055,46 +3921,71 @@ export default function Home() {
       const isCover = i === 0;
 
       if (isCover) {
-        // Master Cover generation
+        // Master Cover: 0ms 즉각 등록 (AI 호출 비용/시간 낭비 및 텍스트 왜곡 방지)
+        // 스티커 생성 완료 직후 100% 실제 생성된 스티커 실물로 고화질(3000px) 자동 합성됩니다.
         const preset = targetPresets[0];
         const itemName = formatCoverTitleWithCount(preset.name, totalStickerItems);
-        const itemPrompt = formatCoverPromptWithCount(preset.prompt, totalStickerItems);
+        const coverId = 'design_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
 
         setBatchProgress({
           current: 1,
           total: totalExpectedCount,
-          label: itemName,
+          label: `${itemName} (표지 등록 및 스티커 일괄 생성 준비)`,
           packTitle: packName
         });
 
         try {
-          const data = await generateWithRetry(itemPrompt, itemName, 3);
-          if (data && data.success && data.data) {
-            const compressedUrl = await compressImageForFirestore(data.data.image_url, 800000);
-            coverDocData = {
-              ...data.data,
-              image_url: compressedUrl,
-              title: itemName,
-              topic: itemName,
-              stickerPresetId: preset.id,
-              sticker_sub: subKey,
-              design_type: 'sticker',
-              is_deleted: false
-            };
+          const initialCanvas = document.createElement('canvas');
+          initialCanvas.width = 1200;
+          initialCanvas.height = 1200;
+          const initCtx = initialCanvas.getContext('2d');
+          if (initCtx) {
+            initCtx.fillStyle = '#FFFFFF';
+            initCtx.fillRect(0, 0, 1200, 1200);
+            initCtx.strokeStyle = '#E2E8F0';
+            initCtx.lineWidth = 14;
+            initCtx.strokeRect(7, 7, 1186, 1186);
 
-            await fetch('/api/designs/save', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                id: data.data.id,
-                designData: coverDocData
-              })
-            });
-            successCount++;
-            fetchDesigns(1, false);
+            initCtx.fillStyle = '#4F46E5';
+            initCtx.font = 'bold 52px sans-serif';
+            initCtx.textAlign = 'center';
+            initCtx.textBaseline = 'middle';
+            initCtx.fillText('✨ 마스터 썸네일 커버 표지', 600, 520);
+
+            initCtx.fillStyle = '#0F172A';
+            initCtx.font = 'bold 36px sans-serif';
+            initCtx.fillText(itemName, 600, 600);
+
+            initCtx.fillStyle = '#059669';
+            initCtx.font = 'bold 26px sans-serif';
+            initCtx.fillText('⚡ 스티커 생성 완료 후 100% 실물 스티커로 자동 합성됩니다', 600, 680);
           }
+          const placeholderUrl = initialCanvas.toDataURL('image/jpeg', 0.85);
+
+          coverDocData = {
+            id: coverId,
+            image_url: placeholderUrl,
+            title: itemName,
+            topic: itemName,
+            stickerPresetId: preset.id,
+            sticker_sub: subKey,
+            design_type: 'sticker',
+            is_deleted: false,
+            created_at: new Date().toISOString()
+          };
+
+          await fetch('/api/designs/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: coverId,
+              designData: coverDocData
+            })
+          });
+          successCount++;
+          fetchDesigns(1, false);
         } catch (e) {
-          console.error('Failed to generate cover:', e);
+          console.error('Failed to register initial cover placeholder:', e);
         }
         continue;
       }
@@ -4160,6 +4051,13 @@ export default function Home() {
             })
           });
           successCount++;
+          generatedStickersForCover.push({
+            id: data.data.id,
+            image_url: stickerImgUrl,
+            title: vesselPreset.name,
+            stickerPresetId: vesselPreset.id,
+            sticker_sub: subKey
+          });
         }
       } catch (e) {
         console.error(`Failed to generate sticker for ${vesselPreset.name}:`, e);
@@ -4196,10 +4094,59 @@ export default function Home() {
               })
             });
             successCount++;
+            generatedStickersForCover.push({
+              id: data.data.id,
+              image_url: data.data.image_url,
+              title: standalonePreset.name,
+              stickerPresetId: standalonePreset.id,
+              sticker_sub: subKey
+            });
           }
         } catch (e) {
           console.error(`Failed to generate standalone sticker for ${standalonePreset.name}:`, e);
         }
+      }
+    }
+
+    // 3. AUTO-COMPOSITE 100% REAL STICKER MASTER COVER (Etsy Bestseller Standard)
+    // AI 텍스트 생성 대신, 방금 생성된 실제 20/40종 스티커 실물을 캔버스(3000px)에 100% 자동 합성하여 표지를 완성합니다.
+    if (coverDocData && generatedStickersForCover.length > 0) {
+      setBatchProgress({
+        current: totalExpectedCount,
+        total: totalExpectedCount,
+        label: `✨ 실제 생성된 스티커(${generatedStickersForCover.length}종) 100% 일치 고화질 마스터 표지 자동 합성 중...`,
+        packTitle: packName
+      });
+
+      try {
+        const targetCount = generatedStickersForCover.length;
+        const adjustedTitle = formatCoverTitleWithCount(targetPresets[0].name, targetCount);
+        const compositeDataUrl = await createCompositeMasterCover(generatedStickersForCover, {
+          title: adjustedTitle,
+          subType: subKey,
+          stickerCount: targetCount
+        });
+
+        const compressedCoverUrl = await compressImageForFirestore(compositeDataUrl, 650000);
+
+        const updatedCoverData = {
+          ...coverDocData,
+          image_url: compressedCoverUrl,
+          title: adjustedTitle,
+          topic: adjustedTitle,
+          updated_at: new Date().toISOString()
+        };
+
+        await fetch('/api/designs/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: coverDocData.id,
+            designData: updatedCoverData
+          })
+        });
+      } catch (compErr) {
+        console.error('Failed to auto-composite master cover:', compErr);
       }
     }
 
