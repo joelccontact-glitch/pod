@@ -45,34 +45,33 @@ import { HANGUL_20_DATA, findHangulPresetData, compositeHangulTypography, extrac
 
 // Client-side cache for high-frequency design pool queries to eliminate redundant Firestore reads (99%+ reduction)
 let clientPoolCache: { data: any[]; timestamp: number } | null = null;
-const CLIENT_POOL_TTL_MS = 600000; // 10 minutes cache
-const SESSION_CACHE_KEY = 'mypod_stickers_pool_cache_v3';
+const CLIENT_POOL_TTL_MS = 60000; // 1 minute cache
+const SESSION_CACHE_KEY = 'mypod_stickers_pool_cache_v5';
 
 const getCachedStickersPool = async (forceRefresh = false): Promise<any[]> => {
   const now = Date.now();
 
-  // 1. Check in-memory variable
-  if (!forceRefresh && clientPoolCache && (now - clientPoolCache.timestamp < CLIENT_POOL_TTL_MS)) {
-    return clientPoolCache.data;
-  }
+  if (forceRefresh) {
+    invalidateClientPoolCache();
+  } else {
+    // 1. Check in-memory variable
+    if (clientPoolCache && (now - clientPoolCache.timestamp < CLIENT_POOL_TTL_MS)) {
+      return clientPoolCache.data;
+    }
 
-  // 2. Check sessionStorage if memory cache was lost (e.g. page navigation)
-  if (!forceRefresh && typeof window !== 'undefined') {
-    try {
-      const stored = sessionStorage.getItem(SESSION_CACHE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && Array.isArray(parsed.data) && (now - parsed.timestamp < CLIENT_POOL_TTL_MS)) {
-          clientPoolCache = parsed;
-          return parsed.data;
+    // 2. Check sessionStorage if memory cache was lost (e.g. page navigation)
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = sessionStorage.getItem(SESSION_CACHE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && Array.isArray(parsed.data) && (now - parsed.timestamp < CLIENT_POOL_TTL_MS)) {
+            clientPoolCache = parsed;
+            return parsed.data;
+          }
         }
-      }
-    } catch {}
-  }
-
-  // If forceRefresh requested but last fetch was within 15 seconds, avoid hammering Firestore
-  if (forceRefresh && clientPoolCache && (now - clientPoolCache.timestamp < 15000)) {
-    return clientPoolCache.data;
+      } catch {}
+    }
   }
 
   try {
@@ -7082,6 +7081,18 @@ export default function Home() {
                   <span className="text-xs font-bold text-teal-900 bg-teal-100 border border-teal-300 px-3 py-1.5 rounded-xl">
                     📦 세트 구성: 표지 1장 + 하위 스티커 {packStickers.length}종
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      invalidateClientPoolCache();
+                      handleOpenPackDetail(selectedPackCover, true);
+                    }}
+                    className="text-xs bg-white hover:bg-teal-100 text-teal-800 border border-teal-300 font-bold px-2.5 py-1.5 rounded-xl transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
+                    title="최신 스티커 목록을 서버에서 즉시 다시 불러옵니다"
+                  >
+                    <span>🔄</span>
+                    <span>새로고침</span>
+                  </button>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
