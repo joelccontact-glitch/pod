@@ -18,7 +18,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   // --- 👕 POD Commercial Apparel & Goods Mockups ---
   {
     id: 'white-tshirt',
-    name: '흰색 코튼 티셔츠',
+    name: 'Comfort Colors 1717 코튼 티셔츠 (화이트)',
     imageUrl: '/mockup_1.png',
     category: 'pod',
     overlay: {
@@ -31,7 +31,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   {
     id: 'cream-tshirt',
-    name: '크림/베이지 티셔츠',
+    name: 'Comfort Colors 1717 빈티지 티셔츠 (크림/내추럴)',
     imageUrl: '/mockup_cream.jpg',
     category: 'pod',
     overlay: {
@@ -43,8 +43,21 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
     }
   },
   {
+    id: 'gildan-18000-sweatshirt',
+    name: 'Gildan 18000 오버핏 크루넥 맨투맨 (샌드/베이지)',
+    imageUrl: '/mockup_sweatshirt.jpg',
+    category: 'pod',
+    overlay: {
+      x: 322,
+      y: 290,
+      width: 380,
+      height: 380,
+      blendMode: 'multiply'
+    }
+  },
+  {
     id: 'black-tshirt',
-    name: '검정 코튼 티셔츠',
+    name: 'Comfort Colors 1717 코튼 티셔츠 (블랙)',
     imageUrl: '/mockup_black.jpg',
     category: 'pod',
     overlay: {
@@ -57,7 +70,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   {
     id: 'navy-tshirt',
-    name: '네이비 티셔츠',
+    name: 'Comfort Colors 1717 코튼 티셔츠 (네이비)',
     imageUrl: '/mockup_navy.jpg',
     category: 'pod',
     overlay: {
@@ -70,7 +83,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   {
     id: 'folded-tee',
-    name: '접힌 티셔츠 (디스플레이)',
+    name: 'Comfort Colors 1717 접힌 티셔츠 (플랫레이)',
     imageUrl: '/mockup_folded.png',
     category: 'pod',
     overlay: {
@@ -83,7 +96,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   {
     id: 'model-adult-female',
-    name: '성인 여성 피팅 착샷',
+    name: 'Comfort Colors 1717 여성 피팅 착샷',
     imageUrl: '/mockup_adult_female_smiling_1786343996457.jpg',
     category: 'pod',
     overlay: {
@@ -96,7 +109,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   {
     id: 'model-boy',
-    name: '키즈 남아 피팅 착샷',
+    name: '키즈 남아 티셔츠 피팅 착샷',
     imageUrl: '/mockup_boy_smiling_1786343963751.jpg',
     category: 'pod',
     overlay: {
@@ -109,7 +122,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   {
     id: 'model-girl',
-    name: '키즈 여아 피팅 착샷',
+    name: '키즈 여아 티셔츠 피팅 착샷',
     imageUrl: '/mockup_girl_smiling_v2_1786347441131.jpg',
     category: 'pod',
     overlay: {
@@ -122,7 +135,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   {
     id: 'totebag',
-    name: '캔버스 에코백 목업',
+    name: 'Printify 헤비 캔버스 에코백 (토트백)',
     imageUrl: '/mockup_totebag.png',
     category: 'pod',
     overlay: {
@@ -135,7 +148,7 @@ export const MOCKUP_TEMPLATES: MockupTemplate[] = [
   },
   {
     id: 'mug',
-    name: '도자기 머그컵 목업',
+    name: 'Printify 11oz 세라믹 머그컵',
     imageUrl: '/mockup_mug.png',
     category: 'pod',
     overlay: {
