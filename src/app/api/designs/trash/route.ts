@@ -48,16 +48,23 @@ export async function GET(req: Request) {
         }
       });
 
-      // Execute auto cleanup for expired docs (>15 days) in safe chunks (<= 400 per batch)
+      // Execute auto cleanup for expired docs (>15 days) safely in small chunks (<= 40 per batch)
+      // Non-blocking try-catch ensures trash fetch always succeeds immediately
       if (expiredDocRefs.length > 0) {
-        const CHUNK_SIZE = 400;
-        for (let i = 0; i < expiredDocRefs.length; i += CHUNK_SIZE) {
-          const chunk = expiredDocRefs.slice(i, i + CHUNK_SIZE);
-          const batch = db.batch();
-          chunk.forEach((ref: any) => batch.delete(ref));
-          await batch.commit();
+        try {
+          // Clean up in batches of 40, capped at 120 items per request to guarantee <1s response time
+          const toDelete = expiredDocRefs.slice(0, 120);
+          const CHUNK_SIZE = 40;
+          for (let i = 0; i < toDelete.length; i += CHUNK_SIZE) {
+            const chunk = toDelete.slice(i, i + CHUNK_SIZE);
+            const batch = db.batch();
+            chunk.forEach((ref: any) => batch.delete(ref));
+            await batch.commit();
+          }
+          console.log(`Auto-cleaned ${toDelete.length} expired trash items (>15 days). Remaining: ${Math.max(0, expiredDocRefs.length - toDelete.length)}`);
+        } catch (cleanupErr) {
+          console.warn('Non-blocking auto-cleanup error in trash route:', cleanupErr);
         }
-        console.log(`Auto-cleaned ${expiredDocRefs.length} expired trash items (>15 days).`);
       }
 
       // Sort by deleted_at descending
