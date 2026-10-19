@@ -198,7 +198,16 @@ export const AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 8. TANK COMPOSITION RULE: Classic rectangular glass box aquarium drawn in a three-quarter front view: the large front glass panel faces the viewer and dominates the image, the camera is slightly above so the top rim and water surface are visible, and one narrow side panel is visible receding to the side in gentle perspective. NOT a flat 2D front-only view, NOT corner-facing diamond/isometric view, NOT top-down. NO round fish bowls, NO cylinders.
 9. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
 
-export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT;
+export const TERRARIUM_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
+1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
+2. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
+3. Square 1:1 ratio. STRICT SINGLE ITEM RULE: EXACTLY ONE single centered glass jar terrarium. Absolutely NO duplicate side-by-side jars, NO pairs, NO twins, NO multiple containers, NO 2-in-a-row layout, NO sticker sheet collage.
+4. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures, NO labels anywhere in the image. Pure graphic illustration art only.
+5. STRICT NON-REFLECTIVE GLASS RULE: Absolutely NO glass reflections, NO white glare streaks, NO diagonal shine strips across the glass container. The glass jar must be completely clear and transparent.
+6. STRICT NO ANIMALS/MAMMALS RULE: Absolutely NO animals, NO mammals, NO rodents, NO cats, NO dogs, NO birds. Pure botanical green moss, succulents, ferns, stone paths, cottages, and miniature botanical ornaments ONLY.
+7. Vector sticker aesthetic, high contrast, vibrant cute kawaii botanical illustration.`;
+
+export const STICKER_RULES_PROMPT_SUFFIX_NO_TEXT = TERRARIUM_RULES_PROMPT_SUFFIX_NO_TEXT;
 
 export const VIVARIUM_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
@@ -323,7 +332,7 @@ STRICT NO MAMMALS/BIRDS RULE: Absolutely NO land animals, NO foxes, NO birds, NO
     theme: 'Terrarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `A cute die-cut sticker design featuring a complete, fully decorated ${items.detail}. NO animals, NO mammals, NO living creatures. NO glass reflection glare lines. Crisp white border. ${STICKER_RULES_PROMPT_SUFFIX_NO_TEXT}`
+    prompt: `Square 1:1 ratio. A cute die-cut sticker design featuring a complete, fully decorated single ${items.detail}. EXACTLY ONE standalone glass jar centered on canvas. Absolutely NO duplicate jars, NO side-by-side items, NO pairs. NO animals, NO mammals, NO living creatures. NO glass reflection glare lines. Crisp white border. ${TERRARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
   }
 }) as unknown as StickerPreset[]];
 

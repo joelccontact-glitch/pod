@@ -4410,6 +4410,17 @@ export default function Home() {
             }
           }
         }
+
+        // Ensure preview image is compressed to stay well under Firestore 1MB limit
+        if (previewData?.image_url && previewData.image_url.startsWith('data:image')) {
+          try {
+            const compressedUrl = await compressImageForFirestore(previewData.image_url, 800000);
+            previewData = { ...previewData, image_url: compressedUrl };
+          } catch (compErr) {
+            console.warn('[Preview Compress Warn]:', compErr);
+          }
+        }
+
         setUploadPreviewDesign(previewData);
       } else {
         alert('생성 실패: ' + data.error);
@@ -4425,12 +4436,22 @@ export default function Home() {
     if (!uploadPreviewDesign) return;
     setIsGeneratingFromImage(true);
     try {
+      let designDataToSave = { ...uploadPreviewDesign };
+      if (designDataToSave.image_url && designDataToSave.image_url.startsWith('data:image')) {
+        const compressedUrl = await compressImageForFirestore(designDataToSave.image_url, 800000);
+        designDataToSave.image_url = compressedUrl;
+      }
+      if (designDataToSave.raw_image_url && designDataToSave.raw_image_url.startsWith('data:image')) {
+        const compressedRaw = await compressImageForFirestore(designDataToSave.raw_image_url, 800000);
+        designDataToSave.raw_image_url = compressedRaw;
+      }
+
       const res = await fetch('/api/designs/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: uploadPreviewDesign.id,
-          designData: uploadPreviewDesign
+          id: designDataToSave.id,
+          designData: designDataToSave
         })
       });
       const data = await res.json();
