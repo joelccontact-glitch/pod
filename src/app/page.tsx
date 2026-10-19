@@ -2350,6 +2350,7 @@ export default function Home() {
 
   const [activeTab, setActiveTab] = useState<'info' | 'mockup' | 'edit'>('info');
   const [selectedMockupId, setSelectedMockupId] = useState(MOCKUP_TEMPLATES[0].id);
+  const [mockupFilterCategory, setMockupFilterCategory] = useState<'all' | 'pod' | 'sticker'>('all');
   const [mockupScale, setMockupScale] = useState(1.0);
   const [isProcessingPNG, setIsProcessingPNG] = useState(false);
   const [mockupOffsetX, setMockupOffsetX] = useState(0);
@@ -5676,7 +5677,7 @@ export default function Home() {
                     onClick={() => setActiveTab('mockup')} 
                     className={`pb-3 font-semibold text-sm transition-colors border-b-2 flex items-center gap-1.5 ${activeTab === 'mockup' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-400 hover:text-gray-700'}`}
                   >
-                    {isStickerMode ? '📦 스티커 디스플레이' : '👕 목업'}
+                    {isStickerMode ? '👕 POD 목업 & 📦 디스플레이' : '👕 의류/굿즈 목업'}
                   </button>
                   <button 
                     onClick={() => setActiveTab('edit')} 
@@ -5926,26 +5927,98 @@ export default function Home() {
                       </>
                     );
                   })()}
-                  {activeTab === 'mockup' && (
+                  {activeTab === 'mockup' && (() => {
+                    const currentMockupTemplate = MOCKUP_TEMPLATES.find(m => m.id === selectedMockupId);
+                    const isPodMockupSelected = currentMockupTemplate?.category === 'pod';
+
+                    return (
                     <div className="flex flex-col items-center h-full min-h-[400px]">
-                      {isStickerMode && (
-                        <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3 text-xs text-teal-950 w-full flex items-start gap-2">
+                      {isPodMockupSelected ? (
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-3 text-xs text-amber-950 w-full flex items-start gap-2 shadow-2xs">
+                          <span className="text-base shrink-0">👕</span>
+                          <div>
+                            <span className="font-bold text-amber-900">Etsy POD 실물 굿즈 셀링 팁:</span> 티셔츠나 캔버스 에코백에 감성 그래픽을 가슴 중앙에 배치하고, 밝은 감성 착샷 목업을 대표 사진으로 등록하면 높은 클릭률과 주문 단가($20~$35)를 얻을 수 있습니다.
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3 text-xs text-teal-950 w-full flex items-start gap-2 shadow-2xs">
                           <span className="text-base shrink-0">💡</span>
                           <div>
                             <span className="font-bold">Etsy 스티커 셀링 핵심 노하우:</span> 스티커 베스트셀러는 의류 목업 대신 <span className="font-bold text-teal-700">전체 20종 스티커 종합 컬렉션 디스플레이</span>와 <span className="font-bold text-teal-700">대표 마스터 썸네일 커버 표지(00_Master_Sticker_Pack_Cover.png)</span>를 메인으로 노출할 때 가장 높은 판매 전환율을 기록합니다.
                           </div>
                         </div>
                       )}
+
                       <div className="w-full mb-4 flex flex-col gap-3">
+                        {/* Mockup Category Quick Selector */}
+                        <div className="grid grid-cols-3 gap-1.5 w-full bg-gray-100 p-1 rounded-xl">
+                          <button
+                            type="button"
+                            onClick={() => setMockupFilterCategory('all')}
+                            className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center ${
+                              mockupFilterCategory === 'all'
+                                ? 'bg-white text-orange-600 shadow-xs'
+                                : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                          >
+                            전체 목업
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMockupFilterCategory('pod');
+                              if (currentMockupTemplate?.category !== 'pod') {
+                                setSelectedMockupId('white-tshirt');
+                              }
+                            }}
+                            className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center flex items-center justify-center gap-1 ${
+                              mockupFilterCategory === 'pod'
+                                ? 'bg-white text-orange-600 shadow-xs'
+                                : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                          >
+                            <span>👕</span>
+                            <span className="truncate">의류·굿즈 POD</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setMockupFilterCategory('sticker');
+                              if (currentMockupTemplate?.category !== 'sticker') {
+                                setSelectedMockupId('journal-sticker');
+                              }
+                            }}
+                            className={`py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center flex items-center justify-center gap-1 ${
+                              mockupFilterCategory === 'sticker'
+                                ? 'bg-white text-orange-600 shadow-xs'
+                                : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                          >
+                            <span>📦</span>
+                            <span className="truncate">스티커 씬</span>
+                          </button>
+                        </div>
+
                         <div className="flex flex-col w-full gap-2.5">
                           <select 
                             value={selectedMockupId}
                             onChange={(e) => setSelectedMockupId(e.target.value)}
                             className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white shadow-xs"
                           >
-                            {getMockupsForMode(isStickerMode).map(t => (
-                              <option key={t.id} value={t.id}>{t.name}</option>
-                            ))}
+                            {(mockupFilterCategory === 'all' || mockupFilterCategory === 'pod') && (
+                              <optgroup label="👕 POD 실물 굿즈 (티셔츠/에코백/머그/착샷)">
+                                {MOCKUP_TEMPLATES.filter(m => m.category === 'pod').map(t => (
+                                  <option key={t.id} value={t.id}>{t.name}</option>
+                                ))}
+                              </optgroup>
+                            )}
+                            {(mockupFilterCategory === 'all' || mockupFilterCategory === 'sticker') && (
+                              <optgroup label="📦 스티커 디스플레이 (다이어리/노트북/텀블러)">
+                                {MOCKUP_TEMPLATES.filter(m => m.category === 'sticker').map(t => (
+                                  <option key={t.id} value={t.id}>{t.name}</option>
+                                ))}
+                              </optgroup>
+                            )}
                           </select>
                           
                           <div className="grid grid-cols-2 gap-2 w-full">
@@ -5955,7 +6028,7 @@ export default function Home() {
                               className="bg-orange-500 hover:bg-orange-600 active:scale-98 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 w-full whitespace-nowrap"
                             >
                               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                              <span>{isStickerMode ? '📦 스티커 디스플레이 다운' : '👕 2.5K 목업'}</span>
+                              <span>{isPodMockupSelected ? '👕 POD 목업 다운' : '📦 스티커 디스플레이 다운'}</span>
                             </button>
                             
                             <button 
@@ -6007,7 +6080,8 @@ export default function Home() {
                         <canvas ref={canvasRef} className="max-w-full max-h-full object-contain" />
                       </div>
                     </div>
-                  )}
+                  );
+                })()}
                   
                   {activeTab === 'edit' && (
                     <div className="flex flex-col h-full gap-4">
