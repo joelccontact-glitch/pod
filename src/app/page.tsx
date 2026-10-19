@@ -4379,12 +4379,18 @@ export default function Home() {
     try {
       const isTemplatePrompt = uploadPrompt.toLowerCase().includes('die-cut sticker');
       const finalPrompt = (selectedAnimal && !isTemplatePrompt) ? `${selectedAnimal} subject, ${uploadPrompt}` : uploadPrompt;
+      
+      const allPresets = getPresetSeriesList(selectedStickerSeriesTab);
+      const activePreset = allPresets.find(p => p.id === selectedStickerPresetId);
+
       const res = await fetch('/api/designs/from-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           imageBase64: uploadImageBase64, 
           prompt: finalPrompt, 
+          title: activePreset?.name,
+          presetId: selectedStickerPresetId,
           isPreview: true, 
           styleId: selectedStyleId, 
           catchphrase: autoGeneratePhrase ? '' : globalCatchphrase.trim(),
@@ -4460,8 +4466,12 @@ export default function Home() {
         setUploadImageBase64('');
         setUploadPrompt('');
         setUploadPreviewDesign(null);
+        invalidateClientPoolCache();
         await fetchDesigns(1);
         setPage(1);
+        if (selectedPackCover) {
+          await handleOpenPackDetail(selectedPackCover, true);
+        }
       } else {
         alert('저장 실패: ' + data.error);
       }

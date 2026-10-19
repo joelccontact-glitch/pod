@@ -9,7 +9,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(req: Request) {
   try {
-    const { imageBase64, prompt, isPreview, styleId, catchphrase: rawCatchphrase, autoPhrase, title: presetTitle } = await req.json();
+    const { imageBase64, prompt, isPreview, styleId, catchphrase: rawCatchphrase, autoPhrase, title: presetTitle, presetId: stickerPresetId } = await req.json();
 
     if (!prompt) {
       return NextResponse.json({ success: false, error: 'Prompt is required' }, { status: 400 });
@@ -224,6 +224,7 @@ export async function POST(req: Request) {
       created_at: new Date().toISOString(),
       design_type: isSticker ? 'sticker' : 'pod',
       sticker_sub: stickerSub,
+      stickerPresetId: stickerPresetId || undefined,
       status: 'success',
       reference_image_used: !!base64Data,
       feedback_applied: prompt,
