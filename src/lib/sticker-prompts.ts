@@ -191,12 +191,12 @@ export const AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
 2. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
 3. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures, NO labels anywhere in the image. Pure graphic illustration art only.
-4. STRICT NON-REFLECTIVE GLASS RULE: Absolutely NO glass reflections, NO white glare streaks, NO diagonal shine strips across the glass container. The glass tank/jar must be completely clear and transparent without any white reflection lines so stickers can be layered seamlessly inside.
+4. STRICT NON-REFLECTIVE GLASS RULE: Absolutely NO glass reflections, NO white glare streaks, NO diagonal shine strips across the glass container. The glass tank must be completely clear and transparent without any white reflection lines so internal details remain fully visible.
 5. STRICT NO MAMMALS/BIRDS IN AQUARIUM RULE: Absolutely NO sea otters, NO penguins, NO mammals, NO birds, NO land/aerial animals inside or trapped in any aquarium tank or glass container. ONLY real marine/freshwater fish, seahorses, jellyfish, sea anemones, corals, aquatic snails, shrimps, and water plants.
-6. STRICT WATER-FILLED AQUARIUM RULE: Every aquarium tank MUST be visibly filled with translucent blue aquatic water, featuring a clear rippling water surface line near the top rim.
-7. STRICT BUBBLE POSITION RULE: All water bubbles MUST stay 100% INSIDE the aquatic water inside the aquarium tank. Absolutely NO floating water bubbles outside the glass tank or floating in the air above the rim.
-8. TANK COMPOSITION & NEAR-DIRECT FRONT VIEW RULE (CRITICAL): The rectangular glass aquarium tank MUST be drawn in a near-direct straight-on front-facing view (eye-level camera positioned directly facing the wide front glass panel, with only a very gentle top rim elevation to reveal the water surface). The flat rectangular front glass panel MUST face straight toward the viewer and occupy 85-95% of the total tank width, making the interior feel wide, expansive, airy, and never cramped. STRICTLY FORBIDDEN: NEVER draw from an isometric or 45-degree diagonal corner perspective, NEVER point a vertical corner edge forward toward the viewer (absolutely NO diamond corner view), NEVER tilt or rotate the tank sideways. Either no side panel or only a minimal hairline sliver of one side panel should be visible. NO round fish bowls, NO cylindrical jars.
-9. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
+6. STRICT WATER-FILLED AQUARIUM RULE: Every aquarium tank MUST be visibly filled with translucent blue aquatic water, featuring a clear wavy water surface line near the top rim. All water bubbles MUST stay 100% INSIDE the water, never outside.
+7. STRICT BOTTOM SUBSTRATE MANDATE (NO EMPTY BOTTOM): The bottom of the aquarium tank MUST NEVER be empty or bare. It MUST feature a lush, beautifully decorated aquascape bottom bed: colorful gravel/pebbles, natural river sand, living rocks, driftwood, and green aquatic plants or vibrant coral reefs covering the lower 25-35% of the tank.
+8. 3D GLASS CUBE TANK & PERSPECTIVE RULE (CRITICAL): The aquarium MUST be a solid 3D volumetric transparent glass CUBE tank (clean square proportions with depth and volume). It MUST be drawn in a three-quarter front view: the wide front glass panel faces forward toward the viewer, the camera is slightly elevated so the rectangular top opening and wavy water surface are visible, and one narrow side glass panel is visible receding in gentle perspective. STRICTLY FORBIDDEN: NEVER draw as a flat 2D frame or border, NEVER draw as a flat cutaway diagram, NEVER draw in corner-facing diamond perspective where a sharp vertical edge points at the camera.
+9. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration with crisp bold black linework and flat vector colors.`;
 
 export const TERRARIUM_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
@@ -440,7 +440,7 @@ STRICT NO LAND ANIMALS/MAMMALS/BIRDS RULE: Absolutely NO land animals, NO mammal
     theme: 'Saltwater Aquarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean rectangular glass saltwater marine aquarium tank in a near-direct straight-on front view (camera directly in front facing the wide flat front glass panel, wide and open interior taking up 90% of tank width, slight gentle high angle showing top rim and water surface line, strictly NOT isometric, strictly NOT corner-facing diamond perspective), completely filled with clear aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT} Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`
+    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean 3D transparent glass cube saltwater marine aquarium tank in three-quarter front view (front panel facing viewer, top opening rim and one side panel visible with gentle perspective and 3D depth, solid volumetric glass cube, NOT a flat 2D frame, NOT corner-facing), filled with translucent blue aquatic water with a rippling water surface line near the top rim and tiny water bubbles inside. Bottom features a vibrant marine substrate with live rock, corals, and white sand. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT} Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`
   }
 }) as unknown as StickerPreset[]];
 
@@ -463,25 +463,25 @@ STRICT NO LAND ANIMALS/MAMMALS/BIRDS RULE: Absolutely NO land animals, NO mammal
   ...Array.from({ length: 20 }, (_, i) => {
     const num = i + 1;
   const items = [
-    { name: '화려한 드레스 베타 열대어항', desc: '붉은 드레스 지느러미 베타와 나나 수초 어항', detail: 'gorgeous red veil-tail betta fish swimming gracefully among green anubias aquatic plants' },
-    { name: '네온 테트라 무리 열대어항', desc: '반짝이는 파란 네온 테트라들이 헤엄치는 수초 어항', detail: 'swarm of glowing blue and red neon tetra fish swimming around mossy river driftwood' },
-    { name: '화려한 네온 구피 열대어항', desc: '화려한 꼬리의 파스텔 구피 두 마리와 수초 어항', detail: 'pair of colorful fancy guppy fish with flowing pastel tails and delicate fins' },
-    { name: '엔젤피쉬 & 수초 유목 어항', desc: '우아한 줄무늬 엔젤피쉬와 유목 수초 어항', detail: 'cute striped freshwater angelfish gliding elegantly near tall Amazon sword plants' },
-    { name: '알비노 코리도라스 열대어항', desc: '바닥을 훑는 귀여운 핑크 코리도라스 어항', detail: 'cute chubby albino corydoras catfish sitting cutely on smooth river gravel' },
-    { name: '블랙 마블 베타 열대어항', desc: '검은색과 파란빛이 조화로운 마블 베타 어항', detail: 'stunning black and blue marble betta fish swimming near lush green java ferns' },
-    { name: '옐로우 드레스 구피 열대어항', desc: '선명한 노란 드레스 꼬리 구피 어항', detail: 'shiny bright yellow fancy guppy fish gliding gracefully above moss stones' },
-    { name: '체리 새우 & 이끼 유목 어항', desc: '빨간 체리 새우들이 유목 이끼 위 노는 어항', detail: 'cute tiny bright red cherry shrimps grazing peacefully on mossy driftwood' },
-    { name: '디스커스(원반 물고기) 열대어항', desc: '원반 모양 화려한 주황 디스커스 열대어항', detail: 'majestic colorful orange and turquoise discus fish swimming near Amazon sword plants' },
-    { name: '골든 알지이더 & 자갈 어항', desc: '귀여운 노란 이끼먹는 물고기와 수초 어항', detail: 'cute golden algae eater fish swimming near smooth river pebbles' },
-    { name: '파스텔 핑크 베타 열대어항', desc: '분홍빛 드레스 지느러미 아기 베타 어항', detail: 'cute pastel pink halfmoon betta fish swimming gracefully near green aquatic plants' },
-    { name: '카디날 테트라 수초 어항', desc: '붉고 푸른 카디날 테트라와 수초 어항', detail: 'vibrant cardinal tetras swimming near bright green carpet moss' },
-    { name: '드워프 구라미 열대어항', desc: '알록달록 드워프 구라미와 나나 수초 어항', detail: 'colorful cute dwarf gourami fish resting near natural river stones' },
-    { name: '화려한 삼색 구피 열대어항', desc: '삼색 화려한 지느러미의 프리미엄 구피 어항', detail: 'fancy tri-color tuxedo guppy fish gliding over colorful river gravel' },
-    { name: '애플 스네일 달팽이 열대어항', desc: '노란 동글동글 애플 스네일 달팽이 수초 어항', detail: 'cute round yellow mystery apple snail crawling on broad aquatic water leaves' },
-    { name: '오토싱(이끼 물고기) 열대어항', desc: '유리 벽면에 찰싹 붙은 미니 오토싱 어항', detail: 'tiny cute otocinclus catfish resting cutely on a green aquatic plant leaf' },
+    { name: '화려한 드레스 베타 열대어항', desc: '붉은 드레스 지느러미 베타와 나나 수초 어항', detail: 'gorgeous red veil-tail betta fish swimming gracefully among green anubias aquatic plants and smooth river pebbles' },
+    { name: '네온 테트라 무리 열대어항', desc: '반짝이는 파란 네온 테트라들이 헤엄치는 수초 어항', detail: 'swarm of glowing blue and red neon tetra fish swimming around mossy river driftwood and aquatic grass bed' },
+    { name: '화려한 네온 구피 열대어항', desc: '화려한 꼬리의 파스텔 구피 두 마리와 수초 어항', detail: 'pair of colorful fancy guppy fish with flowing pastel tails and delicate fins swimming above a lush green carpet moss bed and river pebbles' },
+    { name: '엔젤피쉬 & 수초 유목 어항', desc: '우아한 줄무늬 엔젤피쉬와 유목 수초 어항', detail: 'cute striped freshwater angelfish gliding elegantly near tall Amazon sword plants and river gravel' },
+    { name: '알비노 코리도라스 열대어항', desc: '바닥을 훑는 귀여운 핑크 코리도라스 어항', detail: 'cute chubby albino corydoras catfish sitting cutely on smooth river gravel with green moss rocks' },
+    { name: '블랙 마블 베타 열대어항', desc: '검은색과 파란빛이 조화로운 마블 베타 어항', detail: 'stunning black and blue marble betta fish swimming near lush green java ferns and river driftwood' },
+    { name: '옐로우 드레스 구피 열대어항', desc: '선명한 노란 드레스 꼬리 구피 어항', detail: 'shiny bright yellow fancy guppy fish gliding gracefully above green moss stones and river sand' },
+    { name: '체리 새우 & 이끼 유목 어항', desc: '빨간 체리 새우들이 유목 이끼 위 노는 어항', detail: 'cute tiny bright red cherry shrimps grazing peacefully on mossy driftwood and river pebbles' },
+    { name: '디스커스(원반 물고기) 열대어항', desc: '원반 모양 화려한 주황 디스커스 열대어항', detail: 'majestic colorful orange and turquoise discus fish swimming near Amazon sword plants and river gravel' },
+    { name: '골든 알지이더 & 자갈 어항', desc: '귀여운 노란 이끼먹는 물고기와 수초 어항', detail: 'cute golden algae eater fish swimming near smooth river pebbles and green water grass' },
+    { name: '파스텔 핑크 베타 열대어항', desc: '분홍빛 드레스 지느러미 아기 베타 어항', detail: 'cute pastel pink halfmoon betta fish swimming gracefully near green aquatic plants and white river sand' },
+    { name: '카디날 테트라 수초 어항', desc: '붉고 푸른 카디날 테트라와 수초 어항', detail: 'vibrant cardinal tetras swimming near bright green carpet moss and miniature driftwood' },
+    { name: '드워프 구라미 열대어항', desc: '알록달록 드워프 구라미와 나나 수초 어항', detail: 'colorful cute dwarf gourami fish resting near natural river stones and anubias plants' },
+    { name: '화려한 삼색 구피 열대어항', desc: '삼색 화려한 지느러미의 프리미엄 구피 어항', detail: 'fancy tri-color tuxedo guppy fish gliding over colorful river gravel and lush green plants' },
+    { name: '애플 스네일 달팽이 열대어항', desc: '노란 동글동글 애플 스네일 달팽이 수초 어항', detail: 'cute round yellow mystery apple snail crawling on broad aquatic water leaves and gravel bed' },
+    { name: '오토싱(이끼 물고기) 열대어항', desc: '유리 벽면에 찰싹 붙은 미니 오토싱 어항', detail: 'tiny cute otocinclus catfish resting cutely on a green aquatic plant leaf above smooth stones' },
     { name: '수초 숲 & 자갈 바닥 어항', desc: '푸른 수초가 숲처럼 우거진 힐링 수초 어항', detail: 'lush aquascape jungle filled with green stem plants, aquatic moss, and river pebbles' },
-    { name: '유목 아치 & 구피 무리 어항', desc: '유목 아치 다리 아래 헤엄치는 구피 어항', detail: 'curved wooden driftwood arch bridge with tiny swimming colorful fish underneath' },
-    { name: '화이트 다이아몬드 베타 어항', desc: '순백색 우아한 다이아몬드 베타 어항', detail: 'pristine white veil-tail betta fish swimming gracefully among lush green plants' },
+    { name: '유목 아치 & 구피 무리 어항', desc: '유목 아치 다리 아래 헤엄치는 구피 어항', detail: 'curved wooden driftwood arch bridge with tiny swimming colorful fish underneath and green moss' },
+    { name: '화이트 다이아몬드 베타 어항', desc: '순백색 우아한 다이아몬드 베타 어항', detail: 'pristine white veil-tail betta fish swimming gracefully among lush green plants and river sand' },
     { name: '파노라마 종합 열대어 수초 어항', desc: '베타, 구피, 테트라, 수초가 어우러진 완성 어항', detail: 'harmonious community aquascape filled with betta fish, guppies, lush water plants, and driftwood' }
   ][i];
 
@@ -494,7 +494,7 @@ STRICT NO LAND ANIMALS/MAMMALS/BIRDS RULE: Absolutely NO land animals, NO mammal
     theme: 'Freshwater Aquarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean rectangular glass freshwater aquarium tank in a near-direct straight-on front view (camera directly in front facing the wide flat front glass panel, wide and open interior taking up 90% of tank width, slight gentle high angle showing top rim and water surface line, strictly NOT isometric, strictly NOT corner-facing diamond perspective), completely filled with clear aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT} Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`
+    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean 3D transparent glass cube freshwater aquarium tank in three-quarter front view (front panel facing viewer, top opening rim and one side panel visible with gentle perspective and 3D depth, solid volumetric glass cube, NOT a flat 2D frame, NOT corner-facing), filled with translucent blue aquatic water with a rippling water surface line near the top rim and tiny water bubbles inside. Bottom features a lush aquascape substrate with river gravel, natural driftwood, and green aquatic plants. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT} Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`
   }
 }) as unknown as StickerPreset[]];
 
