@@ -196,7 +196,7 @@ export const AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 6. STRICT WATER-FILLED AQUARIUM RULE: Every aquarium tank MUST be visibly filled with translucent blue aquatic water, featuring a clear rippling water surface line near the top rim.
 7. STRICT BUBBLE POSITION RULE: All water bubbles MUST stay 100% INSIDE the aquatic water inside the aquarium tank. Absolutely NO floating water bubbles outside the glass tank or floating in the air above the rim.
 8. TANK COMPOSITION RULE (EXACT STINGRAY TANK PERSPECTIVE): The rectangular glass aquarium tank MUST be drawn with its wide flat front glass panel facing forward toward the viewer (occupying 85% of the tank width with NO vertical line in the center). The camera is slightly elevated to reveal the top open rim and water surface, and one narrow side panel is visible on the side in gentle perspective to provide 3D box depth—exactly matching the iconic stingray saltwater tank layout. STRICTLY FORBIDDEN: NEVER draw in diamond corner-facing perspective where a sharp vertical edge divides the center. NEVER draw as a flat 2D frame. NO round bowls, NO cylinders.
-9. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration.`;
+9. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration. Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`;
 
 export const TERRARIUM_RULES_PROMPT_SUFFIX_NO_TEXT = `CRITICAL STICKER RULES:
 1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
@@ -440,7 +440,7 @@ STRICT NO LAND ANIMALS/MAMMALS/BIRDS RULE: Absolutely NO land animals, NO mammal
     theme: 'Saltwater Aquarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean rectangular glass saltwater marine aquarium tank in a front-facing three-quarter view (the wide flat front glass panel faces forward toward the viewer with NO center vertical seam, top rim and a narrow side panel visible on the side for 3D depth, exactly matching the iconic stingray marine tank layout, NOT corner-facing), completely filled with clear aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT} Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`
+    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean rectangular glass saltwater marine aquarium tank in a front-facing three-quarter view (the wide flat front glass panel faces forward toward the viewer with NO center vertical seam, top rim and a narrow side panel visible on the side for 3D depth, exactly matching the iconic stingray marine tank layout, NOT corner-facing), completely filled with clear aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
   }
 }) as unknown as StickerPreset[]];
 
@@ -494,7 +494,7 @@ STRICT NO LAND ANIMALS/MAMMALS/BIRDS RULE: Absolutely NO land animals, NO mammal
     theme: 'Freshwater Aquarium 20 Pack',
     phrase: '',
     description: items.desc,
-    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean rectangular glass freshwater aquarium tank in a front-facing three-quarter view (the wide flat front glass panel faces forward toward the viewer with NO center vertical seam, top rim and a narrow side panel visible on the side for 3D depth, exactly matching the iconic stingray marine tank layout, NOT corner-facing), completely filled with clear aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT} Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`
+    prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a clean rectangular glass freshwater aquarium tank in a front-facing three-quarter view (the wide flat front glass panel faces forward toward the viewer with NO center vertical seam, top rim and a narrow side panel visible on the side for 3D depth, exactly matching the iconic stingray marine tank layout, NOT corner-facing), completely filled with clear aquatic water, with a visible water surface line near the top rim and tiny water bubbles strictly inside the water. Inside is a vibrant ${items.detail}. NO glass glare strips. Crisp white border. ${AQUARIUM_RULES_PROMPT_SUFFIX_NO_TEXT}`
   }
 }) as unknown as StickerPreset[]];
 
