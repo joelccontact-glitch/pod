@@ -415,6 +415,69 @@ export const THANKSGIVING_STANDALONE_20_SERIES: StickerPreset[] = [
 // ==========================================
 // 4. 💖 VALENTINE'S DAY & PINK LOVE SERIES (Feb 14)
 // ==========================================
+// ==========================================
+// 3.5 🎆 NEW YEAR'S DAY & COUNTDOWN CELEBRATION SERIES (Jan 1)
+// ==========================================
+export const NEWYEAR_20_SERIES: StickerPreset[] = createSeasonalVesselSeries(
+  'newyear',
+  '새해첫날',
+  'New Year Countdown Snowglobes & Glass Domes',
+  'Etsy 판매용 20종 새해 첫날 골든 카운트다운 스노우볼 스티커 팩 마스터 대표 썸네일 커버',
+  'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold golden script typography reading "20+ CUTE NEW YEAR STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large cute die-cut sticker samples of glass snowglobes with midnight clocks, champagne glasses, glowing sparklers, gold star balloons, disco balls, and party hat cupcakes arranged artistically across white background. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.',
+  [
+    { name: '미드나잇 카운트다운 시계 스노우볼', desc: '자정을 가리키는 황금 시계와 반짝이는 골드 글리터 눈송이', detail: 'spherical crystal snowglobe containing an antique gold pocket clock striking midnight 12:00, surrounded by swirling holographic gold glitter and falling star dust' },
+    { name: '샴페인 글라스 테라리움 속 아기 고양이', desc: '샴페인 잔 속 파티 리본과 아기 고양이', detail: 'elegant crystal champagne flute filled with golden bubbling liquid, starry streamers, and a tiny fluffy baby kitten wearing a glitter party hat' },
+    { name: '황금 불꽃놀이 밤하늘 벨자 돔', desc: '밤하늘에 터지는 금빛 은빛 불꽃놀이 미니어처 돔', detail: 'curved glass bell jar dome containing a miniature midnight sky with bursting golden starburst fireworks and glowing fairy dust' },
+    { name: '미러 디스코 볼 메이슨저', desc: '빛을 반사하는 화려한 미니 디스코볼과 컨페티', detail: 'vintage clear mason jar enclosing a shining faceted mirror disco ball casting rainbow sparkles and metallic star confetti' },
+    { name: '신년 캘린더와 별빛 오너먼트', desc: '1월 1일이 펼쳐진 미니 달력과 황금 별 오너먼트', detail: 'glass bauble ornament displaying a cute miniature desktop calendar flipped to January 1 surrounded by miniature gold stars' },
+    { name: '축하 풍선 다발 유리 돔', desc: '골드와 로즈골드 메탈릭 별 풍선이 가득 찬 돔', detail: 'glass display dome packed with buoyant metallic gold, rose gold, and cream star-shaped foil balloons tied with curly ribbons' },
+    { name: '포춘 쿠키와 소원 유리병', desc: '행운의 황금 포춘쿠키와 리본 묶인 소원 쪽지', detail: 'corked apothecary glass bottle filled with a golden crispy fortune cookie cracked open to reveal a lucky scrolled message and gold flakes' },
+    { name: '스파클러 불꽃 테라리움 속 아기 강아지', desc: '빛나는 스파클러 막대를 바라보는 골든 리트리버 강아지', detail: 'wide glass bowl terrarium with miniature glowing sparkler wands casting golden light on an adorable golden retriever puppy' },
+    { name: '자정의 신데렐라 크리스탈 구두 벨자', desc: '반짝이는 크리스탈 유리구두와 금빛 별가루', detail: 'ornate glass cloche dome showcasing a sparkling crystal glass slipper resting on a plush velvet midnight cushion with gold sparkles' },
+    { name: '축하 샴페인 칠러 버킷 메이슨저', desc: '얼음 바구니 속 미니 샴페인 병과 황금 리본', detail: 'clear mason jar containing a miniature silver ice bucket holding a bottle of bubbly with gold foil neck and crystal ice cubes' },
+    { name: '새해 첫 일출 오로라 스노우볼', desc: '새해 첫 일출 햇살과 무지갯빛 오로라가 담긴 스노우볼', detail: 'glass snowglobe capturing a breathtaking sunrise horizon over snowy mountain peaks with glowing golden sunrays and pastel aurora' },
+    { name: '골드 파티 햇 메이슨저 속 아기 펭귄', desc: '반짝이 고깔모자를 쓴 턱시도 아기 펭귄', detail: 'vintage glass jar enclosing an adorable baby penguin wearing a gold sequin party cone hat and holding a mini celebration noisemaker' },
+    { name: '신년 축하 컵케이크 디스플레이 돔', desc: '금박 별과 축하 픽이 꽂힌 글리터 컵케이크 돔', detail: 'pedestal glass cake dome containing a frosted vanilla cupcake with shimmering edible gold dust, gold pearls, and a sparkling star topper' },
+    { name: '행운의 황금 동전 분수 보틀', desc: '황금 코인과 반짝이는 물방울이 든 행운의 보틀', detail: 'antique glass bottle containing a miniature fountain splashing gleaming gold commemorative coins and crystal droplets' },
+    { name: '모락모락 핫토디 겨울 머그 테라리움', desc: '계피 스틱과 별 아니스가 든 겨울 축하 음료 잔', detail: 'clear glass mug terrarium with warm amber spiced toddy, floating cinnamon sticks, star anise pods, and dried orange slices' },
+    { name: '별자리 나침반과 천구의 벨자', desc: '새해 새로운 항해를 뜻하는 빈티지 황금 나침반 돔', detail: 'glass cloche dome enclosing an antique brass pocket compass with celestial constellation engravings and glowing star charts' },
+    { name: '축하 리본과 콘페티 팝퍼 유리병', desc: '파스텔 & 골드 색종이 꽃가루가 터지는 유리병', detail: 'clear glass container capturing an explosion of metallic gold, silver, and soft pink heart confetti and curling ribbons' },
+    { name: '따뜻한 등불 랜턴 속 아기 곰', desc: '새해 소원을 비는 작은 랜턴 속 아기 흑곰', detail: 'faceted glass lantern terrarium with a cozy baby black bear cub holding a warm glowing golden candle lamp' },
+    { name: '다이아몬드 크리스탈 프리즘 스노우볼', desc: '무지개 빛깔로 반사되는 눈부신 크리스탈 볼', detail: 'faceted geometric crystal snowglobe reflecting radiant prismatic rainbow rays with floating iridescent glitter flakes' },
+    { name: '황금 열쇠와 미래의 문 유리 돔', desc: '새해의 시작을 여는 앤틱 황금 열쇠와 작은 문', detail: 'glass display dome featuring an ornate antique gold key unlocking a miniature whimsical pastel wooden door draped in fairy lights' }
+  ]
+);
+
+export const NEWYEAR_STANDALONE_20_SERIES: StickerPreset[] = createSeasonalStandaloneSeries(
+  'newyear',
+  '새해첫날',
+  'New Year Clipart Objects',
+  'Etsy 판매용 20종 새해 첫날 단독 데코 오브젝트 스티커 팩 마스터 대표 썸네일 커버',
+  'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold golden script typography reading "20+ CUTE NEW YEAR CLIPART BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large standalone die-cut sticker samples of glowing sparkler wands, countdown pocket clocks, popping champagne bottles, gold star balloons, striped party hats, confetti poppers, and fortune cookies. STRICT NO GLASS TANKS: Pure standalone die-cut festive objects only. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
+  [
+    { name: '반짝이는 황금 스파클러 불꽃봉', desc: '타오르는 불꽃과 영롱한 별빛 스파클러', detail: 'standalone glowing handheld sparkler wand crackling with bright golden sparkles and floating stardust particles' },
+    { name: '자정 12시 카운트다운 회중시계', desc: '12시 정각을 알리는 로마자 황금 시계', detail: 'standalone ornate vintage gold pocket watch with hands pointing exactly to 12:00 midnight and delicate chain' },
+    { name: '팡 터지는 축하 샴페인 병', desc: '황금 코르크가 열리며 샴페인 거품과 별이 튀는 병', detail: 'standalone popping green champagne bottle with popping cork, bubbly white froth, and flying golden star sparkles' },
+    { name: '샴페인 플루트 잔 듀오', desc: '건배하는 2개의 크리스탈 샴페인 잔', detail: 'standalone pair of elegant crystal champagne flutes clinking together in a celebratory toast with effervescent golden bubbles' },
+    { name: '메탈릭 골드 스타 호일 풍선', desc: '리본이 달린 광택 나는 별 풍선', detail: 'standalone shiny 3D metallic golden star-shaped helium foil balloon tied with a curling gold ribbon' },
+    { name: '줄무늬 파티 고깔모자', desc: '폼폼 방울과 별 스팽글이 달린 파티 모자', detail: 'standalone festive conical party hat with gold glitter stripes, metallic star decals, and a fluffy white pom-pom on top' },
+    { name: '축하 나팔 노이즈메이커', desc: '반짝이는 술이 달린 파티 나팔', detail: 'standalone colorful celebratory party horn blower noisemaker with shimmering metallic gold foil fringe tassels' },
+    { name: '반짝이 디스코 미러 볼', desc: '빛을 뿜어내는 입체 실버 디스코볼', detail: 'standalone retro faceted silver mirror disco ball reflecting sparkling diamond light glints' },
+    { name: '쏟아지는 콘페티 폭죽 팝퍼', desc: '색종이 꽃가루와 리본이 뿜어져 나오는 팝퍼', detail: 'standalone celebratory party cracker popper bursting with colorful pastel and metallic gold star confetti' },
+    { name: '골드 글리터 컵케이크', desc: '스타 캔디와 황금 크림이 얹힌 축하 컵케이크', detail: 'standalone gourmet cupcake with swirled vanilla bean frosting, edible gold foil leaf, and a golden star sugar candy pick' },
+    { name: '행운의 황금 포춘쿠키', desc: '살짝 갈라져 행운의 쪽지가 보이는 바삭한 쿠키', detail: 'standalone golden-brown crispy fortune cookie split open with a white paper slip sticking out with tiny star prints' },
+    { name: '새해 1월 1일 데스크 달력', desc: 'January 1st가 표시된 빈티지 탁상 달력', detail: 'standalone cute spiral-bound desk calendar page clearly showing "JAN 1" in cheerful typography with confetti doodles' },
+    { name: '건배하는 마티니 잔과 올리브', desc: '파티용 마티니 글라스와 스파클', detail: 'standalone cocktail martini glass with a green stuffed olive on a gold pick and sparkling celebratory glints' },
+    { name: '골드 & 블랙 나비넥타이', desc: '벨벳 감성의 단정한 턱시도 보타이', detail: 'standalone dapper black satin tuxedo bow tie with metallic gold polka dots and centered golden ribbon knot' },
+    { name: '화려한 가장무도회 가면', desc: '골드 레이스와 깃털 마스크', detail: 'standalone elegant masquerade party eye mask decorated with intricate golden lace filigree and soft feathers' },
+    { name: '별 모양 파티 안경', desc: '반짝이는 글리터 프레임의 별 안경', detail: 'standalone novelty party eyeglasses with oversized star-shaped golden glitter frames and tinted lenses' },
+    { name: '새해 소원 플래너 다이어리와 펜', desc: '금박 표지의 플래너와 황금 펜', detail: 'standalone cozy hardbound journal diary with embossed gold star cover and a sleek gold writing pen' },
+    { name: '골든 기프트 박스와 리본', desc: '화려한 선물 상자와 풍성한 리본', detail: 'standalone elegant gift present wrapped in glossy white paper with a magnificent large metallic gold satin bow' },
+    { name: '컬링 스트리머 리본 테이프 묶음', desc: '빙글빙글 꼬인 골드 & 실버 축제 리본', detail: 'standalone cluster of curly spiral party ribbon streamers in gleaming champagne gold and shimmering silver' },
+    { name: '팡 터지는 스타버스트 불꽃놀이', desc: '밤하늘에 피어나는 금빛 꽃송이 불꽃놀이', detail: 'standalone radiant starburst firework blossom explosion made of golden and pastel starlight streaks' }
+  ]
+);
+
 export const VALENTINES_20_SERIES: StickerPreset[] = createSeasonalVesselSeries(
   'valentines',
   '발렌타인',
@@ -667,6 +730,8 @@ export const MOTHERSDAY_STANDALONE_20_SERIES: StickerPreset[] = createSeasonalSt
 // Helper function to pick pack presets
 export function getSeasonalPackPresets(seasonId: string): { vesselSeries: StickerPreset[]; standaloneSeries: StickerPreset[] } {
   switch (seasonId) {
+    case 'newyear':
+      return { vesselSeries: NEWYEAR_20_SERIES, standaloneSeries: NEWYEAR_STANDALONE_20_SERIES };
     case 'christmas':
       return { vesselSeries: CHRISTMAS_20_SERIES, standaloneSeries: CHRISTMAS_STANDALONE_20_SERIES };
     case 'halloween':
@@ -717,6 +782,24 @@ export interface SeasonalRecommendation {
  */
 export function getSeasonalPricingStrategy(holidayId: string, koreanName: string): PricingStrategy {
   switch (holidayId) {
+    case 'newyear':
+      return {
+        suggestedPrice: '$3.50',
+        originalPrice: '$7.00 (50% 런칭 세일 권장)',
+        bundleOffer: '뉴이어 카운트다운 2팩 묶음 $5.90',
+        targetAudience: '새해 다이어리/플래너 첫 장 꾸미기, 연말연시 홈파티 및 새해 인사 카드 라벨러',
+        salesTactics: [
+          '정가 $7.00에 50% 세일($3.50)로 연말연시 굿노트 다이어리 신규 구매자 집중 유치.',
+          '새해 다이어리(Goodnotes/Notion) 첫 페이지 스케줄러에 부착된 깔끔한 실물 목업 썸네일 필수.',
+          '"New Year New Me", "Fresh Start 2027 Planner", "Goal Setting Stickers" 키워드 활용.'
+        ],
+        etsyTags: [
+          'New Year Stickers', 'Countdown Clipart', 'New Years Eve PNG', 'Digital Planner 2027',
+          'Sparkler Clipart', 'Champagne Decal', 'Printable Sticker Sheet', 'Fresh Start Planner',
+          'Party Hat PNG', 'Digital Planner Stickers', 'Gold Star Clipart', 'A4 New Year Sheet', 'Midnight Confetti'
+        ],
+        highlightTip: '11월 말부터 12월 말까지 신년 다이어리 및 플래너 준비 유저들의 구매 전환율이 연중 최고에 달합니다.'
+      };
     case 'christmas':
       return {
         suggestedPrice: '$3.80',
@@ -912,7 +995,11 @@ export function getDynamicSeasonalStickerRecommendations(referenceDate: Date = n
     let subtitle = `${seasonInfo.holiday.name} 시즌 틈새 40종 팩 (완성 20종 + 단일 20종 + A4 2장 시트)`;
     let bestSellerReason = `${seasonInfo.holiday.koreanName} 시즌에 다이어리, 선물 라벨, 크리컷 인쇄용으로 검색량이 폭발하는 테마`;
 
-    if (id === 'christmas') {
+    if (id === 'newyear') {
+      title = '🎆 새해 첫날 & 골든 카운트다운 40종 팩';
+      subtitle = '신년 다이어리 & 파티! 골든 스파클러 & 샴페인 스노우볼';
+      bestSellerReason = '새해 다이어리 첫 장 꾸미기(Goodnotes 플래너), 신년 홈파티 라벨용으로 연말연시 검색량 폭발';
+    } else if (id === 'christmas') {
       title = '🎄 크리스마스 & 윈터 스노우볼 40종 팩';
       subtitle = '연중 최대 성수기! 지금 등록하면 11월~12월 검색 1위 독점';
       bestSellerReason = '연말 다이어리 꾸미기, 크리스마스 선물 포장 라벨, 크리컷 인쇄용으로 전 세계에서 가장 많이 팔리는 1위 테마';

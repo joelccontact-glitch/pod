@@ -17,6 +17,8 @@ import {
   FRESH_AQUARIUM_STANDALONE_20_SERIES,
   CHRISTMAS_20_SERIES,
   CHRISTMAS_STANDALONE_20_SERIES,
+  NEWYEAR_20_SERIES,
+  NEWYEAR_STANDALONE_20_SERIES,
   HALLOWEEN_20_SERIES,
   HALLOWEEN_STANDALONE_20_SERIES,
   THANKSGIVING_20_SERIES,
@@ -185,6 +187,7 @@ const getDesignCategoryKey = (d: any): string => {
   if (presetId.includes('booktok') || presetId.includes('reading')) return 'booktok';
 
   const title = (d.title || d.topic || '').toLowerCase();
+  if (title.includes('새해') || title.includes('신년') || title.includes('new year') || title.includes('newyear')) return 'newyear';
   if (title.includes('디저트') || title.includes('베이커리') || title.includes('dessert') || title.includes('bakery')) return 'dessert';
   if (title.includes('사회적 배터리') || title.includes('내향인') || title.includes('social battery') || title.includes('introvert')) return 'socialbattery';
   if (title.includes('한글') || title.includes('k-감성') || title.includes('hangul') || title.includes('k-vibe')) return 'hangul';
@@ -213,6 +216,7 @@ const getStickerSeriesTitle = (tab: string) => {
   if (tab.startsWith('vivarium20')) return tab.includes('standalone') ? '🦎 비바리움 단일 동물 20종 스티커 팩' : '🦎 비바리움 세트 완성 20종 스티커 팩';
   if (tab.startsWith('saltaquarium20')) return tab.includes('standalone') ? '🐠 해수어 단일 어류 20종 스티커 팩' : '🪸 해수어항 세트 완성 20종 스티커 팩';
   if (tab.startsWith('freshaquarium20')) return tab.includes('standalone') ? '🐟 열대어 단일 어류 20종 스티커 팩' : '🐠 열대어어항 세트 완성 20종 스티커 팩';
+  if (tab.startsWith('newyear20')) return tab.includes('standalone') ? '✨ 새해 첫날 단일 오브젝트 20종 스티커 팩' : '🎆 새해 첫날 골든 카운트다운 20종 스티커 팩';
   if (tab.startsWith('christmas20')) return tab.includes('standalone') ? '🎄 크리스마스 단일 오브젝트 20종 스티커 팩' : '🎄 크리스마스 윈터 스노우볼 20종 스티커 팩';
   if (tab.startsWith('halloween20')) return tab.includes('standalone') ? '🎃 할로윈 단일 오브젝트 20종 스티커 팩' : '🎃 할로윈 스푸키 큐트 20종 스티커 팩';
   if (tab.startsWith('thanksgiving20')) return tab.includes('standalone') ? '🦃 추수감사절 단일 오브젝트 20종 스티커 팩' : '🦃 추수감사절 코지 어텀 20종 스티커 팩';
@@ -236,6 +240,8 @@ const getPresetSeriesList = (tab: string): StickerPreset[] => {
   if (tab === 'saltaquarium20_standalone') return SALT_AQUARIUM_STANDALONE_20_SERIES;
   if (tab === 'freshaquarium20') return FRESH_AQUARIUM_20_SERIES;
   if (tab === 'freshaquarium20_standalone') return FRESH_AQUARIUM_STANDALONE_20_SERIES;
+  if (tab === 'newyear20') return NEWYEAR_20_SERIES;
+  if (tab === 'newyear20_standalone') return NEWYEAR_STANDALONE_20_SERIES;
   if (tab === 'christmas20') return CHRISTMAS_20_SERIES;
   if (tab === 'christmas20_standalone') return CHRISTMAS_STANDALONE_20_SERIES;
   if (tab === 'halloween20') return HALLOWEEN_20_SERIES;
@@ -688,6 +694,16 @@ export default function Home() {
     | 'halloween20_standalone'
     | 'thanksgiving20'
     | 'thanksgiving20_standalone'
+    | 'newyear20'
+    | 'newyear20_standalone'
+    | 'valentines20'
+    | 'valentines20_standalone'
+    | 'stpatrick20'
+    | 'stpatrick20_standalone'
+    | 'easter20'
+    | 'easter20_standalone'
+    | 'mothersday20'
+    | 'mothersday20_standalone'
   >('dessert20');
   const [selectedStickerPresetId, setSelectedStickerPresetId] = useState<string>('terrarium-20-pack-1');
   const [isExportingBundle, setIsExportingBundle] = useState(false);
@@ -5219,6 +5235,16 @@ export default function Home() {
                     <optgroup label="🎉 시즌 & 홀리데이 테마">
                       <option value="christmas20">🎄 크리스마스 윈터 스노우볼 20종</option>
                       <option value="christmas20_standalone">🎁 크리스마스 단일 오브젝트 20종</option>
+                      <option value="newyear20">🎆 새해 첫날 골든 카운트다운 20종</option>
+                      <option value="newyear20_standalone">✨ 새해 첫날 단일 오브젝트 20종</option>
+                      <option value="valentines20">💖 발렌타인데이 핑크 러브 20종</option>
+                      <option value="valentines20_standalone">💌 발렌타인 단일 오브젝트 20종</option>
+                      <option value="stpatrick20">☘️ 성 패트릭 럭키 클로버 20종</option>
+                      <option value="stpatrick20_standalone">🍀 성 패트릭 단일 오브젝트 20종</option>
+                      <option value="easter20">🌸 부활절 파스텔 스프링 20종</option>
+                      <option value="easter20_standalone">🥚 부활절 단일 오브젝트 20종</option>
+                      <option value="mothersday20">💐 마더스데이 플로럴 티컵 20종</option>
+                      <option value="mothersday20_standalone">🌷 마더스데이 단일 오브젝트 20종</option>
                       <option value="halloween20">🎃 할로윈 스푸키 큐트 20종</option>
                       <option value="halloween20_standalone">👻 할로윈 단일 오브젝트 20종</option>
                       <option value="thanksgiving20">🦃 추수감사절 코지 어텀 20종</option>

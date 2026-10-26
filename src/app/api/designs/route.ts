@@ -305,6 +305,11 @@ export async function GET(request: Request) {
           ) {
             stickerSub = 'hangul';
           } else if (
+            title.includes('새해') || title.includes('신년') || title.includes('new year') || title.includes('newyear') ||
+            topic.includes('새해') || topic.includes('new year')
+          ) {
+            stickerSub = 'newyear';
+          } else if (
             title.includes('크리스마스') || title.includes('christmas') || title.includes('스노우볼') ||
             topic.includes('크리스마스') || topic.includes('christmas')
           ) {
