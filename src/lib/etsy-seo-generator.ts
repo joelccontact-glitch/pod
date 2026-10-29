@@ -548,6 +548,12 @@ These high-quality PNG files work seamlessly with popular crafting software:
 ❌ POD AUTOMATION: You may NOT upload these raw files to automated public mass-market POD platforms without modifying them into unique physical merchandise.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✨ CREATIVE PROCESS & TRANSPARENCY:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+In accordance with Etsy's Creativity Standards:
+This original digital collection is conceptually created, styled, and curated by our studio using creative generative AI assistance, then individually inspected, professionally hand-edited, isolated for pure transparent backgrounds, and upscaled to crisp 300 DPI print-ready quality.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💌 NEED HELP?
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 If you have any questions, encounter any issues downloading, or need advice on printing, feel free to reach out via Etsy message. We are always happy to help!
