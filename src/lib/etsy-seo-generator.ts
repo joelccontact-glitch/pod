@@ -17,6 +17,7 @@ export interface EtsySeoData {
 const CATEGORY_SEO_DICT: Record<string, {
   name: string;
   goldenBundleTitle?: string;
+  themeTags: string[];
   bundleKeywords: string[];
   singleKeywords: string[];
   descriptionHighlights: string[];
@@ -24,6 +25,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   halloween: {
     name: 'Halloween Spooky Cute',
     goldenBundleTitle: 'Cute Animal Digital Stickers, Spooky Halloween GoodNotes Stickers, Ghost Pumpkin Clipart, Printable Die Cut Decal Bundle, Instant Download PNG',
+    themeTags: [
+      'halloween stickers',
+      'spooky cute sticker',
+      'ghost pumpkin clipart',
+      'witch cauldron decal',
+      'autumn party favors',
+      'black cat stickers',
+      'trick or treat cut'
+    ],
     bundleKeywords: [
       'Halloween Stickers PNG Bundle',
       'Ghost Pumpkin Cauldron Clipart',
@@ -39,6 +49,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   terrarium: {
     name: 'Succulent Terrarium Plants',
     goldenBundleTitle: 'Digital Stickers PNG, Cute Succulent Terrarium GoodNotes Stickers, Botanical Plant Clipart, Printable Planner Decal Bundle, Instant Download',
+    themeTags: [
+      'terrarium stickers',
+      'succulent plants cut',
+      'cactus jar clipart',
+      'botanical stickers',
+      'plant lover gift',
+      'teacup garden decal',
+      'greenery planner'
+    ],
     bundleKeywords: [
       'Succulent Terrarium Stickers PNG Bundle',
       'Glass Jar Cactus Clipart',
@@ -54,6 +73,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   vivarium: {
     name: 'Vivarium Reptile & Amphibian Friends',
     goldenBundleTitle: 'Digital Stickers PNG, Cute Moss Vivarium GoodNotes Stickers, Frog & Gecko Reptile Clipart, Botanical Terrarium Decal Pack, Instant Download',
+    themeTags: [
+      'vivarium stickers',
+      'tree frog stickers',
+      'gecko lizard clipart',
+      'reptile pet decals',
+      'amphibian stickers',
+      'moss habitat clipart',
+      'terrarium animals'
+    ],
     bundleKeywords: [
       'Vivarium Habitat Stickers PNG Bundle',
       'Tree Frog Gecko Chameleon Clipart',
@@ -69,6 +97,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   saltaquarium: {
     name: 'Saltwater Reef Aquarium',
     goldenBundleTitle: 'Digital Stickers PNG, Cute Ocean Aquarium GoodNotes Stickers, Saltwater Coral Reef Fish Clipart, Printable Sea Life Decal, Instant Download',
+    themeTags: [
+      'saltwater aquarium',
+      'coral reef clipart',
+      'clownfish stickers',
+      'ocean animal decals',
+      'marine life clipart',
+      'sea turtle stickers',
+      'tropical fish tank'
+    ],
     bundleKeywords: [
       'Saltwater Aquarium Stickers PNG Bundle',
       'Clownfish Coral Reef Clipart',
@@ -84,6 +121,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   freshaquarium: {
     name: 'Freshwater Planted Aquarium',
     goldenBundleTitle: 'Digital Stickers PNG, Cute Freshwater Aquarium GoodNotes Stickers, Betta Fish & Aquatic Plants Clipart, Printable Decal Pack, Instant Download',
+    themeTags: [
+      'freshwater aquarium',
+      'betta fish stickers',
+      'planted tank clipart',
+      'aquascaping decals',
+      'guppy snail aquatic',
+      'water lily stickers',
+      'fish lover gift'
+    ],
     bundleKeywords: [
       'Freshwater Aquarium Stickers PNG Bundle',
       'Betta Guppy Fish Clipart',
@@ -99,6 +145,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   booktok: {
     name: 'Cozy Book Club & Reading',
     goldenBundleTitle: 'Bookish Digital Stickers, Cute Booktok GoodNotes Stickers, Cozy Reading Animal Clipart, Reader Gift Printable Decal Bundle, Instant Download PNG',
+    themeTags: [
+      'booktok stickers',
+      'bookish girlie decal',
+      'reading club clipart',
+      'cozy bookworm gift',
+      'ereader case sticker',
+      'book tracker deco',
+      'fantasy reader'
+    ],
     bundleKeywords: [
       'Book Club Stickers PNG Bundle',
       'Bookish Girlie Reading Clipart',
@@ -114,6 +169,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   dessert: {
     name: 'Sweet Dessert Bakery Cafe',
     goldenBundleTitle: 'Cute Food Digital Stickers, Sweet Bakery GoodNotes Sticker Pack, Pastel Dessert Clipart, Printable Cafe Planner Decal, Instant Download PNG',
+    themeTags: [
+      'dessert stickers',
+      'bakery clipart',
+      'cute food stickers',
+      'pastry planner decal',
+      'boba cafe stickers',
+      'sweet treats clipart',
+      'cupcake stickers'
+    ],
     bundleKeywords: [
       'Dessert Stickers PNG Bundle',
       'Sweet Bakery Clipart Cute',
@@ -129,6 +193,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   socialbattery: {
     name: 'Introvert & Social Battery Humor',
     goldenBundleTitle: 'Introvert Digital Stickers, Low Social Battery GoodNotes Stickers, Funny Mood Badge Clipart, Sarcastic Meme Decal Pack, Instant Download PNG',
+    themeTags: [
+      'social battery meme',
+      'introvert stickers',
+      'funny mood badge',
+      'low energy decals',
+      'relatable sloth cut',
+      'overstimulated art',
+      'burnout humor deco'
+    ],
     bundleKeywords: [
       'Social Battery Stickers PNG Bundle',
       'Introvert Meme Clipart Cute',
@@ -144,6 +217,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   hangul: {
     name: 'Korean Hangul & K-Vibe Animals',
     goldenBundleTitle: 'Korean Digital Stickers, Cute Hangul GoodNotes Sticker Pack, KDrama Polco Deco Clipart, Printable Journal Decal Bundle, Instant Download PNG',
+    themeTags: [
+      'korean stickers',
+      'hangul sticker pack',
+      'kdrama polco deco',
+      'kpop photocard cut',
+      'korean calligraphy',
+      'korea journal deco',
+      'cute hangul clipart'
+    ],
     bundleKeywords: [
       'Korean Hangul Stickers PNG Bundle',
       'Cute K-Drama Clipart Set',
@@ -159,6 +241,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   christmas: {
     name: 'Cozy Christmas Holiday',
     goldenBundleTitle: 'Winter Digital Stickers PNG, Cute Snowglobe GoodNotes Stickers, New Year Holiday Clipart, Cozy Christmas Planner Decal, Instant Download',
+    themeTags: [
+      'christmas stickers',
+      'snowglobe clipart',
+      'winter holiday decal',
+      'gingerbread santa',
+      'holiday gift tags',
+      'cozy christmas art',
+      'xmas planner deco'
+    ],
     bundleKeywords: [
       'Christmas Holiday Stickers PNG Bundle',
       'Winter Snowglobe Clipart',
@@ -174,6 +265,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   thanksgiving: {
     name: 'Autumn Harvest Thanksgiving',
     goldenBundleTitle: 'Autumn Digital Stickers, Cute Thanksgiving Fall GoodNotes Stickers, Harvest Pumpkin Clipart, Printable Die Cut Decal, Instant Download PNG',
+    themeTags: [
+      'thanksgiving sticker',
+      'fall harvest clipart',
+      'pumpkin spice decal',
+      'autumn leaves craft',
+      'turkey day stickers',
+      'gratitude journal',
+      'cozy november art'
+    ],
     bundleKeywords: [
       'Thanksgiving Fall Stickers PNG Bundle',
       'Harvest Pumpkin Spice Clipart',
@@ -189,6 +289,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   valentines: {
     name: 'Valentines Sweet Hearts',
     goldenBundleTitle: 'Cute Valentines Digital Stickers, Romantic Heart GoodNotes Sticker Pack, Pastel Love Clipart, Printable Planner Decal, Instant Download PNG',
+    themeTags: [
+      'valentines stickers',
+      'romantic heart deco',
+      'pastel love clipart',
+      'sweetheart stickers',
+      'cupid love potion',
+      'couples gift decals',
+      'february planner'
+    ],
     bundleKeywords: [
       'Valentines Day Stickers PNG Bundle',
       'Heart Love Potion Clipart',
@@ -203,6 +312,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   easter: {
     name: 'Spring Easter Bunny',
     goldenBundleTitle: 'Cute Easter Digital Stickers, Spring Bunny GoodNotes Sticker Pack, Pastel Floral Egg Clipart, Printable Planner Decal, Instant Download PNG',
+    themeTags: [
+      'easter bunny sticker',
+      'spring floral eggs',
+      'pastel chick clipart',
+      'easter basket decals',
+      'spring wildflower',
+      'easter planner deco',
+      'cute rabbit clipart'
+    ],
     bundleKeywords: [
       'Easter Bunny Stickers PNG Bundle',
       'Spring Floral Egg Clipart',
@@ -216,6 +334,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   stpatrick: {
     name: 'St Patricks Lucky Shamrocks',
     goldenBundleTitle: 'Lucky Digital Stickers PNG, Cute St Patricks GoodNotes Stickers, Shamrock Clover Clipart, Planner Decal Bundle, Instant Download',
+    themeTags: [
+      'st patricks sticker',
+      'lucky clover decal',
+      'shamrock gold coin',
+      'irish festival art',
+      'green lucky charm',
+      'march planner deco',
+      'rainbow pot of gold'
+    ],
     bundleKeywords: [
       'St Patricks Day Stickers PNG Bundle',
       'Lucky Clover Gold Clipart',
@@ -229,6 +356,15 @@ const CATEGORY_SEO_DICT: Record<string, {
   mothersday: {
     name: 'Mothers Day Floral Gifts',
     goldenBundleTitle: 'Floral Digital Stickers PNG, Cute Mothers Day GoodNotes Stickers, Teacup Rose Clipart, Printable Planner Decal Bundle, Instant Download',
+    themeTags: [
+      'mothers day sticker',
+      'floral teacup rose',
+      'mom gift clipart',
+      'peony bloom decals',
+      'carnation bouquet',
+      'spring flower art',
+      'mother day planner'
+    ],
     bundleKeywords: [
       'Mothers Day Stickers PNG Bundle',
       'Floral Teacup Rose Clipart',
@@ -420,6 +556,7 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
   const themeInfo = CATEGORY_SEO_DICT[subKey] || {
     name: 'Cute Kawaii',
     goldenBundleTitle: 'Digital Stickers PNG, Cute Kawaii GoodNotes Stickers, Aesthetic Clipart Decal Bundle, Instant Download',
+    themeTags: ['kawaii stickers', 'cute animal clipart', 'aesthetic decals', 'pastel stickers', 'journal clipart', 'korean deco stickers', 'cute character art'],
     bundleKeywords: ['Digital Stickers PNG Bundle', 'Cute Kawaii Clipart Set', 'Aesthetic Die Cut Digital Download', 'GoodNotes Planner Decal'],
     singleKeywords: ['Digital Sticker PNG', 'Cute Kawaii Clipart', 'Die Cut Digital Download', 'Printable Cut File'],
     descriptionHighlights: ['✨ Cute and aesthetic digital illustrations crafted with vibrant colors and crisp details.']
@@ -461,20 +598,23 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
       );
     }
 
-    finalTags = [
+    const commonBundleTags = [
       'digital stickers png',
       'goodnotes stickers',
       'planner stickers',
       'printable stickers',
-      'cute clipart bundle',
       'cricut cut file',
-      'die cut decals',
-      'instant download png',
-      'aesthetic stickers',
-      `${subKey} stickers`.slice(0, 20),
-      'scrapbook clipart',
-      'transparent png',
-      'commercial use png'
+      'instant download'
+    ];
+
+    const specificThemeTags = themeInfo.themeTags && themeInfo.themeTags.length > 0
+      ? themeInfo.themeTags
+      : [`${subKey} stickers`, 'cute clipart bundle', 'die cut decals', 'aesthetic stickers', 'scrapbook clipart', 'commercial use', 'transparent png'];
+
+    // Combine: Theme Specific (7) + High-Volume Common (6) = Exactly 13 Perfect Tags
+    finalTags = [
+      ...specificThemeTags.slice(0, 7),
+      ...commonBundleTags
     ];
   } else {
     // 3. Single Standalone Sticker Mode (Golden SEO Formula 100% Enforced)
@@ -489,20 +629,22 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
       20,
       138
     );
+
+    const specificSingleTags = themeInfo.themeTags && themeInfo.themeTags.length > 0
+      ? themeInfo.themeTags.slice(0, 4)
+      : [`${subKey} sticker`, 'cute clipart'];
+
     finalTags = [
+      `${enItemName.toLowerCase().slice(0, 16)} sticker`.slice(0, 20),
+      `${enItemName.toLowerCase().slice(0, 12)} clipart`.slice(0, 20),
+      ...specificSingleTags,
       'digital sticker png',
       'goodnotes sticker',
       'printable sticker',
-      'cute clipart',
       'die cut decal',
       'cricut cut file',
       'planner decal',
-      `${enItemName.toLowerCase().slice(0, 16)} sticker`.slice(0, 20),
-      `${subKey} sticker`.slice(0, 20),
-      'instant download',
-      'transparent png',
-      'scrapbooking art',
-      'commercial use'
+      'instant download'
     ];
   }
 
