@@ -246,9 +246,8 @@ export async function fetchLikedDesignsSummary(db: any, limitCount = 4): Promise
 
 /**
  * Multi-Engine Image Generation with Zero-Downtime Fallback:
- * 1. GoogleGenAI SDK (multiple model candidate names)
- * 2. Direct Google Imagen 3 REST API
- * 3. High Precision Flux.1 Engine via Pollinations
+ * 1. Primary: High Precision Flux.1 Engine via Pollinations (Zero-Cost, High Quality)
+ * 2. Fallback: Direct Google Native Gemini Image Models (gemini-2.5-flash-image)
  */
 async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isSticker: boolean = false): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_KEY;
@@ -266,17 +265,46 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
       .replace(/\bt-shirt\b/gi, 'sticker');
   }
 
+  // 1. Primary (Zero Cost): High Precision Flux.1 Engine via Pollinations
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      console.log(`🎨 [Primary/Zero-Cost] Drawing high-quality image with Flux.1 (Attempt ${attempt})...`);
+      const cleanPrompt = (prompt.length > 450 ? prompt.substring(0, 450) : prompt) + ', single isolated centered sticker, pure solid white background (#FFFFFF), crisp clean die-cut edge, no duplicate, no pattern, 8k resolution';
+      const seed = Math.floor(Math.random() * 10000000);
+      const encodedPrompt = encodeURIComponent(cleanPrompt);
+      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
+
+      // 25초 타임아웃 적용
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+      const imgRes = await fetch(pollinationsUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (imgRes.ok) {
+        const arrayBuf = await imgRes.arrayBuffer();
+        const base64 = Buffer.from(arrayBuf).toString('base64');
+        if (base64 && base64.length > 500) {
+          console.log(`✨ [Zero-Cost] Successfully generated image via Pollinations Flux.1!`);
+          return base64;
+        }
+      }
+    } catch (err: any) {
+      console.warn(`Pollinations Flux attempt ${attempt} failed:`, err?.message || String(err));
+    }
+  }
+
+  // 2. Fallback (Only if Free Flux fails): Google Native Gemini Image Models
   const googleModels = [
     'gemini-2.5-flash-image',
     'gemini-3.1-flash-image',
     'gemini-3.1-flash-image-preview',
   ];
 
-  // 1. Primary: Direct Google Native Gemini Image Models (gemini-2.5-flash-image & gemini-3.1-flash-image)
   if (apiKey) {
     for (const modelName of googleModels) {
       try {
-        console.log(`🎨 Drawing high-quality image with Google Model '${modelName}'...`);
+        console.log(`⚠️ [Fallback/Paid Warning] Flux failed, trying Google Model '${modelName}'...`);
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
           {
@@ -302,27 +330,6 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
         console.warn(`Google Model '${modelName}' failed:`, err?.message || String(err));
       }
     }
-  }
-
-  // 2. Fallback: High Precision Flux.1 Engine via Pollinations
-  try {
-    console.log(`🎨 Falling back to High Precision Flux.1 AI Engine...`);
-    const cleanPrompt = (prompt.length > 450 ? prompt.substring(0, 450) : prompt) + ', single isolated centered sticker, no duplicates, no pattern, no repetition, pure white background';
-    const seed = Math.floor(Math.random() * 1000000);
-    const encodedPrompt = encodeURIComponent(cleanPrompt);
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
-
-    const imgRes = await fetch(pollinationsUrl);
-    if (imgRes.ok) {
-      const arrayBuf = await imgRes.arrayBuffer();
-      const base64 = Buffer.from(arrayBuf).toString('base64');
-      if (base64) {
-        console.log(`✨ Successfully generated image via Pollinations Flux.1!`);
-        return base64;
-      }
-    }
-  } catch (err: any) {
-    console.error(`Pollinations Flux fallback failed:`, err);
   }
 
   throw new Error('모든 AI 이미지 생성 엔진 호출에 실패했습니다. 잠시 후 다시 시도해 주세요.');

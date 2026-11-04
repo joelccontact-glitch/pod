@@ -38,37 +38,48 @@ Return a JSON object with:
 
     console.log(`🎨 Identified Style: ${styleName}`);
 
-    // 2. Generate Sample Image using Imagen
+    // 2. Generate Sample Image using Pollinations Flux (Zero Cost Primary) -> Imagen Fallback
     let imageUrl = "";
     let base64Data = "";
     try {
-      console.log(`🖼️ Generating sample image...`);
-      const imgResponse = await ai.models.generateImages({
-        model: 'imagen-3.0-generate-002',
-        prompt: `A beautiful 2D vector graphic illustration sticker. strictly following this style: ${promptDescription}. 2D vector graphic illustration, clean bold line art with crisp outlines, flat vector color shading. CRITICAL RULE: The image MUST have a pure solid white background (#FFFFFF). ABSOLUTELY NO 3D rendering, NO photorealism, NO background colors, gradients, or scenery.`,
-        config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' }
-      });
+      console.log(`🖼️ [Zero-Cost Primary] Generating sample image with Flux.1...`);
+      const seed = Math.floor(Math.random() * 1000000);
+      const encodedPrompt = encodeURIComponent(`A beautiful 2D vector graphic illustration sticker. strictly following this style: ${promptDescription}. 2D vector graphic illustration, clean bold line art with crisp outlines, flat vector color shading. CRITICAL RULE: The image MUST have a pure solid white background (#FFFFFF). ABSOLUTELY NO 3D rendering, NO photorealism, NO background colors, gradients, or scenery.`);
+      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
       
-      const base64Image = imgResponse.generatedImages?.[0]?.image?.imageBytes;
-      if (base64Image) {
-        base64Data = base64Image;
-        imageUrl = `data:image/jpeg;base64,${base64Image}`;
-      } else {
-        throw new Error("No image generated.");
-      }
-    } catch (imgError) {
-      console.warn("Imagen generation failed, trying Pollinations Flux fallback:", imgError);
-      try {
-        const seed = Math.floor(Math.random() * 1000000);
-        const encodedPrompt = encodeURIComponent(`A beautiful icon or simple illustration. strictly following this style: ${promptDescription}. Pure solid white background (#FFFFFF)`);
-        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=800&seed=${seed}&model=flux&nologo=true`;
-        const res = await fetch(pollinationsUrl);
-        if (res.ok) {
-          const arrayBuf = await res.arrayBuffer();
-          base64Data = Buffer.from(arrayBuf).toString('base64');
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
+      const res = await fetch(pollinationsUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const arrayBuf = await res.arrayBuffer();
+        base64Data = Buffer.from(arrayBuf).toString('base64');
+        if (base64Data && base64Data.length > 500) {
           imageUrl = `data:image/jpeg;base64,${base64Data}`;
+          console.log(`✨ [Zero-Cost] Successfully generated style sample with Flux.1!`);
         } else {
-          throw new Error("Pollinations fallback failed");
+          throw new Error("Invalid Flux image buffer");
+        }
+      } else {
+        throw new Error("Pollinations Flux response not OK");
+      }
+    } catch (fluxErr) {
+      console.warn("Pollinations Flux failed, trying Imagen fallback:", fluxErr);
+      try {
+        console.log(`⚠️ [Fallback/Paid Warning] Generating sample image with Imagen...`);
+        const imgResponse = await ai.models.generateImages({
+          model: 'imagen-3.0-generate-002',
+          prompt: `A beautiful 2D vector graphic illustration sticker. strictly following this style: ${promptDescription}. 2D vector graphic illustration, clean bold line art with crisp outlines, flat vector color shading. CRITICAL RULE: The image MUST have a pure solid white background (#FFFFFF). ABSOLUTELY NO 3D rendering, NO photorealism, NO background colors, gradients, or scenery.`,
+          config: { numberOfImages: 1, aspectRatio: '1:1', outputMimeType: 'image/jpeg' }
+        });
+        
+        const base64Image = imgResponse.generatedImages?.[0]?.image?.imageBytes;
+        if (base64Image) {
+          base64Data = base64Image;
+          imageUrl = `data:image/jpeg;base64,${base64Image}`;
+        } else {
+          throw new Error("No image generated.");
         }
       } catch (fallbackErr) {
         console.error("All image generation failed:", fallbackErr);
