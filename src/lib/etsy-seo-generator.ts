@@ -13,15 +13,17 @@ export interface EtsySeoData {
   description: string;
 }
 
-// English Category Names & Keywords Dictionary (Optimized for Etsy's 14-Word & Objective Keyword Rules)
+// English Category Names & Keywords Dictionary (Optimized with Golden SEO Formula)
 const CATEGORY_SEO_DICT: Record<string, {
   name: string;
+  goldenBundleTitle?: string;
   bundleKeywords: string[];
   singleKeywords: string[];
   descriptionHighlights: string[];
 }> = {
   halloween: {
     name: 'Halloween Spooky Cute',
+    goldenBundleTitle: 'Cute Animal Digital Stickers, Spooky Halloween GoodNotes Stickers, Ghost Pumpkin Clipart, Printable Die Cut Decal Bundle, Instant Download PNG',
     bundleKeywords: [
       'Halloween Stickers PNG Bundle',
       'Ghost Pumpkin Cauldron Clipart',
@@ -36,6 +38,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   terrarium: {
     name: 'Succulent Terrarium Plants',
+    goldenBundleTitle: 'Digital Stickers PNG, Cute Succulent Terrarium GoodNotes Stickers, Botanical Plant Clipart, Printable Planner Decal Bundle, Instant Download',
     bundleKeywords: [
       'Succulent Terrarium Stickers PNG Bundle',
       'Glass Jar Cactus Clipart',
@@ -50,6 +53,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   vivarium: {
     name: 'Vivarium Reptile & Amphibian Friends',
+    goldenBundleTitle: 'Digital Stickers PNG, Cute Moss Vivarium GoodNotes Stickers, Frog & Gecko Reptile Clipart, Botanical Terrarium Decal Pack, Instant Download',
     bundleKeywords: [
       'Vivarium Habitat Stickers PNG Bundle',
       'Tree Frog Gecko Chameleon Clipart',
@@ -64,6 +68,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   saltaquarium: {
     name: 'Saltwater Reef Aquarium',
+    goldenBundleTitle: 'Digital Stickers PNG, Cute Ocean Aquarium GoodNotes Stickers, Saltwater Coral Reef Fish Clipart, Printable Sea Life Decal, Instant Download',
     bundleKeywords: [
       'Saltwater Aquarium Stickers PNG Bundle',
       'Clownfish Coral Reef Clipart',
@@ -78,6 +83,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   freshaquarium: {
     name: 'Freshwater Planted Aquarium',
+    goldenBundleTitle: 'Digital Stickers PNG, Cute Freshwater Aquarium GoodNotes Stickers, Betta Fish & Aquatic Plants Clipart, Printable Decal Pack, Instant Download',
     bundleKeywords: [
       'Freshwater Aquarium Stickers PNG Bundle',
       'Betta Guppy Fish Clipart',
@@ -92,6 +98,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   booktok: {
     name: 'Cozy Book Club & Reading',
+    goldenBundleTitle: 'Bookish Digital Stickers, Cute Booktok GoodNotes Stickers, Cozy Reading Animal Clipart, Reader Gift Printable Decal Bundle, Instant Download PNG',
     bundleKeywords: [
       'Book Club Stickers PNG Bundle',
       'Bookish Girlie Reading Clipart',
@@ -106,6 +113,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   dessert: {
     name: 'Sweet Dessert Bakery Cafe',
+    goldenBundleTitle: 'Cute Food Digital Stickers, Sweet Bakery GoodNotes Sticker Pack, Pastel Dessert Clipart, Printable Cafe Planner Decal, Instant Download PNG',
     bundleKeywords: [
       'Dessert Stickers PNG Bundle',
       'Sweet Bakery Clipart Cute',
@@ -120,6 +128,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   socialbattery: {
     name: 'Introvert & Social Battery Humor',
+    goldenBundleTitle: 'Introvert Digital Stickers, Low Social Battery GoodNotes Stickers, Funny Mood Badge Clipart, Sarcastic Meme Decal Pack, Instant Download PNG',
     bundleKeywords: [
       'Social Battery Stickers PNG Bundle',
       'Introvert Meme Clipart Cute',
@@ -134,6 +143,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   hangul: {
     name: 'Korean Hangul & K-Vibe Animals',
+    goldenBundleTitle: 'Korean Digital Stickers, Cute Hangul GoodNotes Sticker Pack, KDrama Polco Deco Clipart, Printable Journal Decal Bundle, Instant Download PNG',
     bundleKeywords: [
       'Korean Hangul Stickers PNG Bundle',
       'Cute K-Drama Clipart Set',
@@ -148,6 +158,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   christmas: {
     name: 'Cozy Christmas Holiday',
+    goldenBundleTitle: 'Winter Digital Stickers PNG, Cute Snowglobe GoodNotes Stickers, New Year Holiday Clipart, Cozy Christmas Planner Decal, Instant Download',
     bundleKeywords: [
       'Christmas Holiday Stickers PNG Bundle',
       'Winter Snowglobe Clipart',
@@ -162,6 +173,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   thanksgiving: {
     name: 'Autumn Harvest Thanksgiving',
+    goldenBundleTitle: 'Autumn Digital Stickers, Cute Thanksgiving Fall GoodNotes Stickers, Harvest Pumpkin Clipart, Printable Die Cut Decal, Instant Download PNG',
     bundleKeywords: [
       'Thanksgiving Fall Stickers PNG Bundle',
       'Harvest Pumpkin Spice Clipart',
@@ -176,6 +188,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   valentines: {
     name: 'Valentines Sweet Hearts',
+    goldenBundleTitle: 'Cute Valentines Digital Stickers, Romantic Heart GoodNotes Sticker Pack, Pastel Love Clipart, Printable Planner Decal, Instant Download PNG',
     bundleKeywords: [
       'Valentines Day Stickers PNG Bundle',
       'Heart Love Potion Clipart',
@@ -189,6 +202,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   easter: {
     name: 'Spring Easter Bunny',
+    goldenBundleTitle: 'Cute Easter Digital Stickers, Spring Bunny GoodNotes Sticker Pack, Pastel Floral Egg Clipart, Printable Planner Decal, Instant Download PNG',
     bundleKeywords: [
       'Easter Bunny Stickers PNG Bundle',
       'Spring Floral Egg Clipart',
@@ -201,6 +215,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   stpatrick: {
     name: 'St Patricks Lucky Shamrocks',
+    goldenBundleTitle: 'Lucky Digital Stickers PNG, Cute St Patricks GoodNotes Stickers, Shamrock Clover Clipart, Planner Decal Bundle, Instant Download',
     bundleKeywords: [
       'St Patricks Day Stickers PNG Bundle',
       'Lucky Clover Gold Clipart',
@@ -213,6 +228,7 @@ const CATEGORY_SEO_DICT: Record<string, {
   },
   mothersday: {
     name: 'Mothers Day Floral Gifts',
+    goldenBundleTitle: 'Floral Digital Stickers PNG, Cute Mothers Day GoodNotes Stickers, Teacup Rose Clipart, Printable Planner Decal Bundle, Instant Download',
     bundleKeywords: [
       'Mothers Day Stickers PNG Bundle',
       'Floral Teacup Rose Clipart',
@@ -313,43 +329,44 @@ function translateKoItemToEnglish(koreanText: string): string {
  *    Subjective words filtered out: cute, kawaii, lovely, beautiful, pretty, sweet, aesthetic, adorable
  * 3. Keeps length under 140 chars while maintaining high-value search intent.
  */
-export function sanitizeAndEnforceEtsyTitle(rawTitle: string, maxWords = 13, maxChars = 138): string {
-  // 1. Strip subjective adjectives
+/**
+ * Enforces Etsy's strict title guidelines:
+ * 1. Ensures highest-value search keywords (e.g. Digital Stickers PNG, GoodNotes Stickers) are at the front.
+ * 2. Keeps total length strictly under 140 characters.
+ */
+export function sanitizeAndEnforceEtsyTitle(rawTitle: string, maxWords = 20, maxChars = 138): string {
+  // 1. Clean excessive spaces, double commas and trims
   const cleaned = rawTitle
-    .replace(/\b(cute|kawaii|lovely|beautiful|pretty|aesthetic|adorable|sweet|spooky cute)\b/gi, '')
     .replace(/\s+/g, ' ')
     .replace(/,\s*,/g, ',')
     .replace(/^[\s,]+|[\s,]+$/g, '')
     .trim();
 
-  // 2. Enforce 14 words or less (target <= maxWords)
+  // 2. Ensure character limit under 140 chars
+  if (cleaned.length <= maxChars) {
+    return cleaned;
+  }
+
+  // Truncate at comma boundary to keep clean keywords
   const parts = cleaned.split(/,\s*/);
   const selectedParts: string[] = [];
-  let currentWordCount = 0;
+  let currentLen = 0;
 
   for (const part of parts) {
     const trimmed = part.trim();
     if (!trimmed) continue;
-    const wordsInPart = trimmed.split(/\s+/).filter(Boolean).length;
-    if (currentWordCount + wordsInPart <= maxWords) {
+    const additionalLen = selectedParts.length > 0 ? trimmed.length + 2 : trimmed.length;
+    if (currentLen + additionalLen <= maxChars) {
       selectedParts.push(trimmed);
-      currentWordCount += wordsInPart;
+      currentLen += additionalLen;
     } else {
       break;
     }
   }
 
   let result = selectedParts.join(', ');
-
-  // If result is empty or too short, truncate words directly
-  if (!result || result.split(/\s+/).filter(Boolean).length < 4) {
-    const words = cleaned.split(/\s+/).filter(Boolean).slice(0, maxWords);
-    result = words.join(' ');
-  }
-
-  // Ensure character limit
-  if (result.length > maxChars) {
-    result = result.slice(0, maxChars).trim().replace(/,$/, '');
+  if (!result || result.length < 20) {
+    result = cleaned.slice(0, maxChars).trim().replace(/,$/, '');
   }
 
   return result;
@@ -360,12 +377,12 @@ export function sanitizeAndEnforceEtsyTitle(rawTitle: string, maxWords = 13, max
  */
 export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
   if (!design) {
-    const fallbackTitle = 'Digital Stickers PNG Bundle, Clipart Die Cut Download';
+    const fallbackTitle = 'Digital Stickers PNG, Cute GoodNotes Stickers Clipart, Printable Planner Decal Bundle, Instant Download';
     return {
       title: fallbackTitle,
       charCount: fallbackTitle.length,
       wordCount: fallbackTitle.split(/\s+/).filter(Boolean).length,
-      tags: ['digital stickers', 'clipart bundle', 'craft cut file', 'png download'],
+      tags: ['digital stickers', 'goodnotes stickers', 'printable stickers', 'planner clipart', 'instant download'],
       description: 'High-quality digital download.'
     };
   }
@@ -402,8 +419,9 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
 
   const themeInfo = CATEGORY_SEO_DICT[subKey] || {
     name: 'Cute Kawaii',
-    bundleKeywords: ['Cute Stickers PNG Bundle', 'Kawaii Clipart Set', 'Aesthetic Die Cut Digital Download', 'Commercial Craft Cut'],
-    singleKeywords: ['Cute Sticker PNG', 'Kawaii Clipart', 'Die Cut Digital Download', 'Printable Cut File'],
+    goldenBundleTitle: 'Digital Stickers PNG, Cute Kawaii GoodNotes Stickers, Aesthetic Clipart Decal Bundle, Instant Download',
+    bundleKeywords: ['Digital Stickers PNG Bundle', 'Cute Kawaii Clipart Set', 'Aesthetic Die Cut Digital Download', 'GoodNotes Planner Decal'],
+    singleKeywords: ['Digital Sticker PNG', 'Cute Kawaii Clipart', 'Die Cut Digital Download', 'Printable Cut File'],
     descriptionHighlights: ['✨ Cute and aesthetic digital illustrations crafted with vibrant colors and crisp details.']
   };
 
@@ -414,7 +432,7 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
   let finalTags: string[] = [];
 
   if (isPod) {
-    // 1. POD T-Shirt Apparel Mode (Target 11-13 words, NO subjective adjectives)
+    // 1. POD T-Shirt Apparel Mode
     let cleanTopic = translateKoItemToEnglish(titleRaw || topicRaw)
       .replace(/^(vintage|cute|aesthetic|kawaii)\s+/i, '')
       .replace(/\s+(t-shirt|tshirt|shirt|tee)\b/ig, '')
@@ -423,7 +441,8 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
 
     finalTitle = sanitizeAndEnforceEtsyTitle(
       `${cleanTopic} T-Shirt Design PNG, Retro Graphic Tee Clipart, DTG Sublimation Apparel Digital Download`,
-      13
+      20,
+      138
     );
     finalTags = [
       'graphic tee png', 'sublimation design', 'dtg t shirt art', 'vintage apparel',
@@ -431,55 +450,59 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
       't shirt design', 'trending graphic', 'digital download', 'merch design', 'dtg printing'
     ];
   } else if (isBundle) {
-    // 2. Sticker Pack / Bundle Mode (Target 12-13 words, NO subjective words like 'cute' or 'kawaii')
-    const keywords = [...themeInfo.bundleKeywords];
-    keywords[0] = `${count} ${keywords[0].replace(/^\d+\s*/, '')}`; // e.g. "40 Saltwater Aquarium Stickers PNG Bundle"
-    const joined = keywords.join(', ');
-    finalTitle = sanitizeAndEnforceEtsyTitle(joined, 13);
+    // 2. Sticker Pack / Bundle Mode (Golden SEO Formula 100% Enforced)
+    if (themeInfo.goldenBundleTitle) {
+      finalTitle = sanitizeAndEnforceEtsyTitle(themeInfo.goldenBundleTitle, 20, 138);
+    } else {
+      finalTitle = sanitizeAndEnforceEtsyTitle(
+        `Digital Stickers PNG, Cute ${themeInfo.name} GoodNotes Stickers, Printable Clipart Decal Bundle, Instant Download`,
+        20,
+        138
+      );
+    }
 
     finalTags = [
+      'digital stickers png',
+      'goodnotes stickers',
+      'planner stickers',
+      'printable stickers',
+      'cute clipart bundle',
+      'cricut cut file',
+      'die cut decals',
+      'instant download png',
+      'aesthetic stickers',
       `${subKey} stickers`.slice(0, 20),
-      'digital sticker pack'.slice(0, 20),
-      'craft cut files png'.slice(0, 20),
-      'clipart bundle set'.slice(0, 20),
-      'printable sticker a4'.slice(0, 20),
-      'commercial use png'.slice(0, 20),
-      'die cut sticker set'.slice(0, 20),
-      'planner stickers png'.slice(0, 20),
-      'digital planner png'.slice(0, 20),
-      'scrapbooking clipart'.slice(0, 20),
-      'water bottle decal'.slice(0, 20),
-      '300 dpi transparent'.slice(0, 20),
-      `${count} sticker bundle`.slice(0, 20)
+      'scrapbook clipart',
+      'transparent png',
+      'commercial use png'
     ];
   } else {
-    // 3. Single Standalone Sticker Mode (Target 10-12 words, NO subjective words)
+    // 3. Single Standalone Sticker Mode (Golden SEO Formula 100% Enforced)
     let enItemName = translateKoItemToEnglish(titleRaw || topicRaw)
       .replace(/^(cute|kawaii|sweet|pretty)\s+/i, '')
       .replace(/\s+sticker\b/i, '')
       .trim();
     if (!enItemName) enItemName = 'Artwork';
 
-    const cleanTheme = (themeInfo.name || '').replace(/\b(cute|kawaii|spooky cute)\b/gi, '').trim();
-
     finalTitle = sanitizeAndEnforceEtsyTitle(
-      `${enItemName} Sticker PNG, ${cleanTheme} Clipart, Printable Die Cut Digital Download`,
-      12
+      `Digital Sticker PNG, Cute ${enItemName} GoodNotes Clipart, Printable Die Cut Decal, Instant Download`,
+      20,
+      138
     );
     finalTags = [
-      `${enItemName.toLowerCase().slice(0, 16)} sticker`,
-      `${subKey} sticker`.slice(0, 20),
-      'craft cut file',
-      'die cut sticker',
+      'digital sticker png',
+      'goodnotes sticker',
       'printable sticker',
-      'planner sticker png',
-      'digital planner png',
-      'commercial use png',
-      'digital download',
-      'water bottle decal',
-      'art clipart png',
-      '300 dpi transparent',
-      'instant download'
+      'cute clipart',
+      'die cut decal',
+      'cricut cut file',
+      'planner decal',
+      `${enItemName.toLowerCase().slice(0, 16)} sticker`.slice(0, 20),
+      `${subKey} sticker`.slice(0, 20),
+      'instant download',
+      'transparent png',
+      'scrapbooking art',
+      'commercial use'
     ];
   }
 
