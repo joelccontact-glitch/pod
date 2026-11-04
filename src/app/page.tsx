@@ -41,7 +41,7 @@ import { createCompositeMasterCover } from '@/lib/master-cover-builder';
 import { generateA4StickerSheet, generateA4StickerSheets, generateA4StickerSheetsPair } from '@/lib/sticker-sheet-builder';
 import { extractStandaloneStickerFromTank } from '@/lib/standalone-extractor';
 import { createVesselStickerFromStandalone } from '@/lib/vessel-housing-builder';
-import { generateEtsySeo } from '@/lib/etsy-seo-generator';
+import { generateEtsySeo, formatPinterestTitle } from '@/lib/etsy-seo-generator';
 import { generateAllLifestyleMockups, LifestyleMockupResult } from '@/lib/lifestyle-mockup-builder';
 import { HANGUL_20_DATA, findHangulPresetData, compositeHangulTypography, extractCleanBaseWithoutText } from '@/lib/hangul-composer';
 
@@ -846,7 +846,7 @@ export default function Home() {
     }
 
     const packSeo = generateEtsySeo(selectedPackCover, packStickers.length);
-    const title = customTitle || packSeo.title;
+    const title = formatPinterestTitle(customTitle || packSeo.title, 100);
 
     const hashTags = (packSeo.tags || [])
       .map(t => '#' + t.replace(/[^a-zA-Z0-9]/g, ''))
@@ -7612,7 +7612,7 @@ export default function Home() {
                                 <button
                                   type="button"
                                   onClick={() => {
-                                    handleCopy(packSeo.title);
+                                    handleCopy(formatPinterestTitle(packSeo.title, 100));
                                     setCopiedTitleNotice(true);
                                     setTimeout(() => setCopiedTitleNotice(false), 2000);
                                   }}
@@ -7620,7 +7620,7 @@ export default function Home() {
                                   title="영문 최적화 제목을 복사합니다. 핀 만들기 화면의 제목 칸에 Ctrl+V 하세요."
                                 >
                                   <span>📋</span>
-                                  <span>{copiedTitleNotice ? '✓ 복사완료!' : '2. 제목 복사'}</span>
+                                  <span>{copiedTitleNotice ? '✓ 복사완료!' : '2. 제목 복사 (100자)'}</span>
                                 </button>
 
                                 {/* 3. 설명 복사 */}

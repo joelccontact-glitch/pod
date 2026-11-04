@@ -509,6 +509,39 @@ export function sanitizeAndEnforceEtsyTitle(rawTitle: string, maxWords = 20, max
 }
 
 /**
+ * Enforces Pinterest's strict 100-character title limit:
+ * Truncates gracefully at comma boundaries so no words are awkwardly cut off,
+ * keeping the highest-volume keywords intact (under 100 chars).
+ */
+export function formatPinterestTitle(rawTitle: string, maxChars = 100): string {
+  if (!rawTitle) return '';
+  const cleaned = rawTitle.replace(/\s+/g, ' ').trim();
+  if (cleaned.length <= maxChars) return cleaned;
+
+  const parts = cleaned.split(/,\s*/);
+  const selected: string[] = [];
+  let currentLen = 0;
+
+  for (const part of parts) {
+    const p = part.trim();
+    if (!p) continue;
+    const addedLen = selected.length > 0 ? p.length + 2 : p.length;
+    if (currentLen + addedLen <= maxChars) {
+      selected.push(p);
+      currentLen += addedLen;
+    } else {
+      break;
+    }
+  }
+
+  let result = selected.join(', ');
+  if (!result || result.length < 15) {
+    result = cleaned.slice(0, maxChars).trim().replace(/[, -]+$/, '');
+  }
+  return result;
+}
+
+/**
  * Generate Etsy SEO Title, Description, and Tags
  */
 export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
