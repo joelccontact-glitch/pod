@@ -2214,6 +2214,13 @@ export default function Home() {
       const res = await fetch('/api/designs/trash');
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
+        if (data.audit) {
+          if (data.audit.dbReads === 0) {
+            console.log(`%c[Firestore 쿼터 감사] ⚡ DB 읽기: 0회 (${data.audit.source} 캐시 히트, 캐시 나이: ${data.audit.cacheAgeSeconds}초)`, 'color: #10B981; font-weight: bold;');
+          } else {
+            console.warn(`[Firestore 쿼터 감사] 🚨 DB 풀 스캔 발생: ${data.audit.dbReads}개 문서 읽음`);
+          }
+        }
         const pool = data.data;
 
         const selectedCovers = pool.filter((d: any) => targetIds.includes(d.id) && isCoverDesign(d));
@@ -4241,6 +4248,13 @@ export default function Home() {
       const res = await fetch(`/api/designs?page=${currentPage}&limit=12&type=${selectedCategoryTab}&subType=${activeSub}&search=${encodeURIComponent(activeSearch.trim())}${onlyCoversParam}${nocacheParam}`);
       const data = await res.json();
       if (data.success) {
+        if (data.audit) {
+          if (data.audit.dbReads === 0) {
+            console.log(`%c[Firestore 쿼터 감사] ⚡ DB 읽기: 0회 (${data.audit.source} 캐시 히트, 캐시 나이: ${data.audit.cacheAgeSeconds}초)`, 'color: #10B981; font-weight: bold;');
+          } else {
+            console.warn(`[Firestore 쿼터 감사] 🚨 DB 풀 스캔 발생: ${data.audit.dbReads}개 문서 읽음`);
+          }
+        }
         galleryPageCache.set(cacheKey, { data, timestamp: now });
         if (currentPage === 1 && selectedCategoryTab === 'sticker' && activeSub === 'all' && !activeSearch) {
           try {

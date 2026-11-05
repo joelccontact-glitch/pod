@@ -118,6 +118,8 @@ export async function GET(request: Request) {
 
     const now = Date.now();
     let isQuotaFallback = false;
+    let actualDbReads = 0;
+    let dataSource = 'memory';
 
     // 0. Instant cold-start hydration from disk snapshot (1ms, 0 Firestore reads!)
     if (!cachedSnapshotDocs && !nocache) {
@@ -125,6 +127,7 @@ export async function GET(request: Request) {
       if (diskDocs && diskDocs.length > 0) {
         cachedSnapshotDocs = diskDocs;
         lastCacheTime = now;
+        dataSource = 'disk';
       }
     }
 
@@ -147,6 +150,9 @@ export async function GET(request: Request) {
           )
           .get();
 
+        actualDbReads = designsSnapshot.docs.length;
+        dataSource = 'firestore';
+        console.log(`[Firestore Audit] 🚨 FULL SCAN: Read ${actualDbReads} docs from Firestore!`);
         cachedSnapshotDocs = designsSnapshot.docs.map((doc: any) => ({
           id: doc.id,
           data: doc.data()
@@ -482,8 +488,16 @@ export async function GET(request: Request) {
       stickerCount,
       stickerSubCounts: dynamicSubCounts,
       page,
-      totalPages: Math.ceil(total / limitNum)
+      totalPages: Math.ceil(total / limitNum),
+      audit: {
+        dbReads: actualDbReads,
+        source: dataSource,
+        cacheAgeSeconds: Math.round((now - lastCacheTime) / 1000)
+      }
     });
+
+    jsonResponse.headers.set('X-Firestore-Reads', actualDbReads.toString());
+    jsonResponse.headers.set('X-Data-Source', dataSource);
 
     if (!nocache) {
       jsonResponse.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=180');
