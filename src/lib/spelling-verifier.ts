@@ -286,7 +286,7 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
       if (isStickerDetected) {
         // Enforce strong 2D vector sticker illustration aesthetics upfront (Flux heavily prioritizes prompt prefix)
         // Mandate bold black line art and vibrant saturated colors to eliminate washed out / faint outlines
-        cleanPrompt = `Cute 2D flat vector graphic die-cut sticker illustration of ${corePrompt}, bold clean black comic ink outlines, flat solid colors, vibrant high contrast cel-shading, cute kawaii cartoon art style, pure white die-cut vinyl sticker border, centered on a pure solid white background (#FFFFFF), isolated single sticker graphic.`;
+        cleanPrompt = `Cute 2D die-cut sticker illustration of ${corePrompt}, clean defined sticker outlines, rich vibrant colors, beautiful dimensional cel-shading, glossy highlights, exquisite high detail kawaii sticker art, thick white die-cut sticker border, centered on a pure solid white background (#FFFFFF), isolated single sticker graphic.`;
       } else {
         cleanPrompt = `Cute 2D vector graphic illustration of ${corePrompt}, bold clean black ink linework, rich vibrant saturated colors, isolated graphic centered on pure solid white background (#FFFFFF), crisp line art, vibrant flat vector shading, high contrast. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO real life photography, NO 3D render, NO realistic photo, NO mockups, NO washed out colors, NO faded, NO blurry, NO low contrast.`;
       }
