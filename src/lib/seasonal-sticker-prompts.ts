@@ -88,7 +88,7 @@ function createSeasonalStandaloneSeries(
       theme: `${seasonNameKo} Standalone 20 Pack`,
       phrase: '',
       description: item.desc,
-      prompt: `A cute die-cut sticker design featuring: ${item.detail}. STRICT NO GLASS JARS OR CONTAINERS: Pure standalone die-cut aesthetic object only. Thick white die-cut sticker outline. ${SEASONAL_RULES_NO_TEXT}`
+      prompt: `A cute 2D vector die-cut sticker illustration featuring: ${item.detail}. Pure standalone die-cut sticker, bold clean black outlines, flat vector colors, thick white die-cut border. ${SEASONAL_RULES_NO_TEXT}`
     };
   });
 
@@ -486,7 +486,7 @@ export const VALENTINES_20_SERIES: StickerPreset[] = createSeasonalVesselSeries(
   'Etsy 판매용 20종 발렌타인데이 핑크 하트 유리병 스티커 팩 마스터 대표 썸네일 커버',
   'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE VALENTINE STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large cute die-cut sticker samples of glass heart jars, pink potion bottles, rose bell jars with baby kittens, chocolate fondue glasses, and strawberries arranged artistically across white background. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
   [
-    { name: '하트 솜사탕 메이슨저 속 아기 고양이', desc: '분홍빛 솜사탕 구름과 아기 고양이가 든 하트 메이슨저', detail: 'cute 2D illustrated spherical glass jar filled with vibrant pink cotton candy clouds and an adorable cartoon fluffy kitten wearing a pink heart collar, bold black outlines, rich colors' },
+    { name: '하트 솜사탕 메이슨저 속 아기 고양이', desc: '분홍빛 솜사탕 구름과 아기 고양이가 든 하트 메이슨저', detail: 'cute cartoon baby kitten with pink cheeks sitting happily next to a jar of pink cotton candy, wearing a red heart ribbon, bold black comic outlines, vibrant flat colors, 2D vector clipart sticker' },
     { name: '핑크 러브 포션 마법 물약병', desc: '영롱한 핑크빛 액체와 장미 꽃잎이 든 빈티지 물약병', detail: 'vintage apothecary potion glass bottle filled with shimmering pastel pink potion, floating rose petals, and a cork stopper' },
     { name: '붉은 장미 벨자 속 아기 토끼', desc: '활짝 핀 핑크 장미 덤불 아래 웅크린 아기 토끼', detail: 'cute 2D illustrated glass bell jar dome enclosing a vibrant blooming pink rose bush and an adorable cartoon baby bunny with bold black contours and rich saturated colors' },
     { name: '딸기 보바 밀크티 유리잔 속 햄스터', desc: '딸기 보바와 핑크 빨대를 잡고 있는 햄스터', detail: 'tall glass tumbler filled with strawberry boba milk tea, tapioca pearls, and a tiny dwarf hamster holding a striped straw' },
@@ -531,7 +531,7 @@ export const VALENTINES_STANDALONE_20_SERIES: StickerPreset[] = createSeasonalSt
     { name: '붉은 장미 한 송이와 이슬방울', desc: '벨벳 질감의 붉은 장미 꽃송이와 영롱한 물방울', detail: 'single velvety red rose blossom with green leaves and delicate sparkling dew drops on petals' },
     { name: '하트 와플과 휘핑크림', desc: '딸기와 블루베리가 곁들여진 하트 모양 와플', detail: 'crispy golden heart-shaped waffle topped with whipped cream, fresh raspberries, and maple drizzle' },
     { name: '사랑의 묘약 핑크 향수병', desc: '하트 펜던트가 달린 클래식 앤틱 향수 분무기', detail: 'vintage ornate glass perfume atomizer bottle with pink squeeze bulb and heart pendant' },
-    { name: '날개 달린 하트 크리스탈', desc: '하얀 천사 날개가 달린 투명한 핑크 하트 보석', detail: 'vibrant faceted pink crystal gemstone heart with cute white angel wings, bold clean black outlines, high contrast pop sticker' },
+    { name: '날개 달린 하트 크리스탈', desc: '하얀 천사 날개가 달린 투명한 핑크 하트 보석', detail: 'cute cartoon candy pink heart with a pair of fluffy white angel wings, tiny gold star sparkles, bold clean black comic outlines, vibrant flat colors, 2D vector clipart sticker' },
     { name: '딸기 글레이즈 도넛', desc: '달콤한 딸기 아이싱과 무지개 스프링클 도넛', detail: 'soft baked donut dipped in shiny strawberry pink glaze with colorful rainbow sprinkles' },
     { name: '하트 솜사탕 콘', desc: '사랑스러운 하트 모양으로 빚어진 솜사탕', detail: 'vibrant fluffy heart-shaped cotton candy cloud on a striped cone, bright vivid pink and cyan blue swirls, bold clean black outlines, high contrast' },
     { name: '핑크 진주 조개 목걸이', desc: '입을 벌린 조개 속 영롱한 핑크 진주와 하트 참', detail: 'cute 2D illustrated open sea shell with bold black outlines revealing a luminous glowing pink pearl and shiny gold heart charm, rich saturated colors' },
