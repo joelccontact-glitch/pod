@@ -283,7 +283,7 @@ export async function createCompositeMasterCover(
     ribbonColor = '#C25E26';
     ribbonFold = '#6C2A0C';
     ribbonOutline = '#261208';
-  } else if (optTitle.includes('harvest') || optTitle.includes('fall') || optTitle.includes('autumn')) {
+  } else if (optTitle.includes('harvest') || optTitle.includes('fall') || optTitle.includes('autumn') || optTitle.includes('가을')) {
     seriesTitle = 'FALL HARVEST';
     titleColor = '#B91C1C';
     ribbonColor = '#C25E26';
@@ -295,12 +295,42 @@ export async function createCompositeMasterCover(
     ribbonColor = '#B45309';
     ribbonFold = '#451A03';
     ribbonOutline = '#261208';
-  } else if (subType === 'christmas' || optTitle.includes('christmas') || optTitle.includes('크리스마스')) {
+  } else if (subType === 'christmas' || optTitle.includes('christmas') || optTitle.includes('크리스마스') || optTitle.includes('연말')) {
     seriesTitle = 'CHRISTMAS';
     titleColor = '#B91C1C';
     ribbonColor = '#15803D';
     ribbonFold = '#052E16';
     ribbonOutline = '#0F172A';
+  } else if (subType === 'newyear' || optTitle.includes('newyear') || optTitle.includes('new year') || optTitle.includes('새해') || optTitle.includes('신년')) {
+    seriesTitle = 'NEW YEAR';
+    titleColor = '#B91C1C';
+    ribbonColor = '#1D4ED8';
+    ribbonFold = '#1E3A8A';
+    ribbonOutline = '#0F172A';
+  } else if (subType === 'valentines' || subType === 'valentine' || optTitle.includes('valentine') || optTitle.includes('발렌타인') || optTitle.includes('밸런타인')) {
+    seriesTitle = 'VALENTINE';
+    titleColor = '#B91C1C';
+    ribbonColor = '#C25E26';
+    ribbonFold = '#6C2A0C';
+    ribbonOutline = '#261208';
+  } else if (subType === 'stpatrick' || optTitle.includes('stpatrick') || optTitle.includes('patrick') || optTitle.includes('패트릭')) {
+    seriesTitle = 'ST. PATRICK';
+    titleColor = '#047857';
+    ribbonColor = '#0284C7';
+    ribbonFold = '#075985';
+    ribbonOutline = '#0C4A6E';
+  } else if (subType === 'easter' || optTitle.includes('easter') || optTitle.includes('부활절')) {
+    seriesTitle = 'EASTER & SPRING';
+    titleColor = '#7C3AED';
+    ribbonColor = '#DB2777';
+    ribbonFold = '#9D174D';
+    ribbonOutline = '#4C0519';
+  } else if (subType === 'mothersday' || optTitle.includes('mother') || optTitle.includes('어버이날') || optTitle.includes('마더스')) {
+    seriesTitle = "MOTHER'S DAY";
+    titleColor = '#BE185D';
+    ribbonColor = '#E11D48';
+    ribbonFold = '#9F1239';
+    ribbonOutline = '#4C0519';
   } else if (subType === 'vivarium' || optTitle.includes('vivarium') || optTitle.includes('비바리움')) {
     seriesTitle = 'VIVARIUM';
     titleColor = '#0F766E';
@@ -313,7 +343,7 @@ export async function createCompositeMasterCover(
     ribbonColor = '#0284C7';
     ribbonFold = '#082F49';
     ribbonOutline = '#081C2E';
-  } else if (subType === 'freshaquarium' || optTitle.includes('freshaquarium') || optTitle.includes('열대어')) {
+  } else if (subType === 'freshaquarium' || optTitle.includes('freshaquarium') || optTitle.includes('열대어') || optTitle.includes('담수')) {
     seriesTitle = 'FRESHWATER AQUARIUM';
     titleColor = '#047857';
     ribbonColor = '#059669';
@@ -350,16 +380,23 @@ export async function createCompositeMasterCover(
     ribbonFold = '#831843';
     ribbonOutline = '#500724';
   } else {
-    if (options.title) {
-      const cleanT = options.title.replace(/[0-9+]+| (cute|stickers?|bundle|png|digital|download) /gi, '').trim();
-      if (cleanT.length > 0) {
-        seriesTitle = cleanT.toUpperCase();
-      }
+    // Pure English fallback: Strip Korean and special characters completely
+    const cleanEn = (options.title || '').replace(/[^a-zA-Z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+    const strippedEn = cleanEn.replace(/\b(cute|stickers?|bundle|png|digital|download|pack|master|cover)\b/gi, '').trim();
+    if (strippedEn.length > 2) {
+      seriesTitle = strippedEn.toUpperCase();
+    } else {
+      seriesTitle = 'SPECIAL STICKER';
     }
     titleColor = '#B91C1C';
     ribbonColor = '#C25E26';
     ribbonFold = '#6C2A0C';
     ribbonOutline = '#261208';
+  }
+
+  // ABSOLUTE STRICT GUARANTEE: Never allow ANY Korean characters or messy brackets in the title!
+  if (/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣\[\]🖼️✨]/.test(seriesTitle)) {
+    seriesTitle = 'SPECIAL STICKER';
   }
 
   // Ensure Google Fonts are active in Canvas

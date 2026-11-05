@@ -269,7 +269,26 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       console.log(`🎨 [Primary/Zero-Cost] Drawing high-quality image with Flux.1 (Attempt ${attempt})...`);
-      const cleanPrompt = (prompt.length > 450 ? prompt.substring(0, 450) : prompt) + ', single isolated centered sticker, pure solid white background (#FFFFFF), crisp clean die-cut edge, no duplicate, no pattern, 8k resolution';
+      
+      // Strip any accidental photorealistic / 3D triggers that cause realistic photo-rendering
+      let corePrompt = prompt
+        .replace(/\b(8k resolution|4k resolution|photorealistic|hyperrealistic|unreal engine|octane render|raytracing|studio photography|cinematic lighting)\b/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      // Ensure length stays safe for URL encoding while preserving critical instructions
+      if (corePrompt.length > 700) {
+        corePrompt = corePrompt.substring(0, 700);
+      }
+
+      let cleanPrompt = '';
+      if (isStickerDetected) {
+        // Enforce strong 2D vector sticker illustration aesthetics upfront (Flux heavily prioritizes prompt prefix)
+        cleanPrompt = `Cute 2D vector graphic die-cut sticker illustration of ${corePrompt}, single isolated sticker, pure solid white background (#FFFFFF), thick crisp white die-cut sticker outline, flat vector colors, cute kawaii cartoon art style, no duplicate, no pattern. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO 3D rendering, NO realistic photo, NO studio photography, NO real glass refraction, NO reflections, NO dark shadows, NO grey background.`;
+      } else {
+        cleanPrompt = `Cute 2D vector graphic illustration of ${corePrompt}, isolated graphic centered on pure solid white background (#FFFFFF), crisp bold line art, vibrant flat vector shading. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO 3D render, NO realistic photo, NO mockups.`;
+      }
+
       const seed = Math.floor(Math.random() * 10000000);
       const encodedPrompt = encodeURIComponent(cleanPrompt);
       const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;

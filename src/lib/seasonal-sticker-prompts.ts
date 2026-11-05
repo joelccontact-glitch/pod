@@ -14,7 +14,8 @@ export const SEASONAL_RULES_NO_TEXT = `CRITICAL STICKER RULES:
 1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
 2. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
 3. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures anywhere in the image. Pure graphic illustration art only.
-4. Vector sticker aesthetic, vibrant kawaii illustration, high contrast, clean contours.`;
+4. Cute 2D flat vector sticker aesthetic, vibrant kawaii illustration, clean contours.
+5. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO 3D render, NO realistic photo, NO real glass refraction, NO studio lighting, NO dark shadows, NO grey background.`;
 
 // Helper function to build 20 vessel stickers + 1 master cover
 function createSeasonalVesselSeries(
@@ -48,7 +49,7 @@ function createSeasonalVesselSeries(
       theme: `${seasonNameKo} 20 Pack`,
       phrase: '',
       description: item.desc,
-      prompt: `A cute die-cut sticker design featuring: ${item.detail}. Clear transparent glass container, vibrant festive aesthetic, thick white die-cut sticker outline. ${SEASONAL_RULES_NO_TEXT}`
+      prompt: `A cute 2D vector die-cut sticker illustration featuring: ${item.detail}. Stylized cute illustrated transparent glass container, vibrant festive kawaii aesthetic, thick white die-cut sticker outline. ${SEASONAL_RULES_NO_TEXT}`
     };
   });
 
@@ -145,7 +146,7 @@ export const CHRISTMAS_20_SERIES: StickerPreset[] = [
       theme: 'Christmas 20 Pack',
       phrase: '',
       description: items.desc,
-      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Clear transparent glass container, festive holiday winter color palette, thick white die-cut sticker outline. ${SEASONAL_RULES_NO_TEXT}`
+      prompt: `A cute 2D vector die-cut sticker illustration featuring: ${items.detail}. Stylized cute illustrated transparent glass container, festive holiday winter color palette, thick white die-cut sticker outline. ${SEASONAL_RULES_NO_TEXT}`
     };
   }) as unknown as StickerPreset[]
 ];
@@ -250,7 +251,7 @@ export const HALLOWEEN_20_SERIES: StickerPreset[] = [
       theme: 'Halloween 20 Pack',
       phrase: '',
       description: items.desc,
-      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Pastel spooky kawaii Halloween color palette (soft orange, lavender purple, mint green, blush pink). Clear glass container, thick white die-cut border. ${SEASONAL_RULES_NO_TEXT}`
+      prompt: `A cute 2D vector die-cut sticker illustration featuring: ${items.detail}. Stylized cute illustrated transparent glass container, pastel spooky kawaii Halloween color palette (soft orange, lavender purple, mint green, blush pink), thick white die-cut border. ${SEASONAL_RULES_NO_TEXT}`
     };
   }) as unknown as StickerPreset[]
 ];
@@ -355,7 +356,7 @@ export const THANKSGIVING_20_SERIES: StickerPreset[] = [
       theme: 'Thanksgiving 20 Pack',
       phrase: '',
       description: items.desc,
-      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Cozy autumn harvest color palette (warm mustard yellow, burnt orange, terracotta, rustic brown, sage green). Clear glass container, thick white die-cut border. ${SEASONAL_RULES_NO_TEXT}`
+      prompt: `A cute 2D vector die-cut sticker illustration featuring: ${items.detail}. Stylized cute illustrated transparent glass container, cozy autumn harvest color palette (warm mustard yellow, burnt orange, terracotta, rustic brown, sage green), thick white die-cut border. ${SEASONAL_RULES_NO_TEXT}`
     };
   }) as unknown as StickerPreset[]
 ];
