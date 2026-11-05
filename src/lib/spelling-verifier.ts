@@ -270,8 +270,9 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
     try {
       console.log(`🎨 [Primary/Zero-Cost] Drawing high-quality image with Flux.1 (Attempt ${attempt})...`);
       
-      // Strip any accidental photorealistic / 3D triggers that cause realistic photo-rendering
+      // Strip redundant repetitive prefixes and photorealistic / 3D triggers
       let corePrompt = prompt
+        .replace(/^A cute (2D vector )?die-cut sticker (design|illustration) (featuring|of):\s*/i, '')
         .replace(/\b(8k resolution|4k resolution|photorealistic|hyperrealistic|unreal engine|octane render|raytracing|studio photography|cinematic lighting)\b/gi, '')
         .replace(/\s+/g, ' ')
         .trim();
@@ -284,9 +285,10 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
       let cleanPrompt = '';
       if (isStickerDetected) {
         // Enforce strong 2D vector sticker illustration aesthetics upfront (Flux heavily prioritizes prompt prefix)
-        cleanPrompt = `Cute 2D vector graphic die-cut sticker illustration of ${corePrompt}, single isolated sticker, pure solid white background (#FFFFFF), thick crisp white die-cut sticker outline, flat vector colors, cute kawaii cartoon art style, no duplicate, no pattern. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO 3D rendering, NO realistic photo, NO studio photography, NO real glass refraction, NO reflections, NO dark shadows, NO grey background.`;
+        // Mandate bold black line art and vibrant saturated colors to eliminate washed out / faint outlines
+        cleanPrompt = `Cute 2D vector graphic die-cut sticker illustration of ${corePrompt}, bold clean black ink line art, crisp dark contours, rich vibrant saturated colors, high contrast cel-shading, vibrant cute kawaii cartoon style, single isolated sticker, pure solid white background (#FFFFFF), thick crisp white die-cut sticker outline, no duplicate, no pattern. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO real life food photography, NO food photo, NO realistic cake, NO realistic cream, NO macro photography, NO real world object, NO 3D rendering, NO realistic photo, NO studio photography, NO real glass refraction, NO reflections, NO dark shadows, NO grey background, NO washed out colors, NO faded colors, NO pale colors, NO blurry, NO faint outlines, NO low contrast.`;
       } else {
-        cleanPrompt = `Cute 2D vector graphic illustration of ${corePrompt}, isolated graphic centered on pure solid white background (#FFFFFF), crisp bold line art, vibrant flat vector shading. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO 3D render, NO realistic photo, NO mockups.`;
+        cleanPrompt = `Cute 2D vector graphic illustration of ${corePrompt}, bold clean black ink linework, rich vibrant saturated colors, isolated graphic centered on pure solid white background (#FFFFFF), crisp line art, vibrant flat vector shading, high contrast. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO real life photography, NO 3D render, NO realistic photo, NO mockups, NO washed out colors, NO faded, NO blurry, NO low contrast.`;
       }
 
       const seed = Math.floor(Math.random() * 10000000);

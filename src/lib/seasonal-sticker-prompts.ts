@@ -14,8 +14,8 @@ export const SEASONAL_RULES_NO_TEXT = `CRITICAL STICKER RULES:
 1. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
 2. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
 3. STRICT TEXT RULE: Absolutely NO text, NO words, NO letters, NO phrases, NO typography, NO signatures anywhere in the image. Pure graphic illustration art only.
-4. Cute 2D flat vector sticker aesthetic, vibrant kawaii illustration, clean contours.
-5. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO 3D render, NO realistic photo, NO real glass refraction, NO studio lighting, NO dark shadows, NO grey background.`;
+4. Bold clean black ink line art, crisp dark contours, rich vibrant saturated colors, high contrast cel-shaded 2D vector sticker aesthetic.
+5. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO real life food photography, NO food photo, NO realistic cake, NO realistic edible food, NO macro photography, NO real world object, NO 3D render, NO realistic photo, NO real glass refraction, NO studio lighting, NO dark shadows, NO grey background, NO washed out or faded colors, NO faint outlines.`;
 
 // Helper function to build 20 vessel stickers + 1 master cover
 function createSeasonalVesselSeries(
@@ -486,20 +486,20 @@ export const VALENTINES_20_SERIES: StickerPreset[] = createSeasonalVesselSeries(
   'Etsy 판매용 20종 발렌타인데이 핑크 하트 유리병 스티커 팩 마스터 대표 썸네일 커버',
   'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE VALENTINE STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large cute die-cut sticker samples of glass heart jars, pink potion bottles, rose bell jars with baby kittens, chocolate fondue glasses, and strawberries arranged artistically across white background. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
   [
-    { name: '하트 솜사탕 메이슨저 속 아기 고양이', desc: '분홍빛 솜사탕 구름과 아기 고양이가 든 하트 메이슨저', detail: 'spherical glass jar filled with pastel pink cotton candy clouds and an adorable fluffy baby kitten wearing a pink heart collar' },
+    { name: '하트 솜사탕 메이슨저 속 아기 고양이', desc: '분홍빛 솜사탕 구름과 아기 고양이가 든 하트 메이슨저', detail: 'cute 2D illustrated spherical glass jar filled with vibrant pink cotton candy clouds and an adorable cartoon fluffy kitten wearing a pink heart collar, bold black outlines, rich colors' },
     { name: '핑크 러브 포션 마법 물약병', desc: '영롱한 핑크빛 액체와 장미 꽃잎이 든 빈티지 물약병', detail: 'vintage apothecary potion glass bottle filled with shimmering pastel pink potion, floating rose petals, and a cork stopper' },
-    { name: '붉은 장미 벨자 속 아기 토끼', desc: '활짝 핀 핑크 장미 덤불 아래 웅크린 아기 토끼', detail: 'clear glass bell jar dome enclosing a miniature blooming pink rose bush with a baby bunny snuggled under soft petals' },
+    { name: '붉은 장미 벨자 속 아기 토끼', desc: '활짝 핀 핑크 장미 덤불 아래 웅크린 아기 토끼', detail: 'cute 2D illustrated glass bell jar dome enclosing a vibrant blooming pink rose bush and an adorable cartoon baby bunny with bold black contours and rich saturated colors' },
     { name: '딸기 보바 밀크티 유리잔 속 햄스터', desc: '딸기 보바와 핑크 빨대를 잡고 있는 햄스터', detail: 'tall glass tumbler filled with strawberry boba milk tea, tapioca pearls, and a tiny dwarf hamster holding a striped straw' },
     { name: '큐피드 날개 벨자 속 아기 사슴', desc: '작은 황금 날개를 달고 구름 위에 앉은 아기 사슴', detail: 'curved glass cloche containing a baby fawn with miniature golden cupid wings resting on fluffy white cloud bedding' },
     { name: '러브레터 실링 미니 보틀', desc: '빨간 리본으로 묶인 작은 사랑의 편지가 든 유리병', detail: 'corked apothecary bottle containing miniature rolled love notes tied with delicate red ribbon and gold wax seal' },
     { name: '초콜릿 퐁듀 잔 속 아기 펭귄', desc: '달콤한 초콜릿 퐁듀 잔에 딸기를 찍는 아기 펭귄', detail: 'stemmed glass bowl filled with rich melted milk chocolate fondue and a baby penguin dipping a fresh strawberry' },
-    { name: '하트 크리스탈 스노우볼', desc: '하트 글리터와 별빛이 소용돌이치는 스노우볼', detail: 'faceted crystal snowglobe with swirling holographic pink heart confetti and glowing golden sparkles' },
+    { name: '하트 크리스탈 스노우볼', desc: '하트 글리터와 별빛이 소용돌이치는 스노우볼', detail: 'cute 2D illustrated crystal snowglobe with vibrant swirling pink heart confetti, glowing golden sparkles, bold clean black outlines, high contrast' },
     { name: '핑크 튤립 화병 속 아기 오리', desc: '생화 튤립 꽃송이 모자를 쓴 아기 오리 화병', detail: 'clear bulbous glass vase with fresh blooming pink tulips and an adorable baby duckling wearing a tulip petal hat' },
     { name: '벚꽃 테라리움 속 레서판다', desc: '연분홍 벚꽃 가지를 안고 있는 아기 레서판다', detail: 'wide glass bowl terrarium with miniature cherry blossom branches and baby red panda holding a pink heart macaron' },
     { name: '하트 롤리팝 사탕 단지', desc: '알록달록 파스텔 하트 막대사탕이 가득 찬 사탕병', detail: 'vintage glass candy jar stacked with swirled pastel pink, red, and white heart lollipops' },
     { name: '핑크 글리터 메이슨저 속 골든 강아지', desc: '폭신한 빨간 하트 쿠션을 안고 있는 강아지', detail: 'sparkling glass mason jar with a baby golden retriever puppy hugging a plush red velvet heart pillow' },
-    { name: '딸기 쇼트케이크 디저트 돔', desc: '생크림과 딸기가 얹힌 미니 조각 케이크 돔', detail: 'cake stand glass dome enclosing a cute miniature slice of strawberry shortcake with whipped cream and cherries' },
-    { name: '로맨틱 캔들 램프 저', desc: '장미꽃잎과 함께 따뜻한 촛불이 켜진 캔들 홀더', detail: 'decorative glass lantern jar with a soft glowing pink votive candle surrounded by dried rosebuds and lavender' },
+    { name: '딸기 쇼트케이크 디저트 돔', desc: '생크림과 딸기가 얹힌 미니 조각 케이크 돔', detail: 'cute 2D cartoon illustrated glass cloche dome enclosing a vibrant cartoon slice of strawberry shortcake with illustrated cream, bright red cherries, and bold black outlines' },
+    { name: '로맨틱 캔들 램프 저', desc: '장미꽃잎과 함께 따뜻한 촛불이 켜진 캔들 홀더', detail: 'cute 2D illustrated glass lantern jar with a warm glowing pink candle and vibrant rosebuds, bold clean black outlines, rich colors' },
     { name: '하트 자물쇠와 열쇠 앤틱병', desc: '황금빛 빈티지 하트 자물쇠가 보관된 앤틱 유리병', detail: 'antique apothecary glass bottle enclosing a vintage ornate brass heart padlock and delicate matching key' },
     { name: '핑크 오로라 스노우볼 속 북극곰', desc: '핑크빛 오로라 하늘 아래 아기 북극곰 스노우볼', detail: 'crystal snowglobe featuring a baby polar bear looking up at a shimmering pastel pink and violet aurora sky' },
     { name: '마카롱 타워 디스플레이 돔', desc: '파스텔톤 마카롱이 층층이 쌓인 미니 디저트 돔', detail: 'glass display dome containing a miniature pastel rainbow macaron tower decorated with edible sugar pearls' },
@@ -526,15 +526,15 @@ export const VALENTINES_STANDALONE_20_SERIES: StickerPreset[] = createSeasonalSt
     { name: '딸기 크림 컵케이크와 하트 픽', desc: '딸기 프로스팅과 하트 사탕이 꽂힌 컵케이크', detail: 'fluffy vanilla cupcake with a swirl of pink strawberry frosting and a red sugar heart topper' },
     { name: '핑크 튤립 꽃다발', desc: '크래프트 종이에 감싸인 싱그러운 분홍 튤립 다발', detail: 'fresh bouquet of blooming soft pink and white tulips wrapped in brown kraft paper with twine bow' },
     { name: '하트 라떼 아트 머그잔', desc: '핑크 머그잔 위 사랑스러운 하트 우유 거품 아트', detail: 'pastel pink ceramic mug viewed from top with delicate heart-shaped latte foam art' },
-    { name: '스위트하트 파스텔 캔디 세트', desc: '달콤한 사랑 문구가 새겨진 캔디 하트 삼총사', detail: 'trio of pastel pink, mint, and yellow candy conversation hearts stamped with sweet lettering' },
+    { name: '스위트하트 파스텔 캔디 세트', desc: '달콤한 사랑 문구가 새겨진 캔디 하트 삼총사', detail: 'trio of bright vibrant pastel pink, mint, and yellow candy conversation hearts, bold clean black outlines, high contrast pop art sticker' },
     { name: '딸기 프렌치 마카롱 듀오', desc: '딸기 버터크림이 샌드된 바삭한 마카롱 두 개', detail: 'pair of French pastel pink macarons filled with luscious strawberry cream and edible gold flakes' },
     { name: '붉은 장미 한 송이와 이슬방울', desc: '벨벳 질감의 붉은 장미 꽃송이와 영롱한 물방울', detail: 'single velvety red rose blossom with green leaves and delicate sparkling dew drops on petals' },
     { name: '하트 와플과 휘핑크림', desc: '딸기와 블루베리가 곁들여진 하트 모양 와플', detail: 'crispy golden heart-shaped waffle topped with whipped cream, fresh raspberries, and maple drizzle' },
     { name: '사랑의 묘약 핑크 향수병', desc: '하트 펜던트가 달린 클래식 앤틱 향수 분무기', detail: 'vintage ornate glass perfume atomizer bottle with pink squeeze bulb and heart pendant' },
-    { name: '날개 달린 하트 크리스탈', desc: '하얀 천사 날개가 달린 투명한 핑크 하트 보석', detail: 'faceted pastel pink gemstone heart with delicate feathered white angel wings' },
+    { name: '날개 달린 하트 크리스탈', desc: '하얀 천사 날개가 달린 투명한 핑크 하트 보석', detail: 'vibrant faceted pink crystal gemstone heart with cute white angel wings, bold clean black outlines, high contrast pop sticker' },
     { name: '딸기 글레이즈 도넛', desc: '달콤한 딸기 아이싱과 무지개 스프링클 도넛', detail: 'soft baked donut dipped in shiny strawberry pink glaze with colorful rainbow sprinkles' },
-    { name: '하트 솜사탕 콘', desc: '사랑스러운 하트 모양으로 빚어진 솜사탕', detail: 'fluffy cloud of pastel pink and blue spun sugar cotton candy shaped like a heart on a striped paper cone' },
-    { name: '핑크 진주 조개 목걸이', desc: '입을 벌린 조개 속 영롱한 핑크 진주와 하트 참', detail: 'open pastel sea shell revealing a luminous pink pearl and tiny gold heart charm' },
+    { name: '하트 솜사탕 콘', desc: '사랑스러운 하트 모양으로 빚어진 솜사탕', detail: 'vibrant fluffy heart-shaped cotton candy cloud on a striped cone, bright vivid pink and cyan blue swirls, bold clean black outlines, high contrast' },
+    { name: '핑크 진주 조개 목걸이', desc: '입을 벌린 조개 속 영롱한 핑크 진주와 하트 참', detail: 'cute 2D illustrated open sea shell with bold black outlines revealing a luminous glowing pink pearl and shiny gold heart charm, rich saturated colors' },
     { name: '큐피드 별빛 요술봉', desc: '핑크 하트 보석과 리본이 묶인 마법 요술봉', detail: 'magical golden wand topped with a glowing pink crystal heart and sparkling star ribbons' }
   ]
 );
