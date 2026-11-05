@@ -128,7 +128,13 @@ export async function GET(request: Request) {
       }
     }
 
-    if (nocache || !cachedSnapshotDocs || (now - lastCacheTime > CACHE_TTL_MS)) {
+        // Rate-limit full collection scan: Even if nocache=true is requested,
+    // enforce a minimum 60-second cooldown so rapid deletions/modifications don't trigger 1,000 reads per second!
+    const isCacheExpired = !cachedSnapshotDocs || (now - lastCacheTime > CACHE_TTL_MS);
+    const isNoCacheAllowed = nocache && (now - lastCacheTime > 60000);
+    const shouldFetchFromDb = isCacheExpired || isNoCacheAllowed;
+
+    if (shouldFetchFromDb) {
       try {
         // Fetch ONLY lightweight metadata fields from Firestore (excludes heavy base64 images!)
         const designsSnapshot = await db.collection('designs')
@@ -161,7 +167,9 @@ export async function GET(request: Request) {
             lastCacheTime = now;
             isQuotaFallback = true;
           } else {
-            throw dbErr;
+            console.warn('[Quota Fallback] No disk cache found, returning empty list instead of crashing UI');
+            cachedSnapshotDocs = [];
+            isQuotaFallback = true;
           }
         }
       }

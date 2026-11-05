@@ -1645,7 +1645,7 @@ export default function Home() {
       }
 
       alert(`✨ 실제 ${targetCount}종 스티커 100% 실물 일치 마스터 표지 합성이 완료되었습니다!`);
-      await fetchDesigns(page, false, undefined, undefined, true);
+      await fetchDesigns(page, false);
     } catch (e: any) {
       console.error('Error creating composite master cover:', e);
       alert('실체 합성 마스터 표지 생성 실패: ' + (e.message || String(e)));
@@ -1746,7 +1746,7 @@ export default function Home() {
 
       alert(`✨ 어항 본품 ${successCount}종에서 100% 실물 일치 독립 스티커 추출이 완료되었습니다!`);
       await handleOpenPackDetail(selectedPackCover, true);
-      await fetchDesigns(page, false, undefined, undefined, true);
+      await fetchDesigns(page, false);
     } catch (e: any) {
       console.error('Error in handleExtractAllStandaloneFromTanks:', e);
       alert('독립 스티커 추출 중 오류가 발생했습니다: ' + (e.message || String(e)));
@@ -1850,7 +1850,7 @@ export default function Home() {
 
       alert(`✨ 독립 스티커 ${successCount}종에서 100% 실물 일치 어항/유리병 스티커 합성이 완료되었습니다!`);
       await handleOpenPackDetail(selectedPackCover, true);
-      await fetchDesigns(page, false, undefined, undefined, true);
+      await fetchDesigns(page, false);
     } catch (e: any) {
       console.error('Error in handleBuildAllVesselsFromStandalone:', e);
       alert('어항 스티커 합성 중 오류가 발생했습니다: ' + (e.message || String(e)));
@@ -2040,7 +2040,7 @@ export default function Home() {
         }
 
         alert(`✨ 누락되었던 스티커 ${addedCount}종이 성공적으로 생성되어 팩에 추가되었습니다! (총 ${newTotalCount}종 완성)`);
-        await fetchDesigns(page, false, undefined, undefined, true);
+        await fetchDesigns(page, false);
       } else {
         alert('스티커 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
       }
@@ -2195,7 +2195,7 @@ export default function Home() {
           setSelectedDesign(null);
         }
         invalidateClientPoolCache();
-        fetchDesigns(page, false, undefined, undefined, true);
+        fetchDesigns(page, false);
       }
     } catch (e) {
       console.error('Error moving to trash:', e);
@@ -2260,7 +2260,7 @@ export default function Home() {
       if (data.success) {
         setTrashDesigns(prev => prev.filter(d => !finalTargetIds.includes(d.id)));
         setSelectedIdsInTrash([]);
-        fetchDesigns(page, false, undefined, undefined, true);
+        fetchDesigns(page, false);
       }
     } catch (e) {
       console.error('Error restoring design:', e);
@@ -2327,7 +2327,7 @@ export default function Home() {
       if (data.success) {
         setTrashDesigns(prev => prev.filter(d => !finalTargetIds.includes(d.id)));
         setSelectedIdsInTrash([]);
-        fetchDesigns(page, false, undefined, undefined, true);
+        fetchDesigns(page, false);
       }
     } catch (e) {
       console.error('Error permanently deleting:', e);
