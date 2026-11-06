@@ -226,13 +226,21 @@ export async function GET(request: Request) {
       let snap = await query.get();
       actualDbReads = snap.docs.length;
 
-      // If sticker_sub is not indexed or returned empty, query with presetId prefix safely
+      // If sticker_sub direct query returned empty, query by matching stickerPresetId prefix
       if (snap.empty) {
-        snap = await db.collection('designs')
-          .orderBy('created_at', 'desc')
-          .limit(60)
-          .get();
-        actualDbReads = snap.docs.length;
+        try {
+          const prefixQuery = await db.collection('designs')
+            .where('stickerPresetId', '>=', subType)
+            .where('stickerPresetId', '<=', subType + '\uf8ff')
+            .limit(limitNum)
+            .get();
+          if (!prefixQuery.empty) {
+            snap = prefixQuery;
+            actualDbReads += snap.docs.length;
+          }
+        } catch {
+          // If compound query fails, keep snap empty - NEVER return unrelated themes
+        }
       }
 
       const items = snap.docs.map((d: any) => {

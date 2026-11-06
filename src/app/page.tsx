@@ -1878,14 +1878,13 @@ export default function Home() {
   };
 
   const handleOpenPackDetail = async (coverDesign: any, forceRefresh: boolean = false) => {
+    setSelectedDesign(null);
+    setPreviewDesign(null);
     setSelectedPackCover(coverDesign);
     setIsPackDetailModalOpen(true);
     setIsPinterestHubExpanded(false);
-    const hasWarmCache = !forceRefresh && clientPoolCache && clientPoolCache.data.length > 0;
-    if (!hasWarmCache) {
-      setLoadingPackStickers(true);
-      setPackStickers([]);
-    }
+    setLoadingPackStickers(true);
+    setPackStickers([]);
 
     if (typeof window !== 'undefined') {
       const savedShop = localStorage.getItem('user_etsy_shop_url') || 'https://www.etsy.com/shop/LittlePawsStudioShop';
@@ -1897,10 +1896,29 @@ export default function Home() {
     }
 
     try {
-      const pool = await getCachedStickersPool(forceRefresh);
+      const coverCategory = getDesignCategoryKey(coverDesign);
+      let pool: any[] = [];
+
+      // 1. First priority: Fetch targeted sub-theme stickers directly (ultra-fast, exact match)
+      if (coverCategory && coverCategory !== 'other') {
+        try {
+          const res = await fetch(`/api/designs?limit=60&type=sticker&subType=${coverCategory}${forceRefresh ? '&nocache=true' : ''}`);
+          const data = await res.json();
+          if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+            pool = data.data;
+          }
+        } catch (subErr) {
+          console.error('Targeted subType stickers fetch failed:', subErr);
+        }
+      }
+
+      // 2. Second priority / Fallback: Fetch from cached stickers pool
+      if (!pool || pool.length === 0) {
+        pool = await getCachedStickersPool(forceRefresh);
+      }
+
       if (pool && pool.length > 0) {
         const coverTime = new Date(coverDesign.created_at || 0).getTime();
-        const coverCategory = getDesignCategoryKey(coverDesign);
 
         const matched = pool.filter((d: any) => {
           if (d.id === coverDesign.id) return false;
@@ -5577,6 +5595,8 @@ export default function Home() {
                         setSelectedIdsForDelete(prev => [...prev, design.id]);
                       }
                     } else {
+                      setSelectedDesign(null);
+                      setPreviewDesign(null);
                       if (selectedCategoryTab === 'sticker' || isMasterCover) {
                         handleOpenPackDetail(design);
                       } else {
@@ -7087,7 +7107,7 @@ export default function Home() {
 
         {/* 🌟 Sticker 20-Pack Bundle Detail View Modal (마스터 썸네일 클릭 시 20종 전용 뷰어) */}
         {isPackDetailModalOpen && selectedPackCover && (
-          <div className="fixed inset-0 bg-black/70 z-[70] flex items-center justify-center p-1.5 sm:p-6 backdrop-blur-md">
+          <div className="fixed inset-0 bg-black/70 z-[95] flex items-center justify-center p-1.5 sm:p-6 backdrop-blur-md">
             <div className="bg-white rounded-2xl sm:rounded-3xl max-w-6xl w-full max-h-[96vh] sm:max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-teal-200 animate-fadeIn">
               
               {/* Modal Header (Compact & sleek on mobile, docked cleanly at top) */}
