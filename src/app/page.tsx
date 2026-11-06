@@ -585,35 +585,9 @@ export const organizePackStickers = (matched: any[], coverDesign: any): { finalS
 
 export default function Home() {
   const { data: session } = useSession();
-  const [designs, setDesigns] = useState<any[]>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = sessionStorage.getItem('mypod_initial_page_data_v1');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (parsed && Array.isArray(parsed.data?.data) && (Date.now() - parsed.timestamp < 600000)) {
-            return parsed.data.data;
-          }
-        }
-      } catch {}
-    }
-    return [];
-  });
+  const [designs, setDesigns] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loadingInitial, setLoadingInitial] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = sessionStorage.getItem('mypod_initial_page_data_v1');
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (parsed && Array.isArray(parsed.data?.data) && (Date.now() - parsed.timestamp < 600000)) {
-            return false;
-          }
-        }
-      } catch {}
-    }
-    return true;
-  });
+  const [loadingInitial, setLoadingInitial] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -658,6 +632,25 @@ export default function Home() {
 
   useEffect(() => {
     setDynamicSeasonalRecommendations(getDynamicSeasonalStickerRecommendations());
+  }, []);
+
+  // Hydrate initial cached page data on client mount without causing SSR hydration mismatch (#418)
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem('mypod_initial_page_data_v1');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && Array.isArray(parsed.data?.data) && (Date.now() - parsed.timestamp < 600000)) {
+          setDesigns(parsed.data.data);
+          setLoadingInitial(false);
+          if (parsed.data.totalPages) setTotalPages(parsed.data.totalPages);
+          if (parsed.data.total) setTotalCount(parsed.data.total);
+          if (parsed.data.podCount !== undefined) setPodCount(parsed.data.podCount);
+          if (parsed.data.stickerCount !== undefined) setStickerCount(parsed.data.stickerCount);
+          if (parsed.data.stickerSubCounts !== undefined) setStickerSubCounts(parsed.data.stickerSubCounts);
+        }
+      }
+    } catch {}
   }, []);
 
   // Sticker & Digital PNG Pack States
