@@ -22,6 +22,78 @@ const CATEGORY_SEO_DICT: Record<string, {
   singleKeywords: string[];
   descriptionHighlights: string[];
 }> = {
+  axolotlemote: {
+    name: 'Baby Axolotl Emotes & Reactions',
+    goldenBundleTitle: 'Axolotl Twitch Emotes PNG, Cute Baby Axolotl Discord Emotes, Kawaii GoodNotes Planner Stickers, Streamer Graphics Pack, Instant Download',
+    themeTags: [
+      'axolotl emotes',
+      'twitch emotes pack',
+      'discord emotes cute',
+      'streamer graphics',
+      'kawaii axolotl art',
+      'goodnotes stickers',
+      'reaction stickers'
+    ],
+    bundleKeywords: [
+      'Cute Axolotl Twitch Emotes Bundle',
+      'Discord Streamer Reaction Clipart',
+      'Baby Axolotl Die Cut Stickers'
+    ],
+    singleKeywords: ['Axolotl Twitch Emote PNG', 'Discord Reaction Clipart', 'Baby Axolotl Sticker Cut'],
+    descriptionHighlights: [
+      '🌸 20 Adorable Baby Pink Axolotl emotes & reaction poses (Hi, Love, Boba Sip, GG Gamer, Hype, Cry, Pout, Zzz Sleep, Coffee & Blanket Burrito)',
+      '🎮 Perfect for Twitch streamers, Discord community servers, GoodNotes digital planners, and iMessage',
+      '✨ Includes 300 DPI high-res transparent PNGs ready for immediate use'
+    ]
+  },
+  axolotl: {
+    name: 'Cute Axolotl & Aquatic Friends',
+    goldenBundleTitle: 'Digital Stickers PNG, Cute Axolotl GoodNotes Stickers, Pastel Aquatic Sea Creature Clipart, Planner Decal Bundle, Instant Download',
+    themeTags: [
+      'axolotl stickers',
+      'cute sea creatures',
+      'boba axolotl clipart',
+      'aquatic animal decals',
+      'pastel ocean sticker',
+      'goodnotes stickers',
+      'kawaii marine life'
+    ],
+    bundleKeywords: [
+      'Axolotl Stickers PNG Bundle',
+      'Pastel Marine Animal Clipart',
+      'Cute Axolotl Die Cut'
+    ],
+    singleKeywords: ['Cute Axolotl Sticker PNG', 'Pastel Marine Clipart', 'Axolotl Die Cut'],
+    descriptionHighlights: [
+      '🌸 Adorable baby pink axolotls paired with cozy items (Boba tea, Marimo moss, Strawberry milk, Water lily)',
+      '🌊 Soft pastel kawaii aquatic aesthetic for planners, journals, and Cricut decals',
+      '✨ High-resolution 300 DPI transparent PNG files'
+    ]
+  },
+  deepsea: {
+    name: 'Bioluminescent Deep Sea Creatures',
+    goldenBundleTitle: 'Deep Sea Digital Stickers PNG, Glowing Jellyfish GoodNotes Stickers, Bioluminescent Ocean Creature Clipart, Planner Decal Bundle, Instant Download',
+    themeTags: [
+      'deep sea stickers',
+      'glowing jellyfish',
+      'bioluminescent art',
+      'dumbo octopus decal',
+      'anglerfish clipart',
+      'neon ocean stickers',
+      'marine biology cut'
+    ],
+    bundleKeywords: [
+      'Deep Sea Stickers PNG Bundle',
+      'Bioluminescent Creature Clipart',
+      'Neon Ocean Animal Die Cut'
+    ],
+    singleKeywords: ['Deep Sea Sticker PNG', 'Bioluminescent Clipart', 'Glowing Marine Die Cut'],
+    descriptionHighlights: [
+      '🌊 Mysterious glowing bioluminescent deep sea creatures (Dumbo octopus, Crystal jellyfish, Baby anglerfish, Sea bunny)',
+      '✨ Vibrant neon cyan, emerald & magenta glow effects on clean white backgrounds',
+      '🤿 Perfect for ocean enthusiasts, science journals, laptop skins, and GoodNotes planners'
+    ]
+  },
   halloween: {
     name: 'Halloween Spooky Cute',
     goldenBundleTitle: 'Cute Animal Digital Stickers, Spooky Halloween GoodNotes Stickers, Ghost Pumpkin Clipart, Printable Die Cut Decal Bundle, Instant Download PNG',
@@ -586,7 +658,15 @@ export function generateEtsySeo(design: any, packCount?: number): EtsySeoData {
     titleRaw.includes('bundle')
   );
 
-  const themeInfo = CATEGORY_SEO_DICT[subKey] || {
+  let matchedSubKey = subKey;
+  if (!CATEGORY_SEO_DICT[matchedSubKey]) {
+    const t = `${titleRaw} ${topicRaw}`.toLowerCase();
+    if (t.includes('이모트') || t.includes('emote')) matchedSubKey = 'axolotlemote';
+    else if (t.includes('우파루파') || t.includes('axolotl')) matchedSubKey = 'axolotl';
+    else if (t.includes('심해') || t.includes('deepsea') || t.includes('deep sea')) matchedSubKey = 'deepsea';
+  }
+
+  const themeInfo = CATEGORY_SEO_DICT[matchedSubKey] || {
     name: 'Cute Kawaii',
     goldenBundleTitle: 'Digital Stickers PNG, Cute Kawaii GoodNotes Stickers, Aesthetic Clipart Decal Bundle, Instant Download',
     themeTags: ['kawaii stickers', 'cute animal clipart', 'aesthetic decals', 'pastel stickers', 'journal clipart', 'korean deco stickers', 'cute character art'],

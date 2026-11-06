@@ -385,6 +385,12 @@ export async function createCompositeMasterCover(
     ribbonColor = '#4338CA'; // Deep ocean indigo ribbon
     ribbonFold = '#312E81';
     ribbonOutline = '#1E1B4B';
+  } else if (subType === 'axolotlemote' || subType === 'axolotl-emote' || optTitle.includes('이모트') || optTitle.includes('emote')) {
+    seriesTitle = 'AXOLOTL EMOTES';
+    titleColor = '#BE185D'; // Sweet bold candy pink
+    ribbonColor = '#0D9488'; // Vibrant teal ribbon banner
+    ribbonFold = '#115E59';
+    ribbonOutline = '#042F2E';
   } else if (subType === 'axolotl' || optTitle.includes('axolotl') || optTitle.includes('우파루파')) {
     seriesTitle = 'BABY AXOLOTL';
     titleColor = '#DB2777'; // Cute strawberry milk pink

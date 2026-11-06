@@ -1669,6 +1669,160 @@ STRICT NO GLASS TANKS: Pure standalone glowing bioluminescent deep sea creatures
   }) as unknown as StickerPreset[]
 ];
 
+export const AXOLOTL_EMOTES_20_SERIES: StickerPreset[] = [
+  {
+    id: 'axolotl-emotes-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 아기 우파루파 20종 이모트 & 리액션 팩 대표 커버 표지',
+    animal: 'Cute Axolotl Emotes Master Cover',
+    animalValue: '',
+    affinityObject: 'Cute Axolotl Emotes Master Cover',
+    theme: 'Axolotl Emotes 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy, Twitch & Discord 판매용 20종 아기 우파루파 단일 캐릭터 감정/리액션 이모트 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF).
+CENTERED TITLE (MUST REMAIN CLEAR & UNOBSTRUCTED): Centered cute bold pink script typography reading "20+ CUTE AXOLOTL EMOTES STICKER & EMOTE BUNDLE". Below title reads "TWITCH • DISCORD • GOODNOTES" in a stylish vibrant teal ribbon banner. CRITICAL: The central title and banner MUST remain completely unobstructed, open, and clearly legible with an ample margin around it—NO stickers encroaching, touching, or overlapping the text.
+STICKER ARRANGEMENT (DENSE YET NEATLY SEPARATED): A richly packed collage of 18-20 unique standalone die-cut emote sticker samples of the exact same cute chubby baby pink axolotl character showing different emotional expressions: waving hello, hugging a heart plushie, sipping boba tea, wearing gaming headset with thumbs up, fiery hype eyes, crying tears with tissue, grumpy angry pouting cheeks, cozy sleeping on cloud, coffee mug fuel, and burrito blanket. CRITICAL NO OVERLAPPING: Individual stickers MUST NOT overlap, collide, or clip one another. Each sticker is completely isolated and neatly placed side-by-side with its own distinct thick crisp white die-cut border. STRICT NO DUPLICATES: Every single sticker is 100% unique in facial expression and reaction pose.
+STRICT NO GLASS TANKS: Pure standalone adorable cute axolotl character emotes ONLY. NO glass jar, NO glass tank, NO container, NO background scenery. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      {
+        name: '안녕 인사하는 우파루파 (Hi/Wave)',
+        desc: '한 손을 머리 위로 힘차게 흔들며 활짝 웃는 인사 이모트',
+        phrase: 'Hello!',
+        detail: 'happily waving one stubby paw up in the air with a bright sweet cheerful open-mouth smile, tiny floating starlight sparkles'
+      },
+      {
+        name: '하트 쿠션 껴안은 우파루파 (Love/Heart)',
+        desc: '커다란 핑크 하트 쿠션을 두 손으로 꼬옥 껴안은 사랑 이모트',
+        phrase: 'Love You',
+        detail: 'hugging a giant fluffy pastel pink heart plushie with tiny pink hearts floating around, eyes sparkling with sheer adoration'
+      },
+      {
+        name: '딸기 버블티 쪽쪽 마시는 우파루파 (Boba Sip)',
+        desc: '타피오카 펄이 든 버블티를 빨대로 마시며 눈 감고 힐링하는 이모트',
+        phrase: 'Boba Sip',
+        detail: 'sitting down and sipping a delicious iced strawberry boba bubble tea with black tapioca pearls and a pastel straw, happy closed-eye content smile'
+      },
+      {
+        name: '게이밍 헤드셋 낀 우파루파 (GG/Gamer)',
+        desc: '민트색 헤드셋을 끼고 게임패드와 함께 엄지척하는 게이머 이모트',
+        phrase: 'Good Game',
+        detail: 'wearing an oversized pastel mint green gaming headset with tiny cat ears, giving a proud double thumbs-up with neon pixel star effects'
+      },
+      {
+        name: '주먹 불끈 열정 폭발 우파루파 (Hype/Let\'s Go)',
+        desc: '두 눈에 불꽃이 활활 타오르며 주먹을 번쩍 든 하이프 응원 이모트',
+        phrase: 'HYPE!',
+        detail: 'pumping both tiny fists in the air with fiery comic flames burning in its eyes, intense energetic hype expression with energetic anime speedlines'
+      },
+      {
+        name: '폭풍 눈물 흘리는 우파루파 (Sad/Cry)',
+        desc: '휴지를 쥐고 눈물을 폭포수처럼 쏟아내는 슬픔/감동 이모트',
+        phrase: 'Big Sad',
+        detail: 'crying dramatic fountain tears pouring down chubby cheeks, holding a tiny soft white tissue in paws, adorable sad pouting quivering mouth'
+      },
+      {
+        name: '볼빵빵 뾰로통 삐진 우파루파 (Angry/Pout)',
+        desc: '복어처럼 볼을 빵빵하게 부풀리고 팔짱 낀 채 삐진 분노 이모트',
+        phrase: 'Grumpy',
+        detail: 'cheeks puffed up round like a cute blowfish, arms crossed, grumpy pouty face with a tiny red comic anger mark hovering near forehead'
+      },
+      {
+        name: '구름 베개 쿨쿨 자는 우파루파 (Sleepy/Zzz)',
+        desc: '포근한 파스텔 구름 베개에 머리를 파묻고 단잠에 빠진 수면 이모트',
+        phrase: 'Zzz Sleep',
+        detail: 'snuggled up asleep on a fluffy pastel cloud pillow, tiny translucent snot bubble on nose, floating pastel Zzz letters'
+      },
+      {
+        name: '물음표 띄우고 갸우뚱 우파루파 (Confused/What)',
+        desc: '고개를 갸우뚱 기울이며 머리 위에 물음표를 띄운 어리둥절 이모트',
+        phrase: 'Wait What',
+        detail: 'tilting head quizzically to the side with one eyebrow raised, a glowing yellow question mark symbol floating above its head'
+      },
+      {
+        name: '커피 수혈하는 월요병 우파루파 (Coffee Fuel)',
+        desc: '살짝 다크서클이 앉은 채 커다란 머그잔을 꼭 쥐고 카페인 충전하는 이모트',
+        phrase: 'Need Coffee',
+        detail: 'holding a giant oversized pastel ceramic coffee mug with both paws, slight tired dark circles under eyes, aromatic steam rising, Monday mood'
+      },
+      {
+        name: '전구 번뜩 아이디어 우파루파 (Eureka/Idea)',
+        desc: '손가락을 척 치켜들며 머리 위 노란 전구가 반짝 켜진 깨달음 이모트',
+        phrase: 'Eureka!',
+        detail: 'pointing one index finger up excitedly as a bright yellow light bulb lights up above its head with sparkling inspiration rays'
+      },
+      {
+        name: '고깔모자 파티 댄스 우파루파 (Celebrate/Yay)',
+        desc: '줄무늬 고깔 파티모자를 쓰고 알록달록 컨페티를 뿌리는 축하 이모트',
+        phrase: 'Party Time',
+        detail: 'wearing a colorful striped birthday party cone hat, throwing pastel confetti into the air with a huge open-mouth joyful laugh'
+      },
+      {
+        name: '딸기케이크 냠냠 우파루파 (Nom Nom/Snack)',
+        desc: '딸기 쇼트케이크를 포크로 콕 찍어 볼 빵빵하게 오물오물 먹방 이모트',
+        phrase: 'Nom Nom',
+        detail: 'munching delightfully on a slice of fresh strawberry shortcake, sweet cream frosting on its chubby cheek, blissful foodie face'
+      },
+      {
+        name: '연잎 뒤에서 빼꼼 우파루파 (Lurk/Peek)',
+        desc: '초록 연잎 뒤에 몸을 숨기고 커다란 까만 눈만 빼꼼 내민 눈팅 이모트',
+        phrase: 'Peeking',
+        detail: 'peeking out cutely from behind a big green water lily leaf pad, only big innocent round black eyes and tiny paws visible, lurking vibe'
+      },
+      {
+        name: '영혼 가출 탈진 기절 우파루파 (Dead/RIP/KO)',
+        desc: '입에서 하얀 유령 영혼이 스르륵 빠져나오며 천사 날개가 돋아난 멘붕 이모트',
+        phrase: 'Dead Inside',
+        detail: 'floating comically with soul drifting out of its mouth like a tiny white ghost, miniature golden angel halo and wings, comically exhausted expression'
+      },
+      {
+        name: '안경 쓰고 열공하는 우파루파 (Study/Focus)',
+        desc: '동글이 안경을 쓰고 핑크 미니 노트북을 두드리며 열일/열공하는 이모트',
+        phrase: 'Work Hard',
+        detail: 'wearing round oversized student glasses, tapping away diligently on a mini pastel laptop, studious hyper-focused adorable expression'
+      },
+      {
+        name: '지갑 열고 돈 뿌리는 우파루파 (Take My Money)',
+        desc: '활짝 연 지갑에서 달러 지폐를 공중에 흩뿌리는 지름신/후원 이모트',
+        phrase: 'Take My Money',
+        detail: 'joyfully holding open a tiny wallet as green dollar bills fly everywhere in the air, funny dramatic meme spending pose'
+      },
+      {
+        name: '선글라스 낀 스웩 왕관 우파루파 (Flex/VIP)',
+        desc: '블랙 픽셀 선글라스에 금빛 왕관을 비스듬히 쓰고 거들먹거리는 스웩 이모트',
+        phrase: 'VIP Flex',
+        detail: 'wearing cool black pixel sunglasses, golden sparkling star crown tilted on head, confident smiling swagger pose with gold coin sparkles'
+      },
+      {
+        name: '두 손 모아 초롱초롱 애원 우파루파 (Please/UwU)',
+        desc: '두 손을 모으고 눈망울에 별빛을 가득 담아 간절하게 부탁하는 애원 이모트',
+        phrase: 'Please UwU',
+        detail: 'two paws clasped together beneath chin, gigantic glossy teary pleading puppy-dog eyes, irresistible cute begging face with blush'
+      },
+      {
+        name: '담요 김밥 돌돌 말린 우파루파 (Comfy Burrito)',
+        desc: '포근한 담요에 김밥처럼 몸을 돌돌 말고 얼굴만 쏙 내민 극강의 힐링 이모트',
+        phrase: 'Cozy Burrito',
+        detail: 'tightly rolled up like a cozy burrito inside a warm fluffy pastel tortilla blanket, only smiling round pink face poking out, pure bliss'
+      }
+    ][i];
+
+    return {
+      id: `axolotl-emote-20-pack-${num}`,
+      name: `🌸 [우파루파 이모트 ${num}/20] ${items.name}`,
+      animal: 'Baby Pink Axolotl Emote 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Axolotl Emote 20 Pack',
+      phrase: items.phrase,
+      description: items.desc,
+      prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut emote sticker featuring the exact same chubby baby pastel pink axolotl with fluffy magenta-tipped frilly external gills, big shiny black button eyes, gentle pink blush, and tiny stubby paws, ${items.detail}. STRICT NO GLASS CONTAINER RULE: NO glass jar, NO glass tank, NO container, NO background scenery. Crisp thick white die-cut border with subtle clean drop shadow. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors, kawaii chibi emote sticker aesthetic.`
+    };
+  }) as unknown as StickerPreset[]
+];
+
 export function buildStickerPrompt(
   animalName: string,
   affinityObject: string,

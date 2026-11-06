@@ -24,6 +24,7 @@ import {
   THANKSGIVING_20_SERIES,
   THANKSGIVING_STANDALONE_20_SERIES,
   BOOKTOK_20_SERIES,
+  AXOLOTL_EMOTES_20_SERIES,
   AXOLOTL_20_SERIES,
   DEEPSEA_20_SERIES,
   DESSERT_20_SERIES,
@@ -168,6 +169,7 @@ const getDesignCategoryKey = (d: any): string => {
   if (sub && sub !== 'other') return sub;
 
   const presetId = (d.stickerPresetId || d.id || '').toLowerCase();
+  if (presetId.includes('axolotl-emote') || presetId.includes('axolotlemote') || presetId.includes('emote')) return 'axolotlemote';
   if (presetId.includes('axolotl')) return 'axolotl';
   if (presetId.includes('deepsea') || presetId.includes('deep-sea')) return 'deepsea';
   if (presetId.includes('dessert')) return 'dessert';
@@ -191,6 +193,7 @@ const getDesignCategoryKey = (d: any): string => {
   if (presetId.includes('booktok') || presetId.includes('reading')) return 'booktok';
 
   const title = (d.title || d.topic || '').toLowerCase();
+  if (title.includes('이모트') || title.includes('emote')) return 'axolotlemote';
   if (title.includes('새해') || title.includes('신년') || title.includes('new year') || title.includes('newyear')) return 'newyear';
   if (title.includes('우파루파') || title.includes('axolotl')) return 'axolotl';
   if (title.includes('심해') || title.includes('deep sea') || title.includes('deepsea')) return 'deepsea';
@@ -214,6 +217,7 @@ const getDesignCategoryKey = (d: any): string => {
 };
 
 const getStickerSeriesTitle = (tab: string) => {
+  if (tab.startsWith('axolotlemote20')) return '🌸 아기 우파루파 20종 이모트 & 리액션 팩';
   if (tab.startsWith('axolotl20')) return '🌸 아기 우파루파 & 아쿠아 프렌즈 20종 스티커 팩';
   if (tab.startsWith('deepsea20')) return '🌊 신비로운 심해 발광 생물 20종 스티커 팩';
   if (tab.startsWith('dessert20')) return '🥞 미국 유행 디저트 & 베이커리 20종 스티커 팩';
@@ -236,6 +240,7 @@ const getStickerSeriesTitle = (tab: string) => {
 };
 
 const getPresetSeriesList = (tab: string): StickerPreset[] => {
+  if (tab === 'axolotlemote20') return AXOLOTL_EMOTES_20_SERIES;
   if (tab === 'axolotl20') return AXOLOTL_20_SERIES;
   if (tab === 'deepsea20') return DEEPSEA_20_SERIES;
   if (tab === 'dessert20') return DESSERT_20_SERIES;
@@ -326,6 +331,9 @@ export const getPackPresetsInfo = (coverDesign: any): PackPresetsInfo => {
   const allText = `${presetId} ${sub} ${title} ${prompt} ${categoryKey}`;
 
   // 1. Single 20 themes (strictly 20-pack only, never 40-pack)
+  if (categoryKey === 'axolotlemote' || allText.includes('axolotlemote') || allText.includes('이모트') || allText.includes('emote')) {
+    return { themeKey: 'axolotlemote', isSingleSeries20Theme: true, vesselSeries: AXOLOTL_EMOTES_20_SERIES, standaloneSeries: null };
+  }
   if (categoryKey === 'axolotl' || allText.includes('axolotl') || allText.includes('우파루파')) {
     return { themeKey: 'axolotl', isSingleSeries20Theme: true, vesselSeries: AXOLOTL_20_SERIES, standaloneSeries: null };
   }
@@ -711,6 +719,7 @@ export default function Home() {
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<
+    | 'axolotlemote20'
     | 'axolotl20'
     | 'deepsea20'
     | 'dessert20'
@@ -1169,6 +1178,7 @@ export default function Home() {
   const getCleanEnglishThemeName = (subKey?: string, tabKey?: string, topic?: string): string => {
     const raw = (subKey || tabKey || '').toLowerCase();
     
+    if (raw.includes('axolotlemote') || raw.includes('emote') || raw.includes('이모트')) return 'AxolotlEmotes';
     if (raw.includes('deepsea') || raw.includes('deep_sea') || raw.includes('심해')) return 'DeepSeaGlow';
     if (raw.includes('axolotl') || raw.includes('우파루파')) return 'BabyAxolotl';
     if (raw.includes('dessert') || raw.includes('bakery')) return 'Dessert';
@@ -1188,6 +1198,7 @@ export default function Home() {
     if (raw.includes('booktok') || raw.includes('reading') || raw.includes('book_club')) return 'BookTok';
 
     const topicLower = (topic || '').toLowerCase();
+    if (topicLower.includes('이모트') || topicLower.includes('emote')) return 'AxolotlEmotes';
     if (topicLower.includes('deep sea') || topicLower.includes('deepsea') || topicLower.includes('심해')) return 'DeepSeaGlow';
     if (topicLower.includes('axolotl') || topicLower.includes('우파루파')) return 'BabyAxolotl';
     if (topicLower.includes('dessert') || topicLower.includes('디저트') || topicLower.includes('베이커리')) return 'Dessert';
@@ -3552,6 +3563,71 @@ export default function Home() {
         }
       }
 
+      // Generate Twitch & Discord ready-to-upload emote sizes (112, 56, 28, 500) if emote series
+      const twitchDiscordFiles: { fileName: string; bytes: Uint8Array }[] = [];
+      const isEmoteSeries = themeName.toLowerCase().includes('emote') || cleanSessionName.toLowerCase().includes('emote');
+      if (isEmoteSeries && processedStickers.length > 0) {
+        setExportBundleProgress({
+          current: totalItems,
+          total: totalItems,
+          message: '트위치 & 디스코드 전용 이모트 규격 (112/56/28px) 생성 중...'
+        });
+        await new Promise(resolve => setTimeout(resolve, 15));
+
+        try {
+          const sizes = [
+            { dir: 'Twitch_112x112', dim: 112 },
+            { dir: 'Twitch_56x56', dim: 56 },
+            { dir: 'Twitch_28x28', dim: 28 },
+            { dir: 'Discord_500x500', dim: 500 },
+          ];
+
+          const eCanvas = document.createElement('canvas');
+          const eCtx = eCanvas.getContext('2d');
+
+          if (eCtx) {
+            for (let sIdx = 0; sIdx < processedStickers.length; sIdx++) {
+              const sObj = processedStickers[sIdx];
+              const sUrl = sObj.processedTransparentDataUrl || sObj.image_url;
+              if (!sUrl) continue;
+
+              const eImg = new Image();
+              eImg.crossOrigin = 'anonymous';
+              await new Promise((res) => {
+                eImg.onload = res;
+                eImg.onerror = res;
+                eImg.src = sUrl;
+              });
+
+              if (!eImg.naturalWidth) continue;
+              const sNum = String(sIdx + 1).padStart(2, '0');
+
+              for (const { dir, dim } of sizes) {
+                eCanvas.width = dim;
+                eCanvas.height = dim;
+                eCtx.clearRect(0, 0, dim, dim);
+                eCtx.imageSmoothingEnabled = true;
+                eCtx.imageSmoothingQuality = 'high';
+                eCtx.drawImage(eImg, 0, 0, dim, dim);
+
+                const dataUrl = eCanvas.toDataURL('image/png');
+                const base64 = dataUrl.split(',')[1];
+                const binary = atob(base64);
+                const bytes = new Uint8Array(binary.length);
+                for (let b = 0; b < binary.length; b++) bytes[b] = binary.charCodeAt(b);
+
+                twitchDiscordFiles.push({
+                  fileName: `${dir}/${sNum}_${themeName}_${dim}x${dim}.png`,
+                  bytes,
+                });
+              }
+            }
+          }
+        } catch (emoteErr) {
+          console.error('Error generating Twitch/Discord emote files:', emoteErr);
+        }
+      }
+
       const triggerDownload = (blob: Blob, filename: string) => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -3634,6 +3710,14 @@ export default function Home() {
             folderName: `${cleanSessionName}_Printables`,
             files: printableFiles,
           });
+
+          if (twitchDiscordFiles.length > 0) {
+            parts.push({
+              name: `04_${themeName}_Part4_Twitch_Discord_Emotes.zip`,
+              folderName: `${cleanSessionName}_Twitch_Discord_Emotes`,
+              files: twitchDiscordFiles,
+            });
+          }
         }
 
         for (let p = 0; p < parts.length; p++) {
@@ -3686,6 +3770,9 @@ export default function Home() {
         for (const f of printableFiles) {
           sFolder?.file(f.fileName, f.bytes);
         }
+        for (const f of twitchDiscordFiles) {
+          sFolder?.file(f.fileName, f.bytes);
+        }
 
         const zipBlob = await singleZip.generateAsync({
           type: 'blob',
@@ -3708,7 +3795,10 @@ export default function Home() {
     let bundleName = 'Dessert_20_Stickers_Bundle';
     let seriesTitle = '[미국 유행 디저트 & 베이커리 (20종)]';
 
-    if (currentTab === 'axolotl20') {
+    if (currentTab === 'axolotlemote20') {
+      bundleName = 'Axolotl_Emotes_20_Bundle';
+      seriesTitle = '[아기 우파루파 20종 이모트 & 리액션 팩 (20종)]';
+    } else if (currentTab === 'axolotl20') {
       bundleName = 'Cute_Axolotl_20_Stickers_Bundle';
       seriesTitle = '[아기 우파루파 & 아쿠아 프렌즈 (20종)]';
     } else if (currentTab === 'deepsea20') {
@@ -3767,7 +3857,10 @@ export default function Home() {
         const textToScan = `${d.title || ''} ${d.prompt || ''} ${d.topic || ''} ${d.feedback_applied || ''}`.toLowerCase();
         const sub = d.sticker_sub;
 
-        if (currentTab === 'axolotl20') {
+        if (currentTab === 'axolotlemote20') {
+      bundleName = 'Axolotl_Emotes_20_Bundle';
+      seriesTitle = '[아기 우파루파 20종 이모트 & 리액션 팩 (20종)]';
+    } else if (currentTab === 'axolotl20') {
           return sub === 'axolotl' || presetId.startsWith('axolotl') || textToScan.includes('axolotl') || textToScan.includes('우파루파');
         } else if (currentTab === 'deepsea20') {
           return sub === 'deepsea' || presetId.startsWith('deepsea') || textToScan.includes('deepsea') || textToScan.includes('심해');
@@ -3931,7 +4024,12 @@ export default function Home() {
     let packName = '[북톡 & 코지 리딩 20종 스티커 팩]';
     let subKey = 'booktok';
 
-    if (baseType.startsWith('axolotl')) {
+    if (baseType.startsWith('axolotlemote')) {
+      targetPresets = AXOLOTL_EMOTES_20_SERIES;
+      targetStandalonePresets = AXOLOTL_EMOTES_20_SERIES;
+      packName = '[아기 우파루파 20종 이모트 & 리액션 팩]';
+      subKey = 'axolotlemote';
+    } else if (baseType.startsWith('axolotl')) {
       targetPresets = AXOLOTL_20_SERIES;
       targetStandalonePresets = AXOLOTL_20_SERIES;
       packName = '[아기 우파루파 & 아쿠아 프렌즈 20종 스티커 팩]';
@@ -5244,7 +5342,7 @@ export default function Home() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center gap-2">
-                    {!['axolotl20', 'deepsea20', 'dessert20', 'socialbattery20', 'hangul20', 'booktok20'].includes(selectedStickerSeriesTab) && (
+                    {!['axolotlemote20', 'axolotl20', 'deepsea20', 'dessert20', 'socialbattery20', 'hangul20', 'booktok20'].includes(selectedStickerSeriesTab) && (
                       <button
                         onClick={() => handleBatchGenerateSeries(`${selectedStickerSeriesTab}_both`)}
                         disabled={isBatchGenerating}
@@ -5317,6 +5415,7 @@ export default function Home() {
                     className="w-full bg-white text-teal-950 font-extrabold text-xs sm:text-sm py-2 px-3 rounded-xl border-2 border-teal-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400 cursor-pointer"
                   >
                     <optgroup label="🌟 신규 인기 틈새 테마 (NEW)">
+                      <option value="axolotlemote20">🌸 아기 우파루파 20종 이모트 팩 (단일 캐릭터 표정/리액션)</option>
                       <option value="axolotl20">🌸 아기 우파루파 & 아쿠아 프렌즈 20종 (단독)</option>
                       <option value="deepsea20">🌊 신비로운 심해 발광 생물 20종 (단독)</option>
                       <option value="dessert20">🥞 미국 유행 디저트 & 베이커리 20종</option>
