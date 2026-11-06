@@ -379,6 +379,18 @@ export async function createCompositeMasterCover(
     ribbonColor = '#EC4899';
     ribbonFold = '#831843';
     ribbonOutline = '#500724';
+  } else if (subType === 'deepsea' || optTitle.includes('deepsea') || optTitle.includes('심해')) {
+    seriesTitle = 'DEEP SEA GLOW';
+    titleColor = '#0E7490'; // Rich deep ocean cyan / glowing teal
+    ribbonColor = '#4338CA'; // Deep ocean indigo ribbon
+    ribbonFold = '#312E81';
+    ribbonOutline = '#1E1B4B';
+  } else if (subType === 'axolotl' || optTitle.includes('axolotl') || optTitle.includes('우파루파')) {
+    seriesTitle = 'BABY AXOLOTL';
+    titleColor = '#DB2777'; // Cute strawberry milk pink
+    ribbonColor = '#0D9488'; // Vibrant teal ribbon
+    ribbonFold = '#115E59';
+    ribbonOutline = '#042F2E';
   } else {
     // Pure English fallback: Strip Korean and special characters completely
     const cleanEn = (options.title || '').replace(/[^a-zA-Z\s]/g, ' ').replace(/\s+/g, ' ').trim();
