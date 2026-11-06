@@ -9,6 +9,7 @@ export const config = {
     // - favicon.ico (파비콘)
     // - api/run-agent (Vercel Cron)
     // - api/designs/image, api/designs/save-mockup (Public image serving & mockup saving for Pinterest)
-    "/((?!api/auth|api/run-agent|api/etsy-webhook|api/designs/image|api/designs/save-mockup|_next/static|_next/image|favicon.ico).*)"
+    // - manifest.webmanifest, manifest.json, sw.js (PWA & Service Worker)
+    "/((?!api/auth|api/run-agent|api/etsy-webhook|api/designs/image|api/designs/save-mockup|manifest.webmanifest|manifest.json|sw.js|_next/static|_next/image|favicon.ico).*)"
   ]
 };

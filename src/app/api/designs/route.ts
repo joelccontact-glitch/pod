@@ -123,68 +123,43 @@ export async function GET(request: Request) {
     if (onlyCovers && filterType === 'sticker') {
       let covers: any[] = [];
 
-      // Check in-memory covers cache (0 Firestore reads!)
+      // 1. Check in-memory covers cache (0 Firestore reads!)
       if (!nocache && inMemoryCoversCache && (now - inMemoryCoversCache.timestamp < CACHE_TTL_MS)) {
         covers = inMemoryCoversCache.data;
         dataSource = 'memory';
         actualDbReads = 0;
       } else {
-        // Query ONLY master covers from Firestore (Strict limit of 50 docs max! Reads only ~13 docs!)
-        // 1) First check if dedicated covers snapshot exists in _system_cache
+        // 2. Read from _system_cache/covers (Exactly 1 Firestore read!)
         try {
           const coversCacheDoc = await db.collection('_system_cache').doc('covers').get();
           actualDbReads += 1;
-          if (coversCacheDoc.exists && Array.isArray(coversCacheDoc.data()?.items)) {
+          if (coversCacheDoc.exists && Array.isArray(coversCacheDoc.data()?.items) && coversCacheDoc.data()!.items.length > 0) {
             covers = coversCacheDoc.data()!.items;
             dataSource = 'covers_cache';
           }
-        } catch {}
+        } catch (e: any) {
+          console.error('Failed to read covers cache:', e?.message);
+        }
 
-        // 2) If not in cache, query covers directly with strict limit
+        // 3. Fallback: Query where is_cover == true (Exactly 13 reads, NEVER full scan!)
         if (covers.length === 0) {
           try {
-            // Query docs with is_cover == true or query latest 80 docs to extract covers safely
-            let snap = await db.collection('designs')
+            const snap = await db.collection('designs')
               .where('is_cover', '==', true)
-              .limit(50)
               .get();
-            
             actualDbReads += snap.docs.length;
+            covers = snap.docs.map((d: any) => ({ id: d.id, ...d.data() }));
+            dataSource = 'firestore_covers';
 
-            if (snap.empty) {
-              // Fallback: Query recent designs with cover title pattern (limit 80 max, NEVER 1,542!)
-              snap = await db.collection('designs')
-                .orderBy('created_at', 'desc')
-                .limit(80)
-                .get();
-              actualDbReads += snap.docs.length;
+            // Cache in _system_cache/covers for future 0-1 read performance
+            if (covers.length > 0) {
+              db.collection('_system_cache').doc('covers').set({
+                items: covers,
+                updated_at: new Date().toISOString()
+              }).catch(() => {});
             }
-
-            covers = snap.docs
-              .map((d: any) => ({ id: d.id, ...d.data() }))
-              .filter((d: any) => {
-                if (d.is_deleted) return false;
-                if (d.is_cover === true) return true;
-                const titleStr = `${d.title || ''} ${d.topic || ''} ${d.stickerPresetId || ''} ${d.id || ''}`.toLowerCase();
-                return (
-                  titleStr.includes('-20-pack-cover') ||
-                  titleStr.includes('-standalone-20-pack-cover') ||
-                  titleStr.includes('-pack-cover') ||
-                  titleStr.includes('마스터 썸네일') ||
-                  titleStr.includes('마스터 표지') ||
-                  titleStr.includes('대표 커버')
-                );
-              });
-
-            dataSource = 'firestore_limited';
-
-            // Cache covers in background for future 1-read or 0-read requests
-            db.collection('_system_cache').doc('covers').set({
-              items: covers,
-              updated_at: new Date().toISOString()
-            }).catch(() => {});
           } catch (e: any) {
-            console.error('Failed to query covers:', e?.message);
+            console.error('Failed to query is_cover docs:', e?.message);
           }
         }
 
