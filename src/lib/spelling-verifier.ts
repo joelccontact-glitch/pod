@@ -265,57 +265,7 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
       .replace(/\bt-shirt\b/gi, 'sticker');
   }
 
-  // 1. Primary (Zero Cost): High Precision Flux.1 Engine via Pollinations
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      console.log(`🎨 [Primary/Zero-Cost] Drawing high-quality image with Flux.1 (Attempt ${attempt})...`);
-      
-      // Strip redundant repetitive prefixes and photorealistic / 3D triggers
-      let corePrompt = prompt
-        .replace(/^A cute (2D vector )?die-cut sticker (design|illustration) (featuring|of):\s*/i, '')
-        .replace(/\b(8k resolution|4k resolution|photorealistic|hyperrealistic|unreal engine|octane render|raytracing|studio photography|cinematic lighting)\b/gi, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-
-      // Ensure length stays safe for URL encoding while preserving critical instructions
-      if (corePrompt.length > 700) {
-        corePrompt = corePrompt.substring(0, 700);
-      }
-
-      let cleanPrompt = '';
-      if (isStickerDetected) {
-        // Enforce strong 2D vector sticker illustration aesthetics upfront (Flux heavily prioritizes prompt prefix)
-        // Mandate bold black line art and vibrant saturated colors to eliminate washed out / faint outlines
-        cleanPrompt = `Cute 2D die-cut sticker illustration of ${corePrompt}, clean defined sticker outlines, rich vibrant colors, beautiful dimensional cel-shading, glossy highlights, exquisite high detail kawaii sticker art, thick white die-cut sticker border, centered on a pure solid white background (#FFFFFF), isolated single sticker graphic.`;
-      } else {
-        cleanPrompt = `Cute 2D vector graphic illustration of ${corePrompt}, bold clean black ink linework, rich vibrant saturated colors, isolated graphic centered on pure solid white background (#FFFFFF), crisp line art, vibrant flat vector shading, high contrast. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO real life photography, NO 3D render, NO realistic photo, NO mockups, NO washed out colors, NO faded, NO blurry, NO low contrast.`;
-      }
-
-      const seed = Math.floor(Math.random() * 10000000);
-      const encodedPrompt = encodeURIComponent(cleanPrompt);
-      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
-
-      // 25초 타임아웃 적용
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 25000);
-
-      const imgRes = await fetch(pollinationsUrl, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (imgRes.ok) {
-        const arrayBuf = await imgRes.arrayBuffer();
-        const base64 = Buffer.from(arrayBuf).toString('base64');
-        if (base64 && base64.length > 500) {
-          console.log(`✨ [Zero-Cost] Successfully generated image via Pollinations Flux.1!`);
-          return base64;
-        }
-      }
-    } catch (err: any) {
-      console.warn(`Pollinations Flux attempt ${attempt} failed:`, err?.message || String(err));
-    }
-  }
-
-  // 2. Fallback (Only if Free Flux fails): Google Native Gemini Image Models
+  // 1. Primary: Official High-Quality Google Native Gemini Image Models (Zero Watermark, Pure #FFFFFF Background, Exact 2D Vector)
   const googleModels = [
     'gemini-2.5-flash-image',
     'gemini-3.1-flash-image',
@@ -325,7 +275,7 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
   if (apiKey) {
     for (const modelName of googleModels) {
       try {
-        console.log(`⚠️ [Fallback/Paid Warning] Flux failed, trying Google Model '${modelName}'...`);
+        console.log(`🎨 [Primary] Drawing high-quality image with Google Model '${modelName}' (isSticker: ${isStickerDetected})...`);
         const res = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
           {
@@ -342,14 +292,63 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
           const parts = data.candidates?.[0]?.content?.parts || [];
           for (const part of parts) {
             if (part.inlineData && part.inlineData.data) {
-              console.log(`✨ Successfully generated image via Google '${modelName}'!`);
+              console.log(`✨ Successfully generated crisp image via Google '${modelName}'!`);
               return part.inlineData.data;
             }
           }
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          console.warn(`Google Model '${modelName}' non-ok status ${res.status}:`, errData);
         }
       } catch (err: any) {
         console.warn(`Google Model '${modelName}' failed:`, err?.message || String(err));
       }
+    }
+  }
+
+  // 2. Fallback: Pollinations Flux (Only if Google Models are unreachable)
+  console.warn('⚠️ Google Gemini Image models unavailable, attempting fallback engine...');
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      console.log(`🎨 [Fallback] Drawing image with Flux.1 (Attempt ${attempt})...`);
+      
+      let corePrompt = prompt
+        .replace(/^A cute (2D vector )?die-cut sticker (design|illustration) (featuring|of):\s*/i, '')
+        .replace(/\b(8k resolution|4k resolution|photorealistic|hyperrealistic|unreal engine|octane render|raytracing|studio photography|cinematic lighting)\b/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      if (corePrompt.length > 700) {
+        corePrompt = corePrompt.substring(0, 700);
+      }
+
+      let cleanPrompt = '';
+      if (isStickerDetected) {
+        cleanPrompt = `Cute 2D flat vector graphic die-cut sticker illustration of ${corePrompt}, 2D comic art, flat vector colors, clean bold black ink linework, pure white die-cut vinyl sticker border, centered on a pure solid white background (#FFFFFF), isolated single sticker graphic. STRICT NEGATIVE: Absolutely NO 3D render, NO plastic, NO realistic photography, NO grey background.`;
+      } else {
+        cleanPrompt = `Cute 2D vector graphic illustration of ${corePrompt}, bold clean black ink linework, rich vibrant saturated colors, isolated graphic centered on pure solid white background (#FFFFFF), crisp line art, vibrant flat vector shading, high contrast. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO real life photography, NO 3D render, NO realistic photo, NO mockups, NO washed out colors, NO faded, NO blurry, NO low contrast.`;
+      }
+
+      const seed = Math.floor(Math.random() * 10000000);
+      const encodedPrompt = encodeURIComponent(cleanPrompt);
+      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&model=flux&nologo=true`;
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+      const imgRes = await fetch(pollinationsUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (imgRes.ok) {
+        const arrayBuf = await imgRes.arrayBuffer();
+        const base64 = Buffer.from(arrayBuf).toString('base64');
+        if (base64 && base64.length > 500) {
+          console.log(`✨ [Fallback] Successfully generated image via Pollinations Flux.1!`);
+          return base64;
+        }
+      }
+    } catch (err: any) {
+      console.warn(`Pollinations Flux attempt ${attempt} failed:`, err?.message || String(err));
     }
   }
 
