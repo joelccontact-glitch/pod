@@ -308,54 +308,78 @@ export const getPackPresetsInfo = (coverDesign: any): PackPresetsInfo => {
   if (!coverDesign) {
     return { themeKey: 'other', isSingleSeries20Theme: false, vesselSeries: null, standaloneSeries: null };
   }
-  const presetId = (coverDesign.stickerPresetId || coverDesign.id || '').toLowerCase();
+  const categoryKey = getDesignCategoryKey(coverDesign);
+  const presetId = (coverDesign.stickerPresetId || coverDesign.presetId || coverDesign.id || '').toLowerCase();
   const sub = (coverDesign.sticker_sub || '').toLowerCase();
   const title = (coverDesign.title || coverDesign.topic || '').toLowerCase();
+  const prompt = (coverDesign.prompt || '').toLowerCase();
+  const allText = `${presetId} ${sub} ${title} ${prompt} ${categoryKey}`;
 
   // 1. Single 20 themes (strictly 20-pack only, never 40-pack)
-  if (presetId.includes('dessert') || sub === 'dessert' || title.includes('디저트')) {
+  if (categoryKey === 'dessert' || allText.includes('dessert') || allText.includes('디저트') || allText.includes('베이커리')) {
     return { themeKey: 'dessert', isSingleSeries20Theme: true, vesselSeries: DESSERT_20_SERIES, standaloneSeries: null };
   }
-  if (presetId.includes('socialbattery') || presetId.includes('social-battery') || sub === 'socialbattery' || title.includes('사회적 배터리')) {
+  if (categoryKey === 'socialbattery' || allText.includes('socialbattery') || allText.includes('social-battery') || allText.includes('사회적 배터리')) {
     return { themeKey: 'socialbattery', isSingleSeries20Theme: true, vesselSeries: SOCIAL_BATTERY_20_SERIES, standaloneSeries: null };
   }
-  if (presetId.includes('hangul') || sub === 'hangul' || title.includes('한글')) {
+  if (categoryKey === 'hangul' || allText.includes('hangul') || allText.includes('한글')) {
     return { themeKey: 'hangul', isSingleSeries20Theme: true, vesselSeries: HANGUL_20_SERIES, standaloneSeries: null };
   }
-  if (presetId.includes('booktok') || sub === 'booktok' || title.includes('북톡') || title.includes('독서')) {
+  if (categoryKey === 'booktok' || allText.includes('booktok') || allText.includes('북톡') || allText.includes('독서')) {
     return { themeKey: 'booktok', isSingleSeries20Theme: true, vesselSeries: BOOKTOK_20_SERIES, standaloneSeries: null };
   }
 
   // 2. Dual-series themes (can be 40-pack with vessel + standalone, or 20-pack)
-  if (presetId.includes('terrarium') || sub === 'terrarium' || title.includes('테라리움')) {
+  if (categoryKey === 'valentines' || allText.includes('valentine') || allText.includes('발렌타인')) {
+    const p = getSeasonalPackPresets('valentines');
+    return { themeKey: 'valentines', isSingleSeries20Theme: false, vesselSeries: p.vesselSeries, standaloneSeries: p.standaloneSeries };
+  }
+  if (categoryKey === 'newyear' || allText.includes('newyear') || allText.includes('새해') || allText.includes('신년')) {
+    const p = getSeasonalPackPresets('newyear');
+    return { themeKey: 'newyear', isSingleSeries20Theme: false, vesselSeries: p.vesselSeries, standaloneSeries: p.standaloneSeries };
+  }
+  if (categoryKey === 'stpatrick' || allText.includes('stpatrick') || allText.includes('성패트릭') || allText.includes('세인트패트릭')) {
+    const p = getSeasonalPackPresets('stpatrick');
+    return { themeKey: 'stpatrick', isSingleSeries20Theme: false, vesselSeries: p.vesselSeries, standaloneSeries: p.standaloneSeries };
+  }
+  if (categoryKey === 'easter' || allText.includes('easter') || allText.includes('부활절')) {
+    const p = getSeasonalPackPresets('easter');
+    return { themeKey: 'easter', isSingleSeries20Theme: false, vesselSeries: p.vesselSeries, standaloneSeries: p.standaloneSeries };
+  }
+  if (categoryKey === 'mothersday' || allText.includes('mothersday') || allText.includes('어머니날') || allText.includes('마더스데이')) {
+    const p = getSeasonalPackPresets('mothersday');
+    return { themeKey: 'mothersday', isSingleSeries20Theme: false, vesselSeries: p.vesselSeries, standaloneSeries: p.standaloneSeries };
+  }
+  if (categoryKey === 'terrarium' || allText.includes('terrarium') || allText.includes('테라리움')) {
     return { themeKey: 'terrarium', isSingleSeries20Theme: false, vesselSeries: TERRARIUM_20_SERIES, standaloneSeries: TERRARIUM_STANDALONE_20_SERIES };
   }
-  if (presetId.includes('vivarium') || sub === 'vivarium' || title.includes('비바리움')) {
+  if (categoryKey === 'vivarium' || allText.includes('vivarium') || allText.includes('비바리움')) {
     return { themeKey: 'vivarium', isSingleSeries20Theme: false, vesselSeries: VIVARIUM_20_SERIES, standaloneSeries: VIVARIUM_STANDALONE_20_SERIES };
   }
-  if (presetId.includes('saltaquarium') || presetId.includes('salt-aquarium') || sub === 'saltaquarium' || title.includes('해수어')) {
+  if (categoryKey === 'saltaquarium' || allText.includes('saltaquarium') || allText.includes('salt-aquarium') || allText.includes('해수어')) {
     return { themeKey: 'saltaquarium', isSingleSeries20Theme: false, vesselSeries: SALT_AQUARIUM_20_SERIES, standaloneSeries: SALT_AQUARIUM_STANDALONE_20_SERIES };
   }
-  if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium') || sub === 'freshaquarium' || title.includes('열대어')) {
+  if (categoryKey === 'freshaquarium' || allText.includes('freshaquarium') || allText.includes('fresh-aquarium') || allText.includes('열대어')) {
     return { themeKey: 'freshaquarium', isSingleSeries20Theme: false, vesselSeries: FRESH_AQUARIUM_20_SERIES, standaloneSeries: FRESH_AQUARIUM_STANDALONE_20_SERIES };
   }
-  if (presetId.includes('christmas') || sub === 'christmas' || title.includes('크리스마스')) {
+  if (categoryKey === 'christmas' || allText.includes('christmas') || allText.includes('크리스마스')) {
     return { themeKey: 'christmas', isSingleSeries20Theme: false, vesselSeries: CHRISTMAS_20_SERIES, standaloneSeries: CHRISTMAS_STANDALONE_20_SERIES };
   }
-  if (presetId.includes('halloween') || sub === 'halloween' || title.includes('할로윈')) {
+  if (categoryKey === 'halloween' || allText.includes('halloween') || allText.includes('할로윈')) {
     return { themeKey: 'halloween', isSingleSeries20Theme: false, vesselSeries: HALLOWEEN_20_SERIES, standaloneSeries: HALLOWEEN_STANDALONE_20_SERIES };
   }
-  if (presetId.includes('thanksgiving') || sub === 'thanksgiving' || title.includes('추수감사절')) {
+  if (categoryKey === 'thanksgiving' || allText.includes('thanksgiving') || allText.includes('추수감사절')) {
     return { themeKey: 'thanksgiving', isSingleSeries20Theme: false, vesselSeries: THANKSGIVING_20_SERIES, standaloneSeries: THANKSGIVING_STANDALONE_20_SERIES };
   }
 
-  // 3. Other seasonal presets
-  if (sub) {
+  // 3. Other seasonal presets via sub or categoryKey
+  const fallbackSub = sub || categoryKey;
+  if (fallbackSub && fallbackSub !== 'other') {
     try {
-      const seasonalPack = getSeasonalPackPresets(sub);
+      const seasonalPack = getSeasonalPackPresets(fallbackSub);
       if (seasonalPack?.vesselSeries && seasonalPack.vesselSeries.length > 0) {
         return {
-          themeKey: sub,
+          themeKey: fallbackSub,
           isSingleSeries20Theme: false,
           vesselSeries: seasonalPack.vesselSeries,
           standaloneSeries: seasonalPack.standaloneSeries || null
