@@ -283,14 +283,64 @@ export async function GET(request: Request) {
     }
 
     // =========================================================================
-    // CASE C: GENERAL PAGINATED DESIGNS (Strict limit 12 items!)
+    // CASE C: POD APPAREL PRODUCTS (filterType === 'pod')
+    // There are only ~52 POD products in DB. Query single field without composite index,
+    // then sort and paginate in-memory to prevent FAILED_PRECONDITION index errors!
+    // =========================================================================
+    if (filterType === 'pod') {
+      const podSnap = await db.collection('designs').where('design_type', '==', 'pod').get();
+      actualDbReads = podSnap.docs.length;
+      let podItems = podSnap.docs.map((d: any) => {
+        const data = d.data();
+        const versionTs = data.updated_at ? new Date(data.updated_at).getTime() : (data.created_at ? new Date(data.created_at).getTime() : 0);
+        return {
+          id: d.id,
+          ...data,
+          image_url: `/api/designs/image?id=${d.id}&v=${versionTs}`
+        };
+      }).filter((d: any) => !d.is_deleted);
+
+      podItems.sort((a: any, b: any) => {
+        const timeA = new Date(a.created_at || a.updated_at || 0).getTime();
+        const timeB = new Date(b.created_at || b.updated_at || 0).getTime();
+        return timeB - timeA;
+      });
+
+      if (searchQuery) {
+        podItems = podItems.filter((item: any) => {
+          const text = `${item.title || ''} ${item.topic || ''} ${item.prompt || ''}`.toLowerCase();
+          return text.includes(searchQuery);
+        });
+      }
+
+      const totalPod = podItems.length;
+      const paginatedPod = podItems.slice(offsetNum, offsetNum + limitNum);
+
+      const response = NextResponse.json({
+        success: true,
+        data: paginatedPod,
+        total: totalPod,
+        podCount: stats.podCount || totalPod,
+        stickerCount: stats.stickerCount,
+        stickerSubCounts: stats.stickerSubCounts,
+        page,
+        totalPages: Math.ceil(totalPod / limitNum) || 1,
+        audit: {
+          dbReads: actualDbReads,
+          source: 'firestore_pod',
+          cacheAgeSeconds: 0
+        }
+      });
+      response.headers.set('X-Firestore-Reads', actualDbReads.toString());
+      response.headers.set('X-Data-Source', 'firestore_pod');
+      return response;
+    }
+
+    // =========================================================================
+    // CASE D: GENERAL PAGINATED DESIGNS (Strict limit 12 items!)
     // Absolutely NO full-collection scan! Read ONLY 12 documents from DB!
     // =========================================================================
     let baseQuery = db.collection('designs').orderBy('created_at', 'desc');
-
-    if (filterType === 'pod') {
-      baseQuery = db.collection('designs').where('design_type', '==', 'pod').orderBy('created_at', 'desc');
-    }
 
     const paginatedSnap = await baseQuery.limit(limitNum).offset(offsetNum).get();
     actualDbReads = paginatedSnap.docs.length;
