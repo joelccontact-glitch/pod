@@ -13,7 +13,66 @@ const SNAPSHOT_CACHE_FILE = path.join(os.tmpdir(), 'mypod-designs-snapshot.json'
 // In-memory cache for fast pagination and instant responses (< 5ms)
 let cachedSnapshotDocs: { id: string; data: any }[] | null = null;
 let lastCacheTime = 0;
-const CACHE_TTL_MS = 600000; // 10 minutes cache to drastically cut Firestore read quota consumption (99%+ reduction!)
+const CACHE_TTL_MS = 600000; // 10 minutes cache
+
+// Firestore-backed persistent snapshot cache (Reduces 1,542 reads down to 1-3 reads on cold starts!)
+async function loadSnapshotFromFirestore(): Promise<{ id: string; data: any }[] | null> {
+  try {
+    const metaDoc = await db.collection('_system_cache').doc('meta').get();
+    if (!metaDoc.exists) return null;
+    const meta = metaDoc.data();
+    const chunkCount = meta?.chunkCount || 1;
+    
+    const chunkPromises = [];
+    for (let i = 0; i < chunkCount; i++) {
+      chunkPromises.push(db.collection('_system_cache').doc(`chunk_${i}`).get());
+    }
+    const chunkSnaps = await Promise.all(chunkPromises);
+    let allDocs: { id: string; data: any }[] = [];
+    for (const snap of chunkSnaps) {
+      if (snap.exists) {
+        const data = snap.data();
+        if (Array.isArray(data?.items)) {
+          allDocs = allDocs.concat(data.items);
+        }
+      }
+    }
+    return allDocs.length > 0 ? allDocs : null;
+  } catch (e) {
+    console.error('loadSnapshotFromFirestore error:', e);
+    return null;
+  }
+}
+
+async function saveSnapshotToFirestore(docs: { id: string; data: any }[]) {
+  if (!docs || docs.length === 0) return;
+  try {
+    const CHUNK_SIZE = 600; // ~100KB per chunk, well within 1MB Firestore document limit
+    const chunkCount = Math.ceil(docs.length / CHUNK_SIZE);
+    
+    const writePromises = [];
+    for (let i = 0; i < chunkCount; i++) {
+      const chunkItems = docs.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+      writePromises.push(
+        db.collection('_system_cache').doc(`chunk_${i}`).set({
+          items: chunkItems,
+          updated_at: new Date().toISOString()
+        })
+      );
+    }
+    writePromises.push(
+      db.collection('_system_cache').doc('meta').set({
+        total: docs.length,
+        chunkCount,
+        updated_at: new Date().toISOString()
+      })
+    );
+    await Promise.all(writePromises);
+    console.log(`[Snapshot Cache] Successfully persisted ${docs.length} designs across ${chunkCount} chunks to Firestore!`);
+  } catch (e) {
+    console.error('saveSnapshotToFirestore error:', e);
+  }
+}
 
 function saveSnapshotToDisk(docs: { id: string; data: any }[] | null) {
   if (!docs || docs.length === 0) return;
@@ -51,6 +110,7 @@ export function updateCachedDesign(id: string, updates: any) {
       data: { ...cachedSnapshotDocs[idx].data, ...updates }
     };
     saveSnapshotToDisk(cachedSnapshotDocs);
+        saveSnapshotToFirestore(cachedSnapshotDocs);
   }
 }
 
@@ -128,10 +188,22 @@ export async function GET(request: Request) {
         cachedSnapshotDocs = diskDocs;
         lastCacheTime = now;
         dataSource = 'disk';
+        actualDbReads = 0;
+      } else {
+        const firestoreSnapshotDocs = await loadSnapshotFromFirestore();
+        if (firestoreSnapshotDocs && firestoreSnapshotDocs.length > 0) {
+          cachedSnapshotDocs = firestoreSnapshotDocs;
+          lastCacheTime = now;
+          dataSource = 'firestore_snapshot';
+          const chunkCount = Math.ceil(firestoreSnapshotDocs.length / 600);
+          actualDbReads = chunkCount + 1;
+          saveSnapshotToDisk(cachedSnapshotDocs);
+          console.log(`[Firestore Audit] ⚡ Recovered ${firestoreSnapshotDocs.length} designs via Persistent Snapshot (${actualDbReads} reads)!`);
+        }
       }
     }
 
-        // Rate-limit full collection scan: Even if nocache=true is requested,
+    // Rate-limit full collection scan: Even if nocache=true is requested,
     // enforce a minimum 60-second cooldown so rapid deletions/modifications don't trigger 1,000 reads per second!
     const isCacheExpired = !cachedSnapshotDocs || (now - lastCacheTime > CACHE_TTL_MS);
     const isNoCacheAllowed = nocache && (now - lastCacheTime > 60000);

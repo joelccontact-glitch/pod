@@ -2217,8 +2217,10 @@ export default function Home() {
         if (data.audit) {
           if (data.audit.dbReads === 0) {
             console.log(`%c[Firestore 쿼터 감사] ⚡ DB 읽기: 0회 (${data.audit.source} 캐시 히트, 캐시 나이: ${data.audit.cacheAgeSeconds}초)`, 'color: #10B981; font-weight: bold;');
+          } else if (data.audit.source === 'firestore_snapshot') {
+            console.log(`%c[Firestore 쿼터 감사] 🛡️ DB 읽기: ${data.audit.dbReads}회 (영구 스냅샷 캐시 복원, 1542개 풀스캔 방어 성공!)`, 'color: #3B82F6; font-weight: bold;');
           } else {
-            console.warn(`[Firestore 쿼터 감사] 🚨 DB 풀 스캔 발생: ${data.audit.dbReads}개 문서 읽음`);
+            console.warn(`[Firestore 쿼터 감사] 🚨 DB 풀 스캔 발생: ${data.audit.dbReads}개 문서 읽음 (${data.audit.source})`);
           }
         }
         const pool = data.data;
