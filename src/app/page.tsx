@@ -1169,6 +1169,8 @@ export default function Home() {
   const getCleanEnglishThemeName = (subKey?: string, tabKey?: string, topic?: string): string => {
     const raw = (subKey || tabKey || '').toLowerCase();
     
+    if (raw.includes('deepsea') || raw.includes('deep_sea') || raw.includes('심해')) return 'DeepSeaGlow';
+    if (raw.includes('axolotl') || raw.includes('우파루파')) return 'BabyAxolotl';
     if (raw.includes('dessert') || raw.includes('bakery')) return 'Dessert';
     if (raw.includes('socialbattery') || raw.includes('social_battery') || raw.includes('introvert')) return 'SocialBattery';
     if (raw.includes('hangul') || raw.includes('korean')) return 'HangulKVibe';
@@ -1186,6 +1188,8 @@ export default function Home() {
     if (raw.includes('booktok') || raw.includes('reading') || raw.includes('book_club')) return 'BookTok';
 
     const topicLower = (topic || '').toLowerCase();
+    if (topicLower.includes('deep sea') || topicLower.includes('deepsea') || topicLower.includes('심해')) return 'DeepSeaGlow';
+    if (topicLower.includes('axolotl') || topicLower.includes('우파루파')) return 'BabyAxolotl';
     if (topicLower.includes('dessert') || topicLower.includes('디저트') || topicLower.includes('베이커리')) return 'Dessert';
     if (topicLower.includes('social battery') || topicLower.includes('배터리') || topicLower.includes('내향')) return 'SocialBattery';
     if (topicLower.includes('hangul') || topicLower.includes('한글') || topicLower.includes('대박') || topicLower.includes('괜찮아')) return 'HangulKVibe';
@@ -3433,29 +3437,29 @@ export default function Home() {
         try {
           if (isCover) {
             // Master Cover: MUST have solid white (#FFFFFF) background! Never transparent!
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            await new Promise((resolve) => {
-              img.onload = resolve;
-              img.onerror = () => {
+            const loadedImg = await new Promise<HTMLImageElement>((resolve, reject) => {
+              const im = new Image();
+              im.crossOrigin = 'anonymous';
+              im.onload = () => resolve(im);
+              im.onerror = () => {
                 const fb = new Image();
-                fb.onload = resolve;
-                fb.onerror = resolve;
+                fb.onload = () => resolve(fb);
+                fb.onerror = (e) => reject(e);
                 fb.src = rawUrl;
               };
-              img.src = rawUrl;
+              im.src = rawUrl;
             });
 
             const coverCanvas = document.createElement('canvas');
-            const cw = Math.max(img.naturalWidth || 3000, 3000);
-            const ch = Math.max(img.naturalHeight || 3000, 3000);
+            const cw = Math.max(loadedImg.naturalWidth || 3000, 3000);
+            const ch = Math.max(loadedImg.naturalHeight || 3000, 3000);
             coverCanvas.width = cw;
             coverCanvas.height = ch;
             const cctx = coverCanvas.getContext('2d');
             if (cctx) {
               cctx.fillStyle = '#FFFFFF';
               cctx.fillRect(0, 0, cw, ch);
-              cctx.drawImage(img, 0, 0, cw, ch);
+              cctx.drawImage(loadedImg, 0, 0, cw, ch);
             }
 
             // Master Cover: 3000x3000px solid white background.
@@ -3555,8 +3559,10 @@ export default function Home() {
         a.download = filename;
         document.body.appendChild(a);
         a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
+        setTimeout(() => {
+          a.remove();
+          window.URL.revokeObjectURL(url);
+        }, 60000);
       };
 
       // Determine Packaging Strategy:
@@ -3654,9 +3660,12 @@ export default function Home() {
 
           triggerDownload(blob, parts[p].name);
           if (p < parts.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 800));
+            await new Promise(resolve => setTimeout(resolve, 1500));
           }
         }
+        setTimeout(() => {
+          alert(`🎉 Etsy 분할 ZIP 다운로드가 완료되었습니다! (총 ${parts.length}개 파트)\n브라우저의 다운로드 폴더를 확인해 주세요.\n(브라우저 상단에 '여러 파일 다운로드' 허용 메시지가 뜨면 '허용'을 눌러주세요)`);
+        }, 500);
       } else {
         // Single Unified ZIP (for Creative Fabrica or packs <= 20 stickers)
         setExportBundleProgress({
@@ -7151,7 +7160,7 @@ export default function Home() {
 
         {/* 🌟 Sticker 20-Pack Bundle Detail View Modal (마스터 썸네일 클릭 시 20종 전용 뷰어) */}
         {isPackDetailModalOpen && selectedPackCover && (
-          <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-1.5 sm:p-6 backdrop-blur-md" style={{ zIndex: selectedDesign ? 70 : 95 }}>
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-1.5 sm:p-6 backdrop-blur-md" style={{ zIndex: (selectedDesign || isLifestyleModalOpen || isA4SheetModalOpen || isBatchZipModalOpen) ? 70 : 95 }}>
             <div className="bg-white rounded-2xl sm:rounded-3xl max-w-6xl w-full max-h-[96vh] sm:max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-teal-200 animate-fadeIn">
               
               {/* Modal Header (Compact & sleek on mobile, docked cleanly at top) */}
@@ -7430,9 +7439,12 @@ export default function Home() {
                     onClick={() => {
                       setIsPinterestHubExpanded(true);
                       setTimeout(() => {
+                        const container = document.getElementById('pack-detail-scroll-container');
                         const el = document.getElementById('pinterest-marketing-hub');
-                        if (el) {
-                          el.scrollIntoView({ behavior: 'smooth' });
+                        if (container && el) {
+                          container.scrollTo({ top: el.offsetTop - 20, behavior: 'smooth' });
+                        } else if (el) {
+                          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                         } else {
                           window.open('https://www.pinterest.com/pin-creation-tool/', '_blank');
                         }
@@ -7448,9 +7460,12 @@ export default function Home() {
                   {/* 모바일 최적화: 개별 스티커 세부 목록 바로가기 퀵점프 버튼 */}
                   <button
                     onClick={() => {
+                      const container = document.getElementById('pack-detail-scroll-container');
                       const el = document.getElementById('pack-stickers-grid-section');
-                      if (el) {
-                        el.scrollIntoView({ behavior: 'smooth' });
+                      if (container && el) {
+                        container.scrollTo({ top: el.offsetTop - 20, behavior: 'smooth' });
+                      } else if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                       }
                     }}
                     className="bg-teal-700 hover:bg-teal-800 active:scale-95 text-white font-extrabold text-xs sm:text-sm py-2 px-3.5 rounded-xl shadow-md transition-all flex items-center gap-1.5 cursor-pointer border border-teal-600"
@@ -8071,7 +8086,7 @@ export default function Home() {
 
         {/* 🖨️ A4 Printable Sticker Sheet Modal */}
         {isA4SheetModalOpen && (
-          <div className="fixed inset-0 bg-black/75 z-[80] flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="fixed inset-0 bg-black/75 flex items-center justify-center p-3 sm:p-6 backdrop-blur-sm animate-in fade-in duration-200" style={{ zIndex: 9999 }}>
             <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-indigo-100">
               {/* Modal Header */}
               <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50">
@@ -8247,7 +8262,7 @@ export default function Home() {
 
         {/* 📸 Lifestyle Mockups (Etsy Photos 2~4 & Pinterest Pins) Modal */}
         {isLifestyleModalOpen && (
-          <div className="fixed inset-0 bg-black/80 z-[80] flex items-center justify-center p-2 sm:p-4 md:p-6 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-2 sm:p-4 md:p-6 backdrop-blur-md animate-in fade-in duration-200" style={{ zIndex: 9999 }}>
             <div className="bg-white rounded-3xl max-w-6xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-violet-100">
               {/* Modal Header */}
               <div className="p-4 sm:p-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-violet-50 via-indigo-50 to-pink-50">
@@ -8508,7 +8523,7 @@ export default function Home() {
 
         {/* 📦 Batch ZIP Session Selector Modal */}
         {isBatchZipModalOpen && (
-          <div className="fixed inset-0 bg-black/60 z-[75] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" style={{ zIndex: 9999 }}>
             <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 relative animate-in fade-in zoom-in duration-200 border border-teal-100">
               <button 
                 onClick={() => setIsBatchZipModalOpen(false)} 
