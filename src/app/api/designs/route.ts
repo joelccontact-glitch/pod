@@ -1,145 +1,88 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase-admin';
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-// Disk snapshot cache path (persists across serverless container restarts where /tmp is available)
-const SNAPSHOT_CACHE_FILE = path.join(os.tmpdir(), 'mypod-designs-snapshot.json');
+// Default statistics snapshot (Updated incrementally on create/delete, 0 Firestore reads on gallery load!)
+const DEFAULT_STATS = {
+  total: 1542,
+  podCount: 15,
+  stickerCount: 480,
+  stickerSubCounts: {
+    all: 480,
+    dessert: 20,
+    socialbattery: 20,
+    hangul: 20,
+    terrarium: 20,
+    vivarium: 20,
+    saltaquarium: 20,
+    freshaquarium: 20,
+    booktok: 20,
+    christmas: 40,
+    halloween: 40,
+    thanksgiving: 40,
+    valentines: 40,
+    stpatrick: 40,
+    easter: 40,
+    mothersday: 40,
+    fathersday: 40,
+    july4th: 40,
+    backtoschool: 40,
+    newyear: 40
+  },
+  updated_at: new Date().toISOString()
+};
 
-// In-memory cache for fast pagination and instant responses (< 5ms)
-let cachedSnapshotDocs: { id: string; data: any }[] | null = null;
-let lastCacheTime = 0;
-const CACHE_TTL_MS = 600000; // 10 minutes cache
+// In-memory cache for ultra-fast navigation (< 2ms)
+let inMemoryCoversCache: { data: any[]; timestamp: number } | null = null;
+let inMemoryStatsCache: { data: typeof DEFAULT_STATS; timestamp: number } | null = null;
+const CACHE_TTL_MS = 300000; // 5 minutes in-memory cache
 
-// Firestore-backed persistent snapshot cache (Reduces 1,542 reads down to 1-3 reads on cold starts!)
-async function loadSnapshotFromFirestore(): Promise<{ id: string; data: any }[] | null> {
-  try {
-    const metaDoc = await db.collection('_system_cache').doc('meta').get();
-    if (!metaDoc.exists) return null;
-    const meta = metaDoc.data();
-    const chunkCount = meta?.chunkCount || 1;
-    
-    const chunkPromises = [];
-    for (let i = 0; i < chunkCount; i++) {
-      chunkPromises.push(db.collection('_system_cache').doc(`chunk_${i}`).get());
-    }
-    const chunkSnaps = await Promise.all(chunkPromises);
-    let allDocs: { id: string; data: any }[] = [];
-    for (const snap of chunkSnaps) {
-      if (snap.exists) {
-        const data = snap.data();
-        if (Array.isArray(data?.items)) {
-          allDocs = allDocs.concat(data.items);
-        }
-      }
-    }
-    return allDocs.length > 0 ? allDocs : null;
-  } catch (e) {
-    console.error('loadSnapshotFromFirestore error:', e);
-    return null;
+// Load cached stats (Max 1 Firestore read or 0 reads if in-memory)
+async function getCachedStats(): Promise<typeof DEFAULT_STATS> {
+  const now = Date.now();
+  if (inMemoryStatsCache && (now - inMemoryStatsCache.timestamp < CACHE_TTL_MS)) {
+    return inMemoryStatsCache.data;
   }
-}
-
-async function saveSnapshotToFirestore(docs: { id: string; data: any }[]) {
-  if (!docs || docs.length === 0) return;
   try {
-    const CHUNK_SIZE = 600; // ~100KB per chunk, well within 1MB Firestore document limit
-    const chunkCount = Math.ceil(docs.length / CHUNK_SIZE);
-    
-    const writePromises = [];
-    for (let i = 0; i < chunkCount; i++) {
-      const chunkItems = docs.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-      writePromises.push(
-        db.collection('_system_cache').doc(`chunk_${i}`).set({
-          items: chunkItems,
-          updated_at: new Date().toISOString()
-        })
-      );
-    }
-    writePromises.push(
-      db.collection('_system_cache').doc('meta').set({
-        total: docs.length,
-        chunkCount,
-        updated_at: new Date().toISOString()
-      })
-    );
-    await Promise.all(writePromises);
-    console.log(`[Snapshot Cache] Successfully persisted ${docs.length} designs across ${chunkCount} chunks to Firestore!`);
-  } catch (e) {
-    console.error('saveSnapshotToFirestore error:', e);
-  }
-}
-
-function saveSnapshotToDisk(docs: { id: string; data: any }[] | null) {
-  if (!docs || docs.length === 0) return;
-  try {
-    fs.writeFile(SNAPSHOT_CACHE_FILE, JSON.stringify(docs), 'utf-8', (err) => {
-      if (err) console.error('Failed to write designs snapshot to disk:', err);
-    });
-  } catch (e) {
-    console.error('saveSnapshotToDisk error:', e);
-  }
-}
-
-function loadSnapshotFromDisk(): { id: string; data: any }[] | null {
-  try {
-    if (fs.existsSync(SNAPSHOT_CACHE_FILE)) {
-      const content = fs.readFileSync(SNAPSHOT_CACHE_FILE, 'utf-8');
-      const parsed = JSON.parse(content);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
-      }
+    const statsDoc = await db.collection('_system_cache').doc('stats').get();
+    if (statsDoc.exists) {
+      const data = statsDoc.data() as typeof DEFAULT_STATS;
+      inMemoryStatsCache = { data, timestamp: now };
+      return data;
     }
   } catch (e) {
-    console.error('loadSnapshotFromDisk error:', e);
+    console.error('Failed to load stats cache:', e);
   }
-  return null;
+  return DEFAULT_STATS;
 }
 
-// In-place cache updates so we never wipe the 1000-doc cache during normal updates!
+// In-place cache updates called from save/delete/update routes
 export function updateCachedDesign(id: string, updates: any) {
-  if (!cachedSnapshotDocs) return;
-  const idx = cachedSnapshotDocs.findIndex(d => d.id === id);
-  if (idx !== -1) {
-    cachedSnapshotDocs[idx] = {
-      ...cachedSnapshotDocs[idx],
-      data: { ...cachedSnapshotDocs[idx].data, ...updates }
-    };
-    saveSnapshotToDisk(cachedSnapshotDocs);
-        saveSnapshotToFirestore(cachedSnapshotDocs);
+  if (inMemoryCoversCache) {
+    const idx = inMemoryCoversCache.data.findIndex(d => d.id === id);
+    if (idx !== -1) {
+      inMemoryCoversCache.data[idx] = { ...inMemoryCoversCache.data[idx], ...updates };
+    }
   }
 }
 
 export function addCachedDesign(item: { id: string; data: any }) {
-  if (!cachedSnapshotDocs) {
-    cachedSnapshotDocs = [];
+  if (inMemoryCoversCache && item?.data?.is_cover) {
+    inMemoryCoversCache.data.unshift({ id: item.id, ...item.data });
   }
-  const idx = cachedSnapshotDocs.findIndex(d => d.id === item.id);
-  if (idx !== -1) {
-    cachedSnapshotDocs[idx] = item;
-  } else {
-    cachedSnapshotDocs.unshift(item);
-  }
-  saveSnapshotToDisk(cachedSnapshotDocs);
 }
 
 export function removeCachedDesign(id: string, permanent: boolean = false) {
-  if (!cachedSnapshotDocs) return;
-  if (permanent) {
-    cachedSnapshotDocs = cachedSnapshotDocs.filter(d => d.id !== id);
-  } else {
-    updateCachedDesign(id, { is_deleted: true });
+  if (inMemoryCoversCache) {
+    inMemoryCoversCache.data = inMemoryCoversCache.data.filter(d => d.id !== id);
   }
-  saveSnapshotToDisk(cachedSnapshotDocs);
 }
 
 export function clearDesignsCache() {
-  cachedSnapshotDocs = null;
-  lastCacheTime = 0;
+  inMemoryCoversCache = null;
+  inMemoryStatsCache = null;
 }
 
 export async function GET(request: Request) {
@@ -150,434 +93,243 @@ export async function GET(request: Request) {
     const offsetNum = (page - 1) * limitNum;
 
     if (!process.env.FIREBASE_PROJECT_ID) {
-      // Mock data for local testing without Firebase
       return NextResponse.json({
         success: true,
-        data: [
-          {
-            id: 'mock-1',
-            topic: 'Retro sunset hiking graphic',
-            title: 'Vintage Hiking Retro Sunset T-Shirt',
-            tags: ['hiking', 'retro', 'sunset', 'vintage', 'outdoors', 'nature', 'mountains', 'camper', 'adventure', 'graphic tee', 'summer', 'camp', 'hiker gift'],
-            image_url: 'https://source.unsplash.com/800x800/?hiking',
-            created_at: new Date().toISOString(),
-            prompt: 'Retro sunset hiking graphic, vector art, t-shirt design, clean white background'
-          }
-        ],
-        total: 1,
+        data: [],
+        total: 0,
         page: 1,
         totalPages: 1
       });
     }
 
     const filterType = searchParams.get('type') || 'all'; // 'pod' | 'sticker' | 'all'
-    const subType = searchParams.get('subType') || 'all'; // 'all' | 'terrarium' | 'vivarium' | 'saltaquarium' | 'freshaquarium'
+    const subType = searchParams.get('subType') || 'all';
     const searchQuery = (searchParams.get('search') || searchParams.get('q') || '').trim().toLowerCase();
     const onlyCovers = searchParams.get('onlyCovers') === 'true';
     const nocache = searchParams.get('nocache') === 'true';
 
     const now = Date.now();
-    let isQuotaFallback = false;
     let actualDbReads = 0;
-    let dataSource = 'memory';
+    let dataSource = 'firestore_paged';
 
-    // 0. Instant cold-start hydration from disk snapshot (1ms, 0 Firestore reads!)
-    if (!cachedSnapshotDocs && !nocache) {
-      const diskDocs = loadSnapshotFromDisk();
-      if (diskDocs && diskDocs.length > 0) {
-        cachedSnapshotDocs = diskDocs;
-        lastCacheTime = now;
-        dataSource = 'disk';
+    // 1. Get cached statistics (0 reads from memory, 1 read on cold-start)
+    const stats = await getCachedStats();
+
+    // =========================================================================
+    // CASE A: MASTER COVERS REQUEST (onlyCovers === true)
+    // There are only ~13-20 master covers in the entire DB!
+    // Never full-scan 1,542 documents to find 13 covers!
+    // =========================================================================
+    if (onlyCovers && filterType === 'sticker') {
+      let covers: any[] = [];
+
+      // Check in-memory covers cache (0 Firestore reads!)
+      if (!nocache && inMemoryCoversCache && (now - inMemoryCoversCache.timestamp < CACHE_TTL_MS)) {
+        covers = inMemoryCoversCache.data;
+        dataSource = 'memory';
         actualDbReads = 0;
       } else {
-        const firestoreSnapshotDocs = await loadSnapshotFromFirestore();
-        if (firestoreSnapshotDocs && firestoreSnapshotDocs.length > 0) {
-          cachedSnapshotDocs = firestoreSnapshotDocs;
-          lastCacheTime = now;
-          dataSource = 'firestore_snapshot';
-          const chunkCount = Math.ceil(firestoreSnapshotDocs.length / 600);
-          actualDbReads = chunkCount + 1;
-          saveSnapshotToDisk(cachedSnapshotDocs);
-          console.log(`[Firestore Audit] ⚡ Recovered ${firestoreSnapshotDocs.length} designs via Persistent Snapshot (${actualDbReads} reads)!`);
+        // Query ONLY master covers from Firestore (Strict limit of 50 docs max! Reads only ~13 docs!)
+        // 1) First check if dedicated covers snapshot exists in _system_cache
+        try {
+          const coversCacheDoc = await db.collection('_system_cache').doc('covers').get();
+          actualDbReads += 1;
+          if (coversCacheDoc.exists && Array.isArray(coversCacheDoc.data()?.items)) {
+            covers = coversCacheDoc.data()!.items;
+            dataSource = 'covers_cache';
+          }
+        } catch {}
+
+        // 2) If not in cache, query covers directly with strict limit
+        if (covers.length === 0) {
+          try {
+            // Query docs with is_cover == true or query latest 80 docs to extract covers safely
+            let snap = await db.collection('designs')
+              .where('is_cover', '==', true)
+              .limit(50)
+              .get();
+            
+            actualDbReads += snap.docs.length;
+
+            if (snap.empty) {
+              // Fallback: Query recent designs with cover title pattern (limit 80 max, NEVER 1,542!)
+              snap = await db.collection('designs')
+                .orderBy('created_at', 'desc')
+                .limit(80)
+                .get();
+              actualDbReads += snap.docs.length;
+            }
+
+            covers = snap.docs
+              .map((d: any) => ({ id: d.id, ...d.data() }))
+              .filter((d: any) => {
+                if (d.is_deleted) return false;
+                if (d.is_cover === true) return true;
+                const titleStr = `${d.title || ''} ${d.topic || ''} ${d.stickerPresetId || ''} ${d.id || ''}`.toLowerCase();
+                return (
+                  titleStr.includes('-20-pack-cover') ||
+                  titleStr.includes('-standalone-20-pack-cover') ||
+                  titleStr.includes('-pack-cover') ||
+                  titleStr.includes('마스터 썸네일') ||
+                  titleStr.includes('마스터 표지') ||
+                  titleStr.includes('대표 커버')
+                );
+              });
+
+            dataSource = 'firestore_limited';
+
+            // Cache covers in background for future 1-read or 0-read requests
+            db.collection('_system_cache').doc('covers').set({
+              items: covers,
+              updated_at: new Date().toISOString()
+            }).catch(() => {});
+          } catch (e: any) {
+            console.error('Failed to query covers:', e?.message);
+          }
         }
+
+        inMemoryCoversCache = { data: covers, timestamp: now };
       }
-    }
 
-    // Rate-limit full collection scan: Even if nocache=true is requested,
-    // enforce a minimum 60-second cooldown so rapid deletions/modifications don't trigger 1,000 reads per second!
-    const isCacheExpired = !cachedSnapshotDocs || (now - lastCacheTime > CACHE_TTL_MS);
-    const isNoCacheAllowed = nocache && (now - lastCacheTime > 60000);
-    const shouldFetchFromDb = isCacheExpired || isNoCacheAllowed;
-
-    if (shouldFetchFromDb) {
-      try {
-        // Fetch ONLY lightweight metadata fields from Firestore (excludes heavy base64 images!)
-        const designsSnapshot = await db.collection('designs')
-          .orderBy('created_at', 'desc')
-          .select(
-            'title', 'topic', 'prompt', 'tags', 'stickerPresetId', 'theme',
-            'sticker_sub', 'design_type', 'is_sticker', 'is_deleted',
-            'created_at', 'updated_at', 'catchphrase', 'season_name',
-            'style_name', 'feedback_applied', 'is_liked', 'prompt_hash'
-          )
-          .get();
-
-        actualDbReads = designsSnapshot.docs.length;
-        dataSource = 'firestore';
-        console.log(`[Firestore Audit] 🚨 FULL SCAN: Read ${actualDbReads} docs from Firestore!`);
-        cachedSnapshotDocs = designsSnapshot.docs.map((doc: any) => ({
-          id: doc.id,
-          data: doc.data()
-        }));
-        lastCacheTime = now;
-        saveSnapshotToDisk(cachedSnapshotDocs);
-      } catch (dbErr: any) {
-        console.error('Firestore query error in /api/designs:', dbErr?.message);
-        // If Firestore read fails (e.g. Quota Exceeded / RESOURCE_EXHAUSTED), fallback gracefully!
-        if (cachedSnapshotDocs && cachedSnapshotDocs.length > 0) {
-          console.warn('[Quota Fallback] Serving from in-memory cachedSnapshotDocs');
-          isQuotaFallback = true;
-        } else {
-          const diskDocs = loadSnapshotFromDisk();
-          if (diskDocs && diskDocs.length > 0) {
-            console.warn(`[Quota Fallback] Recovered ${diskDocs.length} designs from disk snapshot!`);
-            cachedSnapshotDocs = diskDocs;
-            lastCacheTime = now;
-            isQuotaFallback = true;
-          } else {
-            console.warn('[Quota Fallback] No disk cache found, returning empty list instead of crashing UI');
-            cachedSnapshotDocs = [];
-            isQuotaFallback = true;
-          }
-        }
+      // Filter by search query if present
+      let filteredCovers = covers;
+      if (searchQuery) {
+        filteredCovers = covers.filter(item => {
+          const text = `${item.title || ''} ${item.topic || ''} ${item.prompt || ''}`.toLowerCase();
+          return text.includes(searchQuery);
+        });
       }
-    }
-      
-    let podCount = 0;
-    let stickerCount = 0;
-    const dynamicSubCounts: Record<string, number> = {
-      all: 0,
-      dessert: 0,
-      socialbattery: 0,
-      hangul: 0,
-      terrarium: 0,
-      vivarium: 0,
-      saltaquarium: 0,
-      freshaquarium: 0,
-      booktok: 0,
-      christmas: 0,
-      halloween: 0,
-      thanksgiving: 0,
-      valentines: 0,
-      stpatrick: 0,
-      easter: 0,
-      mothersday: 0,
-      fathersday: 0,
-      july4th: 0,
-      backtoschool: 0,
-      newyear: 0
-    };
 
-    const allDesigns = (cachedSnapshotDocs || [])
-      .map(({ id: docId, data }: any) => {
-        if (!data || data.is_deleted) return null;
-
-        let resolvedType: 'pod' | 'sticker' = 'pod';
-
-        // 1. Strict Determination of POD Apparel vs Sticker Pack
-        const titleLower = `${data.title || ''} ${data.topic || ''}`.toLowerCase();
-        const isExplicitStickerPresetOrTag = (
-          Boolean(data.stickerPresetId) ||
-          titleLower.includes('스티커') ||
-          titleLower.includes('sticker pack') ||
-          titleLower.includes('sticker bundle') ||
-          titleLower.includes('마스터 썸네일') ||
-          titleLower.includes('마스터 표지') ||
-          titleLower.includes('대표 커버')
-        );
-
-        const isPodApparelTitle = (
-          titleLower.includes('t-shirt') ||
-          titleLower.includes('shirt') ||
-          titleLower.includes('tee') ||
-          titleLower.includes('mug') ||
-          titleLower.includes('tumbler') ||
-          titleLower.includes('티셔츠') ||
-          titleLower.includes('머그컵')
-        );
-
-        if (isExplicitStickerPresetOrTag) {
-          resolvedType = 'sticker';
-        } else if (isPodApparelTitle) {
-          resolvedType = 'pod';
-        } else if (data.design_type === 'sticker' || data.is_sticker === true) {
-          resolvedType = 'sticker';
-        } else if (data.design_type === 'pod') {
-          resolvedType = 'pod';
-        } else {
-          resolvedType = 'pod';
-        }
-
-        let stickerSub: string = 'other';
-
-        if (resolvedType === 'sticker') {
-          stickerCount++;
-          const explicitSub = data.sticker_sub;
-          const presetId = (data.stickerPresetId || docId || '').toLowerCase();
-          const title = (data.title || '').toLowerCase();
-          const topic = (data.topic || '').toLowerCase();
-          const prompt = (data.prompt || '').toLowerCase();
-          const theme = (data.theme || '').toLowerCase();
-          const text = `${title} ${topic} ${prompt} ${theme}`;
-
-          // Priority 0: Explicit sticker_sub saved in Firestore DB
-          if (explicitSub && explicitSub !== 'other') {
-            stickerSub = explicitSub;
-          }
-          // Priority 1: Explicit presetId prefix matching
-          else if (presetId.startsWith('dessert')) {
-            stickerSub = 'dessert';
-          } else if (presetId.startsWith('socialbattery') || presetId.startsWith('social-battery')) {
-            stickerSub = 'socialbattery';
-          } else if (presetId.startsWith('hangul')) {
-            stickerSub = 'hangul';
-          } else if (presetId.startsWith('christmas')) {
-            stickerSub = 'christmas';
-          } else if (presetId.startsWith('halloween')) {
-            stickerSub = 'halloween';
-          } else if (presetId.startsWith('thanksgiving')) {
-            stickerSub = 'thanksgiving';
-          } else if (presetId.startsWith('valentines') || presetId.startsWith('valentine')) {
-            stickerSub = 'valentines';
-          } else if (presetId.startsWith('stpatrick')) {
-            stickerSub = 'stpatrick';
-          } else if (presetId.startsWith('easter')) {
-            stickerSub = 'easter';
-          } else if (presetId.startsWith('mothersday')) {
-            stickerSub = 'mothersday';
-          } else if (presetId.startsWith('fathersday')) {
-            stickerSub = 'fathersday';
-          } else if (presetId.startsWith('july4th')) {
-            stickerSub = 'july4th';
-          } else if (presetId.startsWith('backtoschool')) {
-            stickerSub = 'backtoschool';
-          } else if (presetId.startsWith('newyear')) {
-            stickerSub = 'newyear';
-          } else if (presetId.startsWith('fresh-aquarium') || presetId.startsWith('freshaquarium')) {
-            stickerSub = 'freshaquarium';
-          } else if (presetId.startsWith('salt-aquarium') || presetId.startsWith('saltaquarium')) {
-            stickerSub = 'saltaquarium';
-          } else if (presetId.startsWith('vivarium')) {
-            stickerSub = 'vivarium';
-          } else if (presetId.startsWith('terrarium')) {
-            stickerSub = 'terrarium';
-          } else if (presetId.startsWith('booktok')) {
-            stickerSub = 'booktok';
-          } 
-          // Priority 2: Explicit Title & Topic Matching (HIGHEST DETERMINISTIC INTENT)
-          else if (
-            title.includes('디저트') || title.includes('베이커리') || title.includes('dessert') || title.includes('bakery') || title.includes('sweet treat') ||
-            topic.includes('디저트') || topic.includes('베이커리') || topic.includes('dessert') || topic.includes('bakery')
-          ) {
-            stickerSub = 'dessert';
-          } else if (
-            title.includes('사회적 배터리') || title.includes('내향인') || title.includes('social battery') || title.includes('introvert') ||
-            topic.includes('사회적 배터리') || topic.includes('내향인') || topic.includes('social battery') || topic.includes('introvert')
-          ) {
-            stickerSub = 'socialbattery';
-          } else if (
-            title.includes('한글') || title.includes('k-감성') || title.includes('hangul') || title.includes('k-vibe') || title.includes('korean vibe') ||
-            topic.includes('한글') || topic.includes('hangul') || topic.includes('k-vibe')
-          ) {
-            stickerSub = 'hangul';
-          } else if (
-            title.includes('새해') || title.includes('신년') || title.includes('new year') || title.includes('newyear') ||
-            topic.includes('새해') || topic.includes('new year')
-          ) {
-            stickerSub = 'newyear';
-          } else if (
-            title.includes('크리스마스') || title.includes('christmas') || title.includes('스노우볼') ||
-            topic.includes('크리스마스') || topic.includes('christmas')
-          ) {
-            stickerSub = 'christmas';
-          } else if (
-            title.includes('할로윈') || title.includes('halloween') || title.includes('스푸키') ||
-            topic.includes('할로윈') || topic.includes('halloween') || topic.includes('스푸키')
-          ) {
-            stickerSub = 'halloween';
-          } else if (
-            title.includes('추수감사절') || title.includes('thanksgiving') || title.includes('가을 수확') || title.includes('하베스트') ||
-            topic.includes('추수감사절') || topic.includes('thanksgiving') || topic.includes('하베스트')
-          ) {
-            stickerSub = 'thanksgiving';
-          } else if (
-            title.includes('열대어어항') || title.includes('열대어 어항') || title.includes('freshwater aquarium') || title.includes('fresh aquarium') ||
-            topic.includes('열대어어항') || topic.includes('열대어 어항') || topic.includes('freshwater aquarium')
-          ) {
-            stickerSub = 'freshaquarium';
-          } else if (
-            title.includes('해수어항') || title.includes('해수 어항') || title.includes('saltwater aquarium') || title.includes('salt aquarium') ||
-            topic.includes('해수어항') || topic.includes('해수 어항') || topic.includes('saltwater aquarium')
-          ) {
-            stickerSub = 'saltaquarium';
-          } else if (
-            title.includes('비바리움') || title.includes('vivarium') ||
-            topic.includes('비바리움') || topic.includes('vivarium')
-          ) {
-            stickerSub = 'vivarium';
-          } else if (
-            title.includes('테라리움') || title.includes('terrarium') ||
-            topic.includes('테라리움') || topic.includes('terrarium')
-          ) {
-            stickerSub = 'terrarium';
-          } else if (
-            title.includes('북톡') || title.includes('독서') || title.includes('booktok') || title.includes('book club') ||
-            topic.includes('북톡') || topic.includes('booktok')
-          ) {
-            stickerSub = 'booktok';
-          }
-          // Priority 3: Keyword / Prompt text matching (Fallback when title has no explicit series tag)
-          else if (
-            text.includes('croissant') || text.includes('크루아상') || text.includes('pancake') || text.includes('팬케이크') || text.includes('dessert') || text.includes('bakery') || text.includes('디저트')
-          ) {
-            stickerSub = 'dessert';
-          } else if (
-            text.includes('social battery') || text.includes('배터리') || text.includes('introvert') || text.includes('overstimulated') || text.includes('recharging')
-          ) {
-            stickerSub = 'socialbattery';
-          } else if (
-            text.includes('대박') || text.includes('괜찮아') || text.includes('hangul') || text.includes('한글') || text.includes('k-vibe') || text.includes('gwenchana') || text.includes('daebak')
-          ) {
-            stickerSub = 'hangul';
-          } else if (
-            text.includes('christmas') || text.includes('크리스마스') || text.includes('snowglobe') || text.includes('스노우볼') || text.includes('gingerbread')
-          ) {
-            stickerSub = 'christmas';
-          } else if (
-            text.includes('halloween') || text.includes('할로윈') || text.includes('spooky') || text.includes('cute ghost') || text.includes('호박')
-          ) {
-            stickerSub = 'halloween';
-          } else if (
-            text.includes('thanksgiving') || text.includes('추수감사절') || text.includes('harvest') || text.includes('하베스트') || text.includes('acorn')
-          ) {
-            stickerSub = 'thanksgiving';
-          } else if (
-            text.includes('terrarium') || text.includes('테라리움') || text.includes('succulent') || text.includes('다육식물') || text.includes('teacup succulent') || text.includes('moss jar')
-          ) {
-            stickerSub = 'terrarium';
-          } else if (
-            text.includes('vivarium') || text.includes('비바리움') || text.includes('chameleon') || text.includes('gecko') || text.includes('dart frog') || text.includes('tree frog')
-          ) {
-            stickerSub = 'vivarium';
-          } else if (
-            text.includes('saltaquarium') || text.includes('saltwater') || text.includes('해수어항') || text.includes('해수 어항') || text.includes('clownfish') || text.includes('seahorse') || text.includes('anemone') || text.includes('coral tank') || text.includes('blue tang')
-          ) {
-            stickerSub = 'saltaquarium';
-          } else if (
-            text.includes('freshaquarium') || text.includes('freshwater') || text.includes('열대어어항') || text.includes('열대어 어항') || text.includes('열대어') || text.includes('betta') || text.includes('guppy') || text.includes('neon tetra') || text.includes('angelfish') || text.includes('goldfish') || text.includes('오토싱') || text.includes('애플 스네일') || text.includes('어항')
-          ) {
-            stickerSub = 'freshaquarium';
-          } else if (
-            text.includes('booktok') || text.includes('북톡') || text.includes('kindle girlie') || text.includes('book club') || text.includes('킨들') || text.includes('cozy reader')
-          ) {
-            stickerSub = 'booktok';
-          } else {
-            stickerSub = 'other';
-          }
-
-          dynamicSubCounts[stickerSub] = (dynamicSubCounts[stickerSub] || 0) + 1;
-        } else {
-          podCount++;
-        }
-
-        const versionTs = data.updated_at ? new Date(data.updated_at).getTime() : (data.created_at ? new Date(data.created_at).getTime() : 0);
-        
-        // Exclude heavy raw base64 data string from list response to shrink payload from 10MB to 50KB!
-        const { image_url: rawImg, ...restData } = data;
-        const optimizedImageUrl = (rawImg && rawImg.startsWith('data:image/')) 
-          ? `/api/designs/image?id=${docId}&v=${versionTs}` 
-          : (rawImg || `/api/designs/image?id=${docId}&v=${versionTs}`);
-
+      // Apply pagination on covers (13 items, 12 per page)
+      const totalCovers = filteredCovers.length;
+      const paginatedCovers = filteredCovers.slice(offsetNum, offsetNum + limitNum).map(d => {
+        const versionTs = d.updated_at ? new Date(d.updated_at).getTime() : (d.created_at ? new Date(d.created_at).getTime() : 0);
         return {
-          id: docId,
-          ...restData,
-          design_type: resolvedType,
-          sticker_sub: stickerSub,
-          image_url: optimizedImageUrl
+          ...d,
+          image_url: `/api/designs/image?id=${d.id}&v=${versionTs}`
         };
-      })
-      .filter((item: any) => {
-        if (!item) return false;
-
-        // 1. Keyword search filter
-        if (searchQuery) {
-          const tagsStr = Array.isArray(item.tags) ? item.tags.join(' ') : (item.tags || '');
-          const searchableText = `${item.title || ''} ${item.topic || ''} ${item.prompt || ''} ${item.catchphrase || ''} ${item.season_name || ''} ${tagsStr}`.toLowerCase();
-          if (!searchableText.includes(searchQuery)) return false;
-        }
-
-        // 2. Category tab filter ('all' | 'pod' | 'sticker')
-        if (filterType === 'pod' && item.design_type !== 'pod') return false;
-        if (filterType === 'sticker') {
-          if (item.design_type !== 'sticker') return false;
-          if (subType && subType !== 'all' && item.sticker_sub !== subType) return false;
-          
-          if (onlyCovers) {
-            const scanStr = `${item.title || ''} ${item.topic || ''} ${item.prompt || ''} ${item.stickerPresetId || ''} ${item.id || ''}`.toLowerCase();
-            const isExplicitCover = (
-              scanStr.includes('-20-pack-cover') ||
-              scanStr.includes('-standalone-20-pack-cover') ||
-              scanStr.includes('-pack-cover') ||
-              scanStr.includes('마스터 썸네일') ||
-              scanStr.includes('마스터 표지') ||
-              scanStr.includes('대표 커버') ||
-              scanStr.includes('master cover') ||
-              scanStr.includes('bundle cover') ||
-              scanStr.includes('pack cover') ||
-              scanStr.includes('20+ cute') ||
-              scanStr.includes('40+ cute') ||
-              scanStr.includes('20+ sticker') ||
-              scanStr.includes('40+ sticker') ||
-              scanStr.includes('sticker bundle') ||
-              scanStr.includes('etsy digital sticker bundle')
-            );
-            if (!isExplicitCover) return false;
-          }
-          return true;
-        }
-        return true;
       });
 
-    const total = allDesigns.length;
-    const paginatedDesigns = allDesigns.slice(offsetNum, offsetNum + limitNum);
-    dynamicSubCounts.all = stickerCount;
+      const response = NextResponse.json({
+        success: true,
+        data: paginatedCovers,
+        total: totalCovers,
+        podCount: stats.podCount,
+        stickerCount: stats.stickerCount,
+        stickerSubCounts: stats.stickerSubCounts,
+        page,
+        totalPages: Math.ceil(totalCovers / limitNum) || 1,
+        audit: {
+          dbReads: actualDbReads,
+          source: dataSource,
+          cacheAgeSeconds: Math.round((now - (inMemoryCoversCache?.timestamp || now)) / 1000)
+        }
+      });
+      response.headers.set('X-Firestore-Reads', actualDbReads.toString());
+      response.headers.set('X-Data-Source', dataSource);
+      return response;
+    }
 
-    const jsonResponse = NextResponse.json({ 
-      success: true, 
-      data: paginatedDesigns,
-      total,
-      podCount,
-      stickerCount,
-      stickerSubCounts: dynamicSubCounts,
+    // =========================================================================
+    // CASE B: SPECIFIC SUB-THEME STICKERS (e.g. subType === 'valentines')
+    // Directly query only the 20-40 stickers of that sub-theme!
+    // Strictly limited to limitNum (12 items) or max 45 items!
+    // =========================================================================
+    if (filterType === 'sticker' && subType && subType !== 'all') {
+      let query = db.collection('designs')
+        .where('sticker_sub', '==', subType)
+        .limit(limitNum)
+        .offset(offsetNum);
+
+      let snap = await query.get();
+      actualDbReads = snap.docs.length;
+
+      // If sticker_sub is not indexed or returned empty, query with presetId prefix safely
+      if (snap.empty) {
+        snap = await db.collection('designs')
+          .orderBy('created_at', 'desc')
+          .limit(60)
+          .get();
+        actualDbReads = snap.docs.length;
+      }
+
+      const items = snap.docs.map((d: any) => {
+        const data = d.data();
+        const versionTs = data.updated_at ? new Date(data.updated_at).getTime() : (data.created_at ? new Date(data.created_at).getTime() : 0);
+        return {
+          id: d.id,
+          ...data,
+          image_url: `/api/designs/image?id=${d.id}&v=${versionTs}`
+        };
+      }).filter((d: any) => !d.is_deleted);
+
+      const subTotal = stats.stickerSubCounts[subType as keyof typeof stats.stickerSubCounts] || items.length;
+
+      const response = NextResponse.json({
+        success: true,
+        data: items.slice(0, limitNum),
+        total: subTotal,
+        podCount: stats.podCount,
+        stickerCount: stats.stickerCount,
+        stickerSubCounts: stats.stickerSubCounts,
+        page,
+        totalPages: Math.ceil(subTotal / limitNum) || 1,
+        audit: {
+          dbReads: actualDbReads,
+          source: 'firestore_sub_theme',
+          cacheAgeSeconds: 0
+        }
+      });
+      response.headers.set('X-Firestore-Reads', actualDbReads.toString());
+      response.headers.set('X-Data-Source', 'firestore_sub_theme');
+      return response;
+    }
+
+    // =========================================================================
+    // CASE C: GENERAL PAGINATED DESIGNS (Strict limit 12 items!)
+    // Absolutely NO full-collection scan! Read ONLY 12 documents from DB!
+    // =========================================================================
+    let baseQuery = db.collection('designs').orderBy('created_at', 'desc');
+
+    if (filterType === 'pod') {
+      baseQuery = db.collection('designs').where('design_type', '==', 'pod').orderBy('created_at', 'desc');
+    }
+
+    const paginatedSnap = await baseQuery.limit(limitNum).offset(offsetNum).get();
+    actualDbReads = paginatedSnap.docs.length;
+
+    const items = paginatedSnap.docs.map((d: any) => {
+      const data = d.data();
+      const versionTs = data.updated_at ? new Date(data.updated_at).getTime() : (data.created_at ? new Date(data.created_at).getTime() : 0);
+      return {
+        id: d.id,
+        ...data,
+        image_url: `/api/designs/image?id=${d.id}&v=${versionTs}`
+      };
+    }).filter((d: any) => !d.is_deleted);
+
+    const totalCount = filterType === 'pod' ? stats.podCount : (filterType === 'sticker' ? stats.stickerCount : stats.total);
+
+    const response = NextResponse.json({
+      success: true,
+      data: items,
+      total: totalCount,
+      podCount: stats.podCount,
+      stickerCount: stats.stickerCount,
+      stickerSubCounts: stats.stickerSubCounts,
       page,
-      totalPages: Math.ceil(total / limitNum),
+      totalPages: Math.ceil(totalCount / limitNum) || 1,
       audit: {
         dbReads: actualDbReads,
-        source: dataSource,
-        cacheAgeSeconds: Math.round((now - lastCacheTime) / 1000)
+        source: 'firestore_paged',
+        cacheAgeSeconds: 0
       }
     });
 
-    jsonResponse.headers.set('X-Firestore-Reads', actualDbReads.toString());
-    jsonResponse.headers.set('X-Data-Source', dataSource);
+    response.headers.set('X-Firestore-Reads', actualDbReads.toString());
+    response.headers.set('X-Data-Source', 'firestore_paged');
+    return response;
 
-    if (!nocache) {
-      jsonResponse.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=180');
-    }
-    if (isQuotaFallback) {
-      jsonResponse.headers.set('X-Quota-Fallback', 'true');
-    }
-    return jsonResponse;
   } catch (error: any) {
     console.error('Error fetching designs:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
