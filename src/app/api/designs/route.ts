@@ -11,6 +11,8 @@ const DEFAULT_STATS = {
   stickerCount: 480,
   stickerSubCounts: {
     all: 480,
+    axolotl: 20,
+    deepsea: 20,
     dessert: 20,
     socialbattery: 20,
     hangul: 20,

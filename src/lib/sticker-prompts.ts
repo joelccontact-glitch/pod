@@ -1358,6 +1358,317 @@ STRICT NO GLASS TANKS: Pure standalone adorable Korean Hangul aesthetic stickers
   }) as unknown as StickerPreset[]
 ];
 
+
+export const AXOLOTL_20_SERIES: StickerPreset[] = [
+  {
+    id: 'axolotl-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 우파루파 20종 스티커 팩 대표 커버 표지',
+    animal: 'Cute Axolotl & Friends Master Cover',
+    animalValue: '',
+    affinityObject: 'Cute Axolotl & Friends Master Cover',
+    theme: 'Axolotl 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 아기 우파루파 & 아쿠아 프렌즈 단독 캐릭터 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF).
+CENTERED TITLE (MUST REMAIN CLEAR & UNOBSTRUCTED): Centered cute bold pink script typography reading "20+ CUTE AXOLOTL & AQUATIC FRIENDS STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish teal ribbon banner. CRITICAL: The central title and banner MUST remain completely unobstructed, open, and clearly legible with an ample margin around it—NO stickers encroaching, touching, or overlapping the text.
+STICKER ARRANGEMENT (DENSE YET NEATLY SEPARATED): A richly packed collage of 18-20 unique standalone die-cut sticker samples filling the perimeter of the canvas around the center title with minimal empty white gaps. CRITICAL NO OVERLAPPING: Individual stickers MUST NOT overlap, collide, or clip one another. Each sticker is completely isolated and neatly placed side-by-side with its own distinct thick crisp white die-cut border. STRICT NO DUPLICATES: Every single sticker is 100% unique in character, pose, and accessory with zero repetition.
+FEATURED UNIQUE STICKERS: boba axolotl, marimo moss axolotl, strawberry milk axolotl, water lily umbrella axolotl, golden starlight axolotl, seashell bed axolotl, heart bubble axolotl, headphone music axolotl, coffee mug axolotl, fluffy sea bunny, chubby baby pufferfish, glowing sea angel clione, pastel baby seahorse, black melanoid axolotl, leaf surfing glass frog, pearl necklace axolotl, neon tetra fish, cupcake axolotl topper, high-five starfish axolotl, and cupid arrow axolotl.
+STRICT NO GLASS TANKS: Pure standalone adorable cute axolotl characters and pastel aquatic creatures ONLY. NO glass jar, NO glass tank, NO container, NO background scenery. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      {
+        name: '버블티 껴안은 핑크 우파루파',
+        desc: '달콤한 딸기 버블티를 두 손으로 꼭 껴안고 있는 아기 우파루파 스티커',
+        phrase: 'Boba Bestie',
+        detail: 'standalone super cute smiling baby pink axolotl with fluffy pink frilly external gills happily hugging a tiny iced strawberry boba bubble tea cup with black tapioca pearls and a pastel straw'
+      },
+      {
+        name: '초록 마리모 위에 턱 괸 우파루파',
+        desc: '동글동글 폭신한 마리모 모스볼 위에 턱을 괴고 힐링하는 아기 우파루파 스티커',
+        phrase: 'Cozy & Calm',
+        detail: 'standalone adorable smiling baby pink axolotl resting its chin cutely on top of a giant fluffy green marimo moss ball'
+      },
+      {
+        name: '딸기우유 팩 마시는 우파루파',
+        desc: '미니 딸기우유 팩을 빨대로 마시며 윙크하는 카와이 우파루파 스티커',
+        phrase: 'Berry Sweet',
+        detail: 'standalone cute chibi pink axolotl sitting down and sipping a mini Japanese strawberry milk carton through a tiny straw'
+      },
+      {
+        name: '수련 잎 우산 쓴 우파루파',
+        desc: '초록 수련 잎을 우산처럼 머리에 받쳐 든 귀여운 아기 우파루파 스티커',
+        phrase: 'Rainy Day',
+        detail: 'standalone sweet smiling baby pink axolotl holding a miniature green water lily leaf pad over its head like a cute umbrella'
+      },
+      {
+        name: '금빛 별조각을 품은 골든 우파루파',
+        desc: '반짝이는 황금빛 별 크리스탈을 가슴에 안고 있는 희귀 골든 우파루파 스티커',
+        phrase: 'Shine Bright',
+        detail: 'standalone rare sparkling golden yellow albino axolotl hugging a glowing golden starlight crystal with gentle sparkles'
+      },
+      {
+        name: '진주 조개 침대 속 라벤더 우파루파',
+        desc: '입 벌린 가리비 진주 조개 속에서 쿨쿨 잠든 라벤더 우파루파 스티커',
+        phrase: 'Sweet Dreams',
+        detail: 'standalone cozy baby lavender purple axolotl curled up sleeping peacefully inside an open pearl seashell with a mini iridescent pearl'
+      },
+      {
+        name: '하트 물방울 부는 우파루파',
+        desc: '사랑스러운 분홍색 하트 물방울들을 퐁퐁 불고 있는 아기 우파루파 스티커',
+        phrase: 'Lots of Love',
+        detail: 'standalone playful smiling baby pink axolotl blowing floating pastel pink heart-shaped water bubbles with tiny sparkles'
+      },
+      {
+        name: '헤드폰 끼고 음악 듣는 우파루파',
+        desc: '민트색 헤드폰을 끼고 음악을 들으며 리듬 타는 아기 우파루파 스티커',
+        phrase: 'Lofi Beats',
+        detail: 'standalone cute trendy baby axolotl wearing oversized pastel mint green headphones, happily listening to music with floating musical notes'
+      },
+      {
+        name: '핑크 커피 머그잔 속 우파루파',
+        desc: '생크림 가득한 따뜻한 커피 머그잔 속에서 쏙 고개를 내민 우파루파 스티커',
+        phrase: 'Warm Hugs',
+        detail: 'standalone tiny cute baby axolotl peeking out happily from inside a warm pastel ceramic coffee mug topped with whipped cream foam'
+      },
+      {
+        name: '폭신한 솜사탕 바다토끼 민달팽이',
+        desc: '토끼 귀를 쫑긋 세운 뽀송뽀송 하얀 바다토끼 민달팽이 스티커',
+        phrase: 'Fluffy Bunny',
+        detail: 'standalone super fluffy white and pastel pink sea bunny slug (Jorunna parva) with tiny bunny ear rhinophores and a fluffy tail'
+      },
+      {
+        name: '동글동글 노란 아기 가시복어',
+        desc: '동그랗고 앙증맞은 노란색 아기 가시복어 캐릭터 스티커',
+        phrase: 'Puff of Joy',
+        detail: 'standalone adorable round chubby yellow spiky pufferfish with big innocent sparkly eyes smiling cheerfully'
+      },
+      {
+        name: '날개 펄럭이는 바다천사 클리오네',
+        desc: '황금빛 하트 장기와 투명 날개를 펄럭이는 바다천사 스티커',
+        phrase: 'Sea Angel',
+        detail: 'standalone magical translucent glowing baby sea angel (Clione) with tiny fluttering orange angel wings and a glowing golden heart'
+      },
+      {
+        name: '파스텔 핑크 해초 감은 아기 해마',
+        desc: '산호 가지에 동그란 꼬리를 감고 수줍게 웃는 아기 해마 스티커',
+        phrase: 'Little Swimmer',
+        detail: 'standalone tiny pastel pink baby seahorse clinging with its curved tail to a delicate branching coral twig'
+      },
+      {
+        name: '흑백 멜라노이드 아기 우파루파',
+        desc: '시크한 검정 몸체에 핑크빛 아가미가 대조를 이루는 흑단 우파루파 스티커',
+        phrase: 'Midnight Sparkle',
+        detail: 'standalone cute chibi black melanoid baby axolotl with contrasting fluffy pink frilly gills holding a sparkling quartz crystal'
+      },
+      {
+        name: '수련 잎 서핑하는 유리개구리',
+        desc: '투명한 연두색 유리개구리가 연잎을 타고 신나게 서핑하는 스티커',
+        phrase: 'Surf Vibes',
+        detail: 'standalone tiny translucent green glass frog with big shiny eyes cheerfully surfing on a small floating water lily leaf'
+      },
+      {
+        name: '진주 목걸이 건 아기 우파루파',
+        desc: '우아한 진주 목걸이를 두르고 윙크하는 귀여운 공주 우파루파 스티커',
+        phrase: 'Stay Fabulous',
+        detail: 'standalone playful baby pink axolotl wearing an elegant shiny pearl necklace around its neck and winking cutely'
+      },
+      {
+        name: '무지개빛 네온테트라 듀오',
+        desc: '형광 파랑과 빨강 줄무늬가 영롱하게 빛나는 네온테트라 한 쌍 스티커',
+        phrase: 'Better Together',
+        detail: 'standalone pair of cute glowing neon tetra fish swimming side by side with vivid electric blue and red stripes'
+      },
+      {
+        name: '미니 컵케이크 위 우파루파',
+        desc: '달콤한 바닐라 컵케이크 프로스팅 위에 앙증맞게 얹힌 우파루파 스티커',
+        phrase: 'Sweet Cupcake',
+        detail: 'standalone miniature baby pink axolotl perched cutely like a decorative frosting topper on a frosted vanilla cupcake with sprinkles'
+      },
+      {
+        name: '불가사리와 하이파이브 우파루파',
+        desc: '주황빛 통통한 아기 불가사리와 손을 마주친 우파루파 스티커',
+        phrase: 'High Five',
+        detail: 'standalone smiling baby pink axolotl giving a cheerful high-five to a friendly chubby orange starfish'
+      },
+      {
+        name: '큐피드 하트 활 든 우파루파',
+        desc: '천사 날개를 달고 핑크 하트 화살을 조준하는 큐피드 우파루파 스티커',
+        phrase: 'Love Shot',
+        detail: 'standalone adorable cupid baby pink axolotl with tiny feathery angel wings holding a golden bow and a cute pink heart-tipped arrow'
+      }
+    ][i];
+
+    return {
+      id: `axolotl-20-pack-${num}`,
+      name: `🌸 [우파루파 ${num}/20] ${items.name}`,
+      animal: 'Cute Axolotl 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Axolotl 20 Pack',
+      phrase: items.phrase,
+      description: items.desc,
+      prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a ${items.detail}. STRICT NO GLASS CONTAINER RULE: NO glass jar, NO glass tank, NO container, NO background scenery. Crisp thick white die-cut border. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`
+    };
+  }) as unknown as StickerPreset[]
+];
+
+export const DEEPSEA_20_SERIES: StickerPreset[] = [
+  {
+    id: 'deepsea-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 심해 발광 생물 20종 스티커 팩 대표 커버 표지',
+    animal: 'Bioluminescent Deep Sea Master Cover',
+    animalValue: '',
+    affinityObject: 'Bioluminescent Deep Sea Master Cover',
+    theme: 'Deep Sea 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 신비로운 심해 네온 발광 생물 단독 캐릭터 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF).
+CENTERED TITLE (MUST REMAIN CLEAR & UNOBSTRUCTED): Centered cute bold neon cyan script typography reading "20+ BIOLUMINESCENT DEEP SEA CREATURES STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish deep purple ribbon banner. CRITICAL: The central title and banner MUST remain completely unobstructed, open, and clearly legible with an ample margin around it—NO stickers encroaching, touching, or overlapping the text.
+STICKER ARRANGEMENT (DENSE YET NEATLY SEPARATED): A richly packed collage of 18-20 unique standalone die-cut sticker samples filling the perimeter of the canvas around the center title with minimal empty white gaps. CRITICAL NO OVERLAPPING: Individual stickers MUST NOT overlap, collide, or clip one another. Each sticker is completely isolated and neatly placed side-by-side with its own distinct thick crisp white die-cut border. STRICT NO DUPLICATES: Every single sticker is 100% unique in marine creature species and bioluminescent neon pattern with zero repetition.
+FEATURED UNIQUE STICKERS: baby dumbo octopus, neon crystal jellyfish duo, baby anglerfish with star lantern, glowing sea bunny, deep sea clione, bioluminescent glass squid, iridescent comb jelly, deep sea seahorse, glowing ghost octopus, bioluminescent pearl scallop, neon coral branch, plankton halo jellyfish, chibi oarfish, neon starfish, glowing deep sea glass shrimp, heart medusa jellyfish, blue dragon sea slug, glowing emerald sea snail, crystal amethyst dumbo octopus, and cosmic nebula giant jellyfish.
+STRICT NO GLASS TANKS: Pure standalone glowing bioluminescent deep sea creatures ONLY. NO glass jar, NO glass tank, NO container, NO background scenery. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      {
+        name: '귀 펄럭이는 핑크 아기 덤보문어',
+        desc: '날개 같은 귀 지느러미를 펄럭이며 애교 부리는 아기 덤보문어 스티커',
+        phrase: 'Deep Sea Cutie',
+        detail: 'standalone super cute chubby pink baby dumbo flapjack octopus happily fluttering its tiny round ear-like fins with big shiny black eyes'
+      },
+      {
+        name: '크리스탈 발광 듀오 해파리',
+        desc: '핑크와 네온 시안 빛으로 신비롭게 발광하는 크리스탈 해파리 한 쌍 스티커',
+        phrase: 'Glow Together',
+        detail: 'standalone ethereal pair of cute glowing translucent pink and neon cyan crystal jellyfish floating with delicate trailing tentacles and soft bioluminescent aura'
+      },
+      {
+        name: '별등불 켠 아기 초롱아귀',
+        desc: '머리 위에 환한 노란 별등불을 달고 환하게 웃는 아기 초롱아귀 스티커',
+        phrase: 'Guiding Light',
+        detail: 'standalone adorable chubby round baby anglerfish with a glowing golden star lantern dangling above its head and a friendly smile with tiny cute teeth'
+      },
+      {
+        name: '푸른 네온 발광 바다토끼 민달팽이',
+        desc: '신비로운 에메랄드 시안 빛을 스스로 뿜어내는 바다토끼 민달팽이 스티커',
+        phrase: 'Neon Bunny',
+        detail: 'standalone magical glowing bioluminescent cyan and deep blue sea bunny slug (Jorunna) with velvety texture and soft neon glow'
+      },
+      {
+        name: '얼음 날개 심해 바다천사 클리오네',
+        desc: '오렌지빛 하트 장기와 시안빛 얼음 날개가 신비로운 심해 클리오네 스티커',
+        phrase: 'Angel Wings',
+        detail: 'standalone glowing translucent deep sea angel (Clione) with glowing neon orange internal heart and cyan fluttering wings'
+      },
+      {
+        name: '네온빛 투명 유리 오징어',
+        desc: '보라색과 청록색 네온 점무늬로 빛나는 반투명 유리 오징어 스티커',
+        phrase: 'Glow In Dark',
+        detail: 'standalone cute translucent glass squid with luminous neon purple and turquoise spots and glowing wide eyes'
+      },
+      {
+        name: '오로라 무지개 빗해파리',
+        desc: '프리즘처럼 칠색 무지개 빛을 발광하며 헤엄치는 빗해파리 스티커',
+        phrase: 'Prism Glow',
+        detail: 'standalone shimmering iridescent comb jelly (ctenophore) glowing with rainbow neon prism light along its delicate ciliated ribs'
+      },
+      {
+        name: '네온 보라빛 심해 아기 해마',
+        desc: '우아한 네온 자줏빛과 시안빛 돌기로 빛나는 심해 해마 스티커',
+        phrase: 'Ocean Magic',
+        detail: 'standalone majestic deep sea baby seahorse glowing with soft ultraviolet and neon magenta luminescence with glowing spines'
+      },
+      {
+        name: '반투명 꼬마 유령문어',
+        desc: '유령처럼 몽환적인 파스텔 민트빛으로 투명하게 비치는 아기 문어 스티커',
+        phrase: 'Ghostie Glow',
+        detail: 'standalone cute translucent glowing baby ghost octopus floating peacefully with delicate pastel cyan glowing mantle'
+      },
+      {
+        name: '야광 진주 품은 심해 가리비',
+        desc: '입을 벌린 심해 조개 속에서 황금빛 네온 빛을 내뿜는 야광 진주 스티커',
+        phrase: 'Hidden Treasure',
+        detail: 'standalone deep sea glowing scallop seashell open wide to reveal a radiant bioluminescent pearl emitting soft neon golden light'
+      },
+      {
+        name: '스스로 빛나는 심해 오팔 산호초',
+        desc: '파란색과 라벤더빛 네온 형광을 뿜어내는 심해 산호 가지 스티커',
+        phrase: 'Coral Dream',
+        detail: 'standalone glowing miniature branching deep sea coral branch shimmering with neon blue and lavender bioluminescent tips'
+      },
+      {
+        name: '별빛 플랑크톤 구름 속 꼬마 해파리',
+        desc: '반딧불이 같은 발광 플랑크톤에 둘러싸인 아기 돔 해파리 스티커',
+        phrase: 'Stardust Sea',
+        detail: 'standalone tiny baby glowing dome jellyfish surrounded by a swirling halo of sparkling bioluminescent plankton motes'
+      },
+      {
+        name: '빨간 볏 심해 산갈치 요정',
+        desc: '반짝이는 은빛 몸체와 붉은 불꽃 볏을 가진 귀여운 아기 산갈치 스티커',
+        phrase: 'Deep Ribbon',
+        detail: 'standalone cute chibi ribbon-like baby oarfish with shimmering metallic silver body, big round eyes, and a glowing neon scarlet head crest'
+      },
+      {
+        name: '네온 보라빛 불가사리와 아기 달팽이',
+        desc: '보라색 네온빛 불가사리 팔 위에 얹힌 미니 발광 달팽이 스티커',
+        phrase: 'Starry Friends',
+        detail: 'standalone vibrant neon violet deep sea starfish with a tiny glowing translucent sea snail resting on one arm'
+      },
+      {
+        name: '청록색 형광 줄무늬 심해 새우',
+        desc: '투명한 유리 몸체에 청록색 형광 줄무늬가 선명한 심해 청소새우 스티커',
+        phrase: 'Neon Shrimp',
+        detail: 'standalone cute tiny deep sea glass shrimp with glowing neon cyan stripes and long glowing delicate antennae'
+      },
+      {
+        name: '하트 발광 갓 아기 메두사 해파리',
+        desc: '사랑스러운 하트 모양 갓에서 핑크빛 네온 아우라를 내뿜는 해파리 스티커',
+        phrase: 'Heart of Ocean',
+        detail: 'standalone sweet translucent baby jellyfish with a heart-shaped glowing pink bell umbrella and sparkling trailing frills'
+      },
+      {
+        name: '블루드래곤 바다민달팽이',
+        desc: '푸른 용의 날개 같은 신비로운 지느러미를 활짝 펼친 바다민달팽이 스티커',
+        phrase: 'Sea Dragon',
+        detail: 'standalone mythical and cute glowing blue sea dragon slug (Glaucus atlanticus) with radiant electric blue and silver wing-like cerata'
+      },
+      {
+        name: '스스로 빛나는 에메랄드 소라 달팽이',
+        desc: '신비로운 에메랄드와 시안 형광빛을 품은 심해 나선형 소라 스티커',
+        phrase: 'Emerald Shell',
+        detail: 'standalone magical deep sea spiraled shell snail glowing with rich emerald green and cyan inner light'
+      },
+      {
+        name: '심해 네온 자수정 위 아기 덤보문어',
+        desc: '보라빛 발광 자수정 원석 클러스터 위에 얌전히 앉은 아기 문어 스티커',
+        phrase: 'Crystal Cozy',
+        detail: 'standalone tiny pink flapjack dumbo octopus sitting comfortably on a cluster of glowing purple ocean amethyst crystals'
+      },
+      {
+        name: '우주 성운 무늬 심해 마스터 해파리',
+        desc: '우주 은하수와 성운(Nebula)을 품은 웅장하고 영롱한 심해 거대 해파리 스티커',
+        phrase: 'Cosmic Jelly',
+        detail: 'standalone breathtaking cosmic bioluminescent giant umbrella jellyfish glowing with galaxy nebula patterns of deep violet, magenta, and cyan sparkles'
+      }
+    ][i];
+
+    return {
+      id: `deepsea-20-pack-${num}`,
+      name: `🌊 [심해 ${num}/20] ${items.name}`,
+      animal: 'Bioluminescent Deep Sea 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Deep Sea 20 Pack',
+      phrase: items.phrase,
+      description: items.desc,
+      prompt: `Square 1:1 ratio 2D vector graphic sticker illustration of a cute die-cut sticker design featuring a ${items.detail}. STRICT NO GLASS CONTAINER RULE: NO glass jar, NO glass tank, NO container, NO background scenery. Crisp thick white die-cut border. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Isolated cute artwork centered on a pure solid white background (#FFFFFF). Crisp bold black linework, flat vector colors.`
+    };
+  }) as unknown as StickerPreset[]
+];
+
 export function buildStickerPrompt(
   animalName: string,
   affinityObject: string,

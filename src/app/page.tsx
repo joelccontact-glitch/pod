@@ -24,6 +24,8 @@ import {
   THANKSGIVING_20_SERIES,
   THANKSGIVING_STANDALONE_20_SERIES,
   BOOKTOK_20_SERIES,
+  AXOLOTL_20_SERIES,
+  DEEPSEA_20_SERIES,
   DESSERT_20_SERIES,
   SOCIAL_BATTERY_20_SERIES,
   HANGUL_20_SERIES,
@@ -166,6 +168,8 @@ const getDesignCategoryKey = (d: any): string => {
   if (sub && sub !== 'other') return sub;
 
   const presetId = (d.stickerPresetId || d.id || '').toLowerCase();
+  if (presetId.includes('axolotl')) return 'axolotl';
+  if (presetId.includes('deepsea') || presetId.includes('deep-sea')) return 'deepsea';
   if (presetId.includes('dessert')) return 'dessert';
   if (presetId.includes('socialbattery') || presetId.includes('social-battery')) return 'socialbattery';
   if (presetId.includes('hangul')) return 'hangul';
@@ -188,6 +192,8 @@ const getDesignCategoryKey = (d: any): string => {
 
   const title = (d.title || d.topic || '').toLowerCase();
   if (title.includes('새해') || title.includes('신년') || title.includes('new year') || title.includes('newyear')) return 'newyear';
+  if (title.includes('우파루파') || title.includes('axolotl')) return 'axolotl';
+  if (title.includes('심해') || title.includes('deep sea') || title.includes('deepsea')) return 'deepsea';
   if (title.includes('디저트') || title.includes('베이커리') || title.includes('dessert') || title.includes('bakery')) return 'dessert';
   if (title.includes('사회적 배터리') || title.includes('내향인') || title.includes('social battery') || title.includes('introvert')) return 'socialbattery';
   if (title.includes('한글') || title.includes('k-감성') || title.includes('hangul') || title.includes('k-vibe')) return 'hangul';
@@ -208,6 +214,8 @@ const getDesignCategoryKey = (d: any): string => {
 };
 
 const getStickerSeriesTitle = (tab: string) => {
+  if (tab.startsWith('axolotl20')) return '🌸 아기 우파루파 & 아쿠아 프렌즈 20종 스티커 팩';
+  if (tab.startsWith('deepsea20')) return '🌊 신비로운 심해 발광 생물 20종 스티커 팩';
   if (tab.startsWith('dessert20')) return '🥞 미국 유행 디저트 & 베이커리 20종 스티커 팩';
   if (tab.startsWith('socialbattery20')) return '🔋 사회적 배터리 & 내향인 20종 스티커 팩';
   if (tab.startsWith('hangul20')) return '🇰🇷 K-감성 한글 & 아기 동물 20종 스티커 팩';
@@ -228,6 +236,8 @@ const getStickerSeriesTitle = (tab: string) => {
 };
 
 const getPresetSeriesList = (tab: string): StickerPreset[] => {
+  if (tab === 'axolotl20') return AXOLOTL_20_SERIES;
+  if (tab === 'deepsea20') return DEEPSEA_20_SERIES;
   if (tab === 'dessert20') return DESSERT_20_SERIES;
   if (tab === 'socialbattery20') return SOCIAL_BATTERY_20_SERIES;
   if (tab === 'hangul20') return HANGUL_20_SERIES;
@@ -316,6 +326,12 @@ export const getPackPresetsInfo = (coverDesign: any): PackPresetsInfo => {
   const allText = `${presetId} ${sub} ${title} ${prompt} ${categoryKey}`;
 
   // 1. Single 20 themes (strictly 20-pack only, never 40-pack)
+  if (categoryKey === 'axolotl' || allText.includes('axolotl') || allText.includes('우파루파')) {
+    return { themeKey: 'axolotl', isSingleSeries20Theme: true, vesselSeries: AXOLOTL_20_SERIES, standaloneSeries: null };
+  }
+  if (categoryKey === 'deepsea' || allText.includes('deepsea') || allText.includes('심해')) {
+    return { themeKey: 'deepsea', isSingleSeries20Theme: true, vesselSeries: DEEPSEA_20_SERIES, standaloneSeries: null };
+  }
   if (categoryKey === 'dessert' || allText.includes('dessert') || allText.includes('디저트') || allText.includes('베이커리')) {
     return { themeKey: 'dessert', isSingleSeries20Theme: true, vesselSeries: DESSERT_20_SERIES, standaloneSeries: null };
   }
@@ -639,6 +655,8 @@ export default function Home() {
   const [selectedStickerSubTab, setSelectedStickerSubTab] = useState<string>('all');
   const [stickerSubCounts, setStickerSubCounts] = useState<Record<string, number>>({
     all: 0,
+    axolotl: 0,
+    deepsea: 0,
     dessert: 0,
     socialbattery: 0,
     hangul: 0,
@@ -693,6 +711,8 @@ export default function Home() {
   const [isStickerBannerExpanded, setIsStickerBannerExpanded] = useState(false); // Collapsed by default
   const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<
+    | 'axolotl20'
+    | 'deepsea20'
     | 'dessert20'
     | 'socialbattery20'
     | 'hangul20'
@@ -3679,7 +3699,13 @@ export default function Home() {
     let bundleName = 'Dessert_20_Stickers_Bundle';
     let seriesTitle = '[미국 유행 디저트 & 베이커리 (20종)]';
 
-    if (currentTab === 'dessert20') {
+    if (currentTab === 'axolotl20') {
+      bundleName = 'Cute_Axolotl_20_Stickers_Bundle';
+      seriesTitle = '[아기 우파루파 & 아쿠아 프렌즈 (20종)]';
+    } else if (currentTab === 'deepsea20') {
+      bundleName = 'Bioluminescent_DeepSea_20_Stickers_Bundle';
+      seriesTitle = '[신비로운 심해 발광 생물 (20종)]';
+    } else if (currentTab === 'dessert20') {
       bundleName = 'Dessert_20_Stickers_Bundle';
       seriesTitle = '[미국 유행 디저트 & 베이커리 (20종)]';
     } else if (currentTab === 'socialbattery20') {
@@ -3732,7 +3758,11 @@ export default function Home() {
         const textToScan = `${d.title || ''} ${d.prompt || ''} ${d.topic || ''} ${d.feedback_applied || ''}`.toLowerCase();
         const sub = d.sticker_sub;
 
-        if (currentTab === 'dessert20') {
+        if (currentTab === 'axolotl20') {
+          return sub === 'axolotl' || presetId.startsWith('axolotl') || textToScan.includes('axolotl') || textToScan.includes('우파루파');
+        } else if (currentTab === 'deepsea20') {
+          return sub === 'deepsea' || presetId.startsWith('deepsea') || textToScan.includes('deepsea') || textToScan.includes('심해');
+        } else if (currentTab === 'dessert20') {
           return sub === 'dessert' || presetId.startsWith('dessert') || textToScan.includes('dessert') || textToScan.includes('디저트') || textToScan.includes('베이커리');
         } else if (currentTab === 'socialbattery20') {
           return sub === 'socialbattery' || presetId.startsWith('social-battery') || presetId.startsWith('socialbattery') || textToScan.includes('social battery') || textToScan.includes('사회적 배터리') || textToScan.includes('내향');
@@ -3892,7 +3922,17 @@ export default function Home() {
     let packName = '[북톡 & 코지 리딩 20종 스티커 팩]';
     let subKey = 'booktok';
 
-    if (baseType.startsWith('dessert')) {
+    if (baseType.startsWith('axolotl')) {
+      targetPresets = AXOLOTL_20_SERIES;
+      targetStandalonePresets = AXOLOTL_20_SERIES;
+      packName = '[아기 우파루파 & 아쿠아 프렌즈 20종 스티커 팩]';
+      subKey = 'axolotl';
+    } else if (baseType.startsWith('deepsea')) {
+      targetPresets = DEEPSEA_20_SERIES;
+      targetStandalonePresets = DEEPSEA_20_SERIES;
+      packName = '[신비로운 심해 발광 생물 20종 스티커 팩]';
+      subKey = 'deepsea';
+    } else if (baseType.startsWith('dessert')) {
       targetPresets = DESSERT_20_SERIES;
       targetStandalonePresets = DESSERT_20_SERIES;
       packName = '[미국 유행 디저트 & 베이커리 20종 스티커 팩]';
@@ -5195,7 +5235,7 @@ export default function Home() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center gap-2">
-                    {!['dessert20', 'socialbattery20', 'hangul20', 'booktok20'].includes(selectedStickerSeriesTab) && (
+                    {!['axolotl20', 'deepsea20', 'dessert20', 'socialbattery20', 'hangul20', 'booktok20'].includes(selectedStickerSeriesTab) && (
                       <button
                         onClick={() => handleBatchGenerateSeries(`${selectedStickerSeriesTab}_both`)}
                         disabled={isBatchGenerating}
@@ -5268,6 +5308,8 @@ export default function Home() {
                     className="w-full bg-white text-teal-950 font-extrabold text-xs sm:text-sm py-2 px-3 rounded-xl border-2 border-teal-600 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-400 cursor-pointer"
                   >
                     <optgroup label="🌟 신규 인기 틈새 테마 (NEW)">
+                      <option value="axolotl20">🌸 아기 우파루파 & 아쿠아 프렌즈 20종 (단독)</option>
+                      <option value="deepsea20">🌊 신비로운 심해 발광 생물 20종 (단독)</option>
                       <option value="dessert20">🥞 미국 유행 디저트 & 베이커리 20종</option>
                       <option value="socialbattery20">🔋 사회적 배터리 & 내향인 20종</option>
                       <option value="hangul20">🇰🇷 K-감성 한글 & 아기 동물 20종</option>
@@ -5482,6 +5524,8 @@ export default function Home() {
                 >
                   <option value="all">🌐 전체 테마 보기 (총 {stickerSubCounts.all || stickerCount}장)</option>
                   <optgroup label="🌟 신규 인기 틈새 테마">
+                    <option value="axolotl">🌸 아기 우파루파 & 아쿠아 프렌즈 ({stickerSubCounts.axolotl || 0}장)</option>
+                    <option value="deepsea">🌊 신비로운 심해 발광 생물 ({stickerSubCounts.deepsea || 0}장)</option>
                     <option value="dessert">🥞 미국 유행 디저트 & 베이커리 ({stickerSubCounts.dessert || 0}장)</option>
                     <option value="socialbattery">🔋 사회적 배터리 & 내향인 ({stickerSubCounts.socialbattery || 0}장)</option>
                     <option value="hangul">🇰🇷 K-감성 한글 & 아기 동물 ({stickerSubCounts.hangul || 0}장)</option>
