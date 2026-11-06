@@ -5778,7 +5778,7 @@ export default function Home() {
 
         {/* Detail Modal */}
         {selectedDesign && (
-          <div className="fixed inset-0 bg-black/60 z-[120] flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 backdrop-blur-sm" style={{ zIndex: 9999 }}>
             <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl">
               {/* Left: Image */}
               <div className="w-full md:w-1/2 bg-gray-100 flex items-center justify-center relative p-4 sm:p-6 min-h-[30vh] sm:min-h-0">
@@ -7151,7 +7151,7 @@ export default function Home() {
 
         {/* 🌟 Sticker 20-Pack Bundle Detail View Modal (마스터 썸네일 클릭 시 20종 전용 뷰어) */}
         {isPackDetailModalOpen && selectedPackCover && (
-          <div className="fixed inset-0 bg-black/70 z-[95] flex items-center justify-center p-1.5 sm:p-6 backdrop-blur-md">
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-1.5 sm:p-6 backdrop-blur-md" style={{ zIndex: selectedDesign ? 70 : 95 }}>
             <div className="bg-white rounded-2xl sm:rounded-3xl max-w-6xl w-full max-h-[96vh] sm:max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-teal-200 animate-fadeIn">
               
               {/* Modal Header (Compact & sleek on mobile, docked cleanly at top) */}
