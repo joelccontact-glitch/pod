@@ -49,7 +49,7 @@ function createSeasonalVesselSeries(
       theme: `${seasonNameKo} 20 Pack`,
       phrase: '',
       description: item.desc,
-      prompt: `A cute 2D vector die-cut sticker illustration featuring: ${item.detail}. Stylized cute illustrated transparent glass container, vibrant festive kawaii aesthetic, thick white die-cut sticker outline. ${SEASONAL_RULES_NO_TEXT}`
+      prompt: `A cute 2D vector die-cut sticker illustration featuring: ${item.detail}. Vibrant festive kawaii aesthetic, bold clean black comic outlines, thick white die-cut sticker outline. ${SEASONAL_RULES_NO_TEXT}`
     };
   });
 
@@ -486,7 +486,7 @@ export const VALENTINES_20_SERIES: StickerPreset[] = createSeasonalVesselSeries(
   'Etsy 판매용 20종 발렌타인데이 핑크 하트 유리병 스티커 팩 마스터 대표 썸네일 커버',
   'A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF). Centered cute bold pink script typography reading "20+ CUTE VALENTINE STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish blue ribbon banner. Surrounding text are large cute die-cut sticker samples of glass heart jars, pink potion bottles, rose bell jars with baby kittens, chocolate fondue glasses, and strawberries arranged artistically across white background. CRITICAL: Pure solid white background (#FFFFFF). High resolution.',
   [
-    { name: '딸기 스무디 유리잔과 아기 고양이', desc: '딸기 스무디와 하트 젤리가 든 유리잔을 잡고 있는 아기 고양이', detail: 'tall glass tumbler filled with pink strawberry smoothie, red heart jellies, and an adorable fluffy white baby kitten holding a pink striped straw, bold clean black comic outlines, vibrant flat colors, 2D vector clipart sticker' },
+    { name: '하트 선물 상자를 안은 아기 고양이', desc: '빨간 리본이 달린 핑크 하트 초콜릿 상자를 꼭 안고 있는 귀여운 아기 고양이', detail: 'an adorable white baby kitten hugging a large pink heart-shaped Valentine chocolate box with a big red satin ribbon bow, blushing cheeks, bold clean black comic outlines, vibrant flat colors, 2D vector clipart sticker' },
     { name: '핑크 러브 포션 마법 물약병', desc: '영롱한 핑크빛 액체와 장미 꽃잎이 든 빈티지 물약병', detail: 'vintage apothecary potion glass bottle filled with shimmering pastel pink potion, floating rose petals, and a cork stopper' },
     { name: '장미 찻잔 속 아기 토끼', desc: '만개한 붉은 장미와 화관을 쓴 사랑스러운 찻잔 속 아기 토끼', detail: 'cute pastel pink vintage teacup filled with deep crimson blooming roses and an adorable white baby bunny wearing a rose flower crown, bold clean black comic outlines, rich vibrant colors, 2D vector clipart sticker' },
     { name: '딸기 보바 밀크티 유리잔 속 햄스터', desc: '딸기 보바와 핑크 빨대를 잡고 있는 햄스터', detail: 'tall glass tumbler filled with strawberry boba milk tea, tapioca pearls, and a tiny dwarf hamster holding a striped straw' },
