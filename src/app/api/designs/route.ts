@@ -141,6 +141,9 @@ export async function GET(request: Request) {
           }
         } catch (e: any) {
           console.error('Failed to read covers cache:', e?.message);
+          if (e?.message?.includes('RESOURCE_EXHAUSTED') || e?.message?.includes('Quota exceeded')) {
+            throw e;
+          }
         }
 
         // 3. Fallback: Query where is_cover == true (Exactly 13 reads, NEVER full scan!)
@@ -162,10 +165,15 @@ export async function GET(request: Request) {
             }
           } catch (e: any) {
             console.error('Failed to query is_cover docs:', e?.message);
+            if (e?.message?.includes('RESOURCE_EXHAUSTED') || e?.message?.includes('Quota exceeded')) {
+              throw e;
+            }
           }
         }
 
-        inMemoryCoversCache = { data: covers, timestamp: now };
+        if (covers.length > 0) {
+          inMemoryCoversCache = { data: covers, timestamp: now };
+        }
       }
 
       // 4. Sort covers strictly by created_at descending (Newest first!)

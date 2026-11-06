@@ -690,7 +690,7 @@ export default function Home() {
       const stored = sessionStorage.getItem('mypod_initial_page_data_v1');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed && Array.isArray(parsed.data?.data) && (Date.now() - parsed.timestamp < 600000)) {
+        if (parsed && Array.isArray(parsed.data?.data) && parsed.data.data.length > 0 && (Date.now() - parsed.timestamp < 600000)) {
           setDesigns(parsed.data.data);
           setLoadingInitial(false);
           if (parsed.data.totalPages) setTotalPages(parsed.data.totalPages);
@@ -4440,7 +4440,7 @@ export default function Home() {
           }
         }
         galleryPageCache.set(cacheKey, { data, timestamp: now });
-        if (currentPage === 1 && selectedCategoryTab === 'sticker' && activeSub === 'all' && !activeSearch) {
+        if (currentPage === 1 && selectedCategoryTab === 'sticker' && activeSub === 'all' && !activeSearch && data.data && data.data.length > 0) {
           try {
             sessionStorage.setItem('mypod_initial_page_data_v1', JSON.stringify({ data, timestamp: now }));
           } catch {}
