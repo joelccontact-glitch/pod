@@ -40,6 +40,25 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Fredoka:wght@600;700;800&family=Gaegu:wght@400;700&family=Jua&family=Lilita+One&family=Pacifico&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('error', function(e) {
+                var isChunkError = /Loading chunk .* failed|ERR_ABORTED.*\\.js/i.test(e.message || '') || 
+                  (e.target && e.target.tagName === 'SCRIPT' && /_next\\/static\\/chunks/i.test(e.target.src || ''));
+                if (isChunkError) {
+                  if (!sessionStorage.getItem('chunk_reload_retry')) {
+                    sessionStorage.setItem('chunk_reload_retry', 'true');
+                    window.location.reload();
+                  }
+                }
+              }, true);
+              window.addEventListener('load', function() {
+                sessionStorage.removeItem('chunk_reload_retry');
+              });
+            `,
+          }}
+        />
       </head>
       <body suppressHydrationWarning className="min-h-full flex flex-col">
         <Providers>
