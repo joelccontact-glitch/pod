@@ -166,6 +166,13 @@ export async function GET(request: Request) {
         inMemoryCoversCache = { data: covers, timestamp: now };
       }
 
+      // 4. Sort covers strictly by created_at descending (Newest first!)
+      covers.sort((a, b) => {
+        const timeA = new Date(a.created_at || a.updated_at || 0).getTime();
+        const timeB = new Date(b.created_at || b.updated_at || 0).getTime();
+        return timeB - timeA;
+      });
+
       // Filter by search query if present
       let filteredCovers = covers;
       if (searchQuery) {
@@ -237,6 +244,13 @@ export async function GET(request: Request) {
           image_url: `/api/designs/image?id=${d.id}&v=${versionTs}`
         };
       }).filter((d: any) => !d.is_deleted);
+
+      // Sort items strictly by created_at descending (Newest first!)
+      items.sort((a: any, b: any) => {
+        const timeA = new Date(a.created_at || a.updated_at || 0).getTime();
+        const timeB = new Date(b.created_at || b.updated_at || 0).getTime();
+        return timeB - timeA;
+      });
 
       const subTotal = stats.stickerSubCounts[subType as keyof typeof stats.stickerSubCounts] || items.length;
 
