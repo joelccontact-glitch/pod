@@ -1,16 +1,18 @@
 /**
  * Image Processor for POD (Print-on-Demand) High-Res Export & Background Removal
  * Corner-Sampled Adaptive Background Removal Engine:
- * 1. Corner Background Color Sampling + Luminance/Neutral Shadow Keying
- * 2. BFS Outer Background Flood-Fill (clears outer clouds, shadows, and off-white halos)
- * 3. Enclosed Letter Hole Cleanup (clears white holes inside 'e', 'B', 'o', 'a')
- * 4. Anti-Aliased Edge Defringing
+ * 1. Corner Background Color Sampling + Pure Solid White Thresholding
+ * 2. BFS Outer Background Flood-Fill (clears outer background without breaching character artwork)
+ * 3. Character Protection Guardrail (STRICT: Never punch holes inside character/artwork for stickers)
+ * 4. Anti-Aliased Edge Defringing & Quality Assurance Guardrail
  */
 
 export interface TransparentPNGOptions {
   targetWidth?: number; // default 3000px
   targetHeight?: number; // default 3000px
   tolerance?: number;
+  isSticker?: boolean; // default true: strictly protects character bodies, highlights, eyes, and pastel tones
+  cleanInnerHoles?: boolean; // default false: NEVER punch holes inside character/artwork
 }
 
 /**
@@ -69,6 +71,8 @@ export async function processTransparentPNG(
   const {
     targetWidth = 3000,
     targetHeight = 3000,
+    isSticker = true,
+    cleanInnerHoles = false,
   } = options;
 
   const img = await loadImageElement(imageUrl);
@@ -130,15 +134,18 @@ export async function processTransparentPNG(
     const dr = Math.abs(r - bgR);
     const dg = Math.abs(g - bgG);
     const db = Math.abs(b - bgB);
-    if (dr <= 32 && dg <= 32 && db <= 32) return true;
 
-    // 2. Off-white / light gray ground shadow / floor noise under feet/chairs
-    if (r >= 150 && g >= 150 && b >= 145) {
-      const maxC = Math.max(r, g, b);
-      const minC = Math.min(r, g, b);
-      if (maxC - minC <= 20) {
-        return true;
-      }
+    if (isSticker) {
+      // STRICT STICKER/POD RULE:
+      // Background MUST be near-pure white (#FFFFFF), close to sampled corner.
+      // NEVER match light pastel colors (pink, lavender, cream, mint) or shadows!
+      // E.g. Axolotl baby pink (r=255, g=223, b=225) has dg=32 -> strictly protected!
+      return dr <= 15 && dg <= 15 && db <= 15 && r >= 238 && g >= 238 && b >= 238;
+    }
+
+    // Legacy fallback for non-sticker text designs only
+    if (dr <= 24 && dg <= 24 && db <= 24 && r >= 225 && g >= 225 && b >= 225) {
+      return true;
     }
 
     return false;
@@ -190,68 +197,71 @@ export async function processTransparentPNG(
     }
   }
 
-  // 2. Enclosed Letter Hole Cleanup with PRE-ALLOCATED tiny static buffers
-  // Strictly small enclosed background holes (< 500px) surrounded by non-background strokes
-  const maxHoleArea = Math.min(500, Math.max(40, Math.round(totalPixels * 0.00003)));
-  const islandQueue = new Int32Array(maxHoleArea * 4 + 64);
-  const islandPixels = new Int32Array(maxHoleArea + 16);
+  // 2. Enclosed Letter Hole Cleanup (FOR HOLLOW TEXT TYPOGRAPHY ONLY)
+  // STRICT RULE: NEVER execute for stickers / characters / illustrations (cleanInnerHoles === false)!
+  // Stickers must preserve 100% of character highlights, eye shines, skin, teeth, shells, and sparkles.
+  if (cleanInnerHoles && !isSticker) {
+    const maxHoleArea = Math.min(500, Math.max(40, Math.round(totalPixels * 0.00003)));
+    const islandQueue = new Int32Array(maxHoleArea * 4 + 64);
+    const islandPixels = new Int32Array(maxHoleArea + 16);
 
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const startIdx = y * width + x;
-      if (!visited[startIdx] && isBackgroundPixel(x, y)) {
-        let iHead = 0;
-        let iTail = 0;
-        visited[startIdx] = 2; // Mark temporary
-        islandQueue[iTail++] = startIdx;
-        islandPixels[0] = startIdx;
-        let count = 1;
-        let strokeBoundaryCount = 0;
-        let isTooLarge = false;
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const startIdx = y * width + x;
+        if (!visited[startIdx] && isBackgroundPixel(x, y)) {
+          let iHead = 0;
+          let iTail = 0;
+          visited[startIdx] = 2; // Mark temporary
+          islandQueue[iTail++] = startIdx;
+          islandPixels[0] = startIdx;
+          let count = 1;
+          let strokeBoundaryCount = 0;
+          let isTooLarge = false;
 
-        while (iHead < iTail) {
-          const cidx = islandQueue[iHead++];
-          const ix = cidx % width;
-          const iy = (cidx / width) | 0;
+          while (iHead < iTail) {
+            const cidx = islandQueue[iHead++];
+            const ix = cidx % width;
+            const iy = (cidx / width) | 0;
 
-          for (let d = 0; d < 4; d++) {
-            const nx = ix + dx[d];
-            const ny = iy + dy[d];
+            for (let d = 0; d < 4; d++) {
+              const nx = ix + dx[d];
+              const ny = iy + dy[d];
 
-            if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-              const nidx = ny * width + nx;
-              if (!visited[nidx]) {
-                if (isBackgroundPixel(nx, ny)) {
-                  visited[nidx] = 2;
-                  if (count < maxHoleArea) {
-                    islandQueue[iTail++] = nidx;
-                    islandPixels[count++] = nidx;
+              if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                const nidx = ny * width + nx;
+                if (!visited[nidx]) {
+                  if (isBackgroundPixel(nx, ny)) {
+                    visited[nidx] = 2;
+                    if (count < maxHoleArea) {
+                      islandQueue[iTail++] = nidx;
+                      islandPixels[count++] = nidx;
+                    } else {
+                      isTooLarge = true;
+                    }
                   } else {
-                    isTooLarge = true;
+                    strokeBoundaryCount++;
                   }
-                } else {
-                  strokeBoundaryCount++;
                 }
               }
             }
           }
-        }
 
-        // Clear if small background hole is bounded by text stroke (mint, pink, coral, black)
-        if (!isTooLarge && count <= maxHoleArea && strokeBoundaryCount > 4) {
-          for (let k = 0; k < count; k++) {
-            visited[islandPixels[k]] = 1;
+          // Clear if small background hole is bounded strictly by dark text strokes
+          if (!isTooLarge && count <= maxHoleArea && strokeBoundaryCount > 4) {
+            for (let k = 0; k < count; k++) {
+              visited[islandPixels[k]] = 1;
+            }
           }
         }
       }
     }
   }
 
-  // 3. Clear background & letter holes with 100% strict transparency
+  // 3. Clear background with 100% strict transparency
   for (let i = 0; i < totalPixels; i++) {
     if (visited[i] === 1) {
       const pIdx = i * 4;
-      data[pIdx + 3] = 0; // 100% strictly transparent! Never leave semi-transparent residue for sticker die-cuts
+      data[pIdx + 3] = 0; // 100% strictly transparent for outer background!
     }
   }
 
