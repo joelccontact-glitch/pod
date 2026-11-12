@@ -397,6 +397,12 @@ export async function createCompositeMasterCover(
     ribbonColor = '#0D9488'; // Vibrant teal ribbon
     ribbonFold = '#115E59';
     ribbonOutline = '#042F2E';
+  } else if (subType === 'foodimal' || optTitle.includes('foodimal') || optTitle.includes('푸디멀') || optTitle.includes('음식동물')) {
+    seriesTitle = 'KAWAII FOODIMAL';
+    titleColor = '#EA580C'; // Warm appetizing strawberry/tangerine orange-coral
+    ribbonColor = '#E11D48'; // Vibrant rose-red ribbon banner
+    ribbonFold = '#9F1239';
+    ribbonOutline = '#4C0519';
   } else {
     // Pure English fallback: Strip Korean and special characters completely
     const cleanEn = (options.title || '').replace(/[^a-zA-Z\s]/g, ' ').replace(/\s+/g, ' ').trim();

@@ -262,6 +262,30 @@ const CATEGORY_SEO_DICT: Record<string, {
       '🧁 Ideal for bullet journals, recipe scrapbooks, digital planners, and water bottle decals'
     ]
   },
+  foodimal: {
+    name: 'Kawaii Foodimal Hybrid Creatures',
+    goldenBundleTitle: 'Kawaii Food Animal Stickers, Cute Foodimal GoodNotes Sticker Pack, Dessert Animal Clipart, Funny Food Clipart Bundle, Instant Download PNG',
+    themeTags: [
+      'foodimal stickers',
+      'kawaii food animal',
+      'cute food clipart',
+      'animal food hybrid',
+      'cornet cat sticker',
+      'avocado hamster',
+      'planner food decals'
+    ],
+    bundleKeywords: [
+      'Kawaii Food Animal Bundle',
+      'Foodimal Digital Stickers',
+      'Cute Food Clipart PNG'
+    ],
+    singleKeywords: ['Kawaii Foodimal Sticker', 'Food Animal Clipart', 'Cute Food Hybrid Decal'],
+    descriptionHighlights: [
+      '🍓 Ultra-creative kawaii food-animal hybrid creatures (Cornet Cat, Avocado Hamster, Strawberry Mochi Seal, Tacorgi)',
+      '🥞 Fluffy pastries, savory treats, and sweet desserts fused seamlessly with adorable baby animals',
+      '🍩 Perfect for GoodNotes planners, Cricut die-cut crafts, laptop stickers, and foodie bullet journaling'
+    ]
+  },
   socialbattery: {
     name: 'Introvert & Social Battery Humor',
     goldenBundleTitle: 'Introvert Digital Stickers, Low Social Battery GoodNotes Stickers, Funny Mood Badge Clipart, Sarcastic Meme Decal Pack, Instant Download PNG',

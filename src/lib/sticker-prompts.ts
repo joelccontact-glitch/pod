@@ -1823,6 +1823,161 @@ STRICT NO GLASS TANKS: Pure standalone adorable cute axolotl character emotes ON
   }) as unknown as StickerPreset[]
 ];
 
+export const FOODIMAL_20_SERIES: StickerPreset[] = [
+  {
+    id: 'foodimal-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 푸디멀 & 카와이 음식 동물 20종 스티커 팩 대표 커버 표지',
+    animal: 'Kawaii Foodimal Hybrid Cover',
+    animalValue: '',
+    affinityObject: 'Kawaii Foodimal Cover',
+    theme: 'Foodimal Hybrid 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 푸디멀 & 음식 동물 하이브리드 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF).
+CENTERED TITLE (MUST REMAIN CLEAR & UNOBSTRUCTED): Centered cute bold coral-pink script typography reading "20+ CUTE KAWAII FOODIMAL STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish vibrant rose-red ribbon banner. CRITICAL: The central title and banner MUST remain completely unobstructed, open, and clearly legible with an ample margin around it—NO stickers encroaching, touching, or overlapping the text.
+STICKER ARRANGEMENT (DENSE YET NEATLY SEPARATED): A richly packed collage of 18-20 unique standalone die-cut sticker samples filling the perimeter of the canvas around the center title with minimal empty white gaps. CRITICAL NO OVERLAPPING: Individual stickers MUST NOT overlap, collide, or clip one another. Each sticker is completely isolated and neatly placed side-by-side with its own distinct thick crisp white die-cut border. STRICT NO DUPLICATES: Every single sticker is 100% unique in food type, animal character, and hybrid pose with zero repetition.
+FEATURED UNIQUE STICKERS: choco cornet sleeping kitten, avocado seed hamster, strawberry mochi seal, crispy taco corgi, golden tempura shrimp red panda, salmon nigiri penguin, fluffy pancake stack bear, melonpan turtle, peach bunny, banana kitty, hot dog dachshund, creme brulee hedgehog, flaky croissant fox, custard egg tart duckling, soup dumpling piglet, pastel macaron hamster, twin cherry chicks, cheesy pizza shiba inu, taiyaki fish otter, and strawberry sprinkle donut panda.
+STRICT NO GLASS TANKS: Pure standalone adorable kawaii food-animal hybrid creatures ONLY. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      {
+        name: '초코 소라빵 아기 고양이 (Cornet Cat)',
+        desc: '황금빛 초코 소라빵 안에서 얼굴과 젤리 발바닥을 쏙 내민 빵 고양이 스티커',
+        phrase: 'Baked with Love',
+        detail: 'standalone adorable kawaii baby calico kitten seamlessly curled up and sleeping inside a warm golden flaky Japanese chocolate cornet pastry, cute little pink paw pads and sleepy smiling face poking out from the chocolate-filled opening'
+      },
+      {
+        name: '아보카도 햄스터 (Avo-Hammy)',
+        desc: '잘 익은 아보카도 씨앗 자리에 쏙 파묻힌 통통한 골든 햄스터 스티커',
+        phrase: 'Avo-Cute',
+        detail: 'standalone cute chubby golden hamster curled into a perfect round ball nestled snugly in place of the brown pit inside a creamy ripe avocado half with fresh green rim and soft blush'
+      },
+      {
+        name: '딸기 모찌 물범 (Strawberry Mochi Seal)',
+        desc: '말랑한 딸기 찹쌀떡 안에 생딸기와 함께 쏙 들어간 아기 하프물범 스티커',
+        phrase: 'Berry Sweet',
+        detail: 'standalone soft squishy white baby harp seal pup shaped like a fluffy strawberry daifuku mochi confection, dusted with powdered sugar, sitting next to a fresh glossy red strawberry slice'
+      },
+      {
+        name: '타코 웰시코기 (Tacorgi)',
+        desc: '바삭한 타코 쉘 속 양상추와 치즈 사이에 쏙 끼어 있는 방실방실 웰시코기 스티커',
+        phrase: "Taco 'Bout Cute",
+        detail: 'standalone joyful baby Welsh corgi puppy tucked snugly inside a crunchy golden corn taco shell with shredded cheddar cheese, crisp lettuce frills, and tomato cubes, showing its adorable fluffy loaf body'
+      },
+      {
+        name: '새우튀김 레서판다 (Tempura Panda)',
+        desc: '바삭한 황금빛 튀김옷을 입고 바삭한 새우 꼬리를 뽐내는 레서판다 스티커',
+        phrase: 'Crispy & Cozy',
+        detail: 'standalone sweet baby red panda wearing a crunchy golden-brown panko tempura fried shrimp breading suit, with a bright orange-red shrimp tail fan perkily sticking out from its back'
+      },
+      {
+        name: '연어 스시 펭귄 (Salmon Nigiri Penguin)',
+        desc: '포슬포슬한 초밥 밥알 위에 엎드려 신선한 연어를 등에 얹은 아기 펭귄 스티커',
+        phrase: "Rollin' with It",
+        detail: 'standalone adorable baby penguin lying flat on a bed of fluffy white sushi rice (shari), carrying a glistening marble-patterned orange salmon sashimi slice on its back tied with a dark green nori seaweed band'
+      },
+      {
+        name: '수플레 팬케이크 곰 (Pancake Stack Bear)',
+        desc: '폭신폭신한 3단 수플레 팬케이크 몸통에 버터 큐브를 얹은 아기 곰 스티커',
+        phrase: 'Fluffy Treat',
+        detail: 'standalone chubby baby brown bear whose round body is made of a tall towering stack of 3 fluffy Japanese soufflé pancakes, with dripping golden maple syrup and a melting yellow butter cube on top of its head'
+      },
+      {
+        name: '멜론빵 바다거북 (Melonpan Turtle)',
+        desc: '등껍질이 달콤한 격자무늬 설탕 코팅 멜론빵인 아기 바다거북 스티커',
+        phrase: 'Sweet Shell',
+        detail: 'standalone cute pastel green baby sea turtle swimming gracefully, with its round carapace shell formed of a freshly baked sweet Japanese melonpan pastry with crisp crosshatch sugar lines and sparkling sugar crystals'
+      },
+      {
+        name: '복숭아 모찌 토끼 (Peach Mochi Bunny)',
+        desc: '뽀송뽀송한 분홍빛 복숭아 모양 몸에 긴 귀가 달린 아기 토끼 스티커',
+        phrase: 'Peachy Keen',
+        detail: 'standalone sweet baby bunny with long pastel pink ears, its plump body shaped exactly like a soft velvety blushing pink peach fruit with a tiny green leaf sprout on top'
+      },
+      {
+        name: '바나나 아기 고양이 (Banana Kitty)',
+        desc: '노란 바나나 껍질이 스르륵 벗겨지며 쏙 고개를 내민 샴고양이 스티커',
+        phrase: 'Going Bananas',
+        detail: 'standalone playful Siamese kitten poking out from inside a bright yellow sweet banana peel whose peels are neatly folded down like petals, smiling with big blue curious eyes'
+      },
+      {
+        name: '핫도그 닥스훈트 (Hot Dog Dachshund)',
+        desc: '부드러운 핫도그 빵 사이에 누워 지그재그 머스타드를 뿌린 닥스훈트 스티커',
+        phrase: 'Hot Diggity Dog',
+        detail: 'standalone elongated reddish-brown smooth dachshund puppy resting comfortably inside a warm toasted hot dog bun, with a neat zigzag drizzle of yellow mustard and red ketchup along its back'
+      },
+      {
+        name: '크림 브륄레 아기 고슴도치 (Creme Brulee Hedgehog)',
+        desc: '가시 부분이 바삭한 황금빛 캐러멜 설탕 코팅으로 된 아기 고슴도치 스티커',
+        phrase: 'Cracking Sweet',
+        detail: 'standalone cute baby hedgehog curled into a ceramic ramekin cup, its back quill coat made of glossy golden-amber caramelized crackly sugar glaze over a rich creamy vanilla custard body'
+      },
+      {
+        name: '크루아상 아기 여우 (Croissant Fox)',
+        desc: '둥글게 만 몸통과 꼬리가 버터향 가득한 황금빛 크루아상 결인 여우 스티커',
+        phrase: 'Golden & Flaky',
+        detail: 'standalone charming sleeping baby red fox curled in a circle, its entire bushy body and tail naturally formed of delicate spiral layers of golden-brown butter croissant pastry with dusted powdered sugar'
+      },
+      {
+        name: '에그 타르트 아기 오리 (Egg Tart Duckling)',
+        desc: '바삭한 페이스트리 타르트 속 말랑한 노란 커스터드 크림이 된 아기 오리 스티커',
+        phrase: 'Egg-cellent',
+        detail: 'standalone bright yellow fluffy baby duckling happily sitting inside a crispy multi-layered flaky Portuguese egg tart pastry crust, its rounded belly blending seamlessly into the warm glossy custard cream'
+      },
+      {
+        name: '샤오롱바오 아기 돼지 (Dumpling Piglet)',
+        desc: '대나무 찜기 속 얇고 주름진 딤섬 만두 모양으로 빚어진 아기 돼지 스티커',
+        phrase: 'Little Dumpling',
+        detail: 'standalone adorable chubby baby pink piglet sculpted into a delicate steaming Chinese soup dumpling (xiaolongbao) with elegant folded pleats on top, resting on a miniature bamboo steamer leaf'
+      },
+      {
+        name: '마카롱 샌드 햄스터 (Macaron Hamster)',
+        desc: '파스텔 라벤더와 민트 마카롱 꼬끄 사이에 크림과 함께 샌드된 햄스터 스티커',
+        phrase: 'Sweet & Petit',
+        detail: 'standalone tiny baby hamster with puffed cheeks delightfully sandwiched inside a colorful French macaron between two pastel lavender and mint cookies with piped vanilla buttercream'
+      },
+      {
+        name: '체리 쌍둥이 아기 병아리 (Cherry Chicks)',
+        desc: '초록색 줄기로 이어진 두 알의 반짝이는 루비 체리가 된 아기 병아리 둘 스티커',
+        phrase: 'Cherry Besties',
+        detail: 'standalone two tiny round yellow baby chicks transformed into a pair of glossy ruby-red cherries joined at the top by a slender green stem and dual cherry leaves, hugging each other cheek-to-cheek'
+      },
+      {
+        name: '피자 슬라이스 시바견 (Pizza Shiba)',
+        desc: '모짜렐라 치즈가 길게 늘어나는 페퍼로니 피자 삼각형 모양의 시바견 스티커',
+        phrase: 'Piece of My Heart',
+        detail: 'standalone cute round Shiba Inu dog playfully shaped like a triangular slice of warm cheesy pepperoni pizza with stretchy melted mozzarella cheese strings and toasted crust'
+      },
+      {
+        name: '붕어빵 아기 수달 (Taiyaki Otter)',
+        desc: '팥앙금이 살짝 삐져나온 바삭한 황금빛 붕어빵을 안고 헤엄치는 아기 수달 스티커',
+        phrase: 'Sweet Catch',
+        detail: 'standalone adorable baby river otter floating on its back, hugging a warm golden fish-shaped waffle pastry (taiyaki) with sweet red bean filling peeking out from the mouth'
+      },
+      {
+        name: '딸기 도넛 링 아기 판다 (Donut Panda)',
+        desc: '가운데가 뚫린 핑크 폰데링 도넛 형태의 통통한 아기 판다 스티커',
+        phrase: 'Donut Worry',
+        detail: 'standalone chubby baby giant panda cub whose round torso forms a puffy ring-shaped mochi pon-de-ring donut coated in pastel strawberry pink glaze with rainbow candy sprinkles'
+      }
+    ][i];
+
+    return {
+      id: `foodimal-20-pack-${num}`,
+      name: `🍓 [푸디멀 ${num}/20] ${items.name}`,
+      animal: 'Kawaii Foodimal Hybrid 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Foodimal Hybrid 20 Pack',
+      phrase: items.phrase,
+      description: items.desc,
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    };
+  }) as unknown as StickerPreset[]
+];
+
 export function buildStickerPrompt(
   animalName: string,
   affinityObject: string,
