@@ -25,6 +25,74 @@ export interface StickerSheetOptions {
   onProgress?: (current: number, total: number, message: string) => void;
 }
 
+/**
+ * Automatically infers a clean, professional English commercial title based on theme/category keywords.
+ */
+export function getThemeEnglishTitle(categoryOrTitle: string, stickerCount: number = 20): string {
+  const t = (categoryOrTitle || '').toLowerCase();
+  const countStr = stickerCount > 20 ? '40+' : '20+';
+
+  if (t.includes('thanksgiving') || t.includes('추수감사절') || t.includes('autumn') || t.includes('가을') || t.includes('fall')) {
+    return `${countStr} CUTE FALL THANKSGIVING STICKER PACK`;
+  }
+  if (t.includes('christmas') || t.includes('크리스마스') || t.includes('스노우볼') || t.includes('winter') || t.includes('겨울')) {
+    return `${countStr} CUTE CHRISTMAS SNOWGLOBE STICKER PACK`;
+  }
+  if (t.includes('foodimal') || t.includes('푸디멀') || t.includes('음식동물')) {
+    return `${countStr} CUTE KAWAII FOODIMAL STICKER PACK`;
+  }
+  if (t.includes('axolotlemote') || t.includes('이모트') || t.includes('emote')) {
+    return `${countStr} CUTE AXOLOTL EMOTES STICKER PACK`;
+  }
+  if (t.includes('axolotl') || t.includes('우파루파')) {
+    return `${countStr} CUTE BABY AXOLOTL STICKER PACK`;
+  }
+  if (t.includes('deepsea') || t.includes('심해')) {
+    return `${countStr} CUTE BIOLUMINESCENT DEEP SEA STICKER PACK`;
+  }
+  if (t.includes('dessert') || t.includes('디저트') || t.includes('베이커리') || t.includes('cafe') || t.includes('카페')) {
+    return `${countStr} CUTE SWEET DESSERT & CAFE STICKER PACK`;
+  }
+  if (t.includes('booktok') || t.includes('북톡') || t.includes('독서') || t.includes('reading')) {
+    return `${countStr} CUTE COZY READING BOOKTOK STICKER PACK`;
+  }
+  if (t.includes('socialbattery') || t.includes('배터리') || t.includes('내향인') || t.includes('introvert')) {
+    return `${countStr} CUTE SOCIAL BATTERY MEME STICKER PACK`;
+  }
+  if (t.includes('hangul') || t.includes('한글')) {
+    return `${countStr} CUTE KOREAN HANGUL STICKER PACK`;
+  }
+  if (t.includes('terrarium') || t.includes('테라리움')) {
+    return `${countStr} CUTE BOTANICAL TERRARIUM STICKER PACK`;
+  }
+  if (t.includes('vivarium') || t.includes('비바리움')) {
+    return `${countStr} CUTE EXOTIC VIVARIUM STICKER PACK`;
+  }
+  if (t.includes('saltaquarium') || t.includes('해수어')) {
+    return `${countStr} CUTE SALTWATER AQUARIUM STICKER PACK`;
+  }
+  if (t.includes('freshaquarium') || t.includes('열대어')) {
+    return `${countStr} CUTE FRESHWATER AQUARIUM STICKER PACK`;
+  }
+  if (t.includes('newyear') || t.includes('새해') || t.includes('신년')) {
+    return `${countStr} CUTE HAPPY NEW YEAR STICKER PACK`;
+  }
+  if (t.includes('valentine') || t.includes('발렌타인')) {
+    return `${countStr} CUTE SWEET VALENTINE STICKER PACK`;
+  }
+  if (t.includes('stpatrick') || t.includes('패트릭')) {
+    return `${countStr} CUTE ST. PATRICK LUCKY STICKER PACK`;
+  }
+  if (t.includes('easter') || t.includes('부활절')) {
+    return `${countStr} CUTE EASTER SPRING STICKER PACK`;
+  }
+  if (t.includes('halloween') || t.includes('할로윈')) {
+    return `${countStr} CUTE SPOOKY HALLOWEEN STICKER PACK`;
+  }
+
+  return `${countStr} CUTE DIGITAL STICKER PACK`;
+}
+
 interface BoundingBox {
   x: number;
   y: number;
@@ -132,23 +200,23 @@ function drawCommercialBanners(
   // Top Main Title
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  const mainFontSize = Math.round(66 * scaleRatio);
-  ctx.font = `bold ${mainFontSize}px Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
-  ctx.fillStyle = '#9A3412'; // Warm rust autumn/bestseller color
+  const mainFontSize = Math.round(72 * scaleRatio);
+  ctx.font = `900 ${mainFontSize}px Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+  ctx.fillStyle = '#7C2D12'; // Deep rich autumn / bold rust
 
-  const cleanTitle = (titleText || '20+ CUTE DIGITAL STICKER PACK').toUpperCase();
-  const displayTitle = totalPages > 1 ? `${cleanTitle} (PAGE ${pageIndex + 1}/${totalPages})` : cleanTitle;
-  ctx.fillText(displayTitle, canvasWidth / 2, Math.round(100 * scaleRatio));
+  const resolvedTitle = getThemeEnglishTitle(titleText || '');
+  const displayTitle = totalPages > 1 ? `${resolvedTitle} (PAGE ${pageIndex + 1}/${totalPages})` : resolvedTitle;
+  ctx.fillText(displayTitle, canvasWidth / 2, Math.round(102 * scaleRatio));
 
   // Top Ribbon Banner for "PNG DIGITAL STICKERS • GOODNOTES & PRINTABLE"
-  const ribbonW = Math.round(canvasWidth * 0.84);
-  const ribbonH = Math.round(92 * scaleRatio);
+  const ribbonW = Math.round(canvasWidth * 0.88);
+  const ribbonH = Math.round(96 * scaleRatio);
   const ribbonX = (canvasWidth - ribbonW) / 2;
   const ribbonY = Math.round(168 * scaleRatio);
-  const ribbonRadius = Math.round(20 * scaleRatio);
+  const ribbonRadius = Math.round(22 * scaleRatio);
 
   // Ribbon fill (vibrant rose-red)
-  ctx.fillStyle = '#E11D48';
+  ctx.fillStyle = '#BE123C';
   ctx.beginPath();
   if (typeof (ctx as any).roundRect === 'function') {
     (ctx as any).roundRect(ribbonX, ribbonY, ribbonW, ribbonH, ribbonRadius);
@@ -158,7 +226,7 @@ function drawCommercialBanners(
   ctx.fill();
 
   // Ribbon Text
-  const ribbonFontSize = Math.round(36 * scaleRatio);
+  const ribbonFontSize = Math.round(40 * scaleRatio);
   ctx.font = `bold ${ribbonFontSize}px Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
   ctx.fillStyle = '#FFFFFF';
   ctx.fillText('★ PNG DIGITAL STICKERS • GOODNOTES & PRINTABLE ★', canvasWidth / 2, ribbonY + ribbonH / 2);
