@@ -1110,9 +1110,14 @@ export default function Home() {
     setA4SheetProgress({ current: 0, total: list.length, label: 'A4 시트 생성 준비 중...' });
 
     try {
+      const currentThemeTitle = selectedPackCover?.title || getStickerSeriesTitle(selectedStickerSeriesTab);
+      const cleanEn = (currentThemeTitle || '').replace(/[^a-zA-Z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+      const sheetTitle = cleanEn.length > 3 ? cleanEn : 'CUTE DIGITAL STICKER PACK';
+
       const pages = await generateA4StickerSheets(list, {
         background: bg,
         pageSize: 20,
+        title: sheetTitle,
         onProgress: (current, total, label) => {
           setA4SheetProgress({ current, total, label });
         },
@@ -3556,8 +3561,15 @@ export default function Home() {
         await new Promise(resolve => setTimeout(resolve, 15));
 
         try {
+          const rawBundleTitle = items[0]?.title || items[0]?.topic || sessionName || '';
+          const cleanEn = (rawBundleTitle || '').replace(/[^a-zA-Z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
+          const sheetTitle = cleanEn.length > 3 ? cleanEn : 'CUTE DIGITAL STICKER PACK';
+
           // Efficiently generate BOTH Transparent (Cricut) and White (Home Printers) A4 sheets in a single pass
-          const { transparentPages, whitePages } = await generateA4StickerSheetsPair(processedStickers, { pageSize: 20 });
+          const { transparentPages, whitePages } = await generateA4StickerSheetsPair(processedStickers, {
+            pageSize: 20,
+            title: sheetTitle,
+          });
 
           // 1. Transparent Background A4 Sheets (Optimized for Cricut / Silhouette cutting machines)
           for (let p = 0; p < transparentPages.length; p++) {

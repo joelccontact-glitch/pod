@@ -14,6 +14,10 @@ export interface StickerSheetOptions {
   format?: 'a4' | 'us_letter';
   pageSize?: number; // default 20
   pageIndex?: number;
+  totalPages?: number;
+  title?: string;
+  subType?: string;
+  includeCommercialBanners?: boolean; // default true when background === 'white'
   maxWidth?: number;
   maxHeight?: number;
   outputFormat?: 'image/png' | 'image/jpeg';
@@ -93,6 +97,98 @@ function getImageBoundingBox(img: HTMLImageElement): BoundingBox {
     w: Math.max(1, origMaxX - origMinX),
     h: Math.max(1, origMaxY - origMinY),
   };
+}
+
+/**
+ * Draws professional commercial Etsy/Pinterest typography banners on white printable sheets.
+ * Explicitly indicates to shoppers that this is an instant digital download sticker pack.
+ */
+function drawCommercialBanners(
+  ctx: CanvasRenderingContext2D,
+  canvasWidth: number,
+  canvasHeight: number,
+  scaleRatio: number,
+  titleText: string = '20+ CUTE DIGITAL STICKER PACK',
+  pageIndex: number = 0,
+  totalPages: number = 1
+) {
+  const headerHeight = Math.round(310 * scaleRatio);
+  const footerHeight = Math.round(210 * scaleRatio);
+
+  ctx.save();
+
+  // 1. Header Area Background (Warm elegant cream)
+  ctx.fillStyle = '#FEFAF6';
+  ctx.fillRect(0, 0, canvasWidth, headerHeight);
+
+  // Header separator line
+  ctx.strokeStyle = '#E2D3BE';
+  ctx.lineWidth = Math.max(2, Math.round(3 * scaleRatio));
+  ctx.beginPath();
+  ctx.moveTo(0, headerHeight);
+  ctx.lineTo(canvasWidth, headerHeight);
+  ctx.stroke();
+
+  // Top Main Title
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const mainFontSize = Math.round(66 * scaleRatio);
+  ctx.font = `bold ${mainFontSize}px Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+  ctx.fillStyle = '#9A3412'; // Warm rust autumn/bestseller color
+
+  const cleanTitle = (titleText || '20+ CUTE DIGITAL STICKER PACK').toUpperCase();
+  const displayTitle = totalPages > 1 ? `${cleanTitle} (PAGE ${pageIndex + 1}/${totalPages})` : cleanTitle;
+  ctx.fillText(displayTitle, canvasWidth / 2, Math.round(100 * scaleRatio));
+
+  // Top Ribbon Banner for "PNG DIGITAL STICKERS • GOODNOTES & PRINTABLE"
+  const ribbonW = Math.round(canvasWidth * 0.84);
+  const ribbonH = Math.round(92 * scaleRatio);
+  const ribbonX = (canvasWidth - ribbonW) / 2;
+  const ribbonY = Math.round(168 * scaleRatio);
+  const ribbonRadius = Math.round(20 * scaleRatio);
+
+  // Ribbon fill (vibrant rose-red)
+  ctx.fillStyle = '#E11D48';
+  ctx.beginPath();
+  if (typeof (ctx as any).roundRect === 'function') {
+    (ctx as any).roundRect(ribbonX, ribbonY, ribbonW, ribbonH, ribbonRadius);
+  } else {
+    ctx.rect(ribbonX, ribbonY, ribbonW, ribbonH);
+  }
+  ctx.fill();
+
+  // Ribbon Text
+  const ribbonFontSize = Math.round(36 * scaleRatio);
+  ctx.font = `bold ${ribbonFontSize}px Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillText('★ PNG DIGITAL STICKERS • GOODNOTES & PRINTABLE ★', canvasWidth / 2, ribbonY + ribbonH / 2);
+
+  // 2. Footer Area Background
+  const footerY = canvasHeight - footerHeight;
+  ctx.fillStyle = '#FEFAF6';
+  ctx.fillRect(0, footerY, canvasWidth, footerHeight);
+
+  // Footer separator line
+  ctx.strokeStyle = '#E2D3BE';
+  ctx.lineWidth = Math.max(2, Math.round(3 * scaleRatio));
+  ctx.beginPath();
+  ctx.moveTo(0, footerY);
+  ctx.lineTo(canvasWidth, footerY);
+  ctx.stroke();
+
+  // Footer Line 1: 300 DPI Transparent PNG & Instant Download
+  const fLine1Size = Math.round(36 * scaleRatio);
+  ctx.font = `bold ${fLine1Size}px Arial, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+  ctx.fillStyle = '#9A3412';
+  ctx.fillText('INSTANT DIGITAL DOWNLOAD • 300 DPI HIGH RESOLUTION • TRANSPARENT PNG', canvasWidth / 2, footerY + Math.round(70 * scaleRatio));
+
+  // Footer Line 2: Cricut & Etsy Shop link
+  const fLine2Size = Math.round(32 * scaleRatio);
+  ctx.font = `bold ${fLine2Size}px "Segoe UI", Arial, sans-serif`;
+  ctx.fillStyle = '#78645A';
+  ctx.fillText('CRICUT & HAND CUT READY  •  Etsy Shop: littlepawsstudioshop.etsy.com', canvasWidth / 2, footerY + Math.round(140 * scaleRatio));
+
+  ctx.restore();
 }
 
 /**
@@ -191,12 +287,18 @@ export async function generateA4StickerSheet(
   // Proportional layout scaling based on baseline width (2480px)
   const scaleRatio = canvasWidth / 2480;
   const marginX = Math.round(140 * scaleRatio);
-  const marginY = Math.round(160 * scaleRatio);
+  const marginY = Math.round(100 * scaleRatio);
   const gapX = Math.round(40 * scaleRatio);
-  const gapY = Math.round(48 * scaleRatio);
+  const gapY = Math.round(44 * scaleRatio);
+
+  // Commercial Typography Banners for White Printables (Etsy/Pinterest Ready)
+  const shouldDrawBanners = background === 'white' && options.includeCommercialBanners !== false;
+  const headerHeight = shouldDrawBanners ? Math.round(310 * scaleRatio) : 0;
+  const footerHeight = shouldDrawBanners ? Math.round(210 * scaleRatio) : 0;
 
   const usableWidth = canvasWidth - marginX * 2;
-  const usableHeight = canvasHeight - marginY * 2;
+  const usableTop = marginY + headerHeight;
+  const usableHeight = canvasHeight - usableTop - marginY - footerHeight;
 
   const cellWidth = (usableWidth - (cols - 1) * gapX) / cols;
   const cellHeight = (usableHeight - (rows - 1) * gapY) / rows;
@@ -235,7 +337,7 @@ export async function generateA4StickerSheet(
       const row = Math.floor(i / cols);
 
       const cellX = marginX + col * (cellWidth + gapX);
-      const cellY = marginY + row * (cellHeight + gapY);
+      const cellY = usableTop + row * (cellHeight + gapY);
 
       // 4. Scale preserving aspect ratio inside cell bounds
       const scale = Math.min(maxStickerW / bbox.w, maxStickerH / bbox.h);
@@ -261,6 +363,19 @@ export async function generateA4StickerSheet(
     } catch (err) {
       console.error(`Error processing sticker ${i + 1} for A4 sheet:`, err);
     }
+  }
+
+  // Draw Header and Footer Commercial Banners if requested
+  if (shouldDrawBanners) {
+    drawCommercialBanners(
+      ctx,
+      canvasWidth,
+      canvasHeight,
+      scaleRatio,
+      options.title || '20+ CUTE DIGITAL STICKERS',
+      options.pageIndex || 0,
+      options.totalPages || 1
+    );
   }
 
   if (onProgress) {
@@ -304,6 +419,8 @@ export async function generateA4StickerSheets(
 
     const dataUrl = await generateA4StickerSheet(chunk, {
       ...options,
+      pageIndex: p,
+      totalPages,
       onProgress: pageProgress,
     });
     pages.push(dataUrl);
@@ -357,6 +474,8 @@ export async function generateA4StickerSheetsPair(
       maxWidth: transparentW,
       maxHeight: transparentH,
       outputFormat: 'image/png',
+      pageIndex: p,
+      totalPages,
       onProgress: pageProgress,
     });
     transparentPages.push(transparentDataUrl);
@@ -376,6 +495,21 @@ export async function generateA4StickerSheetsPair(
         wctx.fillStyle = '#FFFFFF';
         wctx.fillRect(0, 0, canvasWidth, canvasHeight);
         wctx.drawImage(transparentImg, 0, 0, canvasWidth, canvasHeight);
+
+        // Draw Commercial Typography Banners for Home Printer / Pinterest ready
+        if (options.includeCommercialBanners !== false) {
+          const scaleRatio = canvasWidth / 2480;
+          drawCommercialBanners(
+            wctx,
+            canvasWidth,
+            canvasHeight,
+            scaleRatio,
+            options.title || '20+ CUTE DIGITAL STICKERS',
+            p,
+            totalPages
+          );
+        }
+
         whitePages.push(whiteCanvas.toDataURL('image/jpeg', 0.92));
       } else {
         whitePages.push(transparentDataUrl);
