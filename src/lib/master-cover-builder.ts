@@ -403,6 +403,18 @@ export async function createCompositeMasterCover(
     ribbonColor = '#E11D48'; // Vibrant rose-red ribbon banner
     ribbonFold = '#9F1239';
     ribbonOutline = '#4C0519';
+  } else if (subType === 'cozygamer' || optTitle.includes('cozygamer') || optTitle.includes('cozy-gamer') || optTitle.includes('게이머') || optTitle.includes('gamer')) {
+    seriesTitle = 'COZY GAMER';
+    titleColor = '#7C3AED'; // Pastel purple / lavender
+    ribbonColor = '#EC4899'; // Candy pink ribbon banner
+    ribbonFold = '#BE185D';
+    ribbonOutline = '#500724';
+  } else if (subType === 'magicjar' || optTitle.includes('magicjar') || optTitle.includes('magic-jar') || optTitle.includes('유리병') || optTitle.includes('포션') || optTitle.includes('potion')) {
+    seriesTitle = 'MINIATURE MAGIC JAR';
+    titleColor = '#0D9488'; // Mystical enchanted emerald teal
+    ribbonColor = '#7C3AED'; // Deep magical violet ribbon banner
+    ribbonFold = '#5B21B6';
+    ribbonOutline = '#2E1065';
   } else {
     // Pure English fallback: Strip Korean and special characters completely
     const cleanEn = (options.title || '').replace(/[^a-zA-Z\s]/g, ' ').replace(/\s+/g, ' ').trim();

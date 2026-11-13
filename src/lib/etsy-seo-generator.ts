@@ -286,6 +286,54 @@ const CATEGORY_SEO_DICT: Record<string, {
       '🍩 Perfect for GoodNotes planners, Cricut die-cut crafts, laptop stickers, and foodie bullet journaling'
     ]
   },
+  cozygamer: {
+    name: 'Cozy Gamer Girls & Desk Setup',
+    goldenBundleTitle: 'Cozy Gamer Digital Stickers, Cute Kawaii Gaming GoodNotes Sticker Pack, Pastel Desk Clipart, Switch Streamer Decals, Instant Download PNG',
+    themeTags: [
+      'cozy gamer stickers',
+      'pastel gaming clipart',
+      'kawaii gamer girl',
+      'cute switch decals',
+      'streamer sticker png',
+      'retro gameboy art',
+      'desk setup stickers'
+    ],
+    bundleKeywords: [
+      'Cozy Gamer Sticker Bundle',
+      'Kawaii Gaming Clipart PNG',
+      'Pastel Gamer Girl Decals'
+    ],
+    singleKeywords: ['Cozy Gamer Sticker', 'Kawaii Gaming Clipart', 'Pastel Gamer Decal PNG'],
+    descriptionHighlights: [
+      '🎮 Pastel cozy gamer aesthetics for girls & cozy gamers (Cat-ear Headset Otter, AFK Keyboard Kitten, Mini Arcade Hamster)',
+      '🌸 Warm pastel pink, mint, lavender Lo-Fi desk setup elements with witty gamer memes (Just 5 More Minutes, Low Battery, GG WP)',
+      '✨ Ideal for GoodNotes digital planners, Twitch/Discord emote decos, Cricut print-then-cut, and laptop stickers'
+    ]
+  },
+  magicjar: {
+    name: 'Miniature Magic Jar & Enchanted Worlds',
+    goldenBundleTitle: 'Miniature World in Jar Stickers, Cute Magic Potion Bottle GoodNotes Stickers, Fantasy Biome Clipart, Fairy Terrarium Decals, Instant Download PNG',
+    themeTags: [
+      'magic jar stickers',
+      'potion bottle clipart',
+      'miniature world art',
+      'fantasy terrarium',
+      'cute potion sticker',
+      'starlight bottle png',
+      'cottagecore magic'
+    ],
+    bundleKeywords: [
+      'Miniature Magic Jar Bundle',
+      'Magic Potion Sticker Pack',
+      'Enchanted Bottle Clipart PNG'
+    ],
+    singleKeywords: ['Magic Jar Sticker', 'Potion Bottle Clipart', 'Miniature Biome Decal PNG'],
+    descriptionHighlights: [
+      '🧪 Dreamy miniature worlds and enchanted biomes inside 3D crystal glass jars & magical potion bottles',
+      '✨ Whimsical glowing fantasy scenes (Midnight Star Bear, Sakura Perfume Fawn, Cotton Cloud Flying Duckling, Starlight Otter)',
+      '🌿 Perfect for bullet journals, witchy/cottagecore planners, Cricut die-cuts, and water bottle decals'
+    ]
+  },
   socialbattery: {
     name: 'Introvert & Social Battery Humor',
     goldenBundleTitle: 'Introvert Digital Stickers, Low Social Battery GoodNotes Stickers, Funny Mood Badge Clipart, Sarcastic Meme Decal Pack, Instant Download PNG',

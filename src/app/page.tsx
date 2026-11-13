@@ -29,6 +29,8 @@ import {
   DEEPSEA_20_SERIES,
   DESSERT_20_SERIES,
   FOODIMAL_20_SERIES,
+  COZY_GAMER_20_SERIES,
+  MAGIC_JAR_20_SERIES,
   SOCIAL_BATTERY_20_SERIES,
   HANGUL_20_SERIES,
   SEASONAL_RECOMMENDATIONS,
@@ -193,9 +195,13 @@ const getDesignCategoryKey = (d: any): string => {
   if (presetId.includes('terrarium')) return 'terrarium';
   if (presetId.includes('booktok') || presetId.includes('reading')) return 'booktok';
   if (presetId.includes('foodimal') || presetId.includes('food-animal')) return 'foodimal';
+  if (presetId.includes('cozy-gamer') || presetId.includes('cozygamer')) return 'cozygamer';
+  if (presetId.includes('magic-jar') || presetId.includes('magicjar')) return 'magicjar';
 
   const title = (d.title || d.topic || '').toLowerCase();
   if (title.includes('푸디멀') || title.includes('음식 동물') || title.includes('foodimal')) return 'foodimal';
+  if (title.includes('코지 게이머') || title.includes('cozygamer') || title.includes('cozy gamer') || title.includes('게이머')) return 'cozygamer';
+  if (title.includes('마법 유리병') || title.includes('유리병') || title.includes('magicjar') || title.includes('magic jar') || title.includes('포션')) return 'magicjar';
   if (title.includes('이모트') || title.includes('emote')) return 'axolotlemote';
   if (title.includes('새해') || title.includes('신년') || title.includes('new year') || title.includes('newyear')) return 'newyear';
   if (title.includes('우파루파') || title.includes('axolotl')) return 'axolotl';
@@ -221,6 +227,8 @@ const getDesignCategoryKey = (d: any): string => {
 
 const getStickerSeriesTitle = (tab: string) => {
   if (tab.startsWith('foodimal20')) return '🍓 푸디멀 & 카와이 음식 동물 20종 스티커 팩';
+  if (tab.startsWith('cozygamer20')) return '🎮 코지 파스텔 게이머 20종 스티커 팩';
+  if (tab.startsWith('magicjar20')) return '🧪 미니어처 유리병 & 마법 포션 20종 스티커 팩';
   if (tab.startsWith('axolotlemote20')) return '🌸 아기 우파루파 20종 이모트 & 리액션 팩';
   if (tab.startsWith('axolotl20')) return '🌸 아기 우파루파 & 아쿠아 프렌즈 20종 스티커 팩';
   if (tab.startsWith('deepsea20')) return '🌊 신비로운 심해 발광 생물 20종 스티커 팩';
@@ -245,6 +253,8 @@ const getStickerSeriesTitle = (tab: string) => {
 
 const getPresetSeriesList = (tab: string): StickerPreset[] => {
   if (tab === 'foodimal20') return FOODIMAL_20_SERIES;
+  if (tab === 'cozygamer20') return COZY_GAMER_20_SERIES;
+  if (tab === 'magicjar20') return MAGIC_JAR_20_SERIES;
   if (tab === 'axolotlemote20') return AXOLOTL_EMOTES_20_SERIES;
   if (tab === 'axolotl20') return AXOLOTL_20_SERIES;
   if (tab === 'deepsea20') return DEEPSEA_20_SERIES;
@@ -359,6 +369,12 @@ export const getPackPresetsInfo = (coverDesign: any): PackPresetsInfo => {
   }
   if (categoryKey === 'foodimal' || allText.includes('foodimal') || allText.includes('푸디멀') || allText.includes('음식동물')) {
     return { themeKey: 'foodimal', isSingleSeries20Theme: true, vesselSeries: FOODIMAL_20_SERIES, standaloneSeries: null };
+  }
+  if (categoryKey === 'cozygamer' || allText.includes('cozygamer') || allText.includes('cozy-gamer') || allText.includes('게이머') || allText.includes('gamer')) {
+    return { themeKey: 'cozygamer', isSingleSeries20Theme: true, vesselSeries: COZY_GAMER_20_SERIES, standaloneSeries: null };
+  }
+  if (categoryKey === 'magicjar' || allText.includes('magicjar') || allText.includes('magic-jar') || allText.includes('유리병') || allText.includes('magic jar') || allText.includes('potion')) {
+    return { themeKey: 'magicjar', isSingleSeries20Theme: true, vesselSeries: MAGIC_JAR_20_SERIES, standaloneSeries: null };
   }
 
   // 2. Dual-series themes (can be 40-pack with vessel + standalone, or 20-pack)
@@ -672,6 +688,8 @@ export default function Home() {
   const [stickerSubCounts, setStickerSubCounts] = useState<Record<string, number>>({
     all: 0,
     foodimal: 0,
+    cozygamer: 0,
+    magicjar: 0,
     axolotl: 0,
     deepsea: 0,
     dessert: 0,
@@ -729,6 +747,8 @@ export default function Home() {
   const [isPresetGridExpanded, setIsPresetGridExpanded] = useState(false); // Collapsed by default
   const [selectedStickerSeriesTab, setSelectedStickerSeriesTab] = useState<
     | 'foodimal20'
+    | 'cozygamer20'
+    | 'magicjar20'
     | 'axolotlemote20'
     | 'axolotl20'
     | 'deepsea20'
@@ -1642,7 +1662,7 @@ export default function Home() {
             return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
           });
 
-          const is20Theme = ['foodimal', 'booktok', 'dessert', 'socialbattery', 'hangul'].includes(coverCategory);
+          const is20Theme = ['foodimal', 'cozygamer', 'magicjar', 'booktok', 'dessert', 'socialbattery', 'hangul'].includes(coverCategory);
           const maxItems = !is20Theme && ((coverDesign.title || '').includes('40종') || matched.length >= 35) ? 40 : 20;
           const finalItems = matched.slice(0, maxItems);
           finalItems.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
@@ -3808,6 +3828,12 @@ export default function Home() {
     if (currentTab === 'foodimal20') {
       bundleName = 'Kawaii_Foodimal_20_Stickers_Bundle';
       seriesTitle = '[푸디멀 & 카와이 음식 동물 (20종)]';
+    } else if (currentTab === 'cozygamer20') {
+      bundleName = 'Cozy_Gamer_20_Stickers_Bundle';
+      seriesTitle = '[코지 파스텔 게이머 (20종)]';
+    } else if (currentTab === 'magicjar20') {
+      bundleName = 'Miniature_Magic_Jar_20_Stickers_Bundle';
+      seriesTitle = '[미니어처 유리병 & 마법 포션 (20종)]';
     } else if (currentTab === 'axolotlemote20') {
       bundleName = 'Axolotl_Emotes_20_Bundle';
       seriesTitle = '[아기 우파루파 20종 이모트 & 리액션 팩 (20종)]';
@@ -3872,6 +3898,10 @@ export default function Home() {
 
         if (currentTab === 'foodimal20') {
           return sub === 'foodimal' || presetId.startsWith('foodimal') || textToScan.includes('foodimal') || textToScan.includes('푸디멀') || textToScan.includes('음식동물');
+        } else if (currentTab === 'cozygamer20') {
+          return sub === 'cozygamer' || presetId.startsWith('cozy-gamer') || presetId.startsWith('cozygamer') || textToScan.includes('cozygamer') || textToScan.includes('게이머') || textToScan.includes('gamer');
+        } else if (currentTab === 'magicjar20') {
+          return sub === 'magicjar' || presetId.startsWith('magic-jar') || presetId.startsWith('magicjar') || textToScan.includes('magicjar') || textToScan.includes('유리병') || textToScan.includes('포션');
         } else if (currentTab === 'axolotlemote20') {
           return sub === 'axolotlemote' || presetId.startsWith('axolotl-emote') || textToScan.includes('이모트') || textToScan.includes('emote');
         } else if (currentTab === 'axolotl20') {
@@ -4043,6 +4073,16 @@ export default function Home() {
       targetStandalonePresets = FOODIMAL_20_SERIES;
       packName = '[푸디멀 & 카와이 음식 동물 20종 스티커 팩]';
       subKey = 'foodimal';
+    } else if (baseType.startsWith('cozygamer')) {
+      targetPresets = COZY_GAMER_20_SERIES;
+      targetStandalonePresets = COZY_GAMER_20_SERIES;
+      packName = '[코지 파스텔 게이머 20종 스티커 팩]';
+      subKey = 'cozygamer';
+    } else if (baseType.startsWith('magicjar')) {
+      targetPresets = MAGIC_JAR_20_SERIES;
+      targetStandalonePresets = MAGIC_JAR_20_SERIES;
+      packName = '[미니어처 유리병 & 마법 포션 20종 스티커 팩]';
+      subKey = 'magicjar';
     } else if (baseType.startsWith('axolotlemote')) {
       targetPresets = AXOLOTL_EMOTES_20_SERIES;
       targetStandalonePresets = AXOLOTL_EMOTES_20_SERIES;
@@ -5361,7 +5401,7 @@ export default function Home() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center gap-2">
-                    {!['foodimal20', 'axolotlemote20', 'axolotl20', 'deepsea20', 'dessert20', 'socialbattery20', 'hangul20', 'booktok20'].includes(selectedStickerSeriesTab) && (
+                    {!['foodimal20', 'cozygamer20', 'magicjar20', 'axolotlemote20', 'axolotl20', 'deepsea20', 'dessert20', 'socialbattery20', 'hangul20', 'booktok20'].includes(selectedStickerSeriesTab) && (
                       <button
                         onClick={() => handleBatchGenerateSeries(`${selectedStickerSeriesTab}_both`)}
                         disabled={isBatchGenerating}
@@ -5435,6 +5475,8 @@ export default function Home() {
                   >
                     <optgroup label="🌟 신규 인기 틈새 테마 (NEW)">
                       <option value="foodimal20">🍓 푸디멀 & 카와이 음식 동물 20종 (차별화 1위)</option>
+                      <option value="cozygamer20">🎮 코지 파스텔 게이머 20종 (차별화 2위)</option>
+                      <option value="magicjar20">🧪 미니어처 유리병 & 마법 포션 20종 (차별화 3위)</option>
                       <option value="axolotlemote20">🌸 아기 우파루파 20종 이모트 팩 (단일 캐릭터 표정/리액션)</option>
                       <option value="axolotl20">🌸 아기 우파루파 & 아쿠아 프렌즈 20종 (단독)</option>
                       <option value="deepsea20">🌊 신비로운 심해 발광 생물 20종 (단독)</option>
@@ -5653,6 +5695,8 @@ export default function Home() {
                   <option value="all">🌐 전체 테마 보기 (총 {stickerSubCounts.all || stickerCount}장)</option>
                   <optgroup label="🌟 신규 인기 틈새 테마">
                     <option value="foodimal">🍓 푸디멀 & 카와이 음식 동물 ({stickerSubCounts.foodimal || 0}장)</option>
+                    <option value="cozygamer">🎮 코지 파스텔 게이머 ({stickerSubCounts.cozygamer || 0}장)</option>
+                    <option value="magicjar">🧪 미니어처 유리병 & 마법 포션 ({stickerSubCounts.magicjar || 0}장)</option>
                     <option value="axolotl">🌸 아기 우파루파 & 아쿠아 프렌즈 ({stickerSubCounts.axolotl || 0}장)</option>
                     <option value="deepsea">🌊 신비로운 심해 발광 생물 ({stickerSubCounts.deepsea || 0}장)</option>
                     <option value="dessert">🥞 미국 유행 디저트 & 베이커리 ({stickerSubCounts.dessert || 0}장)</option>

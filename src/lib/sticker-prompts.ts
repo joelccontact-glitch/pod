@@ -1978,6 +1978,316 @@ STRICT NO GLASS TANKS: Pure standalone adorable kawaii food-animal hybrid creatu
   }) as unknown as StickerPreset[]
 ];
 
+export const COZY_GAMER_20_SERIES: StickerPreset[] = [
+  {
+    id: 'cozy-gamer-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 코지 파스텔 게이머 20종 스티커 팩 대표 커버 표지',
+    animal: 'Cozy Pastel Gamer Cover',
+    animalValue: '',
+    affinityObject: 'Cozy Pastel Gamer Cover',
+    theme: 'Cozy Gamer 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 코지 파스텔 게이머 & 데스크셋업 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF).
+CENTERED TITLE (MUST REMAIN CLEAR & UNOBSTRUCTED): Centered cute bold pastel lavender and candy-pink script typography reading "20+ CUTE COZY GAMER STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish pastel teal ribbon banner. CRITICAL: The central title and banner MUST remain completely unobstructed, open, and clearly legible with an ample margin around it—NO stickers encroaching, touching, or overlapping the text.
+STICKER ARRANGEMENT (DENSE YET NEATLY SEPARATED): A richly packed collage of 18-20 unique standalone die-cut sticker samples filling the perimeter of the canvas around the center title with minimal empty white gaps. CRITICAL NO OVERLAPPING: Individual stickers MUST NOT overlap, collide, or clip one another. Each sticker is completely isolated and neatly placed side-by-side with its own distinct thick crisp white die-cut border. STRICT NO DUPLICATES: Every single sticker is 100% unique in animal gamer character, gaming gear, and pastel desk prop with zero repetition.
+FEATURED UNIQUE STICKERS: cat-ear headset otter with switch, mini retro arcade hamster, mechanical keyboard sleeping kitten, 8-bit gameboy bunny, boba gamer shiba inu, low battery panda, lilac controller fox, snack munching gamer raccoon, VR goggles penguin, quest complete corgi, fully charged coffee ferret, gaming chair teddy bear, RGB ringlight streamer seal, game cartridge chipmunk, pixel heart red panda, sleep mode hedgehog, lo-fi wireless lamb, switch pouch puppy, save point crystal fawn, and boss raid pink axolotl.
+STRICT NO GLASS TANKS: Pure standalone adorable kawaii cozy pastel gamer animal characters ONLY. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      {
+        name: '고양이 귀 헤드셋 수달 (Headset Otter)',
+        desc: '핑크 캣이어 헤드폰을 끼고 닌텐도 스위치에 몰입한 아기 수달 스티커',
+        phrase: 'Just 5 More Minutes',
+        detail: 'standalone adorable baby river otter wearing pastel pink cat-ear gaming headphones, holding a mint-green handheld gaming console with tiny paws, sitting comfortably on a fluffy cloud cushion'
+      },
+      {
+        name: '미니 아케이드 게임기 햄스터 (Arcade Hamster)',
+        desc: '라벤더색 미니 레트로 아케이드 게임기 속에서 조이스틱을 흔드는 햄스터 스티커',
+        phrase: 'Level Up!',
+        detail: 'standalone chubby baby hamster operating a miniature pastel lavender retro arcade cabinet machine with a pink joystick and sparkly buttons, its cheeks full and eyes sparkling'
+      },
+      {
+        name: '기계식 키보드 위 낮잠 고양이 (Keyboard Kitten)',
+        desc: '무지개빛 파스텔 기계식 키보드 위에 엎드려 곤히 잠든 아기 삼색 고양이 스티커',
+        phrase: 'AFK - Sleeping',
+        detail: 'standalone fluffy sleeping baby calico kitten curled up over the pastel candy-colored keycaps of a glowing mechanical keyboard, with a tiny pixel heart icon floating above'
+      },
+      {
+        name: '도트 레트로 게임보이 토끼 (Retro Gameboy Bunny)',
+        desc: '8비트 레트로 게임보이를 안고 귀를 쫑긋 세운 아기 토끼 스티커',
+        phrase: 'Press Start',
+        detail: 'standalone sweet baby bunny with floppy ears happily hugging a pastel yellow retro 8-bit handheld console, heart-shaped pixel screen glowing gently'
+      },
+      {
+        name: '버블티 & 게이머 시바견 (Boba Gamer Shiba)',
+        desc: '후드티를 입고 타로 버블티와 하트 마우스패드 옆에 누운 시바견 스티커',
+        phrase: 'Cozy Gaming Zone',
+        detail: 'standalone cute round Shiba Inu puppy wearing a cozy gamer hoodie, holding a pastel taro boba milk tea with straw next to a heart-shaped gaming mouse pad'
+      },
+      {
+        name: '배터리 1칸 탈진 판다 (Low Battery Panda)',
+        desc: '게이밍 의자 팔걸이에 축 늘어진 머리 위 배터리 1칸이 깜빡이는 아기 판다 스티커',
+        phrase: 'Low Battery',
+        detail: 'standalone chubby baby giant panda draped lazily over a gaming chair armrest, a glowing pastel pink battery icon with just 1 blinking red bar above its head'
+      },
+      {
+        name: '별빛 무선 패드 아기 여우 (Controller Fox)',
+        desc: '라일락색 무선 게임 컨트롤러에 턱을 괴고 낮잠 자는 아기 붉은 여우 스티커',
+        phrase: 'Sleep Game Repeat',
+        detail: 'standalone sleeping curled-up baby fox resting its chin on a cute pastel lilac wireless game controller with star-shaped joystick grips'
+      },
+      {
+        name: '스낵 먹방 라쿤 게이머 (Gamer Snack Raccoon)',
+        desc: '게이밍 헤드셋을 끼고 무지개 별 감자칩을 먹는 아기 라쿤 스티커',
+        phrase: 'Snack & Win',
+        detail: 'standalone cute baby raccoon wearing a gaming headset, happily munching on starry rainbow potato chips from a pastel snack bag while staring intently at a screen'
+      },
+      {
+        name: 'VR 고글 쓴 아기 펭귄 (VR Penguin)',
+        desc: '커다란 핑크 VR 헤드셋을 쓰고 두 날개를 파닥이는 아기 펭귄 스티커',
+        phrase: 'Virtual Cutie',
+        detail: 'standalone round baby penguin wearing oversized pastel pink VR goggles, flapping its tiny wings excitedly with pixel confetti and sparkles in the air'
+      },
+      {
+        name: '퀘스트 완료 아기 코기 (Quest Complete Corgi)',
+        desc: '황금 픽셀 왕관을 쓰고 경험치 상자를 열어 환호하는 웰시코기 스티커',
+        phrase: 'Quest Complete!',
+        detail: 'standalone joyful baby Corgi puppy jumping with paws up, wearing a golden pixel crown, a pastel RPG text box above reading "EXP +9999"'
+      },
+      {
+        name: '카페인 충전 아기 페럿 (Coffee Powered Ferret)',
+        desc: '픽셀 커피 스티커가 붙은 게이머 텀블러를 감싸 쥔 초롱초롱한 아기 페럿 스티커',
+        phrase: 'Fully Charged',
+        detail: 'standalone energetic slender baby ferret coiled around an oversized pastel gamer thermos mug with pixel coffee bean stickers, glowing with cute energy sparks'
+      },
+      {
+        name: '핑크 게이밍 의자 아기 곰 (Gaming Chair Bear)',
+        desc: '토끼 귀 쿠션이 달린 핑크 게이밍 체어에 쏙 안겨 컨트롤러를 쥔 아기 곰 스티커',
+        phrase: 'Game Day',
+        detail: 'standalone cuddly baby teddy bear sitting snug inside an oversized pastel pink ergonomic gaming chair with fluffy bunny-ear lumbar pillow, holding a tiny controller'
+      },
+      {
+        name: 'RGB 링라이트 스트리머 물개 (Streamer Seal)',
+        desc: '무지개빛 RGB 조명과 스트리밍 마이크 앞에서 애교 부리는 아기 하프물개 스티커',
+        phrase: 'Live Now!',
+        detail: 'standalone smooth white baby harp seal pup posing adorably in front of a glowing rainbow pastel RGB ring light and cute podcast microphone'
+      },
+      {
+        name: '게임 팩 안은 아기 다람쥐 (Cartridge Chipmunk)',
+        desc: '도토리 대신 거대한 빈티지 파스텔 게임 팩 카트리지를 품에 안은 아기 다람쥐 스티커',
+        phrase: 'Retro Lover',
+        detail: 'standalone chubby baby chipmunk hugging a giant vintage pastel game cartridge like an acorn, little tail swishing happily'
+      },
+      {
+        name: '픽셀 하트 아기 레서판다 (Pixel Heart Red Panda)',
+        desc: '두 발로 반짝이는 루비 픽셀 하트를 번쩍 든 볼 빨간 아기 레서판다 스티커',
+        phrase: 'Player 2',
+        detail: 'standalone adorable red panda holding up a glowing 8-bit retro pixelated ruby heart with both paws, blushing sweetly'
+      },
+      {
+        name: '슬립모드 마우스패드 고슴도치 (Sleep Mode Hedgehog)',
+        desc: '은은한 네온 마우스패드 위에서 둥글게 공처럼 말려 잠든 아기 고슴도치 스티커',
+        phrase: 'Sleep Mode',
+        detail: 'standalone tiny baby hedgehog curled into a complete round ball on top of a soft pastel glowing mousepad, tiny "Zzz" pixel letters drifting up'
+      },
+      {
+        name: '로파이 이어폰 아기 양 (Lo-Fi Lamb)',
+        desc: '파스텔 이어폰을 꽂고 눈을 지그시 감은 뽀송뽀송한 아기 양 스티커',
+        phrase: 'Lo-Fi Vibez',
+        detail: 'standalone fluffy baby lamb wearing pastel rainbow wireless in-ear buds with starry antenna, listening to lo-fi chillhop beats with half-closed eyes'
+      },
+      {
+        name: '스위치 파우치 속 아기 리트리버 (Switch Pouch Puppy)',
+        desc: '조이콘이 달린 퀼팅 스위치 휴대용 파우치 속에서 쏙 고개 내민 골든리트리버 스티커',
+        phrase: 'Ready to Play',
+        detail: 'standalone golden retriever puppy peeking out from an open pastel quilted switch travel case with pastel joy-cons attached'
+      },
+      {
+        name: '세이브포인트 아기 사슴 (Save Point Fawn)',
+        desc: '빛나는 픽셀 수정 세이브포인트 옆에 온화하게 엎드린 아기 꽃사슴 스티커',
+        phrase: 'Save Your Game',
+        detail: 'standalone gentle baby fawn lying next to a glowing crystalline pixel save-point crystal that radiates pastel golden sparkle dust'
+      },
+      {
+        name: '보스 레이드 아기 우파루파 (Boss Raid Axolotl)',
+        desc: '미니 게이밍 헤드셋을 끼고 별빛 요술봉으로 최종 보스를 공략하는 핑크 우파루파 스티커',
+        phrase: 'GG WP!',
+        detail: 'standalone cheerful pink baby axolotl holding a tiny glowing pastel star wand and wearing a mini gamer headset with frilly gills fluttering'
+      }
+    ][i];
+
+    return {
+      id: `cozy-gamer-20-pack-${num}`,
+      name: `🎮 [코지 게이머 ${num}/20] ${items.name}`,
+      animal: 'Cozy Pastel Gamer 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Cozy Gamer 20 Pack',
+      phrase: items.phrase,
+      description: items.desc,
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    };
+  }) as unknown as StickerPreset[]
+];
+
+export const MAGIC_JAR_20_SERIES: StickerPreset[] = [
+  {
+    id: 'magic-jar-20-pack-cover',
+    name: '🖼️ [마스터 썸네일] 미니어처 유리병 & 마법 포션 20종 스티커 팩 대표 커버 표지',
+    animal: 'Miniature Magic Jar Cover',
+    animalValue: '',
+    affinityObject: 'Miniature Magic Jar Cover',
+    theme: 'Magic Jar 20 Pack Cover',
+    phrase: '',
+    description: 'Etsy 판매용 20종 미니어처 유리병 & 마법 포션 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
+    prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF).
+CENTERED TITLE (MUST REMAIN CLEAR & UNOBSTRUCTED): Centered cute bold emerald and magical gold script typography reading "20+ MINIATURE MAGIC JAR STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish deep starry purple ribbon banner. CRITICAL: The central title and banner MUST remain completely unobstructed, open, and clearly legible with an ample margin around it—NO stickers encroaching, touching, or overlapping the text.
+STICKER ARRANGEMENT (DENSE YET NEATLY SEPARATED): A richly packed collage of 18-20 unique standalone die-cut sticker samples filling the perimeter of the canvas around the center title with minimal empty white gaps. CRITICAL NO OVERLAPPING: Individual stickers MUST NOT overlap, collide, or clip one another. Each sticker is completely isolated and neatly placed side-by-side with its own distinct thick crisp white die-cut border. STRICT NO DUPLICATES: Every single sticker is 100% unique in glass bottle shape, miniature biome, and enchanted animal with zero repetition.
+FEATURED UNIQUE STICKERS: midnight star bear cork jar, sakura perfume fawn bottle, cotton cloud duckling flask, star candy bunny preserve jar, aurora starlight otter teardrop flask, dewdrop pond frog orb, enchanted forest squirrel jar, sunset ocean penguin bottle, galaxy potion kitten flask, desert oasis fennec jar, sweet honey elixir bear pot, hydrangea hamster cloche dome, crystal geode hedgehog flask, dandelion wish puppy medicine bottle, snowy winter pine arctic fox jar, rainbow prism panda flask, autumn harvest raccoon jar, seashell pearl seal bottle, firefly lantern red panda jar, and mystic bioluminescent axolotl potion bottle.
+STRICT STANDALONE ENCHANTED GLASS CONTAINERS: 3D clear glass containers with hyper-realistic glass refraction, glossy highlights, and transparent reflections on a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
+  },
+  ...Array.from({ length: 20 }, (_, i) => {
+    const num = i + 1;
+    const items = [
+      {
+        name: '코르크 밤하늘 별낚시 흑곰 (Midnight Star Bear Jar)',
+        desc: '코르크 마개 유리병 속 초승달과 별을 낚는 아기 흑곰 스티커',
+        phrase: 'Catching Dreams',
+        detail: 'standalone vintage round corked clear glass apothecary bottle containing a glowing crescent moon, deep indigo starry night sky, and a tiny baby black bear fishing for glowing stars with a golden rod'
+      },
+      {
+        name: '앤틱 벚꽃 향수병 아기 사슴 (Sakura Perfume Fawn)',
+        desc: '향수병 속 피어난 분홍 벚꽃 나무 아래 낮잠 자는 아기 꽃사슴 스티커',
+        phrase: 'Pure Magic',
+        detail: 'standalone ornate faceted clear crystal perfume bottle with golden atomizer, containing a blooming miniature pink cherry blossom tree and a tiny spotted baby fawn resting on petal moss'
+      },
+      {
+        name: '솜사탕 구름 비행 오리 (Cotton Cloud Duckling Jar)',
+        desc: '물약 플라스크 속 몽글몽글 구름 위를 비행하는 아기 오리 스티커',
+        phrase: 'Cloud Nine',
+        detail: 'standalone magical clear potion flask filled with fluffy pastel pink and blue cotton candy clouds, with a tiny yellow baby duckling wearing pilot goggles flying happily inside'
+      },
+      {
+        name: '별사탕 잼 병 잠자는 토끼 (Star Candy Bunny Jar)',
+        desc: '육각 유리 잼 병 속 알록달록 별사탕에 파묻혀 잠든 아기 토끼 스티커',
+        phrase: 'Sweet Dreams',
+        detail: 'standalone hexagonal clear glass preserve jam jar with a pastel ribbon tie, filled with colorful pastel star candies (konpeito) and a fluffy white baby bunny sleeping soundly in the center'
+      },
+      {
+        name: '오로라 플라스크 아기 해달 (Aurora Starlight Otter)',
+        desc: '에메랄드와 보랏빛 오로라가 찰랑이는 물방울 플라스크 속 아기 해달 스티커',
+        phrase: 'Starlight Wish',
+        detail: 'standalone teardrop glass alchemical flask filled with swirling ethereal emerald and violet aurora borealis liquid, where a baby river otter floats on its back hugging a glowing star pearl'
+      },
+      {
+        name: '물방울 연못 청개구리 (Dewdrop Pond Frog Jar)',
+        desc: '둥근 유리 어항 속 수련 잎에 앉아 미소 짓는 아기 청개구리 스티커',
+        phrase: 'Tiny Oasis',
+        detail: 'standalone spherical dewdrop glass terrarium jar with tiny water lily pads, a blooming pink lotus, and a tiny smiling green tree frog perched above the calm water'
+      },
+      {
+        name: '비밀의 숲 이끼 병 다람쥐 (Enchanted Forest Squirrel Jar)',
+        desc: '원통형 코르크 병 속 발광 버섯과 황금 도토리를 쥔 아기 다람쥐 스티커',
+        phrase: 'Enchanted Forest',
+        detail: 'standalone tall cylindrical corked glass specimen jar showcasing a lush miniature mossy forest floor with glowing fairy mushrooms and an adorable baby squirrel holding a golden acorn'
+      },
+      {
+        name: '노을 바다 코르크 병 펭귄 (Sunset Ocean Penguin Jar)',
+        desc: '노을빛 투톤 바다와 미니 빙하 위를 미끄러지는 아기 펭귄 스티커',
+        phrase: 'Ocean Magic',
+        detail: 'standalone wide-bellied clear glass cork bottle holding layered sunset-orange and twilight-blue ocean waves, with a tiny baby penguin sliding across a miniature floating ice crystal'
+      },
+      {
+        name: '은하수 하트 포션 아기 고양이 (Galaxy Potion Kitten)',
+        desc: '보랏빛 성운과 별빛 먼지가 소용돌이치는 하트 물약병 속 흰 아기 고양이 스티커',
+        phrase: 'Cosmic Purr',
+        detail: 'standalone heart-shaped glass potion bottle glowing with swirling purple cosmic galaxy dust and nebula clouds, with a tiny white kitten batting at a floating starlight ring'
+      },
+      {
+        name: '사막 오아시스 다이아몬드 병 사막여우 (Desert Oasis Fennec Jar)',
+        desc: '다이아몬드 컷팅 유리병 속 따스한 모래언덕과 아기 사막여우 스티커',
+        phrase: 'Warm & Cozy',
+        detail: 'standalone diamond-faceted glass terrarium jar with pastel desert dunes, blooming pink mini succulents, and a sweet baby fennec fox with big ears basking under a miniature warm crystal sun'
+      },
+      {
+        name: '황금 꿀단지 아기 불곰 (Honey Elixir Bear Jar)',
+        desc: '투명 꿀단지 속 빛나는 마법 벌꿀과 허니디퍼를 안은 아기 곰 스티커',
+        phrase: 'Sweet Elixir',
+        detail: 'standalone vintage honey pot glass jar filled with translucent golden glowing magical honey and honeycomb dripping with light, where a baby brown bear happily hugs a honey dipper'
+      },
+      {
+        name: '수국 온실 벨 자 햄스터 (Hydrangea Hamster Cloche)',
+        desc: '유리 돔 갓 속 수국 꽃밭과 찻잔에 앉은 아기 햄스터 스티커',
+        phrase: 'Flower Whisper',
+        detail: 'standalone elegant clear glass cloche bell dome on a wooden base, enclosing pastel blue and purple hydrangea blossoms with a tiny hamster sitting on a miniature teacup'
+      },
+      {
+        name: '자수정 지오드 병 고슴도치 (Crystal Geode Hedgehog Jar)',
+        desc: '보라색 자수정 원석으로 덮인 유리병 속 벨벳 이끼에 누운 아기 고슴도치 스티커',
+        phrase: 'Shimmer & Shine',
+        detail: 'standalone raw crystal-topped clear glass flask with shimmering purple amethyst crystal clusters inside, where a cute baby hedgehog rests on a bed of velvet moss'
+      },
+      {
+        name: '민들레 홀씨 요정 병 강아지 (Dandelion Wish Puppy Jar)',
+        desc: '앤틱 유리 약병 속 둥둥 떠다니는 반짝이는 민들레 홀씨를 바라보는 강아지 스티커',
+        phrase: 'Make a Wish',
+        detail: 'standalone slender antique medicine bottle containing glowing dandelion wish seeds floating in gentle air, with a tiny golden retriever puppy looking up in pure wonder'
+      },
+      {
+        name: '겨울 스노우글로브 병 북극여우 (Snowy Pine Arctic Fox Jar)',
+        desc: '눈 덮인 소나무와 흩날리는 눈송이 병 속에서 웅크려 자는 북극여우 스티커',
+        phrase: 'Winter Whisper',
+        detail: 'standalone snowglobe-style clear glass orb jar with frosted pine branches, gentle falling snow sparkles, and a sleeping baby arctic fox wrapped in its fluffy tail'
+      },
+      {
+        name: '무지개 프리즘 물약 병 판다 (Rainbow Prism Panda Flask)',
+        desc: '빛을 프리즘 무지개로 굴절시키는 플라스크 속 비눗방울과 아기 판다 스티커',
+        phrase: 'Rainbow Wonders',
+        detail: 'standalone geometric prism glass potion bottle refracting brilliant pastel rainbow light rays, with a chubby baby giant panda playing with floating rainbow soap bubbles'
+      },
+      {
+        name: '가을 단풍 호박 병 너구리 (Autumn Harvest Raccoon Jar)',
+        desc: '단풍잎과 미니 호박 뒤에서 빼끔 고개를 내민 아기 라쿤 스티커',
+        phrase: 'Golden Autumn',
+        detail: 'standalone vintage apothecary cork jar filled with miniature golden maple leaves, tiny acorns, and a cute baby raccoon peeking from behind a mini orange pumpkin'
+      },
+      {
+        name: '바다 조개 진주 병 물개 (Seashell Pearl Seal Jar)',
+        desc: '하얀 모래와 오색 조개 속 진주 옆에 누워 웃는 아기 하프물개 스티커',
+        phrase: 'Hidden Treasure',
+        detail: 'standalone clear glass nautical message bottle with fine white beach sand, sea glass pebbles, and a smiling baby seal pup resting beside an open iridescent oyster shell with a glowing pearl'
+      },
+      {
+        name: '반딧불 램프 병 레서판다 (Firefly Lantern Red Panda Jar)',
+        desc: '황금빛 반딧불이들이 춤추는 유리 랜턴 병 속 대나무 가지를 쥔 레서판다 스티커',
+        phrase: 'Light the Way',
+        detail: 'standalone antique lantern-shaped glass jar filled with softly glowing warm golden fireflies, where a baby red panda clings to a miniature bamboo branch inside'
+      },
+      {
+        name: '신비의 우파루파 포션 병 (Mystic Water Axolotl Flask)',
+        desc: '발광 핑크빛 물과 별빛 거품 속에서 방긋 웃는 아기 우파루파 포션 스티커',
+        phrase: 'Pure Serenity',
+        detail: 'standalone ornate alchemical potion bottle filled with crystalline pink bioluminescent water, floating waterweed, and a cheerful smiling pink baby axolotl blowing glowing bubbles'
+      }
+    ][i];
+
+    return {
+      id: `magic-jar-20-pack-${num}`,
+      name: `🧪 [마법 유리병 ${num}/20] ${items.name}`,
+      animal: 'Miniature Magic Jar 20 Pack',
+      animalValue: '',
+      affinityObject: items.name,
+      theme: 'Magic Jar 20 Pack',
+      phrase: items.phrase,
+      description: items.desc,
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+    };
+  }) as unknown as StickerPreset[]
+];
+
 export function buildStickerPrompt(
   animalName: string,
   affinityObject: string,

@@ -10,7 +10,10 @@ const DEFAULT_STATS = {
   podCount: 15,
   stickerCount: 480,
   stickerSubCounts: {
-    all: 480,
+    all: 540,
+    foodimal: 20,
+    cozygamer: 20,
+    magicjar: 20,
     axolotl: 20,
     deepsea: 20,
     dessert: 20,
