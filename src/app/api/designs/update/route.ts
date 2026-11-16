@@ -1,6 +1,7 @@
 import { db } from '@/lib/firebase-admin';
 import { NextResponse } from 'next/server';
 import { updateCachedDesign } from '../route';
+import { clearImageCache } from '../image/route';
 
 export async function POST(req: Request) {
   try {
@@ -18,6 +19,7 @@ export async function POST(req: Request) {
       // (prevents busting browser image cache for pure metadata/title/tag updates!)
       if (updates.image_url || updates.forceTimestamp) {
         payload.updated_at = new Date().toISOString();
+        clearImageCache(id);
       }
 
       await designRef.set(payload, { merge: true });

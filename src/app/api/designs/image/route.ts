@@ -50,14 +50,21 @@ const MAX_CACHE_ITEMS = 1500;
 export function clearImageCache(id?: string) {
   if (id) {
     inMemoryImageCache.delete(id);
-    for (const key of inMemoryImageCache.keys()) {
-      if (key.startsWith(id)) {
+    for (const key of Array.from(inMemoryImageCache.keys())) {
+      if (key === id || key.startsWith(`${id}_`)) {
         inMemoryImageCache.delete(key);
       }
     }
     try {
-      const p = getDiskImagePath(id);
-      if (fs.existsSync(p)) fs.unlinkSync(p);
+      const safePrefix = id.replace(/[^a-zA-Z0-9_\-]/g, '_');
+      if (fs.existsSync(DISK_IMG_DIR)) {
+        const files = fs.readdirSync(DISK_IMG_DIR);
+        for (const file of files) {
+          if (file === `${safePrefix}.dat` || file.startsWith(`${safePrefix}_`)) {
+            try { fs.unlinkSync(path.join(DISK_IMG_DIR, file)); } catch {}
+          }
+        }
+      }
     } catch {}
   } else {
     inMemoryImageCache.clear();
@@ -109,7 +116,9 @@ export async function GET(request: Request) {
 
     // 1. Check in-memory RAM cache first (0 Firestore reads!)
     if (!nocache) {
-      const cached = inMemoryImageCache.get(cacheKey) || inMemoryImageCache.get(baseKey);
+      // If version timestamp v is specified, ONLY accept the exact version key.
+      // NEVER fall back to unversioned baseKey, which may hold an obsolete prior image!
+      const cached = v ? inMemoryImageCache.get(cacheKey) : (inMemoryImageCache.get(cacheKey) || inMemoryImageCache.get(baseKey));
       if (cached) {
         return new NextResponse(new Uint8Array(cached.buffer), {
           headers: {
@@ -123,9 +132,9 @@ export async function GET(request: Request) {
       }
 
       // 2. Check disk file cache before hitting Firestore (< 1ms, 0 Firestore reads!)
-      const diskCached = loadImageFromDisk(cacheKey) || loadImageFromDisk(baseKey);
+      const diskCached = v ? loadImageFromDisk(cacheKey) : (loadImageFromDisk(cacheKey) || loadImageFromDisk(baseKey));
       if (diskCached) {
-        inMemoryImageCache.set(baseKey, diskCached);
+        inMemoryImageCache.set(cacheKey, diskCached);
         return new NextResponse(new Uint8Array(diskCached.buffer), {
           headers: {
             'Content-Type': diskCached.mimeType,

@@ -1737,7 +1737,7 @@ export default function Home() {
       const freshData = {
         ...updates,
         updated_at: updateData.updated_at || updates.updated_at,
-        image_url: freshImageUrl
+        image_url: compressedUrl // Immediately display the actual new canvas render in the UI
       };
 
       setSelectedPackCover((prev: any) => prev ? { ...prev, ...freshData } : prev);

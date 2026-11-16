@@ -69,6 +69,12 @@ export function updateCachedDesign(id: string, updates: any) {
     const idx = inMemoryCoversCache.data.findIndex(d => d.id === id);
     if (idx !== -1) {
       inMemoryCoversCache.data[idx] = { ...inMemoryCoversCache.data[idx], ...updates };
+      if (process.env.FIREBASE_PROJECT_ID) {
+        db.collection('_system_cache').doc('covers').set({
+          items: inMemoryCoversCache.data,
+          updated_at: new Date().toISOString()
+        }, { merge: true }).catch(() => {});
+      }
     }
   }
 }
