@@ -31,8 +31,8 @@ export async function POST(req: Request) {
       }
 
       await batch.commit();
+      await removeCachedDesign(targetIds, !!permanent);
       targetIds.forEach(tId => {
-        removeCachedDesign(tId, !!permanent);
         clearImageCache(tId);
       });
 

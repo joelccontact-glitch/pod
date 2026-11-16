@@ -107,6 +107,11 @@ const GALLERY_CACHE_TTL_MS = 300000; // 5 minutes client cache
 
 const clearGalleryPageCache = () => {
   galleryPageCache.clear();
+  if (typeof window !== 'undefined') {
+    try {
+      sessionStorage.removeItem('mypod_initial_page_data_v1');
+    } catch {}
+  }
 };
 
 const invalidateClientPoolCache = () => {
@@ -115,6 +120,7 @@ const invalidateClientPoolCache = () => {
   if (typeof window !== 'undefined') {
     try {
       sessionStorage.removeItem(SESSION_CACHE_KEY);
+      sessionStorage.removeItem('mypod_initial_page_data_v1');
     } catch {}
   }
 };
@@ -1746,8 +1752,15 @@ export default function Home() {
         setSelectedDesign((prev: any) => prev ? { ...prev, ...freshData } : prev);
       }
 
+      // Bust all client caches and session storage so refresh (F5) is guaranteed to stay updated
+      invalidateClientPoolCache();
+      try {
+        sessionStorage.removeItem('mypod_initial_page_data_v1');
+      } catch {}
+      clearGalleryPageCache();
+
       alert(`✨ 실제 ${targetCount}종 스티커 100% 실물 일치 마스터 표지 합성이 완료되었습니다!`);
-      await fetchDesigns(page, false);
+      await fetchDesigns(page, false, undefined, undefined, true);
     } catch (e: any) {
       console.error('Error creating composite master cover:', e);
       alert('실체 합성 마스터 표지 생성 실패: ' + (e.message || String(e)));
@@ -5855,7 +5868,7 @@ export default function Home() {
                 >
                   <div className={`${viewMode === 'grid' ? 'aspect-square' : 'w-28 sm:w-36 flex-shrink-0'} bg-gray-200 relative`}>
                     <img 
-                      src={design.image_url} 
+                      src={design.image_url ? (design.image_url.startsWith('data:') ? design.image_url : `${design.image_url}${design.image_url.includes('?') ? '&' : '?'}_t=${new Date(design.updated_at || design.created_at || 0).getTime()}`) : ''} 
                       alt={design.title} 
                       loading="lazy"
                       decoding="async"
@@ -5983,7 +5996,17 @@ export default function Home() {
             <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row shadow-2xl">
               {/* Left: Image */}
               <div className="w-full md:w-1/2 bg-gray-100 flex items-center justify-center relative p-4 sm:p-6 min-h-[30vh] sm:min-h-0">
-                <img src={previewDesign ? previewDesign.image_url : selectedDesign.image_url} alt={previewDesign ? previewDesign.title : selectedDesign.title} className="max-w-full max-h-full object-contain rounded-xl shadow-md" />
+                {(() => {
+                  const targetImgUrl = previewDesign ? previewDesign.image_url : selectedDesign.image_url;
+                  const displayImgUrl = targetImgUrl ? (targetImgUrl.startsWith('data:') ? targetImgUrl : `${targetImgUrl}${targetImgUrl.includes('?') ? '&' : '?'}_t=${new Date(selectedDesign.updated_at || selectedDesign.created_at || 0).getTime()}`) : '';
+                  return (
+                    <img 
+                      src={displayImgUrl} 
+                      alt={previewDesign ? previewDesign.title : selectedDesign.title} 
+                      className="max-w-full max-h-full object-contain rounded-xl shadow-md" 
+                    />
+                  );
+                })()}
               </div>
               
               {/* Right: Details & Chat */}
@@ -7360,7 +7383,7 @@ export default function Home() {
                 <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
                   <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-white/10 border border-white/20 overflow-hidden shrink-0 shadow-md">
                     <img 
-                      src={selectedPackCover.image_url} 
+                      src={selectedPackCover.image_url ? (selectedPackCover.image_url.startsWith('data:') ? selectedPackCover.image_url : `${selectedPackCover.image_url}${selectedPackCover.image_url.includes('?') ? '&' : '?'}_t=${new Date(selectedPackCover.updated_at || selectedPackCover.created_at || 0).getTime()}`) : ''} 
                       alt={selectedPackCover.title} 
                       className="w-full h-full object-cover"
                     />
@@ -7530,15 +7553,16 @@ export default function Home() {
                         const coverTheme = getCleanEnglishThemeName(selectedPackCover.sticker_sub, selectedStickerSeriesTab, selectedPackCover.topic || selectedPackCover.title);
                         const img = new Image();
                         img.crossOrigin = 'anonymous';
+                        const bustUrl = selectedPackCover.image_url ? (selectedPackCover.image_url.startsWith('data:') ? selectedPackCover.image_url : `${selectedPackCover.image_url}${selectedPackCover.image_url.includes('?') ? '&' : '?'}_t=${Date.now()}`) : '';
                         await new Promise((resolve) => {
                           img.onload = resolve;
                           img.onerror = () => {
                             const fb = new Image();
                             fb.onload = resolve;
                             fb.onerror = resolve;
-                            fb.src = selectedPackCover.image_url;
+                            fb.src = bustUrl;
                           };
-                          img.src = selectedPackCover.image_url;
+                          img.src = bustUrl;
                         });
 
                         const canvas = document.createElement('canvas');

@@ -24,8 +24,8 @@ export async function POST(req: Request) {
 
       await designRef.set(payload, { merge: true });
       
-      // Update in-place in memory cache without wiping 1000 items!
-      updateCachedDesign(id, payload);
+      // Update in-place in covers cache and Firestore _system_cache/covers
+      await updateCachedDesign(id, payload);
 
       return NextResponse.json({ success: true, updated_at: payload.updated_at });
     }

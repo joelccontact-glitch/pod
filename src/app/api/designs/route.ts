@@ -64,30 +64,99 @@ async function getCachedStats(): Promise<typeof DEFAULT_STATS> {
 }
 
 // In-place cache updates called from save/delete/update routes
-export function updateCachedDesign(id: string, updates: any) {
-  if (inMemoryCoversCache) {
-    const idx = inMemoryCoversCache.data.findIndex(d => d.id === id);
-    if (idx !== -1) {
-      inMemoryCoversCache.data[idx] = { ...inMemoryCoversCache.data[idx], ...updates };
-      if (process.env.FIREBASE_PROJECT_ID) {
-        db.collection('_system_cache').doc('covers').set({
-          items: inMemoryCoversCache.data,
-          updated_at: new Date().toISOString()
-        }, { merge: true }).catch(() => {});
-      }
+export async function updateCachedDesign(id: string, updates: any) {
+  try {
+    if (!process.env.FIREBASE_PROJECT_ID) return;
+
+    // 1. Fetch current covers cache directly from Firestore (ensures sync across all serverless instances)
+    const coversDoc = await db.collection('_system_cache').doc('covers').get();
+    let items: any[] = [];
+    if (coversDoc.exists && Array.isArray(coversDoc.data()?.items)) {
+      items = [...coversDoc.data()!.items];
+    } else if (inMemoryCoversCache?.data) {
+      items = [...inMemoryCoversCache.data];
     }
+
+    const idx = items.findIndex((d: any) => d.id === id);
+    if (idx !== -1) {
+      items[idx] = { ...items[idx], ...updates };
+    } else if (updates.is_cover) {
+      items.unshift({ id, ...updates });
+    }
+
+    // 2. Persist updated covers back to _system_cache/covers
+    await db.collection('_system_cache').doc('covers').set({
+      items,
+      updated_at: new Date().toISOString()
+    }, { merge: true });
+
+    // 3. Keep in-memory cache in sync for the current worker instance
+    inMemoryCoversCache = {
+      data: items,
+      timestamp: Date.now()
+    };
+  } catch (e: any) {
+    console.error(`[updateCachedDesign] Failed to update cover cache for ${id}:`, e?.message);
   }
 }
 
-export function addCachedDesign(item: { id: string; data: any }) {
-  if (inMemoryCoversCache && item?.data?.is_cover) {
-    inMemoryCoversCache.data.unshift({ id: item.id, ...item.data });
+export async function addCachedDesign(item: { id: string; data: any }) {
+  try {
+    if (!process.env.FIREBASE_PROJECT_ID || !item?.data?.is_cover) return;
+
+    const coversDoc = await db.collection('_system_cache').doc('covers').get();
+    let items: any[] = [];
+    if (coversDoc.exists && Array.isArray(coversDoc.data()?.items)) {
+      items = [...coversDoc.data()!.items];
+    } else if (inMemoryCoversCache?.data) {
+      items = [...inMemoryCoversCache.data];
+    }
+
+    const existingIdx = items.findIndex((d: any) => d.id === item.id);
+    if (existingIdx !== -1) {
+      items[existingIdx] = { id: item.id, ...item.data };
+    } else {
+      items.unshift({ id: item.id, ...item.data });
+    }
+
+    await db.collection('_system_cache').doc('covers').set({
+      items,
+      updated_at: new Date().toISOString()
+    }, { merge: true });
+
+    inMemoryCoversCache = {
+      data: items,
+      timestamp: Date.now()
+    };
+  } catch (e: any) {
+    console.error(`[addCachedDesign] Failed to add cover cache:`, e?.message);
   }
 }
 
-export function removeCachedDesign(id: string, permanent: boolean = false) {
-  if (inMemoryCoversCache) {
-    inMemoryCoversCache.data = inMemoryCoversCache.data.filter(d => d.id !== id);
+export async function removeCachedDesign(idOrIds: string | string[], permanent: boolean = false) {
+  try {
+    if (!process.env.FIREBASE_PROJECT_ID) return;
+    const targetIds = new Set(Array.isArray(idOrIds) ? idOrIds : [idOrIds]);
+
+    const coversDoc = await db.collection('_system_cache').doc('covers').get();
+    let items: any[] = [];
+    if (coversDoc.exists && Array.isArray(coversDoc.data()?.items)) {
+      items = coversDoc.data()!.items.filter((d: any) => !targetIds.has(d.id));
+    } else if (inMemoryCoversCache?.data) {
+      items = inMemoryCoversCache.data.filter((d: any) => !targetIds.has(d.id));
+    }
+
+    await db.collection('_system_cache').doc('covers').set({
+      items,
+      updated_at: new Date().toISOString()
+    }, { merge: true });
+
+    inMemoryCoversCache = {
+      data: items,
+      timestamp: Date.now()
+    };
+  } catch (e: any) {
+    console.error(`[removeCachedDesign] Failed to remove from cover cache:`, e?.message);
   }
 }
 
