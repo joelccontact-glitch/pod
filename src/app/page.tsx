@@ -519,8 +519,16 @@ export const organizePackStickers = (matched: any[], coverDesign: any): { finalS
   const titleLower = (coverDesign.title || coverDesign.topic || '').toLowerCase();
   const promptLower = (coverDesign.prompt || '').toLowerCase();
 
-  const vesselMatched = matched.filter((d: any) => !isStickerStandalone(d));
-  const standaloneMatched = matched.filter((d: any) => isStickerStandalone(d));
+  // Exclude deleted items and define reliable timestamp getter (updated_at > created_at)
+  const cleanMatched = (matched || []).filter((d: any) => !d.is_deleted);
+  const getItemTime = (d: any) => {
+    const tUpdate = d.updated_at ? new Date(d.updated_at).getTime() : 0;
+    const tCreate = d.created_at ? new Date(d.created_at).getTime() : 0;
+    return Math.max(tUpdate, tCreate);
+  };
+
+  const vesselMatched = cleanMatched.filter((d: any) => !isStickerStandalone(d));
+  const standaloneMatched = cleanMatched.filter((d: any) => isStickerStandalone(d));
 
   // Determine if this is a 40-pack:
   // Must NOT be a single-series 20 theme (booktok, dessert, socialbattery, hangul),
@@ -529,7 +537,7 @@ export const organizePackStickers = (matched: any[], coverDesign: any): { finalS
     titleLower.includes('40종') ||
     titleLower.includes('40') ||
     promptLower.includes('40+') ||
-    matched.length >= 25 ||
+    cleanMatched.length >= 25 ||
     (vesselMatched.length >= 5 && standaloneMatched.length >= 5)
   );
 
@@ -539,8 +547,8 @@ export const organizePackStickers = (matched: any[], coverDesign: any): { finalS
     const vesselPresets = packInfo.vesselSeries.slice(1);
     const standalonePresets = packInfo.standaloneSeries.slice(1);
 
-    // 1. Sort & match Vessel stickers (Sheet 1: Slots 0..19)
-    vesselMatched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    // 1. Sort & match Vessel stickers (Sheet 1: Slots 0..19) - Newest item first in each bucket
+    vesselMatched.sort((a: any, b: any) => getItemTime(b) - getItemTime(a));
     const vesselBuckets = new Map<number, any[]>();
     const vesselUnmatched: any[] = [];
     for (const item of vesselMatched) {
@@ -562,8 +570,8 @@ export const organizePackStickers = (matched: any[], coverDesign: any): { finalS
       vesselOrdered.push(item);
     }
 
-    // 2. Sort & match Standalone stickers (Sheet 2: Slots 0..19)
-    standaloneMatched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    // 2. Sort & match Standalone stickers (Sheet 2: Slots 0..19) - Newest item first in each bucket
+    standaloneMatched.sort((a: any, b: any) => getItemTime(b) - getItemTime(a));
     const standaloneBuckets = new Map<number, any[]>();
     const standaloneUnmatched: any[] = [];
     for (const item of standaloneMatched) {
@@ -601,9 +609,9 @@ export const organizePackStickers = (matched: any[], coverDesign: any): { finalS
     const slotBuckets = new Map<number, any[]>();
     const unmatched: any[] = [];
 
-    matched.sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    cleanMatched.sort((a: any, b: any) => getItemTime(b) - getItemTime(a));
 
-    for (const item of matched) {
+    for (const item of cleanMatched) {
       const slot = matchStickerToPresetSlot(item, activeSeries);
       if (slot >= 0 && slot < expectedSlots.length) {
         if (!slotBuckets.has(slot)) slotBuckets.set(slot, []);
@@ -1641,45 +1649,54 @@ export default function Home() {
     if (!coverDesign) return;
 
     const coverCategory = getDesignCategoryKey(coverDesign);
-    const coverTime = new Date(coverDesign.created_at || 0).getTime();
-    let targetStickers = stickerList && stickerList.length > 0 ? stickerList : packStickers;
+    let rawCandidates: any[] = [];
 
-    if (targetStickers.length === 0 || getDesignCategoryKey(targetStickers[0]) !== coverCategory) {
+    // 1. Direct fetch for the latest active stickers from DB (bypassing any stale client cache)
+    if (coverCategory && coverCategory !== 'other') {
       try {
-        const pool = await getCachedStickersPool();
-        if (pool && pool.length > 0) {
-          const matched = pool.filter((d: any) => {
-            if (d.id === coverDesign.id || isCoverDesign(d)) return false;
-            const itemCategory = getDesignCategoryKey(d);
-            if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) {
-              return false; // Mismatched category -> exclude
-            }
-            const itemTime = new Date(d.created_at || 0).getTime();
-            const isTimeMatched = coverTime > 0 && itemTime > 0 && Math.abs(itemTime - coverTime) <= 120 * 60 * 1000;
-            return isTimeMatched || (coverCategory !== 'other' && itemCategory === coverCategory);
-          });
-
-          matched.sort((a: any, b: any) => {
-            const timeA = new Date(a.created_at || 0).getTime();
-            const timeB = new Date(b.created_at || 0).getTime();
-            return Math.abs(timeA - coverTime) - Math.abs(timeB - coverTime);
-          });
-
-          const is20Theme = ['foodimal', 'cozygamer', 'magicjar', 'booktok', 'dessert', 'socialbattery', 'hangul'].includes(coverCategory);
-          const maxItems = !is20Theme && ((coverDesign.title || '').includes('40종') || matched.length >= 35) ? 40 : 20;
-          const finalItems = matched.slice(0, maxItems);
-          finalItems.sort((a: any, b: any) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
-          targetStickers = finalItems;
+        const res = await fetch(`/api/designs?limit=60&type=sticker&subType=${coverCategory}&nocache=true&_t=${Date.now()}`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          rawCandidates = data.data;
         }
       } catch (e) {
-        console.error('Error loading stickers for composite cover:', e);
+        console.warn('Direct fetch for composite cover failed:', e);
       }
     }
+
+    // 2. If direct fetch returned nothing, use stickerList, packStickers, or client pool
+    if (rawCandidates.length === 0) {
+      if (stickerList && stickerList.length > 0) {
+        rawCandidates = stickerList;
+      } else if (packStickers.length > 0) {
+        rawCandidates = packStickers;
+      } else {
+        try {
+          rawCandidates = await getCachedStickersPool(true);
+        } catch {}
+      }
+    }
+
+    // 3. Filter strictly out covers, deleted items, and mismatched themes
+    const validStickers = (rawCandidates || []).filter((d: any) => {
+      if (!d || d.id === coverDesign.id || isCoverDesign(d) || d.is_deleted) return false;
+      const itemCategory = getDesignCategoryKey(d);
+      if (coverCategory !== 'other' && itemCategory !== 'other' && coverCategory !== itemCategory) {
+        return false;
+      }
+      return true;
+    });
+
+    // 4. Always strictly organize through organizePackStickers to ensure 1:1 slot matching with newest items!
+    const { finalStickers: targetStickers } = organizePackStickers(validStickers, coverDesign);
 
     if (targetStickers.length === 0) {
       alert('실제 스티커 항목이 없습니다. 먼저 스티커 일괄 생성을 진행해 주세요.');
       return;
     }
+
+    // Keep packStickers state in perfect sync with the organized stickers
+    setPackStickers(targetStickers);
 
     setIsBuildingComposite(true);
     try {
@@ -2094,6 +2111,7 @@ export default function Home() {
 
         if (genData?.data?.image_url) {
           const compressedUrl = await compressImageForFirestore(genData.data.image_url, 800000);
+          const nowIso = new Date().toISOString();
           const newDoc = {
             ...genData.data,
             image_url: compressedUrl,
@@ -2103,7 +2121,8 @@ export default function Home() {
             sticker_sub: subKey,
             design_type: 'sticker',
             is_deleted: false,
-            created_at: selectedPackCover.created_at || new Date().toISOString()
+            created_at: nowIso,
+            updated_at: nowIso
           };
 
           await fetch('/api/designs/save', {
@@ -2125,6 +2144,7 @@ export default function Home() {
         const { finalStickers: updatedStickers } = organizePackStickers(combined, selectedPackCover);
 
         setPackStickers(updatedStickers);
+        invalidateClientPoolCache();
 
         const newTotalCount = updatedStickers.length;
         const currentTitle = selectedPackCover.title || selectedPackCover.topic || '';

@@ -585,12 +585,20 @@ export async function createCompositeMasterCover(
       ctx.lineWidth = 14;
       ctx.strokeRect(8, 8, targetWidth - 16, targetHeight - 16);
 
-      // 3. Load all sticker images concurrently
+      // 3. Load all sticker images concurrently (with strict cache-busting to prevent stale image reuse)
       const loadPromises = realStickersToRender.map((s) => {
         return new Promise<HTMLImageElement | null>((res) => {
           const img = new Image();
           img.crossOrigin = 'anonymous';
-          img.src = s?.image_url || s?.url || '';
+          const rawUrl = s?.image_url || s?.url || '';
+          if (rawUrl.startsWith('data:')) {
+            img.src = rawUrl;
+          } else if (rawUrl) {
+            const sep = rawUrl.includes('?') ? '&' : '?';
+            img.src = `${rawUrl}${sep}_t=${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+          } else {
+            img.src = '';
+          }
           img.onload = () => res(img);
           img.onerror = () => res(null);
         });
