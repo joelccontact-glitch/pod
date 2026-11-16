@@ -22,9 +22,9 @@ export interface StickerPreset {
 export const STICKER_RULES_PROMPT_SUFFIX = `CRITICAL STICKER RULES:
 1. STRICT SINGLE SUBJECT MANDATE: MUST feature EXACTLY ONE single centered subject/character. Absolutely NO multiple characters, NO duplicate side-by-side copies, NO trios, NO repeated pattern, NO sticker sheet collage. EXACTLY ONE single isolated sticker in the center.
 2. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design.
-3. Must have a PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, scenery, or gradients outside the sticker border.
-4. Any brand or catchphrase text MUST be drawn in an elegant, cute, hand-drawn script font with colors matching the design palette.
-5. Vector sticker aesthetic, high contrast, vibrant cute kawaii illustration, square 1:1 ratio.`;
+3. Must have a 100% PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO black background, NO dark background, NO dark studio photography, NO shadows, NO scenery outside the sticker border. The canvas outside the sticker border MUST be pure solid white (#FFFFFF), NEVER black.
+4. Any brand or catchphrase text MUST be drawn in an elegant, cute, hand-drawn script font with distinct readable contrast.
+5. Vector sticker aesthetic, high contrast, rich vibrant saturated colors, sharp crisp outlines, NO washed-out or faded pastel tones, sharp defined edges, square 1:1 ratio.`;
 
 /**
  * Formats a master cover title so that the count (e.g. 20종, 40종) dynamically reflects
@@ -868,7 +868,7 @@ STRICT NO GLASS TANKS: Absolutely NO fish tanks, NO terrarium jars. Pure standal
       theme: 'BookTok Reading 20 Pack',
       phrase: items.phrase,
       description: items.desc,
-      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font with clear readable contrast. ${STICKER_RULES_PROMPT_SUFFIX}`
     };
   }) as unknown as StickerPreset[]
 ];
@@ -1023,7 +1023,7 @@ STRICT NO GLASS TANKS: Pure standalone adorable bakery dessert animals, pastries
       theme: 'Dessert Bakery 20 Pack',
       phrase: items.phrase,
       description: items.desc,
-      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font with clear readable contrast. ${STICKER_RULES_PROMPT_SUFFIX}`
     };
   }) as unknown as StickerPreset[]
 ];
@@ -1178,7 +1178,7 @@ STRICT NO GLASS TANKS: Absolutely NO fish tanks, NO terrarium jars. Pure standal
       theme: 'Social Battery 20 Pack',
       phrase: items.phrase,
       description: items.desc,
-      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font with clear readable contrast. ${STICKER_RULES_PROMPT_SUFFIX}`
     };
   }) as unknown as StickerPreset[]
 ];
@@ -1973,7 +1973,7 @@ STRICT NO GLASS TANKS: Pure standalone adorable kawaii food-animal hybrid creatu
       theme: 'Foodimal Hybrid 20 Pack',
       phrase: items.phrase,
       description: items.desc,
-      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font with clear readable contrast. ${STICKER_RULES_PROMPT_SUFFIX}`
     };
   }) as unknown as StickerPreset[]
 ];
@@ -2128,7 +2128,7 @@ STRICT NO GLASS TANKS: Pure standalone adorable kawaii cozy pastel gamer animal 
       theme: 'Cozy Gamer 20 Pack',
       phrase: items.phrase,
       description: items.desc,
-      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font with clear readable contrast. ${STICKER_RULES_PROMPT_SUFFIX}`
     };
   }) as unknown as StickerPreset[]
 ];
@@ -2162,19 +2162,19 @@ STRICT STANDALONE ENCHANTED GLASS CONTAINERS: 3D clear glass containers with hyp
         name: '앤틱 벚꽃 향수병 아기 사슴 (Sakura Perfume Fawn)',
         desc: '향수병 속 피어난 분홍 벚꽃 나무 아래 낮잠 자는 아기 꽃사슴 스티커',
         phrase: 'Pure Magic',
-        detail: 'standalone ornate faceted clear crystal perfume bottle with golden atomizer, containing a blooming miniature pink cherry blossom tree and a tiny spotted baby fawn resting on petal moss'
+        detail: 'standalone ornate faceted clear crystal perfume bottle with polished metallic golden atomizer and crisp amber-gold glass bevels, enclosing a rich vibrant blooming cherry blossom tree with vivid magenta and rose petals, and a cute warm chestnut-spotted baby fawn sleeping on deep emerald moss. High contrast, crisp defined ink outlines, rich color saturation'
       },
       {
         name: '솜사탕 구름 비행 오리 (Cotton Cloud Duckling Jar)',
         desc: '물약 플라스크 속 몽글몽글 구름 위를 비행하는 아기 오리 스티커',
         phrase: 'Cloud Nine',
-        detail: 'standalone magical clear potion flask filled with fluffy pastel pink and blue cotton candy clouds, with a tiny yellow baby duckling wearing pilot goggles flying happily inside'
+        detail: 'standalone magical clear potion flask with distinct glass rim reflections, filled with vibrant swirled cotton candy clouds in contrasting vivid bubblegum pink, lavender, and rich sky blue, featuring an adorable bright sunny-yellow baby duckling wearing retro aviator goggles flying happily inside. High contrast, crisp clean linework, vibrant rich saturation'
       },
       {
         name: '별사탕 잼 병 잠자는 토끼 (Star Candy Bunny Jar)',
         desc: '육각 유리 잼 병 속 알록달록 별사탕에 파묻혀 잠든 아기 토끼 스티커',
         phrase: 'Sweet Dreams',
-        detail: 'standalone hexagonal clear glass preserve jam jar with a pastel ribbon tie, filled with colorful pastel star candies (konpeito) and a fluffy white baby bunny sleeping soundly in the center'
+        detail: 'standalone hexagonal clear glass preserve jam jar tied with a distinct vivid satin ribbon, filled with colorful sparkling jewel-toned star candies (konpeito) in vibrant strawberry, mint, lemon, and violet hues, with an adorable fluffy white baby bunny with soft rosy cheeks sleeping cozily in the center. Crisp outlines, deep contrast, rich vibrant colors'
       },
       {
         name: '오로라 플라스크 아기 해달 (Aurora Starlight Otter)',
@@ -2186,7 +2186,7 @@ STRICT STANDALONE ENCHANTED GLASS CONTAINERS: 3D clear glass containers with hyp
         name: '물방울 연못 청개구리 (Dewdrop Pond Frog Jar)',
         desc: '둥근 유리 어항 속 수련 잎에 앉아 미소 짓는 아기 청개구리 스티커',
         phrase: 'Tiny Oasis',
-        detail: 'standalone spherical dewdrop glass terrarium jar with tiny water lily pads, a blooming pink lotus, and a tiny smiling green tree frog perched above the calm water'
+        detail: 'standalone crystal-clear spherical glass terrarium orb illuminated by bright daylight, with crisp defined glass contours, vibrant emerald-green lily pads, a rich blooming magenta lotus flower, and an adorable bright lime-green baby tree frog smiling happily above sparkling calm water. High contrast, clean vector linework, rich saturation'
       },
       {
         name: '비밀의 숲 이끼 병 다람쥐 (Enchanted Forest Squirrel Jar)',
@@ -2210,7 +2210,7 @@ STRICT STANDALONE ENCHANTED GLASS CONTAINERS: 3D clear glass containers with hyp
         name: '사막 오아시스 다이아몬드 병 사막여우 (Desert Oasis Fennec Jar)',
         desc: '다이아몬드 컷팅 유리병 속 따스한 모래언덕과 아기 사막여우 스티커',
         phrase: 'Warm & Cozy',
-        detail: 'standalone diamond-faceted glass terrarium jar with pastel desert dunes, blooming pink mini succulents, and a sweet baby fennec fox with big ears basking under a miniature warm crystal sun'
+        detail: 'standalone diamond-faceted glass terrarium jar with crisp refractive edges, warm golden desert dunes, blooming vibrant pink succulents, and a sweet baby fennec fox with big caramel-shaded ears basking under a miniature warm crystal sun. High contrast, rich colors'
       },
       {
         name: '황금 꿀단지 아기 불곰 (Honey Elixir Bear Jar)',
@@ -2222,7 +2222,7 @@ STRICT STANDALONE ENCHANTED GLASS CONTAINERS: 3D clear glass containers with hyp
         name: '수국 온실 벨 자 햄스터 (Hydrangea Hamster Cloche)',
         desc: '유리 돔 갓 속 수국 꽃밭과 찻잔에 앉은 아기 햄스터 스티커',
         phrase: 'Flower Whisper',
-        detail: 'standalone elegant clear glass cloche bell dome on a wooden base, enclosing pastel blue and purple hydrangea blossoms with a tiny hamster sitting on a miniature teacup'
+        detail: 'standalone elegant clear glass cloche bell dome on a polished warm mahogany wooden base, enclosing deep royal blue and rich purple hydrangea blossoms with a tiny golden hamster sitting on a miniature teacup. Crisp outlines, vibrant saturated petals, high contrast'
       },
       {
         name: '자수정 지오드 병 고슴도치 (Crystal Geode Hedgehog Jar)',
@@ -2234,7 +2234,7 @@ STRICT STANDALONE ENCHANTED GLASS CONTAINERS: 3D clear glass containers with hyp
         name: '민들레 홀씨 요정 병 강아지 (Dandelion Wish Puppy Jar)',
         desc: '앤틱 유리 약병 속 둥둥 떠다니는 반짝이는 민들레 홀씨를 바라보는 강아지 스티커',
         phrase: 'Make a Wish',
-        detail: 'standalone slender antique medicine bottle containing glowing dandelion wish seeds floating in gentle air, with a tiny golden retriever puppy looking up in pure wonder'
+        detail: 'standalone slender antique medicine bottle with crisp glass contours containing glowing golden dandelion wish seeds floating in gentle air, with a cute warm golden retriever puppy looking up in pure wonder. High contrast, rich warm colors, defined line art'
       },
       {
         name: '겨울 스노우글로브 병 북극여우 (Snowy Pine Arctic Fox Jar)',
@@ -2246,7 +2246,7 @@ STRICT STANDALONE ENCHANTED GLASS CONTAINERS: 3D clear glass containers with hyp
         name: '무지개 프리즘 물약 병 판다 (Rainbow Prism Panda Flask)',
         desc: '빛을 프리즘 무지개로 굴절시키는 플라스크 속 비눗방울과 아기 판다 스티커',
         phrase: 'Rainbow Wonders',
-        detail: 'standalone geometric prism glass potion bottle refracting brilliant pastel rainbow light rays, with a chubby baby giant panda playing with floating rainbow soap bubbles'
+        detail: 'standalone geometric prism glass potion bottle refracting brilliant vivid rainbow spectrum light rays, with a chubby black and white baby giant panda playing with floating iridescent rainbow bubbles. High contrast, crisp sharp lines'
       },
       {
         name: '가을 단풍 호박 병 너구리 (Autumn Harvest Raccoon Jar)',
@@ -2283,7 +2283,7 @@ STRICT STANDALONE ENCHANTED GLASS CONTAINERS: 3D clear glass containers with hyp
       theme: 'Magic Jar 20 Pack',
       phrase: items.phrase,
       description: items.desc,
-      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font. ${STICKER_RULES_PROMPT_SUFFIX}`
+      prompt: `A cute die-cut sticker design featuring: ${items.detail}. Curved text reads "${items.phrase}" in an elegant cute hand-drawn script font with clear readable contrast. ${STICKER_RULES_PROMPT_SUFFIX}`
     };
   }) as unknown as StickerPreset[]
 ];

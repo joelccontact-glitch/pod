@@ -324,9 +324,9 @@ async function callGenerateImagesWithFallback(ai: any, rawPrompt: string, isStic
 
       let cleanPrompt = '';
       if (isStickerDetected) {
-        cleanPrompt = `Cute 2D flat vector graphic die-cut sticker illustration of ${corePrompt}, 2D comic art, flat vector colors, clean bold black ink linework, pure white die-cut vinyl sticker border, centered on a pure solid white background (#FFFFFF), isolated single sticker graphic. STRICT NEGATIVE: Absolutely NO 3D render, NO plastic, NO realistic photography, NO grey background.`;
+        cleanPrompt = `Cute 2D flat vector graphic die-cut sticker illustration of ${corePrompt}, 2D comic art, rich vibrant saturated flat vector colors, clean bold defined black ink linework, high contrast, pure white die-cut vinyl sticker border, centered on a 100% pure solid white background (#FFFFFF), isolated single sticker graphic. STRICT NEGATIVE: Absolutely NO black background, NO dark background, NO dark studio backdrop, NO black canvas outside border, NO 3D render, NO plastic, NO realistic photography, NO grey background, NO washed-out or faded pastel colors, NO low contrast.`;
       } else {
-        cleanPrompt = `Cute 2D vector graphic illustration of ${corePrompt}, bold clean black ink linework, rich vibrant saturated colors, isolated graphic centered on pure solid white background (#FFFFFF), crisp line art, vibrant flat vector shading, high contrast. STRICT NEGATIVE: ABSOLUTELY NO photorealism, NO real life photography, NO 3D render, NO realistic photo, NO mockups, NO washed out colors, NO faded, NO blurry, NO low contrast.`;
+        cleanPrompt = `Cute 2D vector graphic illustration of ${corePrompt}, bold clean black ink linework, rich vibrant saturated colors, isolated graphic centered on pure solid white background (#FFFFFF), crisp line art, vibrant flat vector shading, high contrast. STRICT NEGATIVE: ABSOLUTELY NO black background, NO dark background, NO photorealism, NO real life photography, NO 3D render, NO realistic photo, NO mockups, NO washed out colors, NO faded, NO blurry, NO low contrast.`;
       }
 
       const seed = Math.floor(Math.random() * 10000000);
