@@ -53,6 +53,9 @@ export function getThemeEnglishTitle(categoryOrTitle: string, stickerCount: numb
   if (t.includes('dessert') || t.includes('디저트') || t.includes('베이커리') || t.includes('cafe') || t.includes('카페')) {
     return `${countStr} CUTE SWEET DESSERT & CAFE STICKER PACK`;
   }
+  if (t.includes('vintageserif') || t.includes('빈티지') || t.includes('세리프') || t.includes('vintage serif')) {
+    return `${countStr} COZY VINTAGE SERIF QUOTE STICKER PACK`;
+  }
   if (t.includes('booktok') || t.includes('북톡') || t.includes('독서') || t.includes('reading')) {
     return `${countStr} CUTE COZY READING BOOKTOK STICKER PACK`;
   }

@@ -238,6 +238,30 @@ const CATEGORY_SEO_DICT: Record<string, {
       '✨ Warm, aesthetic hand-drawn illustrations for hopeless romantics, bookworms & fantasy readers'
     ]
   },
+  vintageserif: {
+    name: 'Cozy Vintage Serif Book Quotes',
+    goldenBundleTitle: 'Bookish Quote Digital Stickers, Vintage Serif Kindle Stickers, Aesthetic Booktok GoodNotes Decals, Literary Reader Gift Bundle, Instant Download PNG',
+    themeTags: [
+      'book quote stickers',
+      'vintage serif decals',
+      'kindle case stickers',
+      'booktok aesthetic',
+      'literary quote pack',
+      'reading journal deco',
+      'cozy reader gift'
+    ],
+    bundleKeywords: [
+      'Vintage Serif Quote Stickers Bundle',
+      'Kindle Case Decals Aesthetic',
+      'Bookish Typography Clipart'
+    ],
+    singleKeywords: ['Vintage Serif Sticker PNG', 'Book Quote Clipart', 'Kindle Case Die Cut'],
+    descriptionHighlights: [
+      '🖋️ Elegant, chunky vintage editorial serif typography paired with delicate botanical olive leaves & coffee motifs',
+      '☕ Sophisticated earth-tone palette: deep espresso brown, warm terracotta, forest sage green, and antique cream',
+      '📖 Tailored for Kindle Paperwhite clear cases, laptop lids, GoodNotes reading journals, and literary scrapbooks'
+    ]
+  },
   dessert: {
     name: 'Sweet Dessert Bakery Cafe',
     goldenBundleTitle: 'Cute Food Digital Stickers, Sweet Bakery GoodNotes Sticker Pack, Pastel Dessert Clipart, Printable Cafe Planner Decal, Instant Download PNG',
@@ -577,7 +601,8 @@ const KO_EN_TRANSLATE: [RegExp, string][] = [
   [/붕어빵/i, 'Bungeoppang Pastry'],
   [/파이팅/i, 'Fighting Cheer Up'],
   [/사랑해/i, 'Saranghae Love'],
-  [/한글/i, 'Korean Hangul']
+  [/한글/i, 'Korean Hangul'],
+  [/빈티지|세리프|명언|독서|킨들/i, 'Vintage Serif Quote']
 ];
 
 function translateKoItemToEnglish(koreanText: string): string {

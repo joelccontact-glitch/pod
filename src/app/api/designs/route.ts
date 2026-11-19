@@ -24,6 +24,7 @@ const DEFAULT_STATS = {
     saltaquarium: 20,
     freshaquarium: 20,
     booktok: 20,
+    vintageserif: 20,
     christmas: 40,
     halloween: 40,
     thanksgiving: 40,
