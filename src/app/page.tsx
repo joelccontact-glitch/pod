@@ -24,6 +24,7 @@ import {
   THANKSGIVING_20_SERIES,
   THANKSGIVING_STANDALONE_20_SERIES,
   BOOKTOK_20_SERIES,
+  ANIMAL_BOOK_CLUB_20_SERIES,
   VINTAGE_SERIF_20_SERIES,
   AXOLOTL_EMOTES_20_SERIES,
   AXOLOTL_20_SERIES,
@@ -201,6 +202,7 @@ const getDesignCategoryKey = (d: any): string => {
   if (presetId.includes('freshaquarium') || presetId.includes('fresh-aquarium')) return 'freshaquarium';
   if (presetId.includes('terrarium')) return 'terrarium';
   if (presetId.includes('vintageserif') || presetId.includes('vintage-serif')) return 'vintageserif';
+  if (presetId.includes('animalbookclub') || presetId.includes('animal-book-club')) return 'animalbookclub';
   if (presetId.includes('booktok') || presetId.includes('reading')) return 'booktok';
   if (presetId.includes('foodimal') || presetId.includes('food-animal')) return 'foodimal';
   if (presetId.includes('cozy-gamer') || presetId.includes('cozygamer')) return 'cozygamer';
@@ -229,6 +231,7 @@ const getDesignCategoryKey = (d: any): string => {
   if (title.includes('열대어') || title.includes('freshaquarium') || title.includes('fresh aquarium')) return 'freshaquarium';
   if (title.includes('테라리움') || title.includes('terrarium')) return 'terrarium';
   if (title.includes('빈티지') || title.includes('세리프') || title.includes('vintageserif') || title.includes('vintage serif')) return 'vintageserif';
+  if (title.includes('아기 동물 북클럽') || title.includes('아기동물 북클럽') || title.includes('animal book') || title.includes('animalbookclub')) return 'animalbookclub';
   if (title.includes('북톡') || title.includes('독서') || title.includes('booktok') || title.includes('book club') || title.includes('kindle')) return 'booktok';
 
   return 'other';
@@ -244,7 +247,8 @@ const getStickerSeriesTitle = (tab: string) => {
   if (tab.startsWith('dessert20')) return '🥞 미국 유행 디저트 & 베이커리 20종 스티커 팩';
   if (tab.startsWith('socialbattery20')) return '🔋 사회적 배터리 & 내향인 20종 스티커 팩';
   if (tab.startsWith('hangul20')) return '🇰🇷 K-감성 한글 & 아기 동물 20종 스티커 팩';
-  if (tab.startsWith('booktok20')) return '📚 안경 쓴 아기 동물들의 북클럽 20종 스티커 팩';
+  if (tab.startsWith('animalbookclub20')) return '🐾 안경 쓴 아기 동물들의 북클럽 20종 스티커 팩';
+  if (tab.startsWith('booktok20')) return '📚 북톡 & 코지 리딩 20종 스티커 팩';
   if (tab.startsWith('terrarium20')) return tab.includes('standalone') ? '🪴 테라리움 단일 식물 20종 스티커 팩' : '🫙 테라리움 세트 완성 20종 스티커 팩';
   if (tab.startsWith('vivarium20')) return tab.includes('standalone') ? '🦎 비바리움 단일 동물 20종 스티커 팩' : '🦎 비바리움 세트 완성 20종 스티커 팩';
   if (tab.startsWith('saltaquarium20')) return tab.includes('standalone') ? '🐠 해수어 단일 어류 20종 스티커 팩' : '🪸 해수어항 세트 완성 20종 스티커 팩';
@@ -270,6 +274,7 @@ const getPresetSeriesList = (tab: string): StickerPreset[] => {
   if (tab === 'dessert20') return DESSERT_20_SERIES;
   if (tab === 'socialbattery20') return SOCIAL_BATTERY_20_SERIES;
   if (tab === 'hangul20') return HANGUL_20_SERIES;
+  if (tab === 'animalbookclub20') return ANIMAL_BOOK_CLUB_20_SERIES;
   if (tab === 'booktok20') return BOOKTOK_20_SERIES;
   if (tab === 'terrarium20') return TERRARIUM_20_SERIES;
   if (tab === 'terrarium20_standalone') return TERRARIUM_STANDALONE_20_SERIES;
@@ -373,7 +378,10 @@ export const getPackPresetsInfo = (coverDesign: any): PackPresetsInfo => {
   if (categoryKey === 'hangul' || allText.includes('hangul') || allText.includes('한글')) {
     return { themeKey: 'hangul', isSingleSeries20Theme: true, vesselSeries: HANGUL_20_SERIES, standaloneSeries: null };
   }
-  if (categoryKey === 'booktok' || allText.includes('booktok') || allText.includes('북톡') || allText.includes('독서') || allText.includes('북클럽') || allText.includes('book club')) {
+  if (categoryKey === 'animalbookclub' || allText.includes('animalbookclub') || allText.includes('아기 동물 북클럽') || allText.includes('아기동물')) {
+    return { themeKey: 'animalbookclub', isSingleSeries20Theme: true, vesselSeries: ANIMAL_BOOK_CLUB_20_SERIES, standaloneSeries: null };
+  }
+  if (categoryKey === 'booktok' || allText.includes('booktok') || allText.includes('북톡') || allText.includes('독서')) {
     return { themeKey: 'booktok', isSingleSeries20Theme: true, vesselSeries: BOOKTOK_20_SERIES, standaloneSeries: null };
   }
   if (categoryKey === 'foodimal' || allText.includes('foodimal') || allText.includes('푸디멀') || allText.includes('음식동물')) {
@@ -716,6 +724,7 @@ export default function Home() {
     vivarium: 0,
     saltaquarium: 0,
     freshaquarium: 0,
+    animalbookclub: 0,
     booktok: 0,
     christmas: 0,
     halloween: 0,
@@ -772,6 +781,7 @@ export default function Home() {
     | 'dessert20'
     | 'socialbattery20'
     | 'hangul20'
+    | 'animalbookclub20'
     | 'booktok20'
     | 'vintageserif20'
     | 'terrarium20'
@@ -3897,6 +3907,9 @@ export default function Home() {
     } else if (currentTab === 'hangul20') {
       bundleName = 'Hangul_K_Vibe_20_Stickers_Bundle';
       seriesTitle = '[K-감성 한글 & 아기 동물 (20종)]';
+    } else if (currentTab === 'animalbookclub20') {
+      bundleName = 'Animal_Book_Club_20_Stickers_Bundle';
+      seriesTitle = '[안경 쓴 아기 동물들의 북클럽 (20종)]';
     } else if (currentTab === 'booktok20') {
       bundleName = 'BookTok_20_Stickers_Bundle';
       seriesTitle = '[북톡 & 코지 리딩 (20종)]';
@@ -3962,6 +3975,8 @@ export default function Home() {
           return sub === 'socialbattery' || presetId.startsWith('social-battery') || presetId.startsWith('socialbattery') || textToScan.includes('social battery') || textToScan.includes('사회적 배터리') || textToScan.includes('내향');
         } else if (currentTab === 'hangul20') {
           return sub === 'hangul' || presetId.startsWith('hangul') || textToScan.includes('hangul') || textToScan.includes('한글') || textToScan.includes('k-감성') || textToScan.includes('대박') || textToScan.includes('괜찮아');
+        } else if (currentTab === 'animalbookclub20') {
+          return sub === 'animalbookclub' || presetId.startsWith('animalbookclub') || textToScan.includes('animalbookclub') || textToScan.includes('아기 동물 북클럽') || textToScan.includes('아기동물');
         } else if (currentTab === 'booktok20') {
           return sub === 'booktok' || presetId.startsWith('booktok') || textToScan.includes('booktok') || textToScan.includes('북톡') || textToScan.includes('독서');
         } else if (currentTab === 'vintageserif20') {
@@ -4163,6 +4178,11 @@ export default function Home() {
       targetStandalonePresets = HANGUL_20_SERIES;
       packName = '[K-감성 한글 & 아기 동물 20종 스티커 팩]';
       subKey = 'hangul';
+    } else if (baseType.startsWith('animalbookclub')) {
+      targetPresets = ANIMAL_BOOK_CLUB_20_SERIES;
+      targetStandalonePresets = ANIMAL_BOOK_CLUB_20_SERIES;
+      packName = '[안경 쓴 아기 동물들의 북클럽 20종 스티커 팩]';
+      subKey = 'animalbookclub';
     } else if (baseType.startsWith('booktok')) {
       targetPresets = BOOKTOK_20_SERIES;
       targetStandalonePresets = BOOKTOK_20_SERIES;
@@ -5456,7 +5476,7 @@ export default function Home() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center gap-2">
-                    {!['foodimal20', 'cozygamer20', 'magicjar20', 'axolotlemote20', 'axolotl20', 'deepsea20', 'dessert20', 'socialbattery20', 'hangul20', 'booktok20'].includes(selectedStickerSeriesTab) && (
+                    {!['foodimal20', 'cozygamer20', 'magicjar20', 'axolotlemote20', 'axolotl20', 'deepsea20', 'dessert20', 'socialbattery20', 'hangul20', 'animalbookclub20', 'booktok20'].includes(selectedStickerSeriesTab) && (
                       <button
                         onClick={() => handleBatchGenerateSeries(`${selectedStickerSeriesTab}_both`)}
                         disabled={isBatchGenerating}
@@ -5538,7 +5558,8 @@ export default function Home() {
                       <option value="dessert20">🥞 미국 유행 디저트 & 베이커리 20종</option>
                       <option value="socialbattery20">🔋 사회적 배터리 & 내향인 20종</option>
                       <option value="hangul20">🇰🇷 K-감성 한글 & 아기 동물 20종</option>
-                      <option value="booktok20">📚 안경 쓴 아기 동물들의 북클럽 20종 (강력 추천)</option>
+                      <option value="animalbookclub20">🐾 안경 쓴 아기 동물들의 북클럽 20종 (강력 추천)</option>
+                      <option value="booktok20">📚 북톡 & 코지 리딩 20종</option>
                     </optgroup>
                     <optgroup label="🌿 수조 & 생태계 테마">
                       <option value="terrarium20">🫙 테라리움 세트 완성 20종</option>
@@ -5757,7 +5778,8 @@ export default function Home() {
                     <option value="dessert">🥞 미국 유행 디저트 & 베이커리 ({stickerSubCounts.dessert || 0}장)</option>
                     <option value="socialbattery">🔋 사회적 배터리 & 내향인 ({stickerSubCounts.socialbattery || 0}장)</option>
                     <option value="hangul">🇰🇷 K-감성 한글 & 아기 동물 ({stickerSubCounts.hangul || 0}장)</option>
-                    <option value="booktok">📚 아기 동물 북클럽 ({stickerSubCounts.booktok || 0}장)</option>
+                    <option value="animalbookclub">🐾 아기 동물 북클럽 ({stickerSubCounts.animalbookclub || 0}장)</option>
+                    <option value="booktok">📚 북톡 & 코지 리딩 ({stickerSubCounts.booktok || 0}장)</option>
                   </optgroup>
                   <optgroup label="🌿 수조 & 생태계 테마">
                     <option value="terrarium">🫙 테라리움 세트 ({stickerSubCounts.terrarium || 0}장)</option>
