@@ -244,8 +244,7 @@ const getStickerSeriesTitle = (tab: string) => {
   if (tab.startsWith('dessert20')) return '🥞 미국 유행 디저트 & 베이커리 20종 스티커 팩';
   if (tab.startsWith('socialbattery20')) return '🔋 사회적 배터리 & 내향인 20종 스티커 팩';
   if (tab.startsWith('hangul20')) return '🇰🇷 K-감성 한글 & 아기 동물 20종 스티커 팩';
-  if (tab.startsWith('booktok20')) return '📚 북톡 & 코지 리딩 20종 스티커 팩';
-  if (tab.startsWith('vintageserif20')) return '🖋️ 빈티지 세리프 명언 20종 스티커 팩';
+  if (tab.startsWith('booktok20')) return '📚 안경 쓴 아기 동물들의 북클럽 20종 스티커 팩';
   if (tab.startsWith('terrarium20')) return tab.includes('standalone') ? '🪴 테라리움 단일 식물 20종 스티커 팩' : '🫙 테라리움 세트 완성 20종 스티커 팩';
   if (tab.startsWith('vivarium20')) return tab.includes('standalone') ? '🦎 비바리움 단일 동물 20종 스티커 팩' : '🦎 비바리움 세트 완성 20종 스티커 팩';
   if (tab.startsWith('saltaquarium20')) return tab.includes('standalone') ? '🐠 해수어 단일 어류 20종 스티커 팩' : '🪸 해수어항 세트 완성 20종 스티커 팩';
@@ -272,7 +271,6 @@ const getPresetSeriesList = (tab: string): StickerPreset[] => {
   if (tab === 'socialbattery20') return SOCIAL_BATTERY_20_SERIES;
   if (tab === 'hangul20') return HANGUL_20_SERIES;
   if (tab === 'booktok20') return BOOKTOK_20_SERIES;
-  if (tab === 'vintageserif20') return VINTAGE_SERIF_20_SERIES;
   if (tab === 'terrarium20') return TERRARIUM_20_SERIES;
   if (tab === 'terrarium20_standalone') return TERRARIUM_STANDALONE_20_SERIES;
   if (tab === 'vivarium20') return VIVARIUM_20_SERIES;
@@ -375,11 +373,8 @@ export const getPackPresetsInfo = (coverDesign: any): PackPresetsInfo => {
   if (categoryKey === 'hangul' || allText.includes('hangul') || allText.includes('한글')) {
     return { themeKey: 'hangul', isSingleSeries20Theme: true, vesselSeries: HANGUL_20_SERIES, standaloneSeries: null };
   }
-  if (categoryKey === 'booktok' || allText.includes('booktok') || allText.includes('북톡') || allText.includes('독서')) {
+  if (categoryKey === 'booktok' || allText.includes('booktok') || allText.includes('북톡') || allText.includes('독서') || allText.includes('북클럽') || allText.includes('book club')) {
     return { themeKey: 'booktok', isSingleSeries20Theme: true, vesselSeries: BOOKTOK_20_SERIES, standaloneSeries: null };
-  }
-  if (categoryKey === 'vintageserif' || allText.includes('vintageserif') || allText.includes('빈티지') || allText.includes('세리프') || allText.includes('vintage serif')) {
-    return { themeKey: 'vintageserif', isSingleSeries20Theme: true, vesselSeries: VINTAGE_SERIF_20_SERIES, standaloneSeries: null };
   }
   if (categoryKey === 'foodimal' || allText.includes('foodimal') || allText.includes('푸디멀') || allText.includes('음식동물')) {
     return { themeKey: 'foodimal', isSingleSeries20Theme: true, vesselSeries: FOODIMAL_20_SERIES, standaloneSeries: null };
@@ -5461,7 +5456,7 @@ export default function Home() {
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center gap-2">
-                    {!['foodimal20', 'cozygamer20', 'magicjar20', 'axolotlemote20', 'axolotl20', 'deepsea20', 'dessert20', 'socialbattery20', 'hangul20', 'booktok20', 'vintageserif20'].includes(selectedStickerSeriesTab) && (
+                    {!['foodimal20', 'cozygamer20', 'magicjar20', 'axolotlemote20', 'axolotl20', 'deepsea20', 'dessert20', 'socialbattery20', 'hangul20', 'booktok20'].includes(selectedStickerSeriesTab) && (
                       <button
                         onClick={() => handleBatchGenerateSeries(`${selectedStickerSeriesTab}_both`)}
                         disabled={isBatchGenerating}
@@ -5543,8 +5538,7 @@ export default function Home() {
                       <option value="dessert20">🥞 미국 유행 디저트 & 베이커리 20종</option>
                       <option value="socialbattery20">🔋 사회적 배터리 & 내향인 20종</option>
                       <option value="hangul20">🇰🇷 K-감성 한글 & 아기 동물 20종</option>
-                      <option value="booktok20">📚 북톡 & 코지 리딩 20종</option>
-                      <option value="vintageserif20">🖋️ 빈티지 세리프 명언 20종 (킨들 & 북클럽 타이포)</option>
+                      <option value="booktok20">📚 안경 쓴 아기 동물들의 북클럽 20종 (강력 추천)</option>
                     </optgroup>
                     <optgroup label="🌿 수조 & 생태계 테마">
                       <option value="terrarium20">🫙 테라리움 세트 완성 20종</option>
@@ -5763,8 +5757,7 @@ export default function Home() {
                     <option value="dessert">🥞 미국 유행 디저트 & 베이커리 ({stickerSubCounts.dessert || 0}장)</option>
                     <option value="socialbattery">🔋 사회적 배터리 & 내향인 ({stickerSubCounts.socialbattery || 0}장)</option>
                     <option value="hangul">🇰🇷 K-감성 한글 & 아기 동물 ({stickerSubCounts.hangul || 0}장)</option>
-                    <option value="booktok">📚 북톡 & 코지 리딩 ({stickerSubCounts.booktok || 0}장)</option>
-                    <option value="vintageserif">🖋️ 빈티지 세리프 명언 ({stickerSubCounts.vintageserif || 0}장)</option>
+                    <option value="booktok">📚 아기 동물 북클럽 ({stickerSubCounts.booktok || 0}장)</option>
                   </optgroup>
                   <optgroup label="🌿 수조 & 생태계 테마">
                     <option value="terrarium">🫙 테라리움 세트 ({stickerSubCounts.terrarium || 0}장)</option>

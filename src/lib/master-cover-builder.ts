@@ -355,18 +355,12 @@ export async function createCompositeMasterCover(
     ribbonColor = '#0F766E';
     ribbonFold = '#042F2E';
     ribbonOutline = '#0A1E1C';
-  } else if (subType === 'vintageserif' || optTitle.includes('vintageserif') || optTitle.includes('빈티지') || optTitle.includes('세리프') || optTitle.includes('vintage serif')) {
-    seriesTitle = 'VINTAGE SERIF QUOTE';
-    titleColor = '#451A03'; // Deep Rich Espresso Brown
-    ribbonColor = '#78350F'; // Warm Terracotta / Amber ribbon
-    ribbonFold = '#451A03';
-    ribbonOutline = '#292524';
-  } else if (subType === 'booktok' || optTitle.includes('booktok') || optTitle.includes('북톡') || optTitle.includes('독서')) {
-    seriesTitle = 'COZY BOOK CLUB';
-    titleColor = '#831843';
-    ribbonColor = '#BE185D';
-    ribbonFold = '#500724';
-    ribbonOutline = '#300416';
+  } else if (subType === 'booktok' || optTitle.includes('booktok') || optTitle.includes('북톡') || optTitle.includes('독서') || optTitle.includes('북클럽') || optTitle.includes('book club') || optTitle.includes('animal book')) {
+    seriesTitle = 'ANIMAL BOOK CLUB';
+    titleColor = '#BE185D'; // Sweet bold candy pink
+    ribbonColor = '#0D9488'; // Vibrant teal ribbon banner
+    ribbonFold = '#115E59';
+    ribbonOutline = '#042F2E';
   } else if (subType === 'dessert' || optTitle.includes('dessert') || optTitle.includes('디저트') || optTitle.includes('베이커리') || optTitle.includes('cafe') || optTitle.includes('카페')) {
     seriesTitle = 'SWEET DESSERT & CAFÉ';
     titleColor = '#BE185D'; // Sweet bold candy pink matching Etsy bestseller cover
