@@ -2292,8 +2292,9 @@ export const VINTAGE_SERIF_STICKER_RULES_PROMPT_SUFFIX = `CRITICAL STICKER RULES
 1. STRICT SINGLE SUBJECT MANDATE: MUST feature EXACTLY ONE single centered vintage typography artwork sticker. Absolutely NO duplicate side-by-side copies, NO trios, NO repeated pattern, NO sticker sheet collage. EXACTLY ONE single isolated sticker in the center.
 2. Must have a crisp, thick, smooth white die-cut sticker border outlining the ENTIRE sticker design, with a gentle subtle soft drop shadow.
 3. Must have a 100% PURE SOLID WHITE BACKGROUND (#FFFFFF). Absolutely NO background colors, NO dark background, NO gradients, NO scenery outside the sticker border. The canvas outside the sticker border MUST be pure solid white (#FFFFFF).
-4. Typography MUST be drawn in an elegant, chunky vintage editorial serif lettering with antique bookish flourishes and warm aesthetic.
-5. Rich sophisticated earth-tone palette: deep espresso brown, warm terracotta, forest sage green, antique parchment cream, and subtle gold accents. High contrast, vector graphic style, sharp clean edges, square 1:1 ratio.`;
+4. STRICT SPELLING ACCURACY & ZERO DUPLICATION: The typography MUST spell the exact specified words with 100% precision. Absolutely NO repeated duplicate words (e.g., NEVER repeat "is is" or "lovely lovely"), NO spelling mistakes, and NO garbled nonsense letters. Every word must be crisp, legible, and clearly readable.
+5. CLEAN AESTHETIC COMPOSITION (NO CLUTTER): Generous breathing room and balanced spacing. The quote text is the primary hero, rendered in chunky elegant vintage editorial serif lettering with antique bookish flourishes. Paired with only 1 or 2 clean, high-end botanical or cozy vintage elements. NOT an overcrowded poster.
+6. Rich sophisticated earth-tone palette: deep espresso brown, warm terracotta, forest sage green, antique parchment cream, and subtle gold accents. High contrast, vector graphic style, sharp clean edges, square 1:1 ratio.`;
 
 export const VINTAGE_SERIF_20_SERIES: StickerPreset[] = [
   {
@@ -2307,8 +2308,8 @@ export const VINTAGE_SERIF_20_SERIES: StickerPreset[] = [
     description: 'Etsy 판매용 20종 킨들 & 북클럽 감성 빈티지 세리프 명언 스티커 팩 마스터 대표 썸네일 커버 표지 그래픽',
     prompt: `A professional Etsy digital sticker bundle master cover graphic illustration on a pure solid white background (#FFFFFF).
 CENTERED TITLE (MUST REMAIN CLEAR & UNOBSTRUCTED): Centered elegant bold vintage espresso brown serif typography reading "20+ COZY VINTAGE SERIF & BOOK CLUB STICKER BUNDLE". Below title reads "PNG DIGITAL DOWNLOAD" in a stylish warm terracotta ribbon banner. CRITICAL: The central title and banner MUST remain completely unobstructed, open, and clearly legible with an ample margin around it—NO stickers encroaching, touching, or overlapping the text.
-STICKER ARRANGEMENT (DENSE YET NEATLY SEPARATED): A richly packed collage of 18-20 unique standalone die-cut sticker samples filling the perimeter of the canvas around the center title with minimal empty white gaps. CRITICAL NO OVERLAPPING: Individual stickers MUST NOT overlap, collide, or clip one another. Each sticker is completely isolated and neatly placed side-by-side with its own distinct thick crisp white die-cut border. STRICT NO DUPLICATES: Every single sticker is 100% unique in quote layout, botanical element, and vintage motif with zero repetition.
-FEATURED UNIQUE STICKERS: Just One More Chapter coffee cup badge, Read Books Drink Coffee Be Kind leaves, Lost in the Right Direction compass, Emotionally Attached to Fictional Characters stars, My Weekend Is Fully Booked stack of antique novels, Between the Pages of a Book pressed flowers, Fueled by Books & Espresso moka pot, Growing at My Own Pace seedling daisy, In a World Where You Can Be Anything Be Kind dove, Protect Your Peace teacup, Still Reading Do Not Disturb door sign, Too Many Books Too Little Time pocket watch, Cozy Mind Warm Heart yarn mug, A Cup of Tea & A Good Novel steaming teacup, One Page at a Time hourglass, Book Lovers Club Member vintage seal, Escape Reality Read a Book starry magic tome, Be Patient With Yourself gentle butterfly, Smells Like Old Books & Coffee roasted beans, and Choose Peace Over Drama olive branch.
+STICKER ARRANGEMENT (SPACIOUS & SEPARATED): A beautifully arranged gallery collage of 18-20 unique standalone die-cut quote stickers surrounding the center title with neat, even margins. CRITICAL NO OVERLAPPING: Individual stickers MUST NOT collide, overlap, or obscure each other. Each sticker is completely isolated and neatly placed side-by-side with its own distinct thick crisp white die-cut border. STRICT NO DUPLICATES: Every single sticker features a unique quote and vintage bookish motif.
+FEATURED UNIQUE STICKERS: Just One More Chapter coffee cup badge, Read Books & Be Kind olive leaves, Lost in a Good Book compass, Book Lovers Club vintage seal, Fully Booked antique novel stack, A Lovely Place to Be flower wreath, Books & Espresso moka pot, Growing at My Own Pace daisy, Choose Kindness peace dove, Protect Your Peace teacup, Still Reading door plaque, Too Many Books pocket watch, Cozy Mind Warm Heart yarn mug, Tea & A Good Novel steaming cup, One Page at a Time hourglass, Escape Reality glowing tome, Be Patient With Yourself gentle butterfly, Old Books & Coffee roasted beans, Choose Peace Over Drama olive branch, and Stay Cozy & Read candle.
 STRICT NO GLASS TANKS: Absolutely NO fish tanks, NO terrarium jars. Pure standalone elegant vintage typography badges and bookish aesthetic stickers ONLY. CRITICAL: The image MUST have a pure solid white background (#FFFFFF). NEVER generate any background colors, gradients, or scenery. Etsy bestseller listing thumbnail aesthetic. High resolution.`
   },
   ...Array.from({ length: 20 }, (_, i) => {
@@ -2318,85 +2319,85 @@ STRICT NO GLASS TANKS: Absolutely NO fish tanks, NO terrarium jars. Pure standal
         name: '한 챕터만 더 (Just One More Chapter)',
         desc: '에스프레소 브라운 빈티지 세리프 폰트와 따뜻한 커피잔, 작은 책갈피가 어우러진 킨들 필수 스티커',
         phrase: 'Just One More Chapter',
-        detail: 'standalone elegant vintage editorial typography sticker reading "JUST ONE MORE CHAPTER" in chunky antique serif font, with an open hardcover novel, a steaming espresso ceramic cup, and delicate botanical olive branch accents'
+        detail: 'standalone elegant vintage typography sticker reading "JUST ONE MORE CHAPTER" in chunky antique serif font, with an open hardcover book and a steaming ceramic espresso cup'
       },
       {
-        name: '독서·커피·다정함 (Read Books, Drink Coffee, Be Kind)',
-        desc: '포레스트 세이지 그린 컬러의 클래식 넘버링 명언과 올리브 잎사귀 스티커',
-        phrase: 'Read Books, Drink Coffee, Be Kind',
-        detail: 'standalone vintage serif quote sticker reading "01. READ BOOKS. 02. DRINK COFFEE. 03. BE KIND." in deep forest green and espresso brown typography, adorned with minimal sage leaves and vintage stars'
+        name: '독서와 다정함 (Read Books & Be Kind)',
+        desc: '포레스트 세이지 그린 컬러의 클래식 명언과 올리브 잎사귀 스티커',
+        phrase: 'Read Books & Be Kind',
+        detail: 'standalone vintage serif quote sticker reading "READ BOOKS & BE KIND" in deep forest green and espresso brown typography, accented with minimal sage olive leaves'
       },
       {
-        name: '올바른 방향의 방황 (Lost in the Right Direction)',
-        desc: '따뜻한 테라코타 컬러와 앤티크 나침반, 가을 도토리 일러스트가 조화된 감성 스티커',
-        phrase: 'Lost in the Right Direction',
-        detail: 'standalone vintage inspirational sticker reading "LOST IN THE RIGHT DIRECTION" in bold editorial serif and italic cursive script, with a miniature vintage brass compass and dried autumn oak leaves'
+        name: '책 속으로의 여행 (Lost in a Good Book)',
+        desc: '따뜻한 테라코타 컬러와 앤티크 나침반, 고서 일러스트가 조화된 감성 스티커',
+        phrase: 'Lost in a Good Book',
+        detail: 'standalone vintage inspirational sticker reading "LOST IN A GOOD BOOK" in bold editorial serif lettering, with a miniature vintage brass pocket compass and an open antique book'
       },
       {
-        name: '가상 인물 과몰입 (Emotionally Attached to Fictional Characters)',
-        desc: '빈티지 플럼 & 골드 배색의 양장본 소설과 반짝이는 별가루 BookTok 자조 밈 스티커',
-        phrase: 'Emotionally Attached to Fictional Characters',
-        detail: 'standalone witty book club quote sticker reading "Emotionally Attached to FICTIONAL CHARACTERS" in elegant antique book typography, flanked by a vintage floral embossed book spine and celestial golden stars'
+        name: '북 러버스 클럽 (Book Lovers Club)',
+        desc: '월계수 관과 오픈 북이 새겨진 빈티지 원형 도서관 스탬프 엠블럼 스티커',
+        phrase: 'Book Lovers Club',
+        detail: 'standalone circular vintage library seal badge sticker reading "BOOK LOVERS CLUB" in crisp archival serif letters, featuring a laurel wreath and open book emblem'
       },
       {
-        name: '예약된 주말 (My Weekend Is Fully Booked)',
-        desc: '앤티크 책탑과 깃털 펜, 웜 허니 앰버 컬러의 독서광 주말 위트 스티커',
-        phrase: 'My Weekend Is Fully Booked',
-        detail: 'standalone charming bookworm sticker reading "MY WEEKEND IS FULLY BOOKED" in 1970s editorial serif lettering, perched on a stack of antique leather-bound novels with a vintage quill pen'
+        name: '예약된 주말 (Fully Booked)',
+        desc: '앤티크 양장본 책탑과 리본 북마크, 웜 허니 앰버 컬러의 독서광 위트 스티커',
+        phrase: 'Fully Booked',
+        detail: 'standalone charming bookworm sticker reading "FULLY BOOKED" in bold 1970s editorial serif lettering, perched above a neat stack of antique leather-bound novels'
       },
       {
-        name: '책갈피 속의 행복 (Between the Pages of a Book is a Lovely Place to Be)',
-        desc: '로즈우드 & 크림 컬러의 서정적 문구와 말린 야생화 리본 스티커',
-        phrase: 'Between the Pages of a Book',
-        detail: 'standalone romantic book quote sticker reading "Between the pages of a book is a lovely place to be" in graceful vintage serif lettering, encircled by pressed botanical wildflowers and a silk ribbon'
+        name: '행복한 공간 (A Lovely Place to Be)',
+        desc: '로즈우드 & 크림 컬러의 서정적 문구와 야생화 리스 화환 프레임 스티커',
+        phrase: 'A Lovely Place to Be',
+        detail: 'standalone romantic bookish sticker reading "A LOVELY PLACE TO BE" in graceful vintage serif lettering, encircled by an elegant circular pressed botanical wildflower wreath'
       },
       {
-        name: '책과 에스프레소의 힘 (Fueled by Books & Espresso)',
+        name: '책과 에스프레소 (Books & Espresso)',
         desc: '다크 초콜릿 컬러의 모카포트와 에스프레소 잔, 감성적인 레트로 뱃지 스티커',
-        phrase: 'Fueled by Books & Espresso',
-        detail: 'standalone cozy coffeehouse typography sticker reading "FUELED BY BOOKS & ESPRESSO" in bold vintage slab serif letters, with a classic Italian moka pot and swirling coffee steam'
+        phrase: 'Books & Espresso',
+        detail: 'standalone cozy coffeehouse typography sticker reading "BOOKS & ESPRESSO" in bold vintage slab serif letters, featuring a classic Italian moka pot and a small coffee cup'
       },
       {
         name: '내 속도대로 자라기 (Growing at My Own Pace)',
         desc: '어스 어텀 그린의 자라나는 새싹과 데이지 꽃이 어우러진 마인드풀니스 스티커',
         phrase: 'Growing at My Own Pace',
-        detail: 'standalone healing mindfulness sticker reading "GROWING AT MY OWN PACE" in curved warm vintage serif typography, blooming with delicate white daisies and fresh green ivy tendrils'
+        detail: 'standalone healing mindfulness sticker reading "GROWING AT MY OWN PACE" in curved warm vintage serif typography, blooming with delicate white daisies'
       },
       {
-        name: '세상에서 가장 다정하기 (In a World Where You Can Be Anything, Be Kind)',
+        name: '다정함 선택하기 (Choose Kindness)',
         desc: '소프트 틸 & 테라코타 컬러의 평화의 비둘기와 올리브 가지 스티커',
-        phrase: 'Be Kind',
-        detail: 'standalone uplifting quote sticker reading "IN A WORLD WHERE YOU CAN BE ANYTHING, BE KIND" in harmonious vintage serif lettering, featuring a minimalist flying dove of peace and olive branches'
+        phrase: 'Choose Kindness',
+        detail: 'standalone uplifting quote sticker reading "CHOOSE KINDNESS" in harmonious bold vintage serif lettering, featuring a minimalist peace dove holding an olive twig'
       },
       {
         name: '평온 지키기 (Protect Your Peace)',
-        desc: '앤티크 세이지 그린 컬러의 따뜻한 찻잔과 연꽃 잎 힐링 스티커',
+        desc: '앤티크 세이지 그린 컬러의 따뜻한 찻잔과 라벤더 힐링 스티커',
         phrase: 'Protect Your Peace',
-        detail: 'standalone serene self-care sticker reading "PROTECT YOUR PEACE" in elegant timeless serif font, resting above a cozy ceramic teacup with lavender sprigs'
+        detail: 'standalone serene self-care sticker reading "PROTECT YOUR PEACE" in elegant timeless serif font, resting gracefully above a cozy ceramic teacup with lavender sprigs'
       },
       {
-        name: '방해 금지 독서 중 (Still Reading, Do Not Disturb)',
+        name: '방해 금지 독서 중 (Still Reading)',
         desc: '클래식 빈티지 호텔 도어행거 팻말 스타일의 위트 있는 독서 몰입 스티커',
-        phrase: 'Still Reading, Do Not Disturb',
-        detail: 'standalone vintage hotel door hanger plaque sticker reading "STILL READING, PLEASE DO NOT DISTURB" in aristocratic serif gold-embossed typography, with a warm vintage reading lamp'
+        phrase: 'Still Reading',
+        detail: 'standalone vintage hotel door sign plaque sticker reading "STILL READING - DO NOT DISTURB" in aristocratic serif typography, with a small cozy reading lamp icon'
       },
       {
-        name: '책은 많고 시간은 부족해 (Too Many Books, Too Little Time)',
+        name: '읽을 책이 너무 많아 (Too Many Books)',
         desc: '클래식 회중시계와 책탑, 앤티크 브라운 컬러의 도서관 명언 스티커',
-        phrase: 'Too Many Books, Too Little Time',
-        detail: 'standalone classic literary quote sticker reading "TOO MANY BOOKS, TOO LITTLE TIME" in distinguished antique serif font, with an ornate Victorian pocket watch draped over open pages'
+        phrase: 'Too Many Books',
+        detail: 'standalone classic literary quote sticker reading "TOO MANY BOOKS, TOO LITTLE TIME" in distinguished antique serif font, with an ornate Victorian pocket watch'
       },
       {
         name: '포근한 마음 (Cozy Mind, Warm Heart)',
         desc: '머스타드 옐로우 & 번트 오렌지의 털실 뭉치와 머그잔 가을 감성 스티커',
         phrase: 'Cozy Mind, Warm Heart',
-        detail: 'standalone autumn hygge typography sticker reading "COZY MIND, WARM HEART" in rounded cozy vintage serif letters, nestled next to a soft knit sweater texture and steaming cinnamon mug'
+        detail: 'standalone autumn hygge typography sticker reading "COZY MIND, WARM HEART" in rounded cozy vintage serif letters, paired with a soft yarn ball and steaming cinnamon mug'
       },
       {
-        name: '차 한 잔과 소설 (A Cup of Tea & A Good Novel)',
-        desc: '빈티지 잉글리시 로즈 티컵과 하트 스팀이 피어나는 애프터눈 티 독서 스티커',
-        phrase: 'A Cup of Tea & A Good Novel',
-        detail: 'standalone quintessential cozy reader sticker reading "A CUP OF TEA & A GOOD NOVEL" in classic bookish serif lettering, with a fine bone china teacup and floating dried rosebuds'
+        name: '차 한 잔과 소설 (Tea & A Good Novel)',
+        desc: '빈티지 잉글리시 로즈 티컵과 장미 꽃잎이 피어나는 애프터눈 티 독서 스티커',
+        phrase: 'Tea & A Good Novel',
+        detail: 'standalone quintessential cozy reader sticker reading "TEA & A GOOD NOVEL" in classic bookish serif lettering, with an elegant porcelain teacup and rose petals'
       },
       {
         name: '한 번에 한 페이지만 (One Page at a Time)',
@@ -2405,34 +2406,34 @@ STRICT NO GLASS TANKS: Absolutely NO fish tanks, NO terrarium jars. Pure standal
         detail: 'standalone gentle encouragement quote sticker reading "ONE PAGE AT A TIME" in graceful serif typography, paired with an antique glass hourglass with golden sand'
       },
       {
-        name: '북 러버스 클럽 멤버 (Book Lovers Club Member)',
-        desc: '월계수 관과 오픈 북이 새겨진 빈티지 원형 도서관 스탬프 엠블럼 스티커',
-        phrase: 'Book Lovers Club',
-        detail: 'standalone circular vintage library seal badge sticker reading "BOOK LOVERS CLUB MEMBER - EST. 1892" in crisp archival serif letters, featuring a laurel wreath and open book emblem'
-      },
-      {
-        name: '현실 탈출 독서 (Escape Reality, Read a Book)',
+        name: '현실 탈출 독서 (Escape Reality)',
         desc: '미드나잇 네이비 & 골드 별자리가 수놓아진 신비로운 판타지 북 스티커',
-        phrase: 'Escape Reality, Read a Book',
-        detail: 'standalone magical literary quote sticker reading "ESCAPE REALITY, READ A BOOK" in whimsical vintage serif font, with floating crescent moons and glowing celestial stardust'
+        phrase: 'Escape Reality',
+        detail: 'standalone magical literary quote sticker reading "ESCAPE REALITY, READ A BOOK" in whimsical vintage serif font, with floating crescent moons and subtle golden stars'
       },
       {
         name: '스스로에게 다정하기 (Be Patient With Yourself)',
         desc: '라벤더 세피아 톤의 작은 나비와 꽃봉오리가 깃든 치유의 문구 스티커',
         phrase: 'Be Patient With Yourself',
-        detail: 'standalone comforting self-compassion sticker reading "BE PATIENT WITH YOURSELF" in tender antique serif typography, with a fluttering monarch butterfly and budding peony'
+        detail: 'standalone comforting self-compassion sticker reading "BE PATIENT WITH YOURSELF" in tender antique serif typography, with a fluttering monarch butterfly and flower'
       },
       {
-        name: '오래된 책과 커피 향 (Smells Like Old Books & Coffee)',
+        name: '오래된 책과 커피 향 (Old Books & Coffee)',
         desc: '가죽 바인딩 고서와 볶은 원두, 빈티지 카페 무드의 감각적 스티커',
         phrase: 'Old Books & Coffee',
-        detail: 'standalone sensory book aesthetic sticker reading "SMELLS LIKE OLD BOOKS & COFFEE" in robust espresso-toned serif lettering, flanked by roasted coffee beans and aged deckle-edge paper'
+        detail: 'standalone sensory book aesthetic sticker reading "OLD BOOKS & COFFEE" in robust espresso-toned serif lettering, flanked by roasted coffee beans and an antique book'
       },
       {
         name: '드라마 대신 평화를 (Choose Peace Over Drama)',
-        desc: '미니멀 올리브 나뭇가지와 잔잔한 물결 라인이 수놓아진 웰니스 스티커',
+        desc: '미니멀 올리브 나뭇가지와 잔잔한 라인이 수놓아진 웰니스 스티커',
         phrase: 'Choose Peace Over Drama',
-        detail: 'standalone modern vintage wisdom sticker reading "CHOOSE PEACE OVER DRAMA" in bold clean serif typography, grounded by a clean olive branch and minimalist aesthetic lines'
+        detail: 'standalone modern vintage wisdom sticker reading "CHOOSE PEACE OVER DRAMA" in bold clean serif typography, grounded by a clean olive branch'
+      },
+      {
+        name: '아늑하게 자주 읽기 (Stay Cozy, Read Often)',
+        desc: '따뜻한 캔들 불빛과 빈티지 안경, 오픈 북이 어우러진 서정적인 독서 스티커',
+        phrase: 'Stay Cozy, Read Often',
+        detail: 'standalone warm hygge reader sticker reading "STAY COZY, READ OFTEN" in gentle serif lettering, with a glowing scented candle and retro wire-rimmed reading glasses'
       }
     ][i];
 

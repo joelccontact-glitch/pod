@@ -613,7 +613,9 @@ export async function createCompositeMasterCover(
       const loadedImages = await Promise.all(loadPromises);
 
       // 4. Render Main Stickers with Die-Cut Shadows (Massive Etsy Bestseller Scale)
-      const baseMaxDim = isExact20 ? 980 : 860; // 980px for 20-packs fills the canvas with grand presence
+      const isVintageSerif = subType === 'vintageserif' || optTitle.includes('vintageserif') || optTitle.includes('세리프') || optTitle.includes('quote');
+      // For text/quote stickers, reduce size to 730px and soften tilts so text remains 100% readable and never overlaps heavily
+      const baseMaxDim = isVintageSerif ? 730 : (isExact20 ? 980 : 860);
 
       for (let i = 0; i < loadedImages.length; i++) {
         const img = loadedImages[i];
@@ -636,7 +638,9 @@ export async function createCompositeMasterCover(
 
         ctx.save();
         ctx.translate(slot.x, slot.y);
-        ctx.rotate((slot.tilt * Math.PI) / 180);
+        // Soften tilt for quote stickers to guarantee maximum legibility
+        const effectiveTilt = isVintageSerif ? slot.tilt * 0.45 : slot.tilt;
+        ctx.rotate((effectiveTilt * Math.PI) / 180);
 
         // Rich die-cut drop shadow around pure sticker object
         ctx.shadowColor = 'rgba(0, 0, 0, 0.22)';
